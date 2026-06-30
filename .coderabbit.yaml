@@ -1,0 +1,312 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# =========================================================
+# CodeRabbit 설정 파일
+# 위치: Bodeum-FrontEnd/.coderabbit.yaml
+# 목적: React + TypeScript + Vite 프론트엔드 PR 자동 리뷰
+# =========================================================
+
+# 리뷰 언어
+# 영어로 받고 싶으면 "en-US"로 변경
+language: "ko-KR"
+
+# 리뷰 말투
+# 너무 길면 스키마 제한에 걸릴 수 있어서 짧게 유지
+tone_instructions: "한국어로 간결하고 실용적으로 리뷰해줘. 실제 버그, 유지보수성, 타입 안정성, UX 영향이 큰 문제를 우선해줘."
+
+chat:
+  # @coderabbitai로 질문했을 때 자동 답변
+  # 너무 시끄러우면 false로 변경
+  auto_reply: true
+
+  # ASCII 아트/장식 줄이기
+  # 토끼 그림 같은 게 거슬리면 false 유지
+  art: false
+
+reviews:
+  # 리뷰 강도
+  # chill: 덜 시끄럽고 핵심 위주
+  # assertive: 더 꼼꼼하지만 잔소리가 많아질 수 있음
+  # 개발 초반에는 chill 추천
+  profile: "chill"
+
+  # CodeRabbit이 자동으로 approve/request changes에 관여하는 기능
+  # 초반 팀 프로젝트에서는 false 추천
+  # 나중에 CI/테스트/리뷰 규칙 안정되면 true 검토
+  request_changes_workflow: false
+
+  # PR 전체 요약
+  high_level_summary: true
+
+  # 변경 파일별 요약
+  changed_files_summary: true
+
+  # 리뷰 진행/완료 상태 메시지
+  review_status: true
+
+  # 리뷰 세부 정보
+  # true면 ignored files, tool output 등이 더 많이 나와서 댓글이 길어짐
+  review_details: false
+
+  # GitHub check 상태 표시
+  commit_status: true
+
+  # 리뷰 실패 시 commit status를 failure로 만들지 여부
+  # 초반에는 false 추천
+  fail_commit_status: false
+
+  # walkthrough 접기
+  # true: 댓글이 덜 길어 보임
+  # false: 바로 펼쳐져서 보임
+  collapse_walkthrough: true
+
+  # 시퀀스 다이어그램
+  # API 흐름이 복잡해지면 true 고려
+  # 초기 프론트 개발에서는 false 추천
+  sequence_diagrams: false
+
+  # 리뷰 예상 난이도 표시
+  estimate_code_review_effort: true
+
+  # 이슈/관련 PR 분석
+  # GitHub Issue를 본격적으로 쓰기 전까지는 false로 두는 게 덜 시끄러움
+  assess_linked_issues: false
+  related_issues: false
+  related_prs: false
+
+  # 라벨 추천/자동 적용
+  # 라벨 체계가 잡히기 전까지는 꺼두기
+  suggested_labels: false
+  auto_apply_labels: false
+
+  # 리뷰어 추천/자동 지정
+  # 팀원별 담당 영역이 명확해지면 true 검토
+  suggested_reviewers: false
+  auto_assign_reviewers: false
+
+  # 장식성 메시지 제거
+  in_progress_fortune: false
+  poem: false
+
+  # AI 에이전트용 프롬프트 섹션
+  # 댓글이 길어질 수 있어서 초기에는 false 추천
+  enable_prompt_for_ai_agents: false
+
+  auto_review:
+    # PR 자동 리뷰 켜기
+    enabled: true
+
+    # Draft PR 리뷰 여부
+    # false: Draft PR은 자동 리뷰 안 함
+    # 작업 중간 피드백도 받고 싶으면 true
+    drafts: false
+
+    # PR에 새 커밋 push될 때마다 증분 리뷰
+    auto_incremental_review: true
+
+    # 자동 리뷰 후 일정 커밋 수가 쌓이면 자동 리뷰 일시 정지
+    # 커밋을 잘게 많이 쌓는 팀이면 10 정도로 늘려도 됨
+    # 0이면 자동 일시정지 비활성화
+    auto_pause_after_reviewed_commits: 5
+
+    # 자동 리뷰 대상 base branch
+    # main은 기본 브랜치면 자동 포함됨
+    # feature/xxx -> develop PR도 리뷰하려고 develop 추가
+    base_branches:
+      - "develop"
+
+    # 제목에 아래 키워드가 있으면 자동 리뷰 스킵
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "[skip review]"
+      - "draft"
+
+    # 봇 PR은 자동 리뷰 스킵
+    # Dependabot PR도 리뷰받고 싶으면 dependabot[bot] 제거
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "github-actions[bot]"
+
+    # 라벨 기반 리뷰 제어
+    # 지금은 모든 일반 PR을 리뷰하게 비워둠
+    # 나중에 특정 라벨만 리뷰하려면 예: ["review-ready"]
+    labels: []
+
+    # 자동 리뷰를 끄고 PR 설명에 특정 키워드가 있을 때만 리뷰할 때 사용
+    # 지금은 사용 안 함
+    description_keyword: ""
+
+  # 리뷰 제외 파일
+  # !로 시작하면 제외
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/coverage/**"
+    - "!**/.cache/**"
+    - "!**/.vite/**"
+
+    # 이미지/바이너리 에셋 제외
+    # SVG를 코드처럼 직접 수정하는 경우가 많으면 svg는 제외하지 않는 게 좋음
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.webp"
+    - "!**/*.gif"
+    - "!**/*.ico"
+
+  # 경로별 리뷰 지시
+  path_instructions:
+    - path: "**/*.{ts,tsx,js,jsx}"
+      instructions: |
+        React + TypeScript 프론트엔드 코드 기준으로 리뷰해줘.
+        특히 다음을 중점적으로 확인해줘:
+        - 타입 안정성, any 남용, null/undefined 처리
+        - 불필요한 리렌더링, useEffect 의존성 누락
+        - 컴포넌트 책임 분리와 재사용성
+        - 조건부 렌더링에서 로딩/에러/빈 상태 누락
+        - 사용자 입력값 검증과 예외 케이스
+        - console.log, debugger, 임시 코드, 하드코딩된 값
+
+    - path: "src/apis/**"
+      instructions: |
+        API 연동 코드를 중점적으로 리뷰해줘.
+        요청/응답 타입, 에러 처리, 로딩 상태, 토큰/민감정보 노출 가능성, 중복 API 로직을 확인해줘.
+        서버 명세와 맞지 않을 수 있는 파라미터명, 응답 필드명, 예외 처리도 지적해줘.
+
+    - path: "src/components/**"
+      instructions: |
+        공통 컴포넌트 기준으로 리뷰해줘.
+        props 설계, 재사용성, 접근성, 스타일 중복, 너무 많은 책임을 가진 컴포넌트 여부를 확인해줘.
+        pages의 비즈니스 로직을 components가 과하게 알고 있으면 분리 방향을 제안해줘.
+
+    - path: "src/pages/**"
+      instructions: |
+        페이지 단위 흐름을 중점적으로 리뷰해줘.
+        라우팅, 로그인/권한 분기, 로딩/에러/빈 상태, 사용자 경험상 어색한 흐름을 확인해줘.
+
+    - path: "src/hooks/**"
+      instructions: |
+        커스텀 훅의 책임 분리, useEffect 의존성 배열, 상태 관리 흐름, 불필요한 재호출, 메모리 누수 가능성을 확인해줘.
+        API 호출 훅과 UI 상태 훅이 과하게 섞이면 분리 방향을 제안해줘.
+
+    - path: "src/context/**"
+      instructions: |
+        Context 사용 범위, 전역 상태 남용, Provider 위치, 불필요한 전체 리렌더링 가능성을 확인해줘.
+        전역으로 둘 필요가 없는 상태가 Context에 올라가면 지적해줘.
+
+    - path: "src/constants/**"
+      instructions: |
+        하드코딩 제거, 상수명 일관성, 중복 상수, 실제 도메인/화면 명세와 어긋날 수 있는 값을 확인해줘.
+
+    - path: "src/enums/**"
+      instructions: |
+        enum 값의 네이밍 일관성, API 응답값과의 매칭, 타입 안정성, 중복 정의 여부를 확인해줘.
+
+    - path: "src/utils/**"
+      instructions: |
+        유틸 함수의 책임 분리, 순수 함수 여부, 예외 케이스, 날짜/문자열/배열 처리 로직의 안정성을 확인해줘.
+
+    - path: "**/*.{css,scss}"
+      instructions: |
+        전역 스타일 충돌, Tailwind와 일반 CSS 혼용 문제, 반응형 처리, 접근성, 중복 스타일을 확인해줘.
+        Tailwind class가 과도하게 길어지거나 반복되면 컴포넌트화나 상수화 방향을 제안해줘.
+
+    - path: "package.json"
+      instructions: |
+        의존성 추가/삭제, scripts 변경, 개발/운영 의존성 구분, 불필요한 패키지 추가 여부를 확인해줘.
+        새 패키지가 추가되면 기존 의존성으로 대체 가능한지, 번들 크기에 영향을 줄 수 있는지 확인해줘.
+
+    - path: ".github/**"
+      instructions: |
+        GitHub Actions, PR 템플릿, 이슈 템플릿 변경 시 빌드/린트 자동화 흐름이 깨지지 않는지 확인해줘.
+
+  # 머지 전 체크
+  # 초반에는 빨간 실패 체크가 너무 자주 뜨지 않게 대부분 off
+  # 팀 규칙이 잡히면 warning 또는 error로 올리면 됨
+  pre_merge_checks:
+    title:
+      mode: off
+      # 나중에 PR 제목 컨벤션을 강제하고 싶으면 mode를 warning 또는 error로 변경
+      # requirements: "PR 제목은 feat:, fix:, refactor:, chore:, docs: 중 하나로 시작해야 한다."
+
+    description:
+      mode: off
+      # PR 템플릿을 제대로 쓰기 시작하면 warning 추천
+
+    docstrings:
+      mode: off
+      # 프론트 앱 코드에서는 docstring 강제 필요성이 낮음
+
+    issue_assessment:
+      mode: off
+      # GitHub Issue를 본격적으로 쓰면 warning 또는 error로 변경
+
+    custom_checks: []
+    # 나중에 팀 규칙을 추가하고 싶으면 예시처럼 사용
+    # custom_checks:
+    #   - name: "No debug code"
+    #     mode: warning
+    #     instructions: |
+    #       console.log, debugger, 임시 mock 데이터가 운영 코드에 남아 있으면 경고해줘.
+
+  # Finishing Touches
+  # 자동 실행은 아니고, CodeRabbit UI/명령으로 생성 기능을 켤지 여부
+  finishing_touches:
+    docstrings:
+      enabled: false
+
+    # 테스트 프레임워크가 아직 없다면 false 추천
+    # Vitest/React Testing Library 도입 후 true 고려
+    unit_tests:
+      enabled: false
+
+    # 코드 단순화 제안
+    # 리팩토링 단계에서 true 고려
+    simplify:
+      enabled: false
+
+  # 중요: tools는 최상위가 아니라 반드시 reviews.tools 아래에 둬야 함
+  tools:
+    # JS/TS 정적 분석
+    eslint:
+      enabled: true
+
+    # React 전용 검사: 성능, 정확성, 접근성, 보안 관련
+    reactDoctor:
+      enabled: true
+
+    # GitHub Actions 체크 결과 참고
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+
+    # YAML 파일 검사
+    yamllint:
+      enabled: true
+
+    # Markdown 문서 검사
+    # README 문서 지적이 귀찮으면 false 유지
+    markdownlint:
+      enabled: false
+
+    # 시크릿/토큰 노출 감지
+    # 웬만하면 끄지 말 것
+    gitleaks:
+      enabled: true
+
+    trufflehog:
+      enabled: true
+
+    # 의존성 취약점 스캔
+    osvScanner:
+      enabled: true
+
+    # stylelint 설정 파일을 따로 도입하기 전까지는 false 추천
+    stylelint:
+      enabled: false
+
+    # Biome을 실제로 도입하기 전까지는 false 추천
+    biome:
+      enabled: false
