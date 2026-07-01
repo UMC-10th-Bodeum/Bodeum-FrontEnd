@@ -1,1 +1,118 @@
+@import "@fontsource/noto-sans-kr/400.css";
+@import "@fontsource/noto-sans-kr/500.css";
+@import "@fontsource/noto-sans-kr/600.css";
+@import "@fontsource/noto-sans-kr/700.css";
+
 @import "tailwindcss";
+
+@theme {
+  /* Font */
+  --font-sans: "Noto Sans KR", sans-serif;
+
+  /* Main Colors */
+
+  --color-main-500: #0669d2;
+  --color-main-400: #1984f7;
+  --color-main-300: #91c3f9;
+  --color-main-200: #e4f1ff;
+  --color-main-150: #f3f9ff;
+  --color-main-100: #f2f4f8;
+
+  /* Sub Colors */
+
+  --color-sub-yellow: #fcbd25;
+  --color-sub-yellow-2: #fff7e4;
+
+  --color-sub-red: #f24346;
+  --color-sub-red-2: #fdf2f8;
+
+  --color-sub-green: #25c35f;
+  --color-sub-green-2: #f0fff6;
+
+  --color-sub-purple: #76568f;
+  --color-sub-purple-2: #f4eeff;
+
+  /* Background */
+
+  --color-background-600: #2e2e2e;
+  --color-background-500: #888c96;
+  --color-background-400: #c4c6ce;
+  --color-background-300: #d9dce2;
+  --color-background-250: #eceef3;
+  --color-background-200: #f9f9fb;
+  --color-background-100: #ffffff;
+
+  /* Typography */
+
+  --text-h1: 18px;
+  --text-h1--line-height: 27px;
+  --text-h1--font-weight: 400;
+
+  --text-h1-onboard: 22px;
+  --text-h1-onboard--line-height: 33px;
+  --text-h1-onboard--font-weight: 700;
+
+  --text-h1-info: 22px;
+  --text-h1-info--line-height: 33px;
+  --text-h1-info--font-weight: 400;
+
+  --text-h2-list: 16px;
+  --text-h2-list--line-height: 24px;
+  --text-h2-list--font-weight: 700;
+
+  --text-h2-onboard: 16px;
+  --text-h2-onboard--line-height: 24px;
+  --text-h2-onboard--font-weight: 400;
+
+  --text-h2-button: 20px;
+  --text-h2-button--line-height: 30px;
+  --text-h2-button--font-weight: 500;
+
+  --text-h3-category: 16px;
+  --text-h3-category--line-height: 24px;
+  --text-h3-category--font-weight: 500;
+
+  --text-h3-category-sub: 14px;
+  --text-h3-category-sub--line-height: 21px;
+  --text-h3-category-sub--font-weight: 500;
+
+  --text-h3-onboard: 14px;
+  --text-h3-onboard--line-height: 21px;
+  --text-h3-onboard--font-weight: 400;
+
+  --text-h4-list: 13px;
+  --text-h4-list--line-height: 19.5px;
+  --text-h4-list--font-weight: 500;
+
+  --text-h5-list: 13px;
+  --text-h5-list--line-height: 19.5px;
+  --text-h5-list--font-weight: 600;
+
+  --text-h6: 12px;
+  --text-h6--line-height: 18px;
+  --text-h6--font-weight: 500;
+
+  --text-h6-list: 12px;
+  --text-h6-list--line-height: 18px;
+  --text-h6-list--font-weight: 400;
+
+  --text-body-sub: 11px;
+  --text-body-sub--line-height: 16.5px;
+  --text-body-sub--font-weight: 400;
+
+  --text-body-label: 11px;
+  --text-body-label--line-height: 16.5px;
+  --text-body-label--font-weight: 500;
+
+  --text-body-sub-2: 10px;
+  --text-body-sub-2--line-height: 15px;
+  --text-body-sub-2--font-weight: 400;
+
+  --text-body-label-2: 10px;
+  --text-body-label-2--line-height: 15px;
+  --text-body-label-2--font-weight: 500;
+}
+
+body {
+  font-family: var(--font-sans);
+}
