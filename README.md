@@ -67,7 +67,7 @@ type/#이슈번호-description
 
 ### Commit Convention
 
-커밋 메시지는 다음 형식을 사용합니다.
+커밋 메시지는 아래 형식을 따릅니다.
 
 ```text
 type: 내용
@@ -89,6 +89,14 @@ type: 내용
 | perf     | 성능 개선        |
 
 ### PR Convention
+
+PR 제목은 아래 형식을 따릅니다.
+
+```text
+[Type] 내용
+```
+
+예시: [Feature] 로그인 UI 구현
 
 PR은 `.github/PULL_REQUEST_TEMPLATE.md` 템플릿을 기준으로 작성합니다.
 
