@@ -11,36 +11,36 @@
 
   /* Main Colors */
 
-  --color-main-500: #0669d2;
-  --color-main-400: #1984f7;
-  --color-main-300: #91c3f9;
-  --color-main-200: #e4f1ff;
-  --color-main-150: #f3f9ff;
-  --color-main-100: #f2f4f8;
+  --color-main-500: #063F7B;
+  --color-main-400: #0C72E0;
+  --color-main-300: #91C3F9;
+  --color-main-200: #E5F1FF;
+  --color-main-150: #E1EFFE;
+  --color-main-100: #EDF0F6;
 
   /* Sub Colors */
 
-  --color-sub-yellow: #fcbd25;
-  --color-sub-yellow-2: #fff7e4;
+  --color-sub-yellow: #F2B31D;
+  --color-sub-yellow-2: #FFF7E4;
 
-  --color-sub-red: #f24346;
-  --color-sub-red-2: #fdf2f8;
+  --color-sub-red: #DC2E31;
+  --color-sub-red-2: #FDF2F8;
 
-  --color-sub-green: #25c35f;
-  --color-sub-green-2: #f0fff6;
+  --color-sub-green: #0EA345;
+  --color-sub-green-2: #F0FFF6;
 
-  --color-sub-purple: #76568f;
-  --color-sub-purple-2: #f4eeff;
+  --color-sub-purple: #603183;
+  --color-sub-purple-2: #F4EEFF;
 
   /* Background */
 
-  --color-background-600: #2e2e2e;
-  --color-background-500: #888c96;
-  --color-background-400: #c4c6ce;
-  --color-background-300: #d9dce2;
-  --color-background-250: #eceef3;
-  --color-background-200: #f9f9fb;
-  --color-background-100: #ffffff;
+  --color-background-600: #2E2E2E;
+  --color-background-500: #616368;
+  --color-background-400: #9DA0AD;
+  --color-background-300: #C1C6D1;
+  --color-background-250: #D7DBE4;
+  --color-background-200: #F3F4F8;
+  --color-background-100: #FFFFFF;
 
   /* Typography */
 
