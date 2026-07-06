@@ -5,10 +5,12 @@ import UserSection from "./UserSection";
 
 export default function SideBar() {
   return (
-    <aside className="flex h-screen flex-col border-r border-gray-200 bg-white">
-      <div className="h-[60px] flex items-center justify-center border-b border-background-300">
+    <aside className="flex h-screen flex-col bg-white">
+      <div className="h-[60px] flex items-center justify-center border-b border-background-250">
         <Logo className="w-[62px] h-[24px]" />
       </div>
+      
+      <div className="flex flex-1 flex-col border-r border-background-250">
       <div className="px-4 pt-[20px]">
         <UserSection type="guest" />
 
@@ -17,7 +19,7 @@ export default function SideBar() {
         </div>
       </div>
 
-      <div className="mt-auto border-t border-background-300 px-[16px]">
+      <div className="mt-auto border-t border-background-250 px-[16px]">
         <div className="mb-[14px] pt-[12px] flex justify-center text-body-sub text-background-500">
           <button>
             개인정보처리방침
@@ -34,7 +36,8 @@ export default function SideBar() {
           <ExportIcon />
           로그아웃
         </button>
-      </div>
+        </div>
+        </div>
     </aside>
   );
 }
