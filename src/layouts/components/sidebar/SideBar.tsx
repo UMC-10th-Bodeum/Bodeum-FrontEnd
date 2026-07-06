@@ -1,4 +1,5 @@
 import ExportIcon from "../../../assets/icons/Export.svg?react";
+import SideNav from "./SideNav";
 import UserSection from "./UserSection";
 
 export default function SideBar() {
@@ -7,8 +8,8 @@ export default function SideBar() {
       <div className="p-4">
         <UserSection type="guest" />
 
-        <div className="mt-6">
-          {/* <SideNavItem /> */}
+        <div className="mt-[18px]">
+          <SideNav />
         </div>
       </div>
 
