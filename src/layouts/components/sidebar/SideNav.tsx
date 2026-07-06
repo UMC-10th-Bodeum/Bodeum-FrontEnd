@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import HomeIcon from "../../../assets/icons/Home.svg?react";
 import ChatIcon from "../../../assets/icons/Chat.svg?react";
 import InfoIcon from "../../../assets/icons/Info.svg?react";
