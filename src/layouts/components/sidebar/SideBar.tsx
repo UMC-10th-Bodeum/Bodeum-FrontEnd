@@ -1,13 +1,14 @@
 import ExportIcon from "../../../assets/icons/Export.svg?react";
+import UserSection from "./UserSection";
 
 export default function SideBar() {
   return (
-    <aside className="flex h-screen w-[201px] flex-col border-r border-gray-200 bg-white">
+    <aside className="flex h-screen flex-col border-r border-gray-200 bg-white">
       <div className="p-4">
-        {/* <UserSection /> */}
+        <UserSection type="guest" />
 
         <div className="mt-6">
-          {/* <SideNav /> */}
+          {/* <SideNavItem /> */}
         </div>
       </div>
 
