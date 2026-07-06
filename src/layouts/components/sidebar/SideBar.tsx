@@ -1,9 +1,8 @@
-
+import ExportIcon from "../../../assets/icons/Export.svg?react";
 
 export default function SideBar() {
   return (
-    <aside className="flex h-screen w-58 flex-col border-r border-gray-200 bg-white">
-      {/* 상단 */}
+    <aside className="flex h-screen w-[201px] flex-col border-r border-gray-200 bg-white">
       <div className="p-4">
         {/* <UserSection /> */}
 
@@ -12,23 +11,21 @@ export default function SideBar() {
         </div>
       </div>
 
-      {/* 하단 */}
-      <div className="mt-auto border-t border-gray-200 px-4 py-5">
-        <div className="mb-5 flex justify-center text-xs text-gray-500">
-          <button className="hover:text-gray-700">
+      <div className="mt-auto border-t border-background-300 px-[16px]">
+        <div className="mb-[14px] pt-[12px] flex justify-center text-body-sub text-background-500">
+          <button>
             개인정보처리방침
           </button>
 
-          <span className="mx-2">|</span>
+          <span className="mx-[10px]">|</span>
 
-          <button className="hover:text-gray-700">
+          <button>
             공공 데이터
           </button>
         </div>
 
-        <button className="flex items-center gap-2 text-sm text-gray-700 hover:text-black">
-          {/* 아이콘 */}
-          <span>↩</span>
+        <button className="flex items-center px-[5px] py-[8.6px] pb-[15.8px] gap-2 text-h6 text-background-500">
+          <ExportIcon />
           로그아웃
         </button>
       </div>
