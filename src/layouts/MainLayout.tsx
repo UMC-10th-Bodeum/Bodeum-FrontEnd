@@ -1,9 +1,10 @@
 import { Outlet } from "react-router-dom";
+import SideBar from "./components/sidebar/SideBar";
 
 export default function MainLayout() {
   return (
     <div className="flex h-screen">
-      {/* <SideBar /> */}
+      <SideBar />
 
       <div className="flex flex-1 flex-col">
         {/* <TopBar /> */}
