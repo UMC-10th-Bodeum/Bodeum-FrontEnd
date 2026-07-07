@@ -11,6 +11,7 @@ export default function TopBar() {
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
         placeholder="기관 · 병원 · 복지 · 취업 · 교육 정보를 검색해보세요"
+        className="w-full"
       />
     </header>
   );

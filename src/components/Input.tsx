@@ -39,7 +39,7 @@ export default function Input({
   return (
     <div
       className={`
-        flex ${search ? "h-[44px]" : "h-[48px]"} w-full items-center rounded-[10px]
+        flex ${search ? "h-[44px]" : "h-[48px]"} items-center rounded-[10px]
         px-[20px]
         transition-all
         ${wrapperStyle}
