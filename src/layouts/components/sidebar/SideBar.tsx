@@ -21,13 +21,13 @@ export default function SideBar() {
 
       <div className="mt-auto border-t border-background-250 px-[16px]">
         <div className="mb-[14px] pt-[12px] flex justify-center text-body-sub text-background-500">
-          <button>
+          <button type="button" onClick={() => {/* TODO: 개인정보처리방침 페이지 이동 */}}>
             개인정보처리방침
           </button>
 
           <span className="mx-[10px]">|</span>
 
-          <button>
+          <button type="button" onClick={() => {/* TODO: 공공 데이터 페이지 이동 */}}>
             공공 데이터
           </button>
         </div>
