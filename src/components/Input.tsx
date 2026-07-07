@@ -26,7 +26,7 @@ export default function Input({
   onKeyDown,
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const [isFilled, setIsFilled] = useState(false);
+  const [isFilled, setIsFilled] = useState(value.trim() !== "");
 
   const wrapperStyle = search
     ? isFilled
