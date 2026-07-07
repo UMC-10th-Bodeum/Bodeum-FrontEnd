@@ -40,11 +40,11 @@ export default function UserSection({
           ) : !isEmpty ? (
             <>
               <p className="mt-2 text-body-sub text-background-500">
-                {disability} 자폐스펙트럼
+                {disability ?? "-"}
               </p>
 
               <p className="text-body-sub text-background-500">
-                Level{level} · {age}세 아이
+                Level{level ?? "-"} · {age ?? "-"}세 아이
               </p>
             </>
           ) : null}
