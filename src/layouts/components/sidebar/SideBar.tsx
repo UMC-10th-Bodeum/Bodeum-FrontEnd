@@ -6,7 +6,7 @@ import UserSection from "./UserSection";
 export default function SideBar() {
   return (
     <aside className="flex h-screen flex-col bg-white">
-      <div className="h-[60px] flex items-center justify-center border-b border-background-250">
+      <div className="h-[60px] py-[18px] flex items-center justify-center border-b border-background-250">
         <Logo className="w-[62px] h-[24px]" />
       </div>
       
