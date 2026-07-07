@@ -1,5 +1,5 @@
-import ExportIcon from "../../../assets/icons/Export.svg?react";
-import Logo from "../../../assets/icons/Logo_kr.svg?react";
+import ExportIcon from "@/assets/icons/Export.svg?react";
+import Logo from "@/assets/icons/Logo_kr.svg?react";
 import SideNav from "./SideNav";
 import UserSection from "./UserSection";
 

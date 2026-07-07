@@ -1,4 +1,4 @@
-import ChevronRightIcon from "../../../assets/icons/ChevronRight.svg?react";
+import ChevronRightIcon from "@/assets/icons/ChevronRight.svg?react";
 
 interface SideNavItemProps {
   icon: React.ReactNode;

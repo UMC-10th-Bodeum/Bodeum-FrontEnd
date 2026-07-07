@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SearchIcon from "../assets/icons/Search.svg?react";
+import SearchIcon from "@/assets/icons/Search.svg?react";
 
 interface InputProps {
   value: string;

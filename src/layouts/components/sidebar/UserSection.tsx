@@ -1,4 +1,4 @@
-import ProfileIcon from "../../../assets/icons/Profile.svg?react";
+import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import OnboardButton from "./OnboardButton";
 
 interface UserSectionProps {
