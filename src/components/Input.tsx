@@ -24,6 +24,7 @@ export default function Input({
   onFocus,
   onBlur,
   onKeyDown,
+  onEnter,
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(value.trim() !== "");
@@ -62,12 +63,20 @@ export default function Input({
         }}
         disabled={disabled}
         placeholder={isFocused ? "" : placeholder}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onFocus={() => {
+          setIsFocused(true);
+          onFocus?.();
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+          onBlur?.();
+        }}
         onKeyDown={(e) => {
+          onKeyDown?.(e);
           if (search && e.key === "Enter") {
             setIsFilled(value.trim() !== "");
-            (e.target as HTMLInputElement).blur(); 
+            (e.target as HTMLInputElement).blur();
+            onEnter?.();
           }
         }}
         className={`
