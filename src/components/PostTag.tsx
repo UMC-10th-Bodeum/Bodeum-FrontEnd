@@ -1,12 +1,19 @@
 import { diagnosisMap } from "@/constants/diagnosis";
 import type { DiagnosisType } from "@/types/diagnosis";
 
-interface PostTagProps {
-  type: DiagnosisType;
-}
+type PostTagProps =
+  | {
+    type: Exclude<DiagnosisType, "ETC">;
+  }
+  | {
+    type: "ETC";
+    label: string;
+  };
 
-export default function PostTag({ type }: PostTagProps) {
-  const { label, className } = diagnosisMap[type];
+export default function PostTag(props: PostTagProps) {
+  const { className, label: defaultLabel } = diagnosisMap[props.type];
+
+  const label = props.type === "ETC" ? props.label : defaultLabel;
 
   return (
     <span
