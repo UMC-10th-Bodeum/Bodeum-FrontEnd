@@ -13,7 +13,10 @@ type PostTagProps =
 export default function PostTag(props: PostTagProps) {
   const { className, label: defaultLabel } = diagnosisMap[props.type];
 
-  const label = props.type === "ETC" ? props.label : defaultLabel;
+  const label =
+    props.type === "ETC"
+      ? props.label ?? defaultLabel
+      : defaultLabel;
 
   return (
     <span
