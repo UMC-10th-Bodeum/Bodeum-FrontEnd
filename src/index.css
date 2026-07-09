@@ -42,6 +42,10 @@
   --color-background-200: #F3F4F8;
   --color-background-100: #FFFFFF;
 
+  /* Effects */
+
+  --shadow-button: 1px 2px 7.5px rgb(0 0 0 / 0.15);
+
   /* Typography */
 
   --text-h1: 18px;
@@ -115,4 +119,12 @@
 
 body {
   font-family: var(--font-sans);
+}
+
+.bodeum-icon-color [fill]:not([fill="none"]) {
+  fill: currentColor;
+}
+
+.bodeum-icon-color [stroke]:not([stroke="none"]) {
+  stroke: currentColor;
 }
