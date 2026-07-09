@@ -25,29 +25,29 @@ const triggerBaseClass =
     "flex w-full items-center justify-between gap-3 border transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
 
 const triggerVariantClass: Record<SelectVariant, string> = {
-    L: "h-[48px] rounded-[10px] px-3 py-2 text-h2-onboard",
+    L: "h-[48px]  px-3 py-2 text-h2-onboard",
     S: "h-[34px] rounded-[5px] p-2 text-h6-list",
 };
 
 const triggerHoverClass: Record<SelectVariant, string> = {
-    L: "hover:border-background-400 hover:text-background-500",
-    S: "hover:border-background-400",
+    L: "hover:bg-background-200 hover:border-background-400 hover:text-background-500",
+    S: "hover:border-background-400 hover:text-background-500",
 };
 
 const triggerPlaceholderClass: Record<SelectVariant, Record<"true" | "false", string>> = {
     L: {
-        true: "border-background-300 bg-background-200 text-background-400",
-        false: "border-main-400 bg-background-100 text-background-600",
+        true: "rounded-[10px] border-background-250 bg-background-200 text-background-500",
+        false: "rounded-[10px] border-main-400 bg-background-100 text-background-600",
     },
     S: {
-        true: "border-main-100 bg-background-100 text-background-500",
+        true: "border-background-250 bg-background-100 text-background-500",
         false: "border-main-400 bg-background-100 text-background-600",
     },
 };
 
 const triggerOpenClass: Record<SelectVariant, string> = {
-    L: "border-main-400 bg-background-100 text-background-500",
-    S: "border-main-400 bg-background-100 text-background-600",
+    L: "rounded-[5px] border-main-400 bg-background-100 text-background-500",
+    S: "border-main-400 bg-background-100 text-background-500",
 };
 
 const dropdownVariantClass: Record<SelectVariant, string> = {
@@ -94,10 +94,7 @@ export function Select({
     const isPlaceholder = !value;
     const selectedLabel = options.find((opt) => opt.value === value)?.label ?? placeholder;
     const ChevronIcon = isOpen ? ChevronUpIcon : ChevronDownIcon;
-    const chevronClassName = [
-        "shrink-0",
-        variant === "L" && isPlaceholder && !isOpen ? "text-background-400" : "text-background-500",
-    ].join(" ");
+    const chevronClassName = "shrink-0 text-background-500";
     const triggerClassName = [
         triggerBaseClass,
         triggerVariantClass[variant],
@@ -119,7 +116,7 @@ export function Select({
                 aria-expanded={isOpen}
                 className={triggerClassName}
             >
-                <span className="flex min-w-0 items-center gap-0 truncate">
+                <span className="flex min-w-0 items-center gap-0.5 truncate">
                     {icon}
                     <span className="truncate">{selectedLabel}</span>
                 </span>
@@ -130,7 +127,7 @@ export function Select({
             {isOpen && (
                 <ul
                     role="listbox"
-                    className={`absolute z-10 mt-[10px] w-full overflow-hidden border border-main-100 bg-background-100 py-2 ${dropdownVariantClass[variant]}`}
+                    className={`absolute z-10 mt-[10px] w-full overflow-hidden border-[0.8px] border-main-100 bg-background-100 py-2 ${dropdownVariantClass[variant]}`}
                 >
                     {options.map((opt) => (
                         <li key={opt.value}>
