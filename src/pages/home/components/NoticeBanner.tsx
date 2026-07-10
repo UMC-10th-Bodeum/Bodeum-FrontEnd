@@ -14,7 +14,7 @@ export default function NoticeBanner({
   onClick,
 }: NoticeBannerProps) {
   return (
-    <div className="flex items-center justify-between rounded-[10px] border border-sub-yellow bg-white px-[18px] py-[12px]">
+    <div className="flex items-center justify-between rounded-[10px] border border-sub-yellow bg-background-100 px-[18px] py-[12px]">
       <div className="flex items-center gap-4">
         <div className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-sub-yellow">
           <BellIcon className="h-[14px] w-[14px] text-white" />
