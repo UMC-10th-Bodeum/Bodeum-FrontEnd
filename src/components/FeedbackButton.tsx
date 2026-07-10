@@ -1,4 +1,10 @@
-import { useState, type ButtonHTMLAttributes, type ComponentType, type SVGProps } from "react";
+import {
+    useState,
+    type ButtonHTMLAttributes,
+    type ComponentType,
+    type SVGProps,
+    type MouseEvent,
+} from "react";
 
 import GoodIcon from "@/assets/icons/Good.svg?react";
 import BadIcon from "@/assets/icons/Bad.svg?react";
@@ -12,8 +18,10 @@ export interface FeedbackButtonProps extends Omit<
 > {
     feedbackType: FeedbackType;
     variant?: FeedbackVariant;
+    selected?: boolean;
     defaultSelected?: boolean;
     count?: number;
+    defaultCount?: number;
     showCount?: boolean;
     label?: string;
     onSelectedChange?: (selected: boolean, count: number) => void;
@@ -32,8 +40,10 @@ const feedbackConfig: Record<FeedbackType, FeedbackConfig> = {
 export default function FeedbackButton({
     feedbackType,
     variant = "text",
+    selected: selectedProp,
     defaultSelected = false,
-    count: initialCount = 0,
+    count: countProp,
+    defaultCount = 0,
     showCount = true,
     label,
     disabled = false,
@@ -44,19 +54,25 @@ export default function FeedbackButton({
 }: FeedbackButtonProps) {
     const { label: defaultLabel, Icon } = feedbackConfig[feedbackType];
 
-    const [selected, setSelected] = useState(defaultSelected);
-    const [count, setCount] = useState(initialCount);
+    const [internalSelected, setInternalSelected] = useState(defaultSelected);
+    const [internalCount, setInternalCount] = useState(defaultCount);
+
+    const isControlled = selectedProp !== undefined;
+    const selected = isControlled ? selectedProp : internalSelected;
+    const count = countProp !== undefined ? countProp : internalCount;
 
     const buttonLabel = label ?? defaultLabel;
     const isIconVariant = variant === "icon";
     const shouldShowCount = !isIconVariant && showCount && count > 0;
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
         const nextSelected = !selected;
         const nextCount = nextSelected ? count + 1 : Math.max(0, count - 1);
 
-        setSelected(nextSelected);
-        setCount(nextCount);
+        if (!isControlled) {
+            setInternalSelected(nextSelected);
+            setInternalCount(nextCount);
+        }
         onSelectedChange?.(nextSelected, nextCount);
         onClick?.(e);
     };
