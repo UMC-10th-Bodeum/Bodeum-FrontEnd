@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import ChevronDownIcon from "@/assets/icons/ChevronDown.svg?react";
-import ChevronUpIcon from "@/assets/icons/ChevronUp.svg?react";
+import ChevronLeft from "@/assets/icons/ChevronLeft.svg?react";
 
 export interface SelectOption {
     label: string;
@@ -93,8 +92,10 @@ export function Select({
 
     const isPlaceholder = !value;
     const selectedLabel = options.find((opt) => opt.value === value)?.label ?? placeholder;
-    const ChevronIcon = isOpen ? ChevronUpIcon : ChevronDownIcon;
-    const chevronClassName = "shrink-0 text-background-500";
+    const chevronClassName = [
+        "shrink-0 !text-background-500",
+        isOpen ? "rotate-90" : "-rotate-90",
+    ].join(" ");
     const triggerClassName = [
         triggerBaseClass,
         triggerVariantClass[variant],
@@ -116,12 +117,12 @@ export function Select({
                 aria-expanded={isOpen}
                 className={triggerClassName}
             >
-                <span className="flex min-w-0 items-center gap-0.5 truncate">
+                <span className="flex min-w-0 items-center gap-0.5">
                     {icon}
-                    <span className="truncate">{selectedLabel}</span>
+                    {selectedLabel}
                 </span>
 
-                <ChevronIcon className={chevronClassName} aria-hidden />
+                <ChevronLeft className={chevronClassName} aria-hidden />
             </button>
 
             {isOpen && (
