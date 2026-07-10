@@ -1,5 +1,5 @@
-import BookmarkIcon from "@/assets/icons/Bookmark.svg?react";
-import BookmarkFilledIcon from "@/assets/icons/BookmarkFilled.svg?react";
+import ScrapIcon from "@/assets/icons/Scrap.svg?react";
+import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
 import ToggleStat from "./ToggleStat";
 
 interface BookmarkStatProps {
@@ -15,8 +15,8 @@ function BookmarkStat({ count, isActive = false, onClick }: BookmarkStatProps) {
             isActive={isActive}
             count={count}
             onClick={onClick}
-            outlineIcon={<BookmarkIcon className="h-3 w-3" aria-hidden="true" />}
-            filledIcon={<BookmarkFilledIcon className="h-3 w-3" aria-hidden="true" />}
+            outlineIcon={<ScrapIcon className="h-3 w-3" aria-hidden="true" />}
+            filledIcon={<ScrapPressedIcon className="h-3 w-3" aria-hidden="true" />}
         />
     );
 }
