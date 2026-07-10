@@ -6,11 +6,11 @@ interface BackButtonProps {
     label?: string;
 }
 
-function BackButton({ to, label = "뒤로가기" }: BackButtonProps) {
+function DetailBackButton({ to, label = "뒤로가기" }: BackButtonProps) {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        if (to) {
+        if (to !== undefined) {
             navigate(to);
         } else {
             navigate(-1);
@@ -29,4 +29,4 @@ function BackButton({ to, label = "뒤로가기" }: BackButtonProps) {
     );
 }
 
-export default BackButton;
+export default DetailBackButton;
