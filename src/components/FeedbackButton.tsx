@@ -55,11 +55,13 @@ export default function FeedbackButton({
     const { label: defaultLabel, Icon } = feedbackConfig[feedbackType];
 
     const [internalSelected, setInternalSelected] = useState(defaultSelected);
-    const [internalCount, setInternalCount] = useState(defaultCount);
+    const [internalCount, setInternalCount] = useState(Math.max(0, defaultCount));
 
-    const isControlled = selectedProp !== undefined;
-    const selected = isControlled ? selectedProp : internalSelected;
-    const count = countProp !== undefined ? countProp : internalCount;
+    const isSelectedControlled = selectedProp !== undefined;
+    const isCountControlled = countProp !== undefined;
+
+    const selected = isSelectedControlled ? selectedProp : internalSelected;
+    const count = Math.max(0, isCountControlled ? countProp : internalCount);
 
     const buttonLabel = label ?? defaultLabel;
     const isIconVariant = variant === "icon";
@@ -69,8 +71,10 @@ export default function FeedbackButton({
         const nextSelected = !selected;
         const nextCount = nextSelected ? count + 1 : Math.max(0, count - 1);
 
-        if (!isControlled) {
+        if (!isSelectedControlled) {
             setInternalSelected(nextSelected);
+        }
+        if (!isCountControlled) {
             setInternalCount(nextCount);
         }
         onSelectedChange?.(nextSelected, nextCount);
