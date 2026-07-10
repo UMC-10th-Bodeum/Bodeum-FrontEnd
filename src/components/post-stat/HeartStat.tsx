@@ -6,7 +6,7 @@ import ToggleStat from "./ToggleStat";
 interface HeartStatProps {
     count: number;
     isActive?: boolean;
-    onClick?: () => void;
+    onClick: () => void;
 }
 
 function HeartStat({ count, isActive = false, onClick }: HeartStatProps) {

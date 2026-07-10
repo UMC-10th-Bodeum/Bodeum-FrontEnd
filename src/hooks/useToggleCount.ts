@@ -13,7 +13,10 @@ function useToggleCount({ initialCount, initialIsActive = false }: UseToggleCoun
         const nextIsActive = !isActive;
 
         setIsActive(nextIsActive);
-        setCount((prevCount) => (nextIsActive ? prevCount + 1 : prevCount - 1));
+        setCount((prevCount) => {
+            const nextCount = nextIsActive ? prevCount + 1 : prevCount - 1;
+            return Math.max(0, nextCount);
+        });
 
         return nextIsActive;
     };

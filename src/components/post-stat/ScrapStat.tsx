@@ -5,7 +5,7 @@ import ToggleStat from "./ToggleStat";
 interface ScrapStatProps {
     count: number;
     isActive?: boolean;
-    onClick?: () => void;
+    onClick: () => void;
 }
 
 function ScrapStat({ count, isActive = false, onClick }: ScrapStatProps) {

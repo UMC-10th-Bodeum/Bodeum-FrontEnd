@@ -4,7 +4,7 @@ interface ToggleStatProps {
     type: "heart" | "scrap";
     isActive: boolean;
     count: number;
-    onClick?: () => void;
+    onClick: () => void;
     outlineIcon: ReactNode;
     filledIcon: ReactNode;
     pressedIcon?: ReactNode;
