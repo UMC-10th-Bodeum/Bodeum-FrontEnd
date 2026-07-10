@@ -1,5 +1,5 @@
 import HeartIcon from "@/assets/icons/Heart.svg?react";
-import HeartFilledIcon from "@/assets/icons/HeartFilled.svg?react";
+import HeartDisabledIcon from "@/assets/icons/HeartDisabled.svg?react";
 import HeartPressedIcon from "@/assets/icons/HeartPressed.svg?react";
 import ToggleStat from "./ToggleStat";
 
@@ -17,8 +17,8 @@ function HeartStat({ count, isActive = false, onClick }: HeartStatProps) {
             count={count}
             onClick={onClick}
             gapClassName="gap-[1.25px]"
-            outlineIcon={<HeartIcon className="h-3.5 w-3.5" aria-hidden="true" />}
-            filledIcon={<HeartFilledIcon className="h-3.5 w-3.5" aria-hidden="true" />}
+            outlineIcon={<HeartDisabledIcon className="h-3.5 w-3.5" aria-hidden="true" />}
+            filledIcon={<HeartIcon className="h-3.5 w-3.5" aria-hidden="true" />}
             pressedIcon={<HeartPressedIcon className="h-3.5 w-3.5" aria-hidden="true" />}
         />
     );
