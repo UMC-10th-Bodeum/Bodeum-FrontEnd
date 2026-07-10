@@ -22,7 +22,7 @@ export default function UserSection({
   const isEmpty = type === "empty";
 
   return (
-    <div className="rounded-[8px] border border-background-300 bg-background-100">
+    <div className="rounded-[8px] border border-background-250 bg-background-100">
       <div className="flex px-[8px] py-[12px]">
         <ProfileIcon className="w-[30px] h-[30px] mr-[9px]" />
 
