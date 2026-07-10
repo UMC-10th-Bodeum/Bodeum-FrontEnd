@@ -1,3 +1,12 @@
+import NoticeBanner from "./components/NoticeBanner";
+import RequiredInfoSection from "./components/RequiredInfoSection";
+
 export default function HomePage() {
-    return <div>홈</div>;
+  return (
+    <div className="flex min-h-screen flex-col px-[32px] py-[20px] bg-background-100 gap-[18px]">
+      <NoticeBanner title="2026년 발달재활서비스 바우처 신청 기간 안내 — D-7" description="5월 31일까지 복지로에서 신청 가능합니다" />
+
+      <RequiredInfoSection />
+    </div>
+  );
 }

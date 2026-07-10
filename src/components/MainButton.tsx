@@ -26,7 +26,7 @@ const sizeClasses: Record<MainButtonSize, string> = {
 };
 
 const filledEnabledClasses =
-  'bg-main-400 text-background-100 hover:bg-main-300 active:bg-main-500';
+  'bg-main-400 text-background-100 hover:bg-main-400 hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] active:bg-main-500 active:shadow-none';
 const filledDisabledClasses: Record<MainButtonSize, string> = {
   L: 'bg-background-250 text-background-500',
   M: 'bg-background-250 text-background-500',
@@ -59,7 +59,7 @@ export default function MainButton({
       data-state={disabled ? 'disabled' : '기본'}
       className={joinClassNames(
         'inline-flex shrink-0 items-center justify-center whitespace-nowrap px-0 py-0 text-center',
-        'transition-colors duration-150 ease-out',
+        'transition-[background-color,color,border-color,box-shadow] duration-150 ease-out',
         'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400',
         sizeClasses[size],
         isStroke ? 'border' : 'border-0',
