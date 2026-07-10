@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 
 interface ToggleStatProps {
-    type: "heart" | "bookmark";
+    type: "heart" | "scrap";
     isActive: boolean;
     count: number;
     onClick?: () => void;
@@ -9,6 +9,7 @@ interface ToggleStatProps {
     filledIcon: ReactNode;
     pressedIcon?: ReactNode;
     gapClassName?: string;
+    ariaLabel: string;
 }
 
 const TOGGLE_STAT_COLOR_CLASS_NAME = {
@@ -17,7 +18,7 @@ const TOGGLE_STAT_COLOR_CLASS_NAME = {
         enabled: "text-sub-red",
         pressed: "text-sub-red-2",
     },
-    bookmark: {
+    scrap: {
         default: "text-background-500",
         enabled: "text-background-600",
     },
@@ -32,6 +33,7 @@ function ToggleStat({
     filledIcon,
     pressedIcon,
     gapClassName = "gap-1",
+    ariaLabel,
 }: ToggleStatProps) {
     const [isPressed, setIsPressed] = useState(false);
     const icon = isPressed && pressedIcon ? pressedIcon : isActive ? filledIcon : outlineIcon;
@@ -46,6 +48,8 @@ function ToggleStat({
         <button
             type="button"
             onClick={onClick}
+            aria-label={ariaLabel}
+            aria-pressed={isActive}
             onPointerDown={() => setIsPressed(true)}
             onPointerUp={() => setIsPressed(false)}
             onPointerLeave={() => setIsPressed(false)}

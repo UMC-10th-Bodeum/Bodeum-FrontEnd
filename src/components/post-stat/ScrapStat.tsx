@@ -2,16 +2,17 @@ import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
 import ToggleStat from "./ToggleStat";
 
-interface BookmarkStatProps {
+interface ScrapStatProps {
     count: number;
     isActive?: boolean;
     onClick?: () => void;
 }
 
-function BookmarkStat({ count, isActive = false, onClick }: BookmarkStatProps) {
+function ScrapStat({ count, isActive = false, onClick }: ScrapStatProps) {
     return (
         <ToggleStat
-            type="bookmark"
+            type="scrap"
+            ariaLabel={isActive ? "스크랩 취소" : "스크랩"}
             isActive={isActive}
             count={count}
             onClick={onClick}
@@ -21,4 +22,4 @@ function BookmarkStat({ count, isActive = false, onClick }: BookmarkStatProps) {
     );
 }
 
-export default BookmarkStat;
+export default ScrapStat;

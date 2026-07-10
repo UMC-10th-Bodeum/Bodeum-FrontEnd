@@ -13,6 +13,7 @@ function HeartStat({ count, isActive = false, onClick }: HeartStatProps) {
     return (
         <ToggleStat
             type="heart"
+            ariaLabel={isActive ? "좋아요 취소" : "좋아요"}
             isActive={isActive}
             count={count}
             onClick={onClick}
