@@ -50,7 +50,7 @@ function ToggleStat({
             onPointerUp={() => setIsPressed(false)}
             onPointerLeave={() => setIsPressed(false)}
             onPointerCancel={() => setIsPressed(false)}
-            className={`inline-flex items-center ${gapClassName} text-h6-list ${colorClassName}`}
+            className={`inline-flex items-center cursor-pointer ${gapClassName} text-h6-list ${colorClassName}`}
         >
             <span className="pointer-events-none">{icon}</span>
             <span>{count}</span>
