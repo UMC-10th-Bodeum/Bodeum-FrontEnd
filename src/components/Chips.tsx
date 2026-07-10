@@ -17,7 +17,7 @@ const VARIANT_STYLES: Record<ChipVariant, string> = {
 export default function Chip({ children, variant = "default", className = "" }: ChipProps) {
     return (
         <span
-            className={`inline-flex min-w-[96px] h-[21px] items-center justify-center whitespace-nowrap rounded-[8px] px-2 py-0.5 text-body-label ${VARIANT_STYLES[variant]} ${className}`}
+            className={`inline-flex h-[21px] items-center justify-center whitespace-nowrap rounded-[8px] px-2 py-0.5 text-body-label ${VARIANT_STYLES[variant]} ${className}`}
         >
             {children}
         </span>
