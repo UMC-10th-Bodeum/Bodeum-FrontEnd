@@ -6,7 +6,7 @@ import {
 
 type CategoryButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
-  "children" | "disabled"
+  "children" | "disabled" | "aria-pressed" | "data-state"
 > & {
   category: InfoCategoryType;
   selected?: boolean;
@@ -62,6 +62,7 @@ export default function CategoryButton({
 
   return (
     <button
+      {...buttonProps}
       type={type}
       aria-pressed={selected}
       data-state={selected ? "selected" : "default"}
@@ -79,7 +80,6 @@ export default function CategoryButton({
         "cursor-pointer",
         className,
       )}
-      {...buttonProps}
     >
       {label} 전체
     </button>
