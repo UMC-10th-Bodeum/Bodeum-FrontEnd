@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import SideBar from "./components/sidebar/SideBar";
-import TopBar from "./components/TopBar";
+import SearchTopBar from "./components/Header/SearchTopBar";
 
 export default function MainLayout() {
   return (
@@ -8,7 +8,7 @@ export default function MainLayout() {
       <SideBar />
 
       <div className="flex flex-1 flex-col">
-        <TopBar />
+        <SearchTopBar />
 
         <main className="flex-1 overflow-y-auto">
           <Outlet />
