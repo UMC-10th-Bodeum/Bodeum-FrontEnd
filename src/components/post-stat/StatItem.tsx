@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 interface StatItemProps {
     icon: ReactNode;
-    value: string | number;
+    value: ReactNode;
 }
 
 function StatItem({ icon, value }: StatItemProps) {

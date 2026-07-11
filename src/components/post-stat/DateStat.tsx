@@ -1,4 +1,4 @@
-import UpdateAtIcon from "@/assets/icons/updateAt.svg?react";
+import UpdateAtIcon from "@/assets/icons/UpdateAt.svg?react";
 import StatItem from "./StatItem";
 
 interface DateStatProps {

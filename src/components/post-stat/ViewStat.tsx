@@ -1,8 +1,9 @@
-import ViewsIcon from "@/assets/icons/views.svg?react";
+import type { ReactNode } from "react";
+import ViewsIcon from "@/assets/icons/Views.svg?react";
 import StatItem from "./StatItem";
 
 interface ViewStatProps {
-    count: number;
+    count: ReactNode;
 }
 
 function ViewStat({ count }: ViewStatProps) {

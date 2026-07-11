@@ -1,8 +1,9 @@
+import type { ReactNode } from "react";
 import CommunityIcon from "@/assets/icons/Community.svg?react";
 import StatItem from "./StatItem";
 
 interface CommentStatProps {
-    count: number;
+    count: ReactNode;
 }
 
 function CommentStat({ count }: CommentStatProps) {
