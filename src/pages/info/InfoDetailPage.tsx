@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import {
@@ -9,8 +9,8 @@ import {
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
-
   const { setBreadcrumb } = useBreadcrumb();
+  const navigate = useNavigate();
 
   const infoCategory = category
     ? infoCategoryMap[category as InfoCategoryType]
@@ -35,9 +35,19 @@ export default function InfoDetailPage() {
     if (!category) return;
 
     setBreadcrumb([
-      "정보",
-      infoCategoryMap[category as InfoCategoryType].label,
-      "서울대학교병원", 
+      {
+        label: "정보",
+        onClick: () => {
+          // 모달 열기
+        },
+      },
+      {
+        label: "병원",
+        onClick: () => navigate("/info?category=HOSPITAL"),
+      },
+      {
+        label: "드림발달클리닉",
+      },
     ]);
 
     return () => setBreadcrumb([]);

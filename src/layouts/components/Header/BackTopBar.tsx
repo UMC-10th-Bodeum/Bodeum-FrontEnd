@@ -10,16 +10,25 @@ export default function BackTopBar() {
     <header className="flex h-[60px] items-center border-b border-background-250 bg-white px-[24px] py-[12px]">
       <DetailBackButton />
 
-      <div className="flex items-center gap-[6px] ml-[20px]">
+      <div className="flex items-center ml-[20px]">
         {breadcrumb.map((item, index) => (
-          <div key={item} className="flex items-center">
+          <div key={index} className="flex items-center">
             {index > 0 && (
-              <RightIcon className="mx-[8px] h-[7px] w-[3.5px] text-background-300" />
+              <RightIcon className="mx-[11.25px] h-[7px] w-[3.5px] text-background-300" />
             )}
 
-            <span className="text-h6-list text-gray-500">
-              {item}
-            </span>
+            {item.onClick ? (
+              <button
+                onClick={item.onClick}
+                className="text-h6-list text-background-500 cursor-pointer"
+              >
+                {item.label}
+              </button>
+            ) : (
+              <span className="text-h6-list text-background-500">
+                {item.label}
+              </span>
+            )}
           </div>
         ))}
       </div>

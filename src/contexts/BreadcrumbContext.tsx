@@ -5,9 +5,14 @@ import {
   type ReactNode,
 } from "react";
 
+export interface BreadcrumbItem {
+  label: string;
+  onClick?: () => void;
+}
+
 interface BreadcrumbContextType {
-  breadcrumb: string[];
-  setBreadcrumb: React.Dispatch<React.SetStateAction<string[]>>;
+  breadcrumb: BreadcrumbItem[];
+  setBreadcrumb: React.Dispatch<React.SetStateAction<BreadcrumbItem[]>>;
 }
 
 const BreadcrumbContext = createContext<BreadcrumbContextType | null>(null);
@@ -17,7 +22,7 @@ export function BreadcrumbProvider({
 }: {
   children: ReactNode;
 }) {
-  const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
+  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem[]>([]);
 
   return (
     <BreadcrumbContext.Provider
