@@ -12,7 +12,7 @@ export default function SideBar() {
       
       <div className="flex flex-1 flex-col border-r border-background-250">
       <div className="px-4 pt-[20px]">
-        <UserSection type="parent" />
+        <UserSection type="guest" />
 
         <div className="mt-[18px]">
           <SideNav />
