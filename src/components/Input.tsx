@@ -32,7 +32,7 @@ export default function Input({
   const wrapperStyle = search
     ? isFilled
       ? "border border-background-250 bg-main-100"
-      : "border border-background-250 bg-background-200"
+      : "border border-background-200 bg-background-200"
     : isFilled
       ? "border-0 bg-background-200 focus-within:border focus-within:border-main-400"
       : "border border-background-300 bg-background-200";
@@ -40,7 +40,7 @@ export default function Input({
   return (
     <div
       className={`
-        flex ${search ? "h-[44px]" : "h-[48px]"} items-center rounded-[10px]
+        flex ${search ? "h-[40px]" : "h-[48px]"} items-center rounded-[10px]
         px-[20px]
         transition-all
         ${wrapperStyle}
