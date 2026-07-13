@@ -23,7 +23,7 @@ export default function RecommendedNewsSection({
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
       <div>
-        <h2 className="text-h2-list text-background-600">추천하는 소식 Top 5</h2>
+        <h2 className="mt-[20px] text-h2-list text-background-600">추천하는 소식 Top 5</h2>
         <p className="mt-[3.6px] mb-[13.6px] text-h6-list text-background-500">
           지역 · 활동별 맞춤 소식을 확인하세요
         </p>
