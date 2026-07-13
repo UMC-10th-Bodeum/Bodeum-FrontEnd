@@ -32,7 +32,7 @@ function ToggleStat({
     outlineIcon,
     filledIcon,
     pressedIcon,
-    gapClassName = "gap-1",
+    gapClassName = "gap-[5px]",
     ariaLabel,
 }: ToggleStatProps) {
     const [isPressed, setIsPressed] = useState(false);
@@ -54,10 +54,14 @@ function ToggleStat({
             onPointerUp={() => setIsPressed(false)}
             onPointerLeave={() => setIsPressed(false)}
             onPointerCancel={() => setIsPressed(false)}
-            className={`inline-flex items-center cursor-pointer ${gapClassName} text-h6-list ${colorClassName}`}
+            className={`inline-flex items-center cursor-pointer ${gapClassName} ${colorClassName}`}
         >
-            <span className="pointer-events-none">{icon}</span>
-            <span>{count}</span>
+            <span className="pointer-events-none inline-flex shrink-0 items-center justify-center">
+                {icon}
+            </span>
+            <span className="inline-flex items-center text-h4-list translate-y-[-1px]">
+                {count.toLocaleString()}
+            </span>
         </button>
     );
 }

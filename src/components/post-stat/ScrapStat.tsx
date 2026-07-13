@@ -16,7 +16,7 @@ function ScrapStat({ count, isActive = false, onClick }: ScrapStatProps) {
             isActive={isActive}
             count={count}
             onClick={onClick}
-            outlineIcon={<ScrapIcon className="h-3 w-3" aria-hidden="true" />}
+            outlineIcon={<ScrapIcon className="bodeum-icon-color h-3 w-3" aria-hidden="true" />}
             filledIcon={<ScrapPressedIcon className="h-3 w-3" aria-hidden="true" />}
         />
     );
