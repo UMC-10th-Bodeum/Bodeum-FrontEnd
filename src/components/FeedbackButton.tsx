@@ -94,7 +94,7 @@ export default function FeedbackButton({
                 inline-flex items-center justify-center
                 border-b border-transparent pb-0.5
                 enabled:hover:border-current
-                ${isIconVariant ? "w-5 h-5" : "h-5 gap-1 text-h6-list"}
+                ${isIconVariant ? "w-5 h-5" : "h-5 gap-1 text-h4-list"}
                 ${selected ? "text-main-400" : "text-background-500"}
                 ${className ?? ""}
             `}
