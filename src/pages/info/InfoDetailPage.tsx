@@ -42,8 +42,8 @@ export default function InfoDetailPage() {
         },
       },
       {
-        label: "병원",
-        onClick: () => navigate("/info?category=HOSPITAL"),
+        label: infoCategory?.label ?? "",
+        onClick: () => navigate(`/info?category=${category}`),
       },
       {
         label: "드림발달클리닉",
