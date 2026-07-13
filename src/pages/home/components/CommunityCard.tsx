@@ -30,7 +30,7 @@ export default function CommunityCard({
   return (
     <button
       onClick={onClick}
-      className="flex  w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left"
+      className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left"
     >
       <div className="mb-[8px] flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -49,9 +49,9 @@ export default function CommunityCard({
         {content}
       </p>
 
-      <div className="mt-[8px] flex items-center gap-[14px] border-t border-background-250 pt-4 text-h4-list text-background-500">
+      <div className="mt-[8px] flex items-center gap-[14px] border-t border-background-250 pt-[8px] text-h4-list text-background-500">
         <div className="flex items-center gap-1">
-          <HeartIcon className="h-[14px] w-[14px]" />
+          <HeartIcon className="h-[12px] w-[12px]" />
           <span>{likes}</span>
         </div>
 

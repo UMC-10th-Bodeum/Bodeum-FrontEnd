@@ -1,6 +1,9 @@
 import type { DiagnosisType } from "@/types/diagnosis";
 import CommunityCard from "./CommunityCard";
 import MainButton from "@/components/MainButton";
+import PostSection from "./PostSection";
+import { postList } from "@/mocks/post";
+import PostListItem from "./PostListItem";
 
 export interface CommunityPost {
   id: number;
@@ -42,12 +45,24 @@ export default function CommunitySection({
       </div>
 
       <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
-    <div className="inline-flex gap-4">
-      {posts.map((post) => (
-        <CommunityCard key={post.id} {...post} />
-      ))}
-    </div>
-  </div>
+        <div className="inline-flex gap-4">
+          {posts.map((post) => (
+            <CommunityCard key={post.id} {...post} />
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-row mt-[20.5px] gap-[24px]">
+        <PostSection title="인기글">
+          {postList.map((post) => (
+            <PostListItem key={post.id} {...post} />
+          ))}
+        </PostSection>
+        <PostSection title="최신글">
+          {postList.map((post) => (
+            <PostListItem key={post.id} {...post} />
+          ))}
+        </PostSection>
+      </div>
     </section>
   );
 }
