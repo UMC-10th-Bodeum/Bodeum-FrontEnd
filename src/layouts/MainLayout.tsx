@@ -1,14 +1,20 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useMatches } from "react-router-dom";
 import SideBar from "./components/sidebar/SideBar";
-import TopBar from "./components/TopBar";
+import SearchTopBar from "./components/Header/SearchTopBar";
+import BackTopBar from "./components/Header/BackTopBar";
 
 export default function MainLayout() {
+  const matches = useMatches();
+  const current = matches[matches.length - 1];
+
+  const header = (current.handle as { header?: string })?.header;
+
   return (
     <div className="flex h-screen">
       <SideBar />
 
       <div className="flex flex-1 flex-col">
-        <TopBar />
+        {header === "back" ? <BackTopBar /> : <SearchTopBar />}
 
         <main className="flex-1 overflow-y-auto">
           <Outlet />
