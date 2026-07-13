@@ -44,7 +44,7 @@ export default function UserSection({
               </p>
 
               <p className="text-body-sub text-background-500">
-                Level{level ?? "-"} · {age ?? "-"}세 아이
+                Level{level ?? " ? "} · {age ?? " ? "}세 아이
               </p>
             </>
           ) : null}

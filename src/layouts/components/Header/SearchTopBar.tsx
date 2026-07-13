@@ -1,11 +1,11 @@
 import { useState } from "react";
 import Input from "@/components/Input";
 
-export default function TopBar() {
+export default function SearchTopBar() {
   const [keyword, setKeyword] = useState("");
 
   return (
-    <header className="h-[60px] border-b border-background-250 bg-white px-[20px] py-[8px]">
+    <header className="h-[60px] border-b border-background-250 bg-background-100 px-[20px] py-[10px]">
       <Input
         search
         value={keyword}

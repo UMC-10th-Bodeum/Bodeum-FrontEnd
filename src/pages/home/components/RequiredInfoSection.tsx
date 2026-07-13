@@ -12,11 +12,11 @@ export default function RequiredInfoSection() {
   return (
     <section className="rounded-[20px] bg-background-200 px-[20px] py-[19.6px]">
       <div className="mb-[12px]">
-        <h2 className="text-h2-list text-[#121619]">
+        <h2 className="text-h2-list text-background-600">
           바로 찾는 필수 정보
         </h2>
 
-        <p className="mt-[3.6px] text-h6-list text-[#4D5358]">
+        <p className="mt-[3.6px] text-h6-list text-background-500">
           필요한 정보를 한번에 바로 찾아보세요
         </p>
       </div>

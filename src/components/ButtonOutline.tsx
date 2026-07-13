@@ -39,9 +39,9 @@ const joinClassNames = (...classNames: Array<string | false | undefined>) =>
 
 const enabledToneClasses: Record<ButtonOutlineTone, string> = {
   primary:
-    "border-main-400 bg-background-100 text-main-400 hover:bg-main-150 active:border-main-400 active:bg-main-400 active:text-background-100",
+    "border-main-400 bg-background-100 text-main-400 hover:bg-background-100 hover:shadow-button active:border-main-500 active:bg-background-100 active:text-main-500",
   black:
-    "border-background-500 bg-background-100 text-background-600 hover:bg-background-250 active:border-background-600 active:bg-background-600 active:text-background-100",
+    "border-background-500 bg-background-100 text-background-600 hover:border-background-600 hover:bg-background-100 hover:shadow-button active:border-background-600 active:bg-background-600 active:text-background-100",
 };
 
 export default function ButtonOutline({
@@ -83,7 +83,7 @@ export default function ButtonOutline({
       data-icon-position={IconComponent ? iconPosition : undefined}
       className={joinClassNames(
         "inline-flex h-[38px] shrink-0 items-center justify-center rounded-[10px] border px-[16px] py-[10px]",
-        "text-h6 transition-colors duration-150 ease-out",
+        "text-h4-list transition-[background-color,border-color,color,box-shadow] duration-150 ease-out",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400",
         size === "L" ? "w-[632px] gap-[6px]" : "gap-[4px]",
         disabled
