@@ -25,7 +25,7 @@ export default function PostListItem({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center justify-between rounded-[10px] bg-background-200 px-[16px] py-[12px]"
+      className="flex w-full items-center justify-between rounded-[10px] bg-background-200 px-[16px] py-[12px] cursor-pointer"
     >
       <div className="flex min-w-0 items-center gap-3">
         <RegionLabel region={region} />
