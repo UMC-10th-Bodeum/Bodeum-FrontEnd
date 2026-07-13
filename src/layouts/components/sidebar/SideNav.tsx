@@ -1,4 +1,3 @@
-import { useState } from "react";
 import HomeIcon from "@/assets/icons/Home.svg?react";
 import ChatIcon from "@/assets/icons/Chat.svg?react";
 import InfoIcon from "@/assets/icons/Info.svg?react";
@@ -6,43 +5,51 @@ import NewsIcon from "@/assets/icons/News.svg?react";
 import CommunityIcon from "@/assets/icons/Community.svg?react";
 import SideNavItem from "./SideNavItem";
 import SideSubNavItem from "./SideSubNavItem";
-
-const subMenus = ["기관", "병원", "복지", "취업", "교육"];
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { infoCategoryMap } from "@/constants/infoCategory";
 
 export default function SideNav() {
-  const [selectedMenu, setSelectedMenu] = useState("정보");
-  const [selectedSubMenu, setSelectedSubMenu] = useState<string>("기관");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { category } = useParams();
+
+  const pathname = location.pathname;
+
+  const searchParams = new URLSearchParams(location.search);
+  const queryCategory = searchParams.get("category");
+
+  const currentCategory = category ?? queryCategory;
 
   return (
     <nav className="flex flex-col gap-[10px]">
       <SideNavItem
         icon={<HomeIcon />}
         label="홈"
-        active={selectedMenu === "홈"}
-        onClick={() => setSelectedMenu("홈")}
+        active={pathname === "/"}
+        onClick={() => navigate("/")}
       />
 
       <SideNavItem
         icon={<ChatIcon />}
         label="AI 챗봇"
-        active={selectedMenu === "AI 챗봇"}
-        onClick={() => setSelectedMenu("AI 챗봇")}
+        active={pathname.startsWith("/aichat")}
+        onClick={() => navigate("/aichat")}
       />
 
       <SideNavItem
         icon={<InfoIcon />}
         label="정보"
-        active={selectedMenu === "정보"}
-        expanded={selectedMenu === "정보"}
-        onClick={() => setSelectedMenu("정보")}
+        active={pathname.startsWith("/info")}
+        expanded={pathname.startsWith("/info")}
+        onClick={() => navigate("/info")}
       >
         <div className="flex flex-col gap-[12px]">
-          {subMenus.map((menu) => (
+          {Object.entries(infoCategoryMap).map(([key, value]) => (
             <SideSubNavItem
-              key={menu}
-              label={menu}
-              selected={selectedSubMenu === menu}
-              onClick={() => setSelectedSubMenu(menu)}
+              key={key}
+              label={value.label}
+              selected={currentCategory === key}
+              onClick={() => navigate(`/info?category=${key}`)}
             />
           ))}
         </div>
@@ -51,15 +58,15 @@ export default function SideNav() {
       <SideNavItem
         icon={<NewsIcon />}
         label="소식"
-        active={selectedMenu === "소식"}
-        onClick={() => setSelectedMenu("소식")}
+        active={pathname === "/news"}
+        onClick={() => navigate("/news")}
       />
 
       <SideNavItem
         icon={<CommunityIcon />}
         label="커뮤니티"
-        active={selectedMenu === "커뮤니티"}
-        onClick={() => setSelectedMenu("커뮤니티")}
+        active={pathname === "/community"}
+        onClick={() => navigate("/community")}
       />
     </nav>
   );
