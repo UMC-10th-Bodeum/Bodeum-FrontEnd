@@ -24,7 +24,7 @@ export default function NewsCard({
   return (
     <button
       onClick={onClick}
-      className="w-[210px] overflow-hidden rounded-[8px] border border-background-250 bg-white text-left cursor-pointer"
+      className="shrink-0 w-[210px] overflow-hidden rounded-[8px] border border-background-250 bg-white text-left cursor-pointer"
     >
       <img
         src={thumbnail || ImagePlaceholder}

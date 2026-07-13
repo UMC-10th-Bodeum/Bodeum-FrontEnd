@@ -10,7 +10,7 @@ const categories = [
 
 export default function RequiredInfoSection() {
   return (
-    <section className="rounded-[20px] bg-background-200 px-[20px] py-[19.6px]">
+    <section className="overflow-hidden rounded-[20px] bg-background-200 px-[20px] py-[19.6px]">
       <div className="mb-[12px]">
         <h2 className="text-h2-list text-background-600">
           바로 찾는 필수 정보
