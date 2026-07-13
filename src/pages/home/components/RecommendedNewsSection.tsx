@@ -29,7 +29,7 @@ export default function RecommendedNewsSection({
         </p>
       </div>
 
-      <div className="flex gap-[12px] overflow-x-auto">
+      <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
         {news.map((item) => (
           <NewsCard
             key={item.id}

@@ -57,10 +57,10 @@ export default function HomePage() {
       <RecommendedNewsSection news={news} />
       
       <CommunitySection
-      posts={communityPosts}
-      onWrite={() => {}}
-      onMore={() => {}}
-    />
+        posts={communityPosts}
+        onWrite={() => { }}
+        onMore={() => { }}
+      />
     </div>
   );
 }
