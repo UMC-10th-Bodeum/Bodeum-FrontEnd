@@ -1,3 +1,5 @@
+import { communityPosts } from "@/mocks/community";
+import CommunitySection from "./components/CommunitySection";
 import NoticeBanner from "./components/NoticeBanner";
 import RecommendedNewsSection from "./components/RecommendedNewsSection";
 import RequiredInfoSection from "./components/RequiredInfoSection";
@@ -54,6 +56,11 @@ export default function HomePage() {
 
       <RecommendedNewsSection news={news} />
       
+      <CommunitySection
+      posts={communityPosts}
+      onWrite={() => {}}
+      onMore={() => {}}
+    />
     </div>
   );
 }

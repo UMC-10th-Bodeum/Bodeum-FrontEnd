@@ -7,7 +7,7 @@ type PostTagProps =
   }
   | {
     type: "ETC";
-    label: string;
+    label?: string;
   };
 
 export default function PostTag(props: PostTagProps) {
