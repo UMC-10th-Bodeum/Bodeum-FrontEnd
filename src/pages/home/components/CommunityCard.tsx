@@ -30,7 +30,7 @@ export default function CommunityCard({
   return (
     <button
       onClick={onClick}
-      className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left"
+      className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left cursor-pointer"
     >
       <div className="mb-[8px] flex items-center justify-between">
         <div className="flex items-center gap-2">
