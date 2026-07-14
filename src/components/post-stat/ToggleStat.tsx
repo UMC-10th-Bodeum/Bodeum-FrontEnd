@@ -55,7 +55,7 @@ function ToggleStat({
             className={`inline-flex h-5 items-center gap-1 cursor-pointer ${colorClassName}`}
         >
             <span className="pointer-events-none inline-flex shrink-0 items-center">{icon}</span>
-            {/* 숫자 폰트가 아이콘보다 아래로 보여 1px 위로 광학 보정 */}
+            {/* 숫자 폰트가 아이콘보다 아래로 보여 0.5px 위로 광학 보정 */}
             <span className="inline-flex translate-y-[-0.5px] items-center text-h4-list leading-none">
                 {count.toLocaleString()}
             </span>
