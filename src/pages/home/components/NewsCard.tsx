@@ -1,6 +1,6 @@
 import ImagePlaceholder from "@/assets/images/news_placeholder.svg";
 import PostTag from "@/components/PostTag";
-import ViewIcon from "@/assets/icons/View.svg?react";
+import ViewIcon from "@/assets/icons/Views.svg?react";
 
 interface NewsCardProps {
   title: string;

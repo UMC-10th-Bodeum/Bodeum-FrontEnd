@@ -1,6 +1,6 @@
 import HeartIcon from "@/assets/icons/HeartDisabled.svg?react";
 import TalkIcon from "@/assets/icons/Community.svg?react"
-import ViewIcon from "@/assets/icons/View.svg?react";
+import ViewIcon from "@/assets/icons/Views.svg?react";
 import RegionLabel from "@/components/RegionLabel";
 
 interface PostListItemProps {
