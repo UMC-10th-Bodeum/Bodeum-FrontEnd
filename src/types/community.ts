@@ -1,6 +1,8 @@
+import type { DiagnosisType } from "./diagnosis";
+
 export interface CommunityPost {
   id: number;
-  diagnosis: string;
+  diagnosis: DiagnosisType;
   author: string;
   createdAt: string;
   title: string;
