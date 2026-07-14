@@ -4,6 +4,7 @@ import MainButton from "@/components/MainButton";
 import PostSection from "./PostSection";
 import { postList } from "@/mocks/post";
 import PostListItem from "./PostListItem";
+import { useNavigate } from "react-router-dom";
 
 export interface CommunityPost {
   id: number;
@@ -16,28 +17,16 @@ export interface CommunityPost {
   comments: number;
   views: number;
 }
-// id: 1,
-//     diagnosis: "AUTISM",
-//     author: "익명 부모님",
-//     createdAt: "2시간 전",
-//     title: "ABA 치료 6개월째, 드디어 눈맞춤이 됐어요 😭",
-//     content:
-//       "처음엔 정말 막막했는데 여기 선배 부모님들 덕분에 ABA 치료사와 연결하고 꾸준히 했더니 드디어 반응이 생겼습니다.",
-//     likes: 142,
-//     comments: 38,
-//     views:
 
 interface CommunitySectionProps {
   posts: CommunityPost[];
-  onWrite?: () => void;
-  onMore?: () => void;
 }
 
 export default function CommunitySection({
-  posts,
-  onWrite,
-  onMore,
+  posts
 }: CommunitySectionProps) {
+  const navigate = useNavigate();
+
   return (
     <section className="w-full min-w-0 overflow-hidden">
       <div className="mt-[20px] mb-[12px] flex items-center justify-between">
@@ -49,8 +38,19 @@ export default function CommunitySection({
         </div>
 
         <div className="flex gap-[10px]">
-          <MainButton size="S" onClick={onWrite}>글쓰기</MainButton>
-          <MainButton size="S" stroke onClick={onMore}>전체보기</MainButton>
+          <MainButton
+            size="S"
+            onClick={() => navigate("/community/write")}
+          >
+            글쓰기
+          </MainButton>
+          <MainButton
+            size="S"
+            stroke
+            onClick={() => navigate("/community")}
+          >
+            전체보기
+          </MainButton>
         </div>
       </div>
 

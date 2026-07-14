@@ -58,8 +58,6 @@ export default function HomePage() {
       
       <CommunitySection
         posts={communityPosts}
-        onWrite={() => { }}
-        onMore={() => { }}
       />
     </div>
   );
