@@ -1,4 +1,4 @@
-import ImagePlaceholder from "@/assets/images/news_placeholder.svg";
+import ImagePlaceholder from "@/assets/images/news-img.svg";
 import PostTag from "@/components/PostTag";
 import ViewIcon from "@/assets/icons/Views.svg?react";
 
