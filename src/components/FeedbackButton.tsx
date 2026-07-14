@@ -92,9 +92,12 @@ export default function FeedbackButton({
             className={`
                 self-start
                 inline-flex items-center justify-center
-                border-b border-transparent pb-0.5
-                enabled:hover:border-current
-                ${isIconVariant ? "w-5 h-5" : "h-5 gap-1 text-h4-list"}
+                cursor-pointer disabled:cursor-not-allowed
+                ${
+                    isIconVariant
+                        ? "w-5 h-5"
+                        : "h-5 gap-1 border-b border-transparent pb-0.5 text-h4-list enabled:hover:border-current"
+                }
                 ${selected ? "text-main-400" : "text-background-500"}
                 ${className ?? ""}
             `}
@@ -102,7 +105,7 @@ export default function FeedbackButton({
             <Icon aria-hidden="true" className="shrink-0 w-5 h-5" />
 
             {!isIconVariant && (
-                <span>
+                <span className="leading-none">
                     {buttonLabel}
                     {shouldShowCount && ` ${count}`}
                 </span>
