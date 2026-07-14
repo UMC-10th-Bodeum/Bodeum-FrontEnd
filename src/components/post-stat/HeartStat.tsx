@@ -17,7 +17,6 @@ function HeartStat({ count, isActive = false, onClick }: HeartStatProps) {
             isActive={isActive}
             count={count}
             onClick={onClick}
-            gapClassName="gap-[1.5px]"
             outlineIcon={<HeartDisabledIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
             filledIcon={<HeartIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
             pressedIcon={<HeartPressedIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
