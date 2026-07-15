@@ -6,7 +6,7 @@ import {
 interface InfoCategoryProps {
   type: InfoCategoryType;
   count: number;
-  onClick?: () => void;
+  onClick: () => void;
 }
 
 export default function InfoCategoryCard({

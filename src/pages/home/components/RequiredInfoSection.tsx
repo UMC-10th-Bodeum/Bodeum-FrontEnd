@@ -27,6 +27,7 @@ export default function RequiredInfoSection() {
             key={type}
             type={type}
             count={235}
+            onClick={()=>{}}
           />
         ))}
       </div>
