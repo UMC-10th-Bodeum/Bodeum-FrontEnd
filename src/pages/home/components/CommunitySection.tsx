@@ -1,22 +1,10 @@
-import type { DiagnosisType } from "@/types/diagnosis";
 import CommunityCard from "./CommunityCard";
 import MainButton from "@/components/MainButton";
 import PostSection from "./PostSection";
 import { postList } from "@/mocks/post";
 import PostListItem from "./PostListItem";
 import { useNavigate } from "react-router-dom";
-
-export interface CommunityPost {
-  id: number;
-  diagnosis: DiagnosisType;
-  author: string;
-  createdAt: string;
-  title: string;
-  content: string;
-  likes: number;
-  comments: number;
-  views: number;
-}
+import type { CommunityPost } from "@/types/community"
 
 interface CommunitySectionProps {
   posts: CommunityPost[];
