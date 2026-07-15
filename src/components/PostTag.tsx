@@ -7,7 +7,7 @@ type PostTagProps =
   }
   | {
     type: "ETC";
-    label: string;
+    label?: string;
   };
 
 export default function PostTag(props: PostTagProps) {
@@ -20,7 +20,7 @@ export default function PostTag(props: PostTagProps) {
 
   return (
     <span
-      className={`inline-flex h-[18px] items-center justify-center rounded-[100px] px-[8px] text-body-label ${className}`}
+      className={`shrink-0 inline-flex h-[18px] items-center justify-center rounded-[100px] px-[8px] text-body-label ${className}`}
     >
       {label}
     </span>

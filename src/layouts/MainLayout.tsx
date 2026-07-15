@@ -13,7 +13,7 @@ export default function MainLayout() {
     <div className="flex h-screen">
       <SideBar />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         {header === "back" ? <BackTopBar /> : <SearchTopBar />}
 
         <main className="flex-1 overflow-y-auto">

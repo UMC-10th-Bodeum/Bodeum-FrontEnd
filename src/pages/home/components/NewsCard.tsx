@@ -1,6 +1,6 @@
-import ImagePlaceholder from "@/assets/images/news_placeholder.svg";
+import ImagePlaceholder from "@/assets/images/news-img.svg";
 import PostTag from "@/components/PostTag";
-import ViewIcon from "@/assets/icons/View.svg?react";
+import ViewIcon from "@/assets/icons/Views.svg?react";
 
 interface NewsCardProps {
   title: string;
@@ -24,7 +24,7 @@ export default function NewsCard({
   return (
     <button
       onClick={onClick}
-      className="w-[210px] overflow-hidden rounded-[8px] border border-background-250 bg-white text-left cursor-pointer"
+      className="shrink-0 w-[210px] overflow-hidden rounded-[8px] border border-background-250 bg-white text-left cursor-pointer"
     >
       <img
         src={thumbnail || ImagePlaceholder}

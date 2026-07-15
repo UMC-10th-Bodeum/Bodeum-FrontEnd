@@ -13,6 +13,7 @@ export const postList: Post[] = [
     title: "언어치료 프로그램 이용자 모집",
     region: "부산 수영구",
     likes: 142,
+    talks: 38,
     views: 1204,
   },
   {
@@ -20,6 +21,7 @@ export const postList: Post[] = [
     title: "놀이치료 참여 아동 모집",
     region: "서울 강남구",
     likes: 89,
+    talks: 38,
     views: 950,
   },
   {

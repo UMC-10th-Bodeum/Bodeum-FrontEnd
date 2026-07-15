@@ -28,7 +28,7 @@ export default function SideNavItem({
         onClick={onClick}
         disabled={disabled}
         className={`
-          flex w-full items-center justify-between rounded-[10px] px-[15px] py-[9.5px] transition-colors text-h3-category-sub
+          flex w-full items-center justify-between rounded-[10px] px-[15px] py-[9.5px] transition-colors text-h3-category-sub cursor-pointer
           ${active
             ? "bg-main-150 text-main-400"
             : `

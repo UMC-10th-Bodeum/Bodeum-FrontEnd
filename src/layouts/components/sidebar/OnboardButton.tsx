@@ -14,7 +14,7 @@ export default function OnboardButton({
   disabled = false,
 }: OnboardButtonProps) {
   const baseStyle =
-    "w-[148px] py-[5px] rounded-[8px] text-h6 transition-all duration-200";
+    "w-full py-[5px] rounded-[8px] text-h6 transition-all duration-200 cursor-pointer";
 
   const variantStyle =
     variant === "primary"
