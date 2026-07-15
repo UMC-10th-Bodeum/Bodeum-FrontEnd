@@ -51,7 +51,7 @@ export default function UserSection({
         </div>
       </div>
 
-      <div className="px-[16px] pb-[12px]">
+      <div className="px-[8px] pb-[12px]">
         <OnboardButton
           variant={isGuest ? "primary" : "secondary"}
           onClick={onButtonClick}
