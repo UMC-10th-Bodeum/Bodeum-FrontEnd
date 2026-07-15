@@ -6,7 +6,7 @@ interface ViewStatProps {
     showLabel?: boolean;
 }
 
-function ViewStat({ count, showLabel = true }: ViewStatProps) {
+function ViewStat({ count, showLabel = false }: ViewStatProps) {
     return (
         <StatItem
             icon={<ViewsIcon className="h-3 w-3" aria-hidden="true" />}

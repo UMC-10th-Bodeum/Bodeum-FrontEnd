@@ -6,7 +6,7 @@ interface CommentStatProps {
     showLabel?: boolean;
 }
 
-function CommentStat({ count, showLabel = true }: CommentStatProps) {
+function CommentStat({ count, showLabel = false }: CommentStatProps) {
     return (
         <StatItem
             icon={<CommunityIcon className="h-3 w-3" aria-hidden="true" />}

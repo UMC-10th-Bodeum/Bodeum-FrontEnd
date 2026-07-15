@@ -6,10 +6,10 @@ interface DateStatProps {
     showLabel?: boolean;
 }
 
-function DateStat({ date, showLabel = true }: DateStatProps) {
+function DateStat({ date, showLabel = false }: DateStatProps) {
     return (
         <StatItem
-            icon={<UpdateAtIcon className="h-[13px] w-[13px]" aria-hidden="true" />}
+            icon={<UpdateAtIcon className="h-3 w-3" aria-hidden="true" />}
             label={showLabel ? "갱신" : undefined}
             value={date}
         />
