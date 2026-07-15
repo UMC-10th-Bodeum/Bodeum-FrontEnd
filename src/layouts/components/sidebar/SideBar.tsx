@@ -21,18 +21,18 @@ export default function SideBar() {
 
       <div className="mt-auto border-t border-background-250 px-[16px]">
         <div className="mb-[16px] pt-[12px] flex text-body-sub text-background-500">
-          <button type="button" onClick={() => {/* TODO: 개인정보처리방침 페이지 이동 */}}>
+          <button type="button" className="cursor-pointer" onClick={() => {/* TODO: 개인정보처리방침 페이지 이동 */}}>
             개인정보처리방침
           </button>
 
           <span className="mx-[4px]">|</span>
 
-          <button type="button" onClick={() => {/* TODO: 공공 데이터 페이지 이동 */}}>
+          <button type="button" className="cursor-pointer" onClick={() => {/* TODO: 공공 데이터 페이지 이동 */}}>
             공공 데이터
           </button>
         </div>
 
-        <button className="flex items-center pb-[23px] gap-2 text-h6 text-background-500">
+        <button className="flex items-center pb-[23px] gap-2 text-h6 text-background-500 cursor-pointer">
           <ExportIcon />
           로그아웃
         </button>
