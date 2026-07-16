@@ -6,14 +6,18 @@ import CategoryChips from "./components/CategoryChips";
 
 export default function InfoPage() {
   const [searchParams] = useSearchParams();
-
-  const parentCategory =
-    (searchParams.get("category") as ParentCategory) ?? "INSTITUTION";
-
+  
+  const categoryParam = searchParams.get("category");
+  const parentCategory = (categoryParam && categoryParam in infoSubCategoryMap)
+    ? (categoryParam as ParentCategory)
+    : "INSTITUTION";
   const [subCategory, setSubCategory] = useState<string | null>(null);
 
   useEffect(() => {
-    setSubCategory(infoSubCategoryMap[parentCategory][0].value);
+    const subCategories = infoSubCategoryMap[parentCategory];
+    if (subCategories && subCategories.length > 0) {
+      setSubCategory(subCategories[0].value);
+    }
   }, [parentCategory]);
   
   return (
@@ -25,4 +29,4 @@ export default function InfoPage() {
       />
     </div>
   );
-}
+};
