@@ -1,17 +1,18 @@
 import InfoCategoryCard from "@/components/InfoCategoryCard";
 import { useNavigate } from "react-router-dom";
+import type { ParentCategory } from "@/types/info";
 
-const categories = [
+const categories: ParentCategory[] = [
   "INSTITUTION",
   "HOSPITAL",
   "WELFARE",
   "EMPLOYMENT",
   "EDUCATION",
-] as const;
+];
 
 export default function RequiredInfoSection() {
   const navigate = useNavigate();
-  
+
   return (
     <section className="overflow-hidden rounded-[10px] bg-background-200 px-[20px] py-[19.6px]">
       <div className="mb-[12px]">
