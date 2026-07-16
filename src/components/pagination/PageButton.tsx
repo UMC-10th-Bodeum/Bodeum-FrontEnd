@@ -13,6 +13,7 @@ export default function PageButton({
 }: PageButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={[

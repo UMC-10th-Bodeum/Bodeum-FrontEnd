@@ -14,6 +14,7 @@ export default function ArrowButton({
 }: ArrowButtonProps) {
   return (
     <button
+      type="button"
       disabled={disabled}
       onClick={onClick}
       className={`
