@@ -3,8 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import type { ParentCategory } from "@/types/info";
 import { infoSubCategoryMap } from "@/constants/infoCategory";
 import CategoryChips from "./components/CategoryChips";
+import Pagination from "@/components/pagination/Pagination";
 
 export default function InfoPage() {
+  const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   
   const categoryParam = searchParams.get("category");
@@ -26,6 +28,12 @@ export default function InfoPage() {
         parentCategory={parentCategory}
         subCategory={subCategory}
         onChange={setSubCategory}
+      />
+
+      <Pagination
+        currentPage={page}
+        totalPages={120}
+        onChange={setPage}
       />
     </div>
   );
