@@ -13,13 +13,15 @@ export default function MainLayout() {
     <div className="flex h-screen">
       <SideBar />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-x-auto">
         {header === "back" ? <BackTopBar /> : <SearchTopBar />}
 
-        <main className="flex-1 overflow-y-auto">
-          <Outlet />
+        <main className="flex-1 overflow-auto">
+          <div className="min-w-[1227px]">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
-  )
+  );
 }
