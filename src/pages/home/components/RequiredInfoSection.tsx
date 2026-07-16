@@ -1,4 +1,5 @@
 import InfoCategoryCard from "@/components/InfoCategoryCard";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   "INSTITUTION",
@@ -9,6 +10,8 @@ const categories = [
 ] as const;
 
 export default function RequiredInfoSection() {
+  const navigate = useNavigate();
+  
   return (
     <section className="overflow-hidden rounded-[10px] bg-background-200 px-[20px] py-[19.6px]">
       <div className="mb-[12px]">
@@ -27,7 +30,7 @@ export default function RequiredInfoSection() {
             key={type}
             type={type}
             count={235}
-            onClick={()=>{}}
+            onClick={() => navigate(`/info?category=${type}`)}
           />
         ))}
       </div>
