@@ -15,7 +15,7 @@ export const diagnosisMap: Record<
     label: "지적장애",
     className: "bg-[#FDF2F8] text-[#B01554]",
   },
-  CEREBRAL_PALSY: {
+  BRAIN_LESION: {
     label: "뇌병변장애",
     className: "bg-[#FDF6D6] text-[#AD531B]",
   },

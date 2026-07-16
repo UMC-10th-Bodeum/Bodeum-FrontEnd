@@ -27,7 +27,7 @@ export const communityPosts: CommunityPost[] = [
   },
   {
     id: 3,
-    diagnosis: "CEREBRAL_PALSY",
+    diagnosis: "BRAIN_LESION",
     author: "익명 부모님",
     createdAt: "3시간 전",
     title: "재활치료 병원 추천 부탁드립니다.",
@@ -39,7 +39,7 @@ export const communityPosts: CommunityPost[] = [
   },
   {
     id: 4,
-    diagnosis: "CEREBRAL_PALSY",
+    diagnosis: "BRAIN_LESION",
     author: "익명 부모님",
     createdAt: "3시간 전",
     title: "재활치료 병원 추천 부탁드립니다.",
@@ -51,7 +51,7 @@ export const communityPosts: CommunityPost[] = [
   },
   {
     id: 5,
-    diagnosis: "CEREBRAL_PALSY",
+    diagnosis: "BRAIN_LESION",
     author: "익명 부모님",
     createdAt: "3시간 전",
     title: "재활치료 병원 추천 부탁드립니다.",

@@ -1,14 +1,12 @@
 import type { ButtonHTMLAttributes } from "react";
-import {
-  infoCategoryMap,
-  type InfoCategoryType,
-} from "@/constants/infoCategory";
+import type { ParentCategory } from "@/types/info";
 
 type CategoryButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   "children" | "disabled" | "aria-pressed" | "data-state"
 > & {
-  category: InfoCategoryType;
+  category: ParentCategory;
+  label: string;
   selected?: boolean;
 };
 
@@ -39,7 +37,7 @@ const categoryButtonClassMap = {
     pressedRing: "active:ring-sub-purple",
   },
 } satisfies Record<
-  InfoCategoryType,
+  ParentCategory,
   {
     selectedBg: string;
     pressedText: string;
@@ -52,12 +50,12 @@ const joinClassNames = (...classNames: Array<string | false | undefined>) =>
 
 export default function CategoryButton({
   category,
+  label,
   selected = false,
   className,
   type = "button",
   ...buttonProps
 }: CategoryButtonProps) {
-  const { label } = infoCategoryMap[category];
   const categoryButton = categoryButtonClassMap[category];
 
   return (
@@ -81,7 +79,7 @@ export default function CategoryButton({
         className,
       )}
     >
-      {label} 전체
+      {label}
     </button>
   );
 }
