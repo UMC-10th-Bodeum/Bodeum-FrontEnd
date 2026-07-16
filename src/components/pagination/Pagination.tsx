@@ -46,13 +46,6 @@ export default function Pagination({
   onChange,
 }: PaginationProps) {
   const items = getPaginationItems(currentPage, totalPages);
-  console.log(
-  items.map((item, index) => ({
-    index,
-    item,
-    key: typeof item === "string" ? `dots-${index}` : `${item}-${index}`,
-  })),
-);
 
   return (
     <div className="flex items-center justify-center gap-2">
