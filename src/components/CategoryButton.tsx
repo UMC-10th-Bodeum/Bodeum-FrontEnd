@@ -1,5 +1,4 @@
 import type { ButtonHTMLAttributes } from "react";
-import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 
 type CategoryButtonProps = Omit<
@@ -7,6 +6,7 @@ type CategoryButtonProps = Omit<
   "children" | "disabled" | "aria-pressed" | "data-state"
 > & {
   category: ParentCategory;
+  label: string;
   selected?: boolean;
 };
 
@@ -50,12 +50,12 @@ const joinClassNames = (...classNames: Array<string | false | undefined>) =>
 
 export default function CategoryButton({
   category,
+  label,
   selected = false,
   className,
   type = "button",
   ...buttonProps
 }: CategoryButtonProps) {
-  const { label } = infoCategoryMap[category];
   const categoryButton = categoryButtonClassMap[category];
 
   return (
@@ -79,7 +79,7 @@ export default function CategoryButton({
         className,
       )}
     >
-      {label} 전체
+      {label}
     </button>
   );
 }

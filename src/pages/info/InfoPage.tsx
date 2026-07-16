@@ -1,15 +1,28 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import type { ParentCategory } from "@/types/info";
+import CategoryChips from "./components/categoryChips";
+import { infoSubCategoryMap } from "@/constants/infoCategory";
 
 export default function InfoPage() {
+  const [searchParams] = useSearchParams();
+
+  const parentCategory =
+    (searchParams.get("category") as ParentCategory) ?? "INSTITUTION";
+
+  const [subCategory, setSubCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSubCategory(infoSubCategoryMap[parentCategory][0].value);
+  }, [parentCategory]);
+  
   return (
-    <div className="flex min-h-screen flex-col px-[32px] py-[20px] bg-background-100 gap-[18px]">
-      <h1 className="text-h5-bold text-gray-900">Infomation</h1>
-      <Link
-        to="/info/HOSPITAL/1"
-        className="w-fit rounded-md bg-background-300 px-4 py-2 text-white"
-      >
-        병원 상세로 이동 (dummy)
-      </Link>
+    <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
+      <CategoryChips
+        parentCategory={parentCategory}
+        subCategory={subCategory}
+        onChange={setSubCategory}
+      />
     </div>
-  )
+  );
 }
