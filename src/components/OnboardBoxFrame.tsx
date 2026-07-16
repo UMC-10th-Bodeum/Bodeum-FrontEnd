@@ -32,6 +32,10 @@ type OnboardBoxFrameBaseProps = {
   showClose?: boolean;
   className?: string;
   ariaLabelledby?: string;
+  showOverlay?: boolean;
+  overlayClassName?: string;
+  leftButtonDisabled?: boolean;
+  rightButtonDisabled?: boolean;
   onClose?: MouseEventHandler<HTMLButtonElement>;
   onRightButtonClick?: MouseEventHandler<HTMLButtonElement>;
 };
@@ -120,6 +124,11 @@ function CloseButton({
 }
 
 export default function OnboardBoxFrame(props: OnboardBoxFrameProps) {
+  const {
+    leftButtonDisabled = false,
+    rightButtonDisabled = false,
+    showOverlay = true,
+  } = props;
   const rightButtonColor = props.rightButtonColor ?? 'main-400';
 
   const onboardBox = (
@@ -142,6 +151,7 @@ export default function OnboardBoxFrame(props: OnboardBoxFrameProps) {
           <div className="min-w-0 flex-1">
             <MainButton
               size="M"
+              disabled={leftButtonDisabled}
               className={leftButtonClassName}
               onClick={props.onLeftButtonClick}
             >
@@ -152,9 +162,11 @@ export default function OnboardBoxFrame(props: OnboardBoxFrameProps) {
         <div className="min-w-0 flex-1">
           <MainButton
             size={props.buttonCount === 1 ? 'L' : 'M'}
+            disabled={rightButtonDisabled}
             className={joinClassNames(
               '!w-full',
-              rightButtonColorClassNames[rightButtonColor],
+              !rightButtonDisabled &&
+                rightButtonColorClassNames[rightButtonColor],
             )}
             onClick={props.onRightButtonClick}
           >
@@ -167,7 +179,14 @@ export default function OnboardBoxFrame(props: OnboardBoxFrameProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-background-600/50" />
+      {showOverlay && (
+        <div
+          className={joinClassNames(
+            'fixed inset-0 z-40 bg-[rgba(0,0,0,0.5)]',
+            props.overlayClassName,
+          )}
+        />
+      )}
       {onboardBox}
     </>
   );

@@ -54,6 +54,15 @@ const dropdownVariantClass: Record<SelectVariant, string> = {
     S: "rounded-[5px]",
 };
 
+const dropdownMaxHeight: Record<SelectVariant, number> = {
+    L: 240,
+    S: 200,
+};
+
+const minDropdownMaxHeight = 80;
+const dropdownViewportPadding = 16;
+const dropdownGap = 10;
+
 const optionBaseClass = "flex w-full items-center text-left transition-colors";
 
 const optionVariantClass: Record<SelectVariant, string> = {
@@ -77,6 +86,8 @@ export function Select({
     className,
 }: SelectProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [openDirection, setOpenDirection] = useState<"bottom" | "top">("bottom");
+    const [maxHeight, setMaxHeight] = useState(dropdownMaxHeight[variant]);
     const rootRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -89,6 +100,42 @@ export function Select({
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        function updateDropdownSize() {
+            if (!rootRef.current) {
+                return;
+            }
+
+            const rect = rootRef.current.getBoundingClientRect();
+            const availableBottom =
+                window.innerHeight - rect.bottom - dropdownGap - dropdownViewportPadding;
+            const availableTop = rect.top - dropdownGap - dropdownViewportPadding;
+            const shouldOpenTop =
+                availableBottom < minDropdownMaxHeight && availableTop > availableBottom;
+            const availableHeight = shouldOpenTop ? availableTop : availableBottom;
+            const nextMaxHeight = Math.max(
+                minDropdownMaxHeight,
+                Math.min(dropdownMaxHeight[variant], availableHeight),
+            );
+
+            setOpenDirection(shouldOpenTop ? "top" : "bottom");
+            setMaxHeight(nextMaxHeight);
+        }
+
+        updateDropdownSize();
+        window.addEventListener("resize", updateDropdownSize);
+        window.addEventListener("scroll", updateDropdownSize, true);
+
+        return () => {
+            window.removeEventListener("resize", updateDropdownSize);
+            window.removeEventListener("scroll", updateDropdownSize, true);
+        };
+    }, [isOpen, variant]);
 
     const isPlaceholder = !value;
     const selectedLabel = options.find((opt) => opt.value === value)?.label ?? placeholder;
@@ -106,6 +153,8 @@ export function Select({
                   triggerPlaceholderClass[variant][String(isPlaceholder) as "true" | "false"],
               ].join(" "),
     ].join(" ");
+    const dropdownPositionClass =
+        openDirection === "top" ? "bottom-full mb-[10px]" : "top-full mt-[10px]";
 
     return (
         <div ref={rootRef} className={`relative inline-block ${className ?? ""}`}>
@@ -128,7 +177,8 @@ export function Select({
             {isOpen && (
                 <ul
                     role="listbox"
-                    className={`absolute z-10 mt-[10px] w-full overflow-hidden border-[0.8px] border-main-100 bg-background-100 py-2 ${dropdownVariantClass[variant]}`}
+                    style={{ maxHeight }}
+                    className={`absolute z-10 w-full overflow-x-hidden overflow-y-auto overscroll-contain border-[0.8px] border-main-100 bg-background-100 py-2 ${dropdownPositionClass} ${dropdownVariantClass[variant]}`}
                 >
                     {options.map((opt) => (
                         <li key={opt.value}>
