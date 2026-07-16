@@ -1,9 +1,12 @@
 import ExportIcon from "@/assets/icons/Export.svg?react";
 import Logo from "@/assets/icons/Logo_kr.svg?react";
+import { useNavigate } from "react-router-dom";
 import SideNav from "./SideNav";
 import UserSection from "./UserSection";
 
 export default function SideBar() {
+  const navigate = useNavigate();
+
   return (
     <aside className="flex h-screen flex-col bg-white">
       <div className="h-[60px] py-[18px] flex items-center justify-center border-b border-background-250">
@@ -12,7 +15,7 @@ export default function SideBar() {
       
       <div className="flex flex-1 flex-col border-r border-background-250">
       <div className="px-4 pt-[20px]">
-        <UserSection type="guest" />
+        <UserSection type="guest" onButtonClick={() => navigate("/auth")} />
 
         <div className="mt-[18px]">
           <SideNav />

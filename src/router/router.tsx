@@ -4,6 +4,7 @@ import HomePage from "../pages/home/HomePage";
 import InfoPage from "@/pages/info/InfoPage";
 import DetailLayout from "@/layouts/DetailLayout";
 import InfoDetailPage from "@/pages/info/InfoDetailPage";
+import AuthPage from "@/pages/auth/AuthPage";
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ export const router = createBrowserRouter([
         element: <InfoPage />,
       },
     ],
+  },
+  {
+    path: "/auth",
+    element: <AuthPage />,
   },
   {
     element: <DetailLayout />,
