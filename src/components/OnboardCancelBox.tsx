@@ -29,7 +29,7 @@ export default function OnboardCancelBox({
       buttonCount={2}
       leftButtonText={leftButtonText}
       rightButtonText={rightButtonText}
-      rightButtonColor="sub-red"
+      rightButtonColor="main-400"
       className={className}
       ariaLabelledby={titleId}
       onLeftButtonClick={onLeftButtonClick}

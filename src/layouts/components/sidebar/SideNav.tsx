@@ -41,7 +41,7 @@ export default function SideNav() {
         label="정보"
         active={pathname.startsWith("/info")}
         expanded={pathname.startsWith("/info")}
-        onClick={() => navigate("/info")}
+        onClick={() => navigate("/info?category=INSTITUTION")}
       >
         <div className="flex flex-col gap-[12px]">
           {Object.entries(infoCategoryMap).map(([key, value]) => (

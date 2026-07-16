@@ -2,10 +2,8 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
-import {
-  infoCategoryMap,
-  type InfoCategoryType,
-} from "@/constants/infoCategory"
+import { infoCategoryMap } from "@/constants/infoCategory";
+import type { ParentCategory } from "@/types/info";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -13,7 +11,7 @@ export default function InfoDetailPage() {
   const navigate = useNavigate();
 
   const infoCategory = category
-    ? infoCategoryMap[category as InfoCategoryType]
+    ? infoCategoryMap[category as ParentCategory]
     : undefined;
 
   // useEffect(() => {
@@ -22,7 +20,7 @@ export default function InfoDetailPage() {
 
   //     setBreadcrumb([
   //       "정보",
-  //       infoCategoryMap[category as InfoCategoryType].label,
+  //       infoCategoryMap[category as ParentCategory].label,
   //       data.name,
   //     ]);
   //   }
