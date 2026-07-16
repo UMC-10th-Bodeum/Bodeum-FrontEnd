@@ -23,7 +23,7 @@ export default function UserSection({
 
   return (
     <div className="rounded-[8px] border border-background-250 bg-background-100">
-      <div className="flex px-[8px] py-[12px]">
+      <div className="flex w-[181px] px-[8px] py-[12px]">
         <ProfileIcon className="w-[30px] h-[30px] mr-[9px]" />
 
         <div className="flex flex-col mr-[12px]">
