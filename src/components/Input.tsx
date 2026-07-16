@@ -4,6 +4,7 @@ import SearchIcon from "@/assets/icons/Search.svg?react";
 interface InputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  id?: string;
   placeholder?: string;
   search?: boolean;
   disabled?: boolean;
@@ -17,6 +18,7 @@ interface InputProps {
 export default function Input({
   value,
   onChange,
+  id,
   placeholder,
   search = false,
   disabled = false,
@@ -54,6 +56,7 @@ export default function Input({
       )}
 
       <input
+        id={id}
         value={value}
         onChange={(e) => {
           onChange(e);

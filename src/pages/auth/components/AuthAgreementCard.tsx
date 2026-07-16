@@ -94,7 +94,7 @@ export default function AuthAgreementCard({ onSubmit }: AuthAgreementCardProps) 
         rightButtonText="다음"
         showOverlay={false}
         rightButtonDisabled={!requiredChecked}
-        className="!w-[624px] !p-[44px] shadow-[0_0_15px_rgb(102_128_155_/_0.1)]"
+        className="w-[624px]! p-[44px]! shadow-[0_0_15px_rgb(102_128_155_/_0.1)] max-sm:px-[24px]! max-sm:py-[32px]!"
         ariaLabelledby={titleId}
         onRightButtonClick={onSubmit}
       >

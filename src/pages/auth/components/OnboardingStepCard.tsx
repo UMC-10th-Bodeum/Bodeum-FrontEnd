@@ -35,9 +35,12 @@ type OnboardingStepCardProps = {
 type FormGroupProps = {
   label: ReactNode;
   children: ReactNode;
+  htmlFor?: string;
+  as?: "div" | "fieldset";
 };
 
 type LimitedTextInputProps = {
+  id: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
@@ -393,10 +396,32 @@ const guardianRoleOptions = [
   "[지혜 조력자] : 나만의 노하우를 적극적으로 나누고 싶은 단계",
 ];
 
-function FormGroup({ label, children }: FormGroupProps) {
+const formLabelClassName = "text-h3-onboard text-background-500";
+
+function FormGroup({
+  label,
+  children,
+  htmlFor,
+  as = "div",
+}: FormGroupProps) {
+  if (as === "fieldset") {
+    return (
+      <fieldset className="m-0 flex w-full min-w-0 flex-col items-start gap-[12px] border-0 p-0 py-[4px]">
+        <legend className={formLabelClassName}>{label}</legend>
+        {children}
+      </fieldset>
+    );
+  }
+
   return (
     <div className="flex w-full flex-col items-start gap-[12px] py-[4px]">
-      <div className="text-h3-onboard text-background-500">{label}</div>
+      {htmlFor ? (
+        <label htmlFor={htmlFor} className={formLabelClassName}>
+          {label}
+        </label>
+      ) : (
+        <div className={formLabelClassName}>{label}</div>
+      )}
       {children}
     </div>
   );
@@ -423,20 +448,22 @@ function StepHeader({
   highlight,
   titleAfter,
   description,
+  titleId,
 }: {
   titleBefore: string;
   highlight: string;
   titleAfter: string;
   description: string;
+  titleId: string;
 }) {
   return (
     <div className="flex flex-col gap-[8px]">
-      <h1 className="text-h1-onboard text-background-600">
+      <h1 id={titleId} className="text-h1-onboard text-background-600">
         {titleBefore}
         <span className="text-main-500">{highlight}</span>
         {titleAfter}
       </h1>
-      <p className="w-[536px] text-h2-onboard text-background-500">
+      <p className="w-full max-w-[536px] text-h2-onboard text-background-500">
         {description}
       </p>
     </div>
@@ -457,6 +484,7 @@ function SkipButton({ onClick }: { onClick: () => void }) {
 }
 
 function LimitedTextInput({
+  id,
   value,
   onChange,
   placeholder,
@@ -465,14 +493,15 @@ function LimitedTextInput({
   const length = Array.from(value).length;
 
   return (
-    <div className="relative w-[536px]">
+    <div className="relative w-full max-w-[536px]">
       <Input
+        id={id}
         value={value}
         onChange={(event) =>
           onChange(limitTextLength(event.target.value, maxLength))
         }
         placeholder={placeholder}
-        className="w-full !pr-[74px]"
+        className="w-full pr-[74px]!"
       />
       <span className="pointer-events-none absolute right-[20px] top-1/2 -translate-y-1/2 text-h6-list text-background-400">
         {length}/{maxLength}
@@ -491,6 +520,13 @@ export default function OnboardingStepCard({
   onSkip,
 }: OnboardingStepCardProps) {
   const titleId = useId();
+  const childNameId = useId();
+  const birthYearId = useId();
+  const birthMonthId = useId();
+  const childKeywordsId = useId();
+  const activityRegionId = useId();
+  const activityDistrictId = useId();
+  const guardianNicknameId = useId();
 
   const updateField = <K extends keyof OnboardingFormState>(
     key: K,
@@ -536,77 +572,72 @@ export default function OnboardingStepCard({
         : Boolean(form.guardianNickname.trim());
 
   const content = (
-    <div className="flex h-[560px] w-full flex-col items-start gap-[20px]">
+    <div className="flex h-[560px] w-full min-w-0 flex-col items-start gap-[20px]">
       <StepProgress activeStep={step} />
 
       {step === 1 && (
         <>
           <StepHeader
+            titleId={titleId}
             titleBefore="반갑습니다, 맞춤 정보를 위해 "
             highlight="아이"
             titleAfter="를 소개해 주세요!"
             description="아이의 연령과 상황에 꼭 맞는 복지·기관 정보를 정교하게 찾아드립니다"
           />
-          <FormGroup label="자녀 이름 또는 별명 (선택)">
+          <FormGroup label="자녀 이름 또는 별명 (선택)" htmlFor={childNameId}>
             <LimitedTextInput
+              id={childNameId}
               value={form.childName}
               onChange={(value) => updateField("childName", value)}
               placeholder="예: 우리 아이, 민준이"
               maxLength={nicknameMaxLength}
             />
           </FormGroup>
-          <FormGroup label="자녀 생년월*">
-            <div className="flex w-full gap-[12px]">
+          <FormGroup label="자녀 생년월*" as="fieldset">
+            <div className="flex w-full flex-wrap gap-[12px]">
               <Select
+                id={birthYearId}
                 variant="L"
                 value={form.birthYear}
                 options={yearOptions}
                 onChange={(value) => updateField("birthYear", value)}
                 placeholder="년도"
-                className="w-[262px]"
+                ariaLabel="자녀 생년월 년도"
+                className="min-w-[160px] flex-1"
               />
               <Select
+                id={birthMonthId}
                 variant="L"
                 value={form.birthMonth}
                 options={monthOptions}
                 onChange={(value) => updateField("birthMonth", value)}
                 placeholder="월"
-                className="w-[262px]"
+                ariaLabel="자녀 생년월 월"
+                className="min-w-[160px] flex-1"
               />
             </div>
           </FormGroup>
-          <FormGroup label="집중 케어 영역* (복수 선택 가능)">
-            <div className="flex w-full flex-col gap-[8px]">
-              <div className="flex gap-[13px]">
-                {careAreaOptions.slice(0, 5).map((option) => (
-                  <SelectableChip
-                    key={option}
-                    label={option}
-                    selected={form.careAreas.includes(option)}
-                    onClick={() => toggleListValue("careAreas", option)}
-                  />
-                ))}
-              </div>
-              <div className="flex gap-[13px]">
-                {careAreaOptions.slice(5).map((option) => (
-                  <SelectableChip
-                    key={option}
-                    label={option}
-                    selected={form.careAreas.includes(option)}
-                    onClick={() => toggleListValue("careAreas", option)}
-                  />
-                ))}
-              </div>
+          <FormGroup label="집중 케어 영역* (복수 선택 가능)" as="fieldset">
+            <div className="flex w-full flex-wrap gap-x-[13px] gap-y-[8px]">
+              {careAreaOptions.map((option) => (
+                <SelectableChip
+                  key={option}
+                  label={option}
+                  selected={form.careAreas.includes(option)}
+                  onClick={() => toggleListValue("careAreas", option)}
+                />
+              ))}
             </div>
           </FormGroup>
-          <FormGroup label="자녀 특징 키워드(선택)">
+          <FormGroup label="자녀 특징 키워드(선택)" htmlFor={childKeywordsId}>
             <Input
+              id={childKeywordsId}
               value={form.childKeywords}
               onChange={(event) =>
                 updateField("childKeywords", event.target.value)
               }
               placeholder="아이와 닮은 친구를 찾기 위한 키워드를 입력해주세요(소심함, 활발함, 소리 예민 등)"
-              className="w-[536px] [&_input::placeholder]:text-h3-onboard"
+              className="w-full max-w-[536px] [&_input::placeholder]:text-h3-onboard"
             />
           </FormGroup>
         </>
@@ -615,13 +646,14 @@ export default function OnboardingStepCard({
       {step === 2 && (
         <>
           <StepHeader
+            titleId={titleId}
             titleBefore="지금 보호자님에게 가장 필요한 "
             highlight="도움"
             titleAfter="은 무엇인가요?"
             description="선택하신 관심사와 활동 지역을 바탕으로 맞춤 정보가 세팅됩니다"
           />
-          <FormGroup label="가장 큰 관심사 (최대 3개 선택)*">
-            <div className="flex gap-[13px]">
+          <FormGroup label="가장 큰 관심사 (최대 3개 선택)*" as="fieldset">
+            <div className="flex w-full flex-wrap gap-[13px]">
               {interestOptions.map((option) => (
                 <SelectableChip
                   key={option}
@@ -632,9 +664,10 @@ export default function OnboardingStepCard({
               ))}
             </div>
           </FormGroup>
-          <FormGroup label="주 활동 지역*">
-            <div className="flex w-full gap-[12px]">
+          <FormGroup label="주 활동 지역*" as="fieldset">
+            <div className="flex w-full flex-wrap gap-[12px]">
               <Select
+                id={activityRegionId}
                 variant="L"
                 value={form.sido}
                 options={regionOptions}
@@ -642,16 +675,19 @@ export default function OnboardingStepCard({
                   onChange({ ...form, sido: value, district: "" })
                 }
                 placeholder="시/도"
-                className="w-[262px]"
+                ariaLabel="주 활동 지역 시/도"
+                className="min-w-[160px] flex-1"
               />
               <Select
+                id={activityDistrictId}
                 variant="L"
                 value={form.district}
                 options={districtOptions}
                 onChange={(value) => updateField("district", value)}
                 placeholder="구/군"
                 disabled={!form.sido || !districtRequired}
-                className="w-[262px]"
+                ariaLabel="주 활동 지역 구/군"
+                className="min-w-[160px] flex-1"
               />
             </div>
           </FormGroup>
@@ -661,21 +697,23 @@ export default function OnboardingStepCard({
       {step === 3 && (
         <>
           <StepHeader
+            titleId={titleId}
             titleBefore="보듬과 함께할 "
             highlight="보호자"
             titleAfter="님을 알려주세요"
             description="설정하신 커뮤니티 역할은 보호자님들의 신뢰 자산이 됩니다"
           />
-          <FormGroup label="보호자 닉네임*">
+          <FormGroup label="보호자 닉네임*" htmlFor={guardianNicknameId}>
             <LimitedTextInput
+              id={guardianNicknameId}
               value={form.guardianNickname}
               onChange={(value) => updateField("guardianNickname", value)}
               placeholder="예: 민준맘"
               maxLength={nicknameMaxLength}
             />
           </FormGroup>
-          <FormGroup label="보호자 유형(선택)">
-            <div className="flex gap-[13px]">
+          <FormGroup label="보호자 유형(선택)" as="fieldset">
+            <div className="flex w-full flex-wrap gap-[13px]">
               {guardianTypeOptions.map((option) => (
                 <SelectableChip
                   key={option}
@@ -691,7 +729,7 @@ export default function OnboardingStepCard({
               ))}
             </div>
           </FormGroup>
-          <FormGroup label="커뮤니티 역할 성향(선택)">
+          <FormGroup label="커뮤니티 역할 성향(선택)" as="fieldset">
             <div className="flex w-full flex-col items-start gap-[12px]">
               {guardianRoleOptions.map((option) => (
                 <SelectableChip
@@ -704,7 +742,8 @@ export default function OnboardingStepCard({
                       form.guardianRole === option ? "" : option,
                     )
                   }
-                  className="!w-[424px] !justify-start"
+                  buttonClassName="w-full max-w-[424px]"
+                  className="w-full! justify-start!"
                 />
               ))}
             </div>
@@ -715,7 +754,7 @@ export default function OnboardingStepCard({
   );
 
   const frameChildren = (
-    <div id={titleId} className="flex w-full flex-col gap-[44px]">
+    <div className="flex w-full min-w-0 flex-col gap-[44px]">
       {content}
       <div className="flex w-full justify-center">
         <SkipButton onClick={onSkip} />
@@ -731,7 +770,7 @@ export default function OnboardingStepCard({
         showClose
         showOverlay={false}
         rightButtonDisabled={!isComplete}
-        className="!w-[624px] !gap-[16px] !p-[44px]"
+        className="w-[624px]! gap-[16px]! p-[44px]! max-sm:px-[24px]! max-sm:py-[32px]!"
         ariaLabelledby={titleId}
         onClose={onClose}
         onRightButtonClick={onNext}
@@ -749,7 +788,7 @@ export default function OnboardingStepCard({
       showClose
       showOverlay={false}
       rightButtonDisabled={!isComplete}
-      className="!w-[624px] !gap-[16px] !p-[44px]"
+      className="w-[624px]! gap-[16px]! p-[44px]! max-sm:px-[24px]! max-sm:py-[32px]!"
       ariaLabelledby={titleId}
       onClose={onClose}
       onLeftButtonClick={onPrev}

@@ -69,7 +69,7 @@ export default function AuthPage() {
   return (
     <main
       className={[
-        "relative flex min-h-screen items-center justify-center overflow-hidden",
+        "relative flex min-h-screen items-center justify-center overflow-x-hidden overflow-y-auto px-[20px] py-[40px] max-sm:px-[16px] max-sm:py-[24px]",
         flow === "onboarding" ? "bg-background-500" : "bg-main-150",
       ].join(" ")}
     >
@@ -94,13 +94,13 @@ export default function AuthPage() {
       )}
 
       {modal === "cancel" && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
           <OnboardCancelBox
             title="온보딩을 중단하시겠어요?"
             description={`지금 종료하시면 작성 중이던 정보가 저장되지 않습니다.\n맞춤형 서비스 이용을 위한 기본 정보는 로그인 후\n[마이페이지 > 설정]에서 언제든 다시 작성하실 수 있습니다.`}
             leftButtonText="계속하기"
             rightButtonText="중단하기"
-            className="!z-[70]"
+            className="z-[70]!"
             onLeftButtonClick={() => setModal(null)}
             onRightButtonClick={goHome}
           />
@@ -108,13 +108,13 @@ export default function AuthPage() {
       )}
 
       {modal === "skip" && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
           <OnboardCancelBox
             title="온보딩을 건너뛰시겠어요?"
             description={`지금 종료하시면 작성 중이던 정보가 저장되지 않습니다.\n맞춤형 서비스 이용을 위한 기본 정보는 로그인 후\n[마이페이지 > 설정]에서 언제든 다시 작성하실 수 있습니다.`}
             leftButtonText="계속하기"
             rightButtonText="건너뛰기"
-            className="!z-[70]"
+            className="z-[70]!"
             onLeftButtonClick={() => setModal(null)}
             onRightButtonClick={completeOnboarding}
           />
