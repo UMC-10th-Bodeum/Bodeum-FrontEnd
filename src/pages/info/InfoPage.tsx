@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { ParentCategory } from "@/types/info";
-import CategoryChips from "./components/categoryChips";
 import { infoSubCategoryMap } from "@/constants/infoCategory";
+import CategoryChips from "./components/CategoryChips";
 
 export default function InfoPage() {
   const [searchParams] = useSearchParams();
