@@ -1,14 +1,12 @@
 import type { ButtonHTMLAttributes } from "react";
-import {
-  infoCategoryMap,
-  type InfoCategoryType,
-} from "@/constants/infoCategory";
+import { infoCategoryMap } from "@/constants/infoCategory";
+import type { ParentCategory } from "@/types/info";
 
 type CategoryButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   "children" | "disabled" | "aria-pressed" | "data-state"
 > & {
-  category: InfoCategoryType;
+  category: ParentCategory;
   selected?: boolean;
 };
 
@@ -39,7 +37,7 @@ const categoryButtonClassMap = {
     pressedRing: "active:ring-sub-purple",
   },
 } satisfies Record<
-  InfoCategoryType,
+  ParentCategory,
   {
     selectedBg: string;
     pressedText: string;

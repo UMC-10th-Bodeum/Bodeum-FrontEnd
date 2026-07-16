@@ -1,10 +1,8 @@
-import {
-  infoCategoryMap,
-  type InfoCategoryType,
-} from "@/constants/infoCategory";
+import { infoCategoryMap } from "@/constants/infoCategory";
+import type { ParentCategory } from "@/types/info";
 
 interface InfoCategoryProps {
-  type: InfoCategoryType;
+  type: ParentCategory;
   count: number;
   onClick: () => void;
 }
