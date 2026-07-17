@@ -58,7 +58,6 @@ interface InfoItemProps {
     scrapCount: number;
     isScrapped?: boolean;
     onClick?: () => void;
-    onNavigate?: () => void;
     onScrapClick?: () => void;
 }
 
@@ -73,7 +72,6 @@ export default function InfoItem({
     scrapCount,
     isScrapped = false,
     onClick,
-    onNavigate,
     onScrapClick,
 }: InfoItemProps) {
     const { label, bgColor, textColor } =
@@ -81,19 +79,14 @@ export default function InfoItem({
     const Icon = infoItemIconMap[type];
     const pressedBorderColor = infoItemPressedBorderMap[type];
     const iconSize = infoItemIconSizeMap[type];
-    const isClickable = Boolean(onClick || onNavigate);
-
-    const handleClick = () => {
-        onClick?.();
-        onNavigate?.();
-    };
+    const isClickable = Boolean(onClick);
 
     const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
         if (!isClickable) return;
 
         if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            handleClick();
+            onClick?.();
         }
     };
 
@@ -101,9 +94,9 @@ export default function InfoItem({
         <article
             role={isClickable ? "button" : undefined}
             tabIndex={isClickable ? 0 : undefined}
-            onClick={isClickable ? handleClick : undefined}
+            onClick={onClick}
             onKeyDown={handleKeyDown}
-            className={`flex h-[102px] w-[578px] items-center justify-between rounded-[10px] border border-background-250 bg-background-100 px-[20px] py-[12px] transition hover:shadow-[0.76px_1.51px_11.36px_0px_#00000026] ${pressedBorderColor} ${isClickable ? "cursor-pointer" : ""}`}
+            className={`flex h-[102px] w-full items-center justify-between rounded-[10px] border border-background-250 bg-background-100 px-[20px] py-[12px] transition hover:shadow-[0.76px_1.51px_11.36px_0px_#00000026] ${pressedBorderColor} ${isClickable ? "cursor-pointer" : ""}`}
         >
             <div className="flex min-w-0 flex-1 items-center gap-4">
                 <div className="flex h-[66px] w-[66px] shrink-0 items-center justify-center rounded-[10px] bg-main-100">
@@ -121,9 +114,11 @@ export default function InfoItem({
                     </div>
 
                     <p className="mt-1 truncate text-h6-list text-background-600">{address}</p>
-                    <p className="mt-0.5 truncate text-body-sub text-background-500">
-                        {services.join(" · ")}
-                    </p>
+                    {services.length > 0 && (
+                        <p className="mt-0.5 truncate text-body-sub text-background-500">
+                            {services.join(" · ")}
+                        </p>
+                    )}
                 </div>
             </div>
 
