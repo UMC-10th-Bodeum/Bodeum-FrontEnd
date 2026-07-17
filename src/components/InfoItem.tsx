@@ -10,7 +10,7 @@ import InfoItemNewsIcon from "@/assets/icons/InfoItem-news.svg?react";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 import type { ChipVariant } from "@/components/Chips";
-import type { ComponentType, KeyboardEvent, ReactNode, SVGProps } from "react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
 
 export type InfoItemCategory = ParentCategory | "PROGRAM";
 
@@ -24,12 +24,12 @@ const infoItemIconMap = {
 } satisfies Record<InfoItemCategory, ComponentType<SVGProps<SVGSVGElement>>>;
 
 const infoItemPressedBorderMap = {
-    INSTITUTION: "active:border-sub-yellow",
-    HOSPITAL: "active:border-main-500",
-    WELFARE: "active:border-sub-green",
-    EDUCATION: "active:border-sub-purple",
-    EMPLOYMENT: "active:border-sub-red",
-    PROGRAM: "active:border-main-400",
+    INSTITUTION: "peer-active:border-sub-yellow",
+    HOSPITAL: "peer-active:border-main-500",
+    WELFARE: "peer-active:border-sub-green",
+    EDUCATION: "peer-active:border-sub-purple",
+    EMPLOYMENT: "peer-active:border-sub-red",
+    PROGRAM: "peer-active:border-main-400",
 } satisfies Record<InfoItemCategory, string>;
 
 const infoItemIconSizeMap = {
@@ -46,6 +46,8 @@ const programCategoryInfo = {
     bgColor: "bg-background-200",
     textColor: "text-background-600",
 } as const;
+
+const noop = () => {};
 
 interface InfoItemProps {
     type: InfoItemCategory;
@@ -80,24 +82,26 @@ export default function InfoItem({
     const pressedBorderColor = infoItemPressedBorderMap[type];
     const iconSize = infoItemIconSizeMap[type];
     const isClickable = Boolean(onClick);
-
-    const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-        if (!isClickable) return;
-
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            onClick?.();
-        }
-    };
+    const interactiveSurfaceStyle = isClickable
+        ? `group-hover:shadow-[0.76px_1.51px_11.36px_0px_#00000026] ${pressedBorderColor}`
+        : "";
 
     return (
-        <article
-            role={isClickable ? "button" : undefined}
-            tabIndex={isClickable ? 0 : undefined}
-            onClick={onClick}
-            onKeyDown={handleKeyDown}
-            className={`flex h-[102px] w-full items-center justify-between rounded-[10px] border border-background-250 bg-background-100 px-[20px] py-[12px] transition hover:shadow-[0.76px_1.51px_11.36px_0px_#00000026] ${pressedBorderColor} ${isClickable ? "cursor-pointer" : ""}`}
-        >
+        <article className="group relative isolate flex h-[102px] w-full items-center justify-between rounded-[10px] px-[20px] py-[12px]">
+            {isClickable && (
+                <button
+                    type="button"
+                    onClick={onClick}
+                    aria-label={`${name} 상세 보기`}
+                    className="peer absolute inset-0 z-10 cursor-pointer rounded-[10px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400"
+                />
+            )}
+
+            <div
+                aria-hidden="true"
+                className={`pointer-events-none absolute inset-0 -z-10 rounded-[10px] border border-background-250 bg-background-100 transition ${interactiveSurfaceStyle}`}
+            />
+
             <div className="flex min-w-0 flex-1 items-center gap-4">
                 <div className="flex h-[66px] w-[66px] shrink-0 items-center justify-center rounded-[10px] bg-main-100">
                     <Icon className={iconSize} />
@@ -129,15 +133,11 @@ export default function InfoItem({
 
                 <div className="flex h-5 w-full items-center justify-center gap-2">
                     <ViewStat count={viewCount} />
-                    <span
-                        className="inline-flex h-5 items-center"
-                        onClick={(event) => event.stopPropagation()}
-                        onKeyDown={(event) => event.stopPropagation()}
-                    >
+                    <span className="relative z-20 inline-flex h-5 items-center">
                         <ScrapStat
                             count={scrapCount}
                             isActive={isScrapped}
-                            onClick={onScrapClick ?? (() => {})}
+                            onClick={onScrapClick ?? noop}
                         />
                     </span>
                 </div>
