@@ -32,7 +32,7 @@ const programCategoryInfo = {
 
 const infoItemPressedBorderMap = {
   INSTITUTION: "peer-active:border-sub-yellow",
-  HOSPITAL: "peer-active:border-main-500",
+  HOSPITAL: "peer-active:border-red-500",
   WELFARE: "peer-active:border-sub-green",
   EDUCATION: "peer-active:border-sub-purple",
   EMPLOYMENT: "peer-active:border-sub-red",
