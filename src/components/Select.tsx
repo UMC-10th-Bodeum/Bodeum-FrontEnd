@@ -21,6 +21,7 @@ export interface SelectProps {
     variant?: SelectVariant;
     disabled?: boolean;
     className?: string;
+    dropdownClassName?: string;
 }
 
 const triggerBaseClass =
@@ -90,6 +91,7 @@ export function Select({
     variant = "S",
     disabled,
     className,
+    dropdownClassName,
 }: SelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [openDirection, setOpenDirection] = useState<"bottom" | "top">("bottom");
@@ -200,7 +202,7 @@ export function Select({
                     ref={dropdownRef}
                     role="listbox"
                     style={{ maxHeight }}
-                    className={`absolute z-10 w-full overflow-x-hidden overflow-y-auto overscroll-contain border-[0.8px] border-main-100 bg-background-100 py-2 ${dropdownPositionClass} ${dropdownVariantClass[variant]}`}
+                    className={`absolute z-10 w-full overflow-x-hidden overflow-y-auto overscroll-contain border-[0.8px] border-main-100 bg-background-100 py-2 ${dropdownPositionClass} ${dropdownVariantClass[variant]} ${dropdownClassName ?? ""}`}
                 >
                     {options.map((opt) => (
                         <li key={opt.value}>
