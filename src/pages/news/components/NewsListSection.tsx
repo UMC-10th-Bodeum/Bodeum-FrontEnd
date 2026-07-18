@@ -1,6 +1,7 @@
 import InfoItem from "@/components/InfoItem";
 import type { ChipVariant } from "@/components/Chips";
 import type { InfoItemCategory } from "@/components/InfoItem";
+import { useNavigate } from "react-router-dom";
 
 export interface NewsListItem {
   id: number;
@@ -17,9 +18,12 @@ export interface NewsListItem {
 
 interface NewsListSectionProps {
   items: NewsListItem[];
+  sourceTab: "activity" | "region";
 }
 
-export default function NewsListSection({ items }: NewsListSectionProps) {
+export default function NewsListSection({ items, sourceTab }: NewsListSectionProps) {
+  const navigate = useNavigate();
+
   return (
     <section className="grid grid-cols-2 gap-x-[24px] gap-y-[14px]">
       {items.map((item) => (
@@ -34,7 +38,7 @@ export default function NewsListSection({ items }: NewsListSectionProps) {
           viewCount={item.viewCount}
           scrapCount={item.scrapCount}
           isScrapped={item.isScrapped}
-          onClick={() => {}}
+          onClick={() => navigate(`/news/${item.id}`, { state: { item, sourceTab } })}
         />
       ))}
     </section>

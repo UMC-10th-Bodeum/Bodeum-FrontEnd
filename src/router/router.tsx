@@ -6,6 +6,7 @@ import DetailLayout from "@/layouts/DetailLayout";
 import InfoDetailPage from "@/pages/info/InfoDetailPage";
 import AuthPage from "@/pages/auth/AuthPage";
 import NewsPage from "@/pages/news/NewsPage";
+import NewsDetailPage from "@/pages/news/NewsDetailPage";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: "/info/:category/:id",
         element: <InfoDetailPage />,
+      },
+      {
+        path: "/news/:id",
+        element: <NewsDetailPage />,
       },
     ],
   },

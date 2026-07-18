@@ -110,7 +110,7 @@ export default function NewsPage() {
             category={category}
             onCategoryChange={setCategory}
           />
-          <NewsListSection items={newsListItems} />
+          <NewsListSection items={newsListItems} sourceTab={selectedTab} />
           <nav aria-label="뉴스 페이지네이션" className="p-2 mb-[21.2px]">
             <Pagination currentPage={page} totalPages={120} onChange={setPage} />
           </nav>
