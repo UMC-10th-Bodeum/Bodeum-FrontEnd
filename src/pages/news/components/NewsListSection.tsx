@@ -26,6 +26,11 @@ export default function NewsListSection({ items, sourceTab }: NewsListSectionPro
 
   return (
     <section className="grid grid-cols-2 gap-x-[24px] gap-y-[14px]">
+      {items.length === 0 && (
+        <div className="col-span-2 flex min-h-[240px] items-center justify-center rounded-[10px] border border-background-300 bg-white px-[24px] py-[48px] text-center text-body1 text-background-500">
+          조건에 맞는 뉴스가 없습니다.
+        </div>
+      )}
       {items.map((item) => (
         <InfoItem
           key={item.id}
