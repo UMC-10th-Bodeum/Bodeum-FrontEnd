@@ -74,6 +74,15 @@ export default function NewsToolbar({
           event.stopPropagation();
           onSelectedRegionClick();
         }}
+        onKeyDownCapture={(event) => {
+          if (!onSelectedRegionClick || (event.key !== "Enter" && event.key !== " ")) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+          onSelectedRegionClick();
+        }}
       >
         <Select
           options={selectedRegionOptions}

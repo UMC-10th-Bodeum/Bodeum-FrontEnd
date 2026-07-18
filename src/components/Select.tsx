@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import ChevronLeft from "@/assets/icons/ChevronLeft.svg?react";
 
 export interface SelectOption {
@@ -25,7 +25,7 @@ export interface SelectProps {
 }
 
 const triggerBaseClass =
-  "flex w-full items-center justify-between gap-3 border transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
+  "flex w-full items-center justify-between gap-3 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background-600 disabled:cursor-not-allowed disabled:opacity-50";
 
 const triggerVariantClass: Record<SelectVariant, string> = {
   L: "h-[48px] px-3 py-2 text-h2-onboard",
@@ -79,6 +79,9 @@ const optionHoverClass =
 
 const optionPressedClass = "active:bg-main-100 active:text-background-600";
 
+const optionFocusClass =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-background-600";
+
 export function Select({
   options,
   value,
@@ -94,12 +97,20 @@ export function Select({
   dropdownClassName,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [openDirection, setOpenDirection] = useState<"bottom" | "top">("bottom");
   const [maxHeight, setMaxHeight] = useState(dropdownMaxHeight[variant]);
+  const reactId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
+  const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
     function handleClickOutside(e: MouseEvent) {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
         setIsOpen(false);
@@ -108,7 +119,7 @@ export function Select({
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -141,7 +152,7 @@ export function Select({
         return;
       }
 
-      setIsOpen(false);
+      updateDropdownSize();
     }
 
     updateDropdownSize();
@@ -155,7 +166,161 @@ export function Select({
   }, [isOpen, variant]);
 
   const isPlaceholder = !value;
-  const selectedLabel = options.find((opt) => opt.value === value)?.label ?? placeholder;
+  const selectedIndex = options.findIndex((opt) => opt.value === value);
+  const selectedLabel = selectedIndex >= 0 ? options[selectedIndex].label : placeholder;
+  const listboxId = `${id ?? reactId}-listbox`;
+  const getInitialActiveIndex = () => {
+    if (options.length === 0) {
+      return 0;
+    }
+
+    return selectedIndex >= 0 ? selectedIndex : 0;
+  };
+  const restoreTriggerFocus = () => {
+    window.requestAnimationFrame(() => {
+      triggerRef.current?.focus();
+    });
+  };
+  const openListbox = (nextActiveIndex = getInitialActiveIndex()) => {
+    if (options.length === 0) {
+      return;
+    }
+
+    setActiveIndex(nextActiveIndex);
+    setIsOpen(true);
+  };
+  const closeListbox = (shouldRestoreFocus = false) => {
+    setIsOpen(false);
+
+    if (shouldRestoreFocus) {
+      restoreTriggerFocus();
+    }
+  };
+  const focusOption = (nextActiveIndex: number) => {
+    if (options.length === 0) {
+      return;
+    }
+
+    const clampedIndex = Math.min(Math.max(nextActiveIndex, 0), options.length - 1);
+    setActiveIndex(clampedIndex);
+  };
+  const selectOption = (nextValue: string) => {
+    onChange(nextValue);
+    closeListbox(true);
+  };
+  const handleTriggerKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) {
+      return;
+    }
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        if (isOpen) {
+          focusOption(activeIndex + 1);
+        } else {
+          openListbox(getInitialActiveIndex());
+        }
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        if (isOpen) {
+          focusOption(activeIndex - 1);
+        } else {
+          openListbox(selectedIndex >= 0 ? selectedIndex : options.length - 1);
+        }
+        break;
+      case "Home":
+        if (isOpen) {
+          e.preventDefault();
+          focusOption(0);
+        }
+        break;
+      case "End":
+        if (isOpen) {
+          e.preventDefault();
+          focusOption(options.length - 1);
+        }
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        if (isOpen) {
+          selectOption(options[activeIndex].value);
+        } else {
+          openListbox();
+        }
+        break;
+      case "Escape":
+        if (isOpen) {
+          e.preventDefault();
+          closeListbox(true);
+        }
+        break;
+      default:
+        break;
+    }
+  };
+  const handleOptionKeyDown = (
+    e: KeyboardEvent<HTMLLIElement>,
+    optionValue: string,
+    optionIndex: number,
+  ) => {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        focusOption(optionIndex + 1);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        focusOption(optionIndex - 1);
+        break;
+      case "Home":
+        e.preventDefault();
+        focusOption(0);
+        break;
+      case "End":
+        e.preventDefault();
+        focusOption(options.length - 1);
+        break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        selectOption(optionValue);
+        break;
+      case "Escape":
+        e.preventDefault();
+        closeListbox(true);
+        break;
+      case "Tab":
+        closeListbox();
+        break;
+      default:
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    if (options.length === 0) {
+      setIsOpen(false);
+      return;
+    }
+
+    const nextActiveIndex = Math.min(activeIndex, options.length - 1);
+    if (nextActiveIndex !== activeIndex) {
+      setActiveIndex(nextActiveIndex);
+      return;
+    }
+
+    const activeOption = optionRefs.current[nextActiveIndex];
+    activeOption?.focus();
+    activeOption?.scrollIntoView({ block: "nearest" });
+  }, [activeIndex, isOpen, options.length]);
+
   const chevronClassName = [
     "shrink-0 text-background-500!",
     isOpen ? "rotate-90" : "-rotate-90",
@@ -176,12 +341,21 @@ export function Select({
   return (
     <div ref={rootRef} className={`relative inline-block ${className ?? ""}`}>
       <button
+        ref={triggerRef}
         id={id}
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (isOpen) {
+            closeListbox();
+          } else {
+            openListbox();
+          }
+        }}
+        onKeyDown={handleTriggerKeyDown}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-controls={isOpen ? listboxId : undefined}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledby}
         className={triggerClassName}
@@ -197,24 +371,26 @@ export function Select({
       {isOpen && (
         <ul
           ref={dropdownRef}
+          id={listboxId}
           role="listbox"
           style={{ maxHeight }}
           className={`absolute z-10 w-full overflow-x-hidden overflow-y-auto overscroll-contain border-[0.8px] border-background-250 bg-background-100 py-2 ${dropdownPositionClass} ${dropdownVariantClass[variant]} ${dropdownClassName ?? ""}`}
         >
-          {options.map((opt) => (
-            <li key={opt.value}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={opt.value === value}
-                onClick={() => {
-                  onChange(opt.value);
-                  setIsOpen(false);
-                }}
-                className={`${optionBaseClass} ${optionVariantClass[variant]} ${optionHoverClass} ${optionPressedClass} text-background-500`}
-              >
-                {opt.label}
-              </button>
+          {options.map((opt, index) => (
+            <li
+              key={opt.value}
+              ref={(node) => {
+                optionRefs.current[index] = node;
+              }}
+              role="option"
+              tabIndex={index === activeIndex ? 0 : -1}
+              aria-selected={opt.value === value}
+              onClick={() => selectOption(opt.value)}
+              onMouseEnter={() => setActiveIndex(index)}
+              onKeyDown={(e) => handleOptionKeyDown(e, opt.value, index)}
+              className={`${optionBaseClass} ${optionVariantClass[variant]} ${optionHoverClass} ${optionPressedClass} ${optionFocusClass} cursor-pointer text-background-500`}
+            >
+              {opt.label}
             </li>
           ))}
         </ul>
