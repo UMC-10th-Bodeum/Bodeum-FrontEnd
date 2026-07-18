@@ -1,0 +1,84 @@
+import { useId, useState } from "react";
+
+import OnboardBoxFrame from "@/components/OnboardBoxFrame";
+import { Select } from "@/components/Select";
+import { districtOptionsByRegion, regionOptions } from "@/constants/regions";
+
+type RegionOnboardingBoxProps = {
+  onClose: () => void;
+  onComplete: (region: string) => void;
+};
+
+const selectClassName = "z-[80] min-w-0 flex-1";
+const dropdownClassName = "!mt-[-15px] !max-h-[427px]";
+
+export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboardingBoxProps) {
+  const titleId = useId();
+  const [sido, setSido] = useState("");
+  const [district, setDistrict] = useState("");
+  const districtOptions = districtOptionsByRegion[sido] ?? [];
+  const districtRequired = districtOptions.length > 0;
+  const shouldBlockDistrictSelect = !sido || !districtRequired;
+  const isComplete = Boolean(sido && (!districtRequired || district));
+  const selectedRegion = districtRequired ? `${sido} ${district}` : sido;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto">
+      <OnboardBoxFrame
+        buttonCount={2}
+        leftButtonText="나가기"
+        rightButtonText="완료"
+        showClose
+        className="h-[482px]! w-[624px]! p-[44px]!"
+        ariaLabelledby={titleId}
+        rightButtonDisabled={!isComplete}
+        onClose={onClose}
+        onLeftButtonClick={onClose}
+        onRightButtonClick={() => onComplete(selectedRegion)}
+      >
+        <div className="flex min-h-0 w-full flex-1 flex-col gap-[12px]">
+          <h2 id={titleId} className="mt-[1.5px] text-h3-onboard text-background-500">
+            어느 지역을 찾아보시겠어요?
+          </h2>
+          <div className="flex w-full gap-[12px]">
+            <Select
+              variant="L"
+              value={sido}
+              options={regionOptions}
+              onChange={(value) => {
+                setSido(value);
+                setDistrict("");
+              }}
+              placeholder="시/도"
+              ariaLabel="시/도 선택"
+              className={selectClassName}
+              dropdownClassName={dropdownClassName}
+            />
+            <div
+              className={selectClassName}
+              onClickCapture={(event) => {
+                if (!shouldBlockDistrictSelect) {
+                  return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+            >
+              <Select
+                variant="L"
+                value={district}
+                options={districtOptions}
+                onChange={setDistrict}
+                placeholder="시/구/군"
+                ariaLabel="시/구/군 선택"
+                className="w-full"
+                dropdownClassName={dropdownClassName}
+              />
+            </div>
+          </div>
+        </div>
+      </OnboardBoxFrame>
+    </div>
+  );
+}

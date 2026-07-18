@@ -9,6 +9,7 @@ interface NewsToolbarProps {
   onKeywordChange: (value: string) => void;
   selectedRegion: string;
   onSelectedRegionChange: (value: string) => void;
+  onSelectedRegionClick?: () => void;
   sort: string;
   onSortChange: (value: string) => void;
   category: string;
@@ -43,13 +44,16 @@ export default function NewsToolbar({
   onKeywordChange,
   selectedRegion,
   onSelectedRegionChange,
+  onSelectedRegionClick,
   sort,
   onSortChange,
   category,
   onCategoryChange,
 }: NewsToolbarProps) {
   const categoryOptions = categoryOptionsByTab[tab];
-  const selectedRegionOptions = [{ label: selectedRegion, value: selectedRegion }];
+  const selectedRegionOptions = selectedRegion
+    ? [{ label: selectedRegion, value: selectedRegion }]
+    : [];
 
   return (
     <div className="flex flex-wrap items-center gap-[12px]">
@@ -61,14 +65,26 @@ export default function NewsToolbar({
         className="w-[640px]"
       />
 
-      <Select
-        options={selectedRegionOptions}
-        value={selectedRegion}
-        onChange={onSelectedRegionChange}
-        ariaLabel="지역 선택"
-        icon={<LocationPinIcon className="h-[16px] w-[16px] shrink-0 text-main-400" />}
-        className="w-[137px]"
-      />
+      <div
+        onClickCapture={(event) => {
+          if (!onSelectedRegionClick) {
+            return;
+          }
+
+          event.stopPropagation();
+          onSelectedRegionClick();
+        }}
+      >
+        <Select
+          options={selectedRegionOptions}
+          value={selectedRegion}
+          onChange={onSelectedRegionChange}
+          placeholder="지역 전체"
+          ariaLabel="지역 선택"
+          icon={<LocationPinIcon className="h-[16px] w-[16px] shrink-0 text-main-400" />}
+          className="w-[137px]"
+        />
+      </div>
       <Select
         options={sortOptions}
         value={sort}

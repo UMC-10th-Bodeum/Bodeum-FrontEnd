@@ -5,6 +5,8 @@ import NewsTabs, { type NewsTabValue } from "./components/NewsTabs";
 import NewsToolbar from "./components/NewsToolbar";
 import NewsListSection from "./components/NewsListSection";
 import type { NewsListItem } from "./components/NewsListSection";
+import RegionOnboardingBox from "./components/RegionOnboardingBox";
+import { formatRegionDisplayLabel } from "@/constants/regions";
 
 const news = [
   {
@@ -65,10 +67,20 @@ const newsListItems: NewsListItem[] = Array.from({ length: 14 }, (_, index) => (
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
   const [keyword, setKeyword] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("서울시 강남구");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
   const [sort, setSort] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
+
+  const openRegionOnboarding = () => {
+    setShowRegionOnboarding(true);
+  };
+
+  const completeRegionOnboarding = (region: string) => {
+    setSelectedRegion(formatRegionDisplayLabel(region));
+    setShowRegionOnboarding(false);
+  };
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
@@ -92,6 +104,7 @@ export default function NewsPage() {
             onKeywordChange={setKeyword}
             selectedRegion={selectedRegion}
             onSelectedRegionChange={setSelectedRegion}
+            onSelectedRegionClick={openRegionOnboarding}
             sort={sort}
             onSortChange={setSort}
             category={category}
@@ -103,6 +116,12 @@ export default function NewsPage() {
           </nav>
         </div>
       </div>
+      {showRegionOnboarding && (
+        <RegionOnboardingBox
+          onClose={() => setShowRegionOnboarding(false)}
+          onComplete={completeRegionOnboarding}
+        />
+      )}
     </main>
   );
 }
