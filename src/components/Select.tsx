@@ -361,9 +361,9 @@ export function Select({
         aria-labelledby={ariaLabelledby}
         className={triggerClassName}
       >
-        <span className="flex min-w-0 items-center gap-0.5">
+        <span className="flex min-w-0 items-center gap-0.5 overflow-hidden">
           {icon}
-          {selectedLabel}
+          <span className="truncate">{selectedLabel}</span>
         </span>
 
         <ChevronLeft className={chevronClassName} aria-hidden />
