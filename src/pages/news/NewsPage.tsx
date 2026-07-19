@@ -103,7 +103,6 @@ export default function NewsPage() {
             keyword={keyword}
             onKeywordChange={setKeyword}
             selectedRegion={selectedRegion}
-            onSelectedRegionChange={setSelectedRegion}
             onSelectedRegionClick={openRegionOnboarding}
             sort={sort}
             onSortChange={setSort}
