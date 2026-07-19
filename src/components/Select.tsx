@@ -25,7 +25,7 @@ export interface SelectProps {
 }
 
 const triggerBaseClass =
-  "flex w-full items-center justify-between gap-3 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background-600 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex w-full items-center justify-between gap-3 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background-600";
 
 const triggerVariantClass: Record<SelectVariant, string> = {
   L: "h-[48px] px-3 py-2 text-h2-onboard",
@@ -328,10 +328,11 @@ export function Select({
   const triggerClassName = [
     triggerBaseClass,
     triggerVariantClass[variant],
+    disabled ? "" : "cursor-pointer",
     isOpen
       ? triggerOpenClass[variant]
       : [
-          triggerHoverClass[variant],
+          disabled ? "" : triggerHoverClass[variant],
           triggerPlaceholderClass[variant][String(isPlaceholder) as "true" | "false"],
         ].join(" "),
   ].join(" ");

@@ -54,28 +54,17 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
               className={selectClassName}
               dropdownClassName={dropdownClassName}
             />
-            <div
+            <Select
+              variant="L"
+              value={district}
+              options={districtOptions}
+              onChange={setDistrict}
+              placeholder="시/구/군"
+              ariaLabel="시/구/군 선택"
+              disabled={shouldBlockDistrictSelect}
               className={selectClassName}
-              onClickCapture={(event) => {
-                if (!shouldBlockDistrictSelect) {
-                  return;
-                }
-
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-            >
-              <Select
-                variant="L"
-                value={district}
-                options={districtOptions}
-                onChange={setDistrict}
-                placeholder="시/구/군"
-                ariaLabel="시/구/군 선택"
-                className="w-full"
-                dropdownClassName={dropdownClassName}
-              />
-            </div>
+              dropdownClassName={dropdownClassName}
+            />
           </div>
         </div>
       </OnboardBoxFrame>
