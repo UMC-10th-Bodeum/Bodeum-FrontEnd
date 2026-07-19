@@ -68,7 +68,7 @@ export default function NewsToolbar({
       <button
         type="button"
         onClick={onSelectedRegionClick}
-        aria-label="지역 선택"
+        aria-label={`지역 선택: ${selectedRegionLabel}`}
         className={`flex h-[34px] w-[137px] cursor-pointer items-center justify-between gap-3 rounded-[8px] border bg-background-100 py-2 pr-2 pl-3 text-left text-h6-list transition-colors hover:border-background-300 hover:text-background-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background-600 ${selectedRegionButtonStateClass}`}
       >
         <span className="flex min-w-0 items-center gap-0.5">
