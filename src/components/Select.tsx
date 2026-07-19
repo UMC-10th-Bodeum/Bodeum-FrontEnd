@@ -105,6 +105,7 @@ export function Select({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
   const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
+  const shouldFocusActiveOptionRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -181,27 +182,33 @@ export function Select({
       triggerRef.current?.focus();
     });
   };
-  const openListbox = (nextActiveIndex = getInitialActiveIndex()) => {
+  const openListbox = (
+    nextActiveIndex = getInitialActiveIndex(),
+    shouldFocusActiveOption = false,
+  ) => {
     if (options.length === 0) {
       return;
     }
 
+    shouldFocusActiveOptionRef.current = shouldFocusActiveOption;
     setActiveIndex(nextActiveIndex);
     setIsOpen(true);
   };
   const closeListbox = (shouldRestoreFocus = false) => {
+    shouldFocusActiveOptionRef.current = false;
     setIsOpen(false);
 
     if (shouldRestoreFocus) {
       restoreTriggerFocus();
     }
   };
-  const focusOption = (nextActiveIndex: number) => {
+  const focusOption = (nextActiveIndex: number, shouldFocusActiveOption = false) => {
     if (options.length === 0) {
       return;
     }
 
     const clampedIndex = Math.min(Math.max(nextActiveIndex, 0), options.length - 1);
+    shouldFocusActiveOptionRef.current = shouldFocusActiveOption;
     setActiveIndex(clampedIndex);
   };
   const selectOption = (nextValue: string) => {
@@ -217,29 +224,29 @@ export function Select({
       case "ArrowDown":
         e.preventDefault();
         if (isOpen) {
-          focusOption(activeIndex + 1);
+          focusOption(activeIndex + 1, true);
         } else {
-          openListbox(getInitialActiveIndex());
+          openListbox(getInitialActiveIndex(), true);
         }
         break;
       case "ArrowUp":
         e.preventDefault();
         if (isOpen) {
-          focusOption(activeIndex - 1);
+          focusOption(activeIndex - 1, true);
         } else {
-          openListbox(selectedIndex >= 0 ? selectedIndex : options.length - 1);
+          openListbox(selectedIndex >= 0 ? selectedIndex : options.length - 1, true);
         }
         break;
       case "Home":
         if (isOpen) {
           e.preventDefault();
-          focusOption(0);
+          focusOption(0, true);
         }
         break;
       case "End":
         if (isOpen) {
           e.preventDefault();
-          focusOption(options.length - 1);
+          focusOption(options.length - 1, true);
         }
         break;
       case "Enter":
@@ -248,7 +255,7 @@ export function Select({
         if (isOpen) {
           selectOption(options[activeIndex].value);
         } else {
-          openListbox();
+          openListbox(getInitialActiveIndex(), true);
         }
         break;
       case "Escape":
@@ -269,19 +276,19 @@ export function Select({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        focusOption(optionIndex + 1);
+        focusOption(optionIndex + 1, true);
         break;
       case "ArrowUp":
         e.preventDefault();
-        focusOption(optionIndex - 1);
+        focusOption(optionIndex - 1, true);
         break;
       case "Home":
         e.preventDefault();
-        focusOption(0);
+        focusOption(0, true);
         break;
       case "End":
         e.preventDefault();
-        focusOption(options.length - 1);
+        focusOption(options.length - 1, true);
         break;
       case "Enter":
       case " ":
@@ -316,6 +323,11 @@ export function Select({
       return;
     }
 
+    if (!shouldFocusActiveOptionRef.current) {
+      return;
+    }
+
+    shouldFocusActiveOptionRef.current = false;
     const activeOption = optionRefs.current[nextActiveIndex];
     activeOption?.focus();
     activeOption?.scrollIntoView({ block: "nearest" });
