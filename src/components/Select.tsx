@@ -28,19 +28,19 @@ const triggerBaseClass =
   "flex w-full items-center justify-between gap-3 border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background-600";
 
 const triggerVariantClass: Record<SelectVariant, string> = {
-  L: "h-[48px] px-3 py-2 text-h2-onboard",
+  L: "h-[48px] rounded-[10px] p-3 text-h2-onboard",
   S: "h-[34px] rounded-[8px] py-2 pr-2 pl-3 text-h6-list",
 };
 
 const triggerHoverClass: Record<SelectVariant, string> = {
   L: "hover:bg-background-200 hover:border-background-400 hover:text-background-500",
-  S: "hover:border-background-400 hover:text-background-500",
+  S: "hover:border-background-300 hover:text-background-500",
 };
 
 const triggerPlaceholderClass: Record<SelectVariant, Record<"true" | "false", string>> = {
   L: {
-    true: "rounded-[10px] border-background-250 bg-background-200 text-background-500",
-    false: "rounded-[10px] border-main-400 bg-background-100 text-background-600",
+    true: "border-background-250 bg-background-200 text-background-500",
+    false: "border-main-400 bg-background-100 text-background-600",
   },
   S: {
     true: "border-background-250 bg-background-100 text-background-500",
@@ -49,7 +49,7 @@ const triggerPlaceholderClass: Record<SelectVariant, Record<"true" | "false", st
 };
 
 const triggerOpenClass: Record<SelectVariant, string> = {
-  L: "rounded-[10px] border-main-400 bg-background-100 text-background-500",
+  L: "border-main-400 bg-background-100 text-background-500",
   S: "border-main-400 bg-background-100 text-background-500",
 };
 
@@ -349,7 +349,7 @@ export function Select({
         ].join(" "),
   ].join(" ");
   const dropdownPositionClass =
-    openDirection === "top" ? "bottom-full mb-[10px]" : "top-full mt-[10px]";
+    openDirection === "top" ? "bottom-full mb-[8px]" : "top-full mt-[8px]";
 
   return (
     <div ref={rootRef} className={`relative inline-block ${className ?? ""}`}>
