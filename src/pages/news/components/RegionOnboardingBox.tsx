@@ -23,51 +23,57 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
   const selectedRegion = districtRequired ? `${sido} ${district}` : sido;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto">
-      <OnboardBoxFrame
-        buttonCount={2}
-        leftButtonText="나가기"
-        rightButtonText="완료"
-        showClose
-        className="h-[482px]! w-[624px]! p-[44px]!"
-        ariaLabelledby={titleId}
-        rightButtonDisabled={!isComplete}
-        onClose={onClose}
-        onLeftButtonClick={onClose}
-        onRightButtonClick={() => onComplete(selectedRegion)}
-      >
-        <div className="flex min-h-0 w-full flex-1 flex-col gap-[12px]">
-          <h2 id={titleId} className="mt-[1.5px] text-h3-onboard text-background-500">
-            어느 지역을 찾아보시겠어요?
-          </h2>
-          <div className="flex w-full gap-[12px]">
-            <Select
-              variant="L"
-              value={sido}
-              options={regionOptions}
-              onChange={(value) => {
-                setSido(value);
-                setDistrict("");
-              }}
-              placeholder="시/도"
-              ariaLabel="시/도 선택"
-              className={selectClassName}
-              dropdownClassName={dropdownClassName}
-            />
-            <Select
-              variant="L"
-              value={district}
-              options={districtOptions}
-              onChange={setDistrict}
-              placeholder="시/구/군"
-              ariaLabel="시/구/군 선택"
-              disabled={shouldBlockDistrictSelect}
-              className={selectClassName}
-              dropdownClassName={dropdownClassName}
-            />
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-[rgba(0,0,0,0.5)]"
+      onClick={onClose}
+    >
+      <div onClick={(event) => event.stopPropagation()}>
+        <OnboardBoxFrame
+          buttonCount={2}
+          leftButtonText="나가기"
+          rightButtonText="완료"
+          showClose
+          showOverlay={false}
+          className="h-[482px]! w-[624px]! p-[44px]!"
+          ariaLabelledby={titleId}
+          rightButtonDisabled={!isComplete}
+          onClose={onClose}
+          onLeftButtonClick={onClose}
+          onRightButtonClick={() => onComplete(selectedRegion)}
+        >
+          <div className="flex min-h-0 w-full flex-1 flex-col gap-[12px]">
+            <h2 id={titleId} className="mt-[1.5px] text-h3-onboard text-background-500">
+              어느 지역을 찾아보시겠어요?
+            </h2>
+            <div className="flex w-full gap-[12px]">
+              <Select
+                variant="L"
+                value={sido}
+                options={regionOptions}
+                onChange={(value) => {
+                  setSido(value);
+                  setDistrict("");
+                }}
+                placeholder="시/도"
+                ariaLabel="시/도 선택"
+                className={selectClassName}
+                dropdownClassName={dropdownClassName}
+              />
+              <Select
+                variant="L"
+                value={district}
+                options={districtOptions}
+                onChange={setDistrict}
+                placeholder="시/구/군"
+                ariaLabel="시/구/군 선택"
+                disabled={shouldBlockDistrictSelect}
+                className={selectClassName}
+                dropdownClassName={dropdownClassName}
+              />
+            </div>
           </div>
-        </div>
-      </OnboardBoxFrame>
+        </OnboardBoxFrame>
+      </div>
     </div>
   );
 }
