@@ -1,24 +1,11 @@
 import InfoItem from "@/components/InfoItem";
-import type { ChipVariant } from "@/components/Chips";
-import type { InfoItemCategory } from "@/components/InfoItem";
 import { useNavigate } from "react-router-dom";
-
-export interface NewsListItem {
-  id: number;
-  type: InfoItemCategory;
-  name: string;
-  address: string;
-  services: string[];
-  chipText?: string;
-  chipVariant?: ChipVariant;
-  viewCount: number;
-  scrapCount: number;
-  isScrapped?: boolean;
-}
+import type { NewsSourceTab } from "@/constants/newsSourceTab";
+import type { NewsListItem } from "../data/newsMockData";
 
 interface NewsListSectionProps {
   items: NewsListItem[];
-  sourceTab: "activity" | "region";
+  sourceTab: NewsSourceTab;
 }
 
 export default function NewsListSection({ items, sourceTab }: NewsListSectionProps) {
@@ -43,7 +30,7 @@ export default function NewsListSection({ items, sourceTab }: NewsListSectionPro
           viewCount={item.viewCount}
           scrapCount={item.scrapCount}
           isScrapped={item.isScrapped}
-          onClick={() => navigate(`/news/${item.id}`, { state: { item, sourceTab } })}
+          onClick={() => navigate(`/news/${sourceTab}/${item.id}`, { state: { item } })}
         />
       ))}
     </section>

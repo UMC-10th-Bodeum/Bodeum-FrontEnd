@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
@@ -18,10 +18,9 @@ import UpdateAtIcon from "@/assets/icons/UpdateAt.svg?react";
 import GalleryMainImage from "@/assets/icons/gallery-main.svg";
 import PostListItem from "../home/components/PostListItem";
 import PostSection from "../home/components/PostSection";
-import type { NewsListItem } from "./components/NewsListSection";
 import HeartStat from "@/components/post-stat/HeartStat";
-
-type NewsSourceTab = "activity" | "region";
+import { isNewsSourceTab, type NewsSourceTab } from "@/constants/newsSourceTab";
+import { getNewsListItemById, type NewsListItem } from "./data/newsMockData";
 
 const breadcrumbLabelMap: Record<NewsSourceTab, string> = {
   activity: "활동소식",
@@ -49,10 +48,12 @@ const noop = () => {};
 
 export default function NewsDetailPage() {
   const location = useLocation();
+  const { id, sourceTab } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
-  const detailState = location.state as { item?: NewsListItem; sourceTab?: NewsSourceTab } | null;
-  const cardItem = detailState?.item;
-  const breadcrumbLabel = breadcrumbLabelMap[detailState?.sourceTab ?? "activity"];
+  const detailState = location.state as { item?: NewsListItem } | null;
+  const selectedSourceTab = isNewsSourceTab(sourceTab) ? sourceTab : undefined;
+  const cardItem = selectedSourceTab ? detailState?.item ?? getNewsListItemById(id) : undefined;
+  const breadcrumbLabel = selectedSourceTab ? breadcrumbLabelMap[selectedSourceTab] : "소식";
   const organization = cardItem?.services[0] ?? "";
   const activityInfo = [
     ["진행기간", detailExtra.period],

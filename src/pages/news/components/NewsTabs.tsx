@@ -1,20 +1,17 @@
-export type NewsTabValue = "activity" | "region";
+import { newsSourceTabs, type NewsSourceTab } from "@/constants/newsSourceTab";
+
+export type NewsTabValue = NewsSourceTab;
 
 interface NewsTabsProps {
   value: NewsTabValue;
   onChange: (value: NewsTabValue) => void;
 }
 
-const newsTabs = [
-  { value: "activity", label: "활동소식" },
-  { value: "region", label: "지역소식" },
-] as const satisfies readonly { value: NewsTabValue; label: string }[];
-
 export default function NewsTabs({ value, onChange }: NewsTabsProps) {
   return (
     <div className="border-b border-background-300">
-      <div role="tablist" aria-label="뉴스 탭" className="flex items-end">
-        {newsTabs.map((tab) => {
+      <div role="tablist" aria-label="소식 탭" className="flex items-end">
+        {newsSourceTabs.map((tab) => {
           const selected = tab.value === value;
 
           return (
