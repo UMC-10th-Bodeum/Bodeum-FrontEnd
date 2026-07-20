@@ -328,43 +328,11 @@ const districtNamesByRegion: Record<string, string[]> = {
   제주특별자치도: ["서귀포시", "제주시"],
 };
 
-const topLevelCityRegions = new Set([
-  "서울특별시",
-  "부산광역시",
-  "대구광역시",
-  "인천광역시",
-  "광주광역시",
-  "대전광역시",
-  "울산광역시",
-  "세종특별자치시",
-]);
+const regionOptions = createOptions(sidoNames);
 
-const regionOptions: SelectOption[] = [];
-const districtOptionsByRegion: Record<string, SelectOption[]> = {};
-
-sidoNames.forEach((sido) => {
-  const childRegions = districtNamesByRegion[sido] ?? [];
-
-  if (topLevelCityRegions.has(sido)) {
-    regionOptions.push({ label: sido, value: sido });
-    districtOptionsByRegion[sido] = createOptions(childRegions);
-    return;
-  }
-
-  const cityRegions = childRegions.filter((region) => region.endsWith("시"));
-  const countyRegions = childRegions.filter((region) => region.endsWith("군"));
-
-  if (countyRegions.length) {
-    regionOptions.push({ label: sido, value: sido });
-    districtOptionsByRegion[sido] = createOptions(countyRegions);
-  }
-
-  cityRegions.forEach((city) => {
-    const value = `${sido} ${city}`;
-    regionOptions.push({ label: value, value });
-    districtOptionsByRegion[value] = [];
-  });
-});
+const districtOptionsByRegion: Record<string, SelectOption[]> = Object.fromEntries(
+  sidoNames.map((sido) => [sido, createOptions(districtNamesByRegion[sido] ?? [])]),
+);
 
 const monthOptions: SelectOption[] = Array.from({ length: 12 }, (_, index) => {
   const month = index + 1;
@@ -630,14 +598,12 @@ export default function OnboardingStepCard({
             </div>
           </FormGroup>
           <FormGroup label="자녀 특징 키워드(선택)" htmlFor={childKeywordsId}>
-            <Input
+            <LimitedTextInput
               id={childKeywordsId}
               value={form.childKeywords}
-              onChange={(event) =>
-                updateField("childKeywords", event.target.value)
-              }
+              onChange={(value) => updateField("childKeywords", value)}
               placeholder="아이와 닮은 친구를 찾기 위한 키워드를 입력해주세요(소심함, 활발함, 소리 예민 등)"
-              className="w-full max-w-[536px] [&_input::placeholder]:text-h3-onboard"
+              maxLength={100}
             />
           </FormGroup>
         </>
@@ -652,14 +618,14 @@ export default function OnboardingStepCard({
             titleAfter="은 무엇인가요?"
             description="선택하신 관심사와 활동 지역을 바탕으로 맞춤 정보가 세팅됩니다"
           />
-          <FormGroup label="가장 큰 관심사 (최대 3개 선택)*" as="fieldset">
+          <FormGroup label="가장 큰 관심사 (최대 2개 선택)*" as="fieldset">
             <div className="flex w-full flex-wrap gap-[13px]">
               {interestOptions.map((option) => (
                 <SelectableChip
                   key={option}
                   label={option}
                   selected={form.interests.includes(option)}
-                  onClick={() => toggleListValue("interests", option, 3)}
+                  onClick={() => toggleListValue("interests", option, 2)}
                 />
               ))}
             </div>
@@ -684,9 +650,9 @@ export default function OnboardingStepCard({
                 value={form.district}
                 options={districtOptions}
                 onChange={(value) => updateField("district", value)}
-                placeholder="구/군"
+                placeholder="시/군/구"
                 disabled={!form.sido || !districtRequired}
-                ariaLabel="주 활동 지역 구/군"
+                ariaLabel="주 활동 지역 시/군/구"
                 className="min-w-[160px] flex-1"
               />
             </div>
