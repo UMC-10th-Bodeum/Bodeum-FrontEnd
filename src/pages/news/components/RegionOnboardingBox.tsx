@@ -64,8 +64,8 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
                 value={district}
                 options={districtOptions}
                 onChange={setDistrict}
-                placeholder="시/구/군"
-                ariaLabel="시/구/군 선택"
+                placeholder="구/군"
+                ariaLabel="구/군 선택"
                 disabled={shouldBlockDistrictSelect}
                 className={selectClassName}
                 dropdownClassName={dropdownClassName}
