@@ -49,12 +49,13 @@ export default function ButtonFill({
       data-state={disabled ? "disabled" : "기본"}
       data-icon={Icon ? "true" : "false"}
       className={joinClassNames(
-        "inline-flex h-[38px] shrink-0 items-center justify-center gap-[6px] rounded-[10px] px-[16px] py-[10px]",
-        "border-0 text-h6 text-background-100 transition-[background-color,box-shadow] duration-150 ease-out",
+        "inline-flex min-h-[40px] shrink-0 items-center justify-center rounded-[10px] px-[16px] py-[10px]",
+        Icon ? "gap-[4px]" : "gap-[6px]",
+        "border-0 text-h4-list transition-[background-color,color,box-shadow] duration-150 ease-out",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400",
         disabled
-          ? "cursor-not-allowed bg-background-500"
-          : "cursor-pointer bg-main-400 hover:bg-main-400 hover:shadow-button active:bg-main-500",
+          ? "cursor-not-allowed bg-background-250 text-background-500"
+          : "cursor-pointer bg-main-400 text-background-100 hover:bg-main-400 hover:shadow-button active:bg-main-500 active:shadow-none",
         className,
       )}
       {...buttonProps}
@@ -62,14 +63,14 @@ export default function ButtonFill({
       {Icon && iconPosition === "left" && (
         <Icon
           aria-hidden="true"
-          className="bodeum-icon-color h-[12px] w-[12px] shrink-0 text-background-100"
+          className="bodeum-icon-color h-[14px] w-[14px] shrink-0"
         />
       )}
       <span className="whitespace-nowrap">{label}</span>
       {Icon && iconPosition === "right" && (
         <Icon
           aria-hidden="true"
-          className="bodeum-icon-color h-[12px] w-[12px] shrink-0 text-background-100"
+          className="bodeum-icon-color h-[14px] w-[14px] shrink-0"
         />
       )}
     </button>
