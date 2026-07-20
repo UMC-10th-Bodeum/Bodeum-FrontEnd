@@ -49,7 +49,7 @@ export default function ButtonFill({
       data-state={disabled ? "disabled" : "기본"}
       data-icon={Icon ? "true" : "false"}
       className={joinClassNames(
-        "inline-flex h-[40px] shrink-0 items-center justify-center rounded-[10px] px-[16px] py-[10px]",
+        "inline-flex min-h-[40px] shrink-0 items-center justify-center rounded-[10px] px-[16px] py-[10px]",
         Icon ? "gap-[4px]" : "gap-[6px]",
         "border-0 text-h4-list transition-[background-color,color,box-shadow] duration-150 ease-out",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400",
