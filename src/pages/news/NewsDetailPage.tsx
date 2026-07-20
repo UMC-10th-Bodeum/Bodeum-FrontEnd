@@ -62,7 +62,9 @@ export default function NewsDetailPage() {
   const { setBreadcrumb } = useBreadcrumb();
   const detailState = location.state as { item?: NewsListItem } | null;
   const selectedSourceTab = isNewsSourceTab(sourceTab) ? sourceTab : undefined;
-  const cardItem = selectedSourceTab ? (detailState?.item ?? getNewsListItemById(id)) : undefined;
+  const routeItem = selectedSourceTab ? getNewsListItemById(id) : undefined;
+  const stateItem = detailState?.item;
+  const cardItem = routeItem && stateItem?.id === routeItem.id ? stateItem : routeItem;
   const breadcrumbLabel = selectedSourceTab ? breadcrumbLabelMap[selectedSourceTab] : "소식";
   const organization = cardItem?.services[0] ?? "";
   const activityInfo = [
