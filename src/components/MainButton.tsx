@@ -22,20 +22,20 @@ type MainButtonProps = MainButtonBaseProps &
 const sizeClasses: Record<MainButtonSize, string> = {
   L: 'h-[50px] w-[536px] rounded-[10px] text-h2-onboard',
   M: 'h-[50px] w-[260px] rounded-[10px] text-h2-onboard',
-  S: 'h-[25px] w-[66px] rounded-[5px] text-body-label',
+  S: 'h-[25px] w-[66px] rounded-[5px] text-h6',
 };
 
 const filledEnabledClasses =
-  'bg-main-400 text-background-100 hover:bg-main-400 hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] active:bg-main-500 active:shadow-none';
+  'bg-main-400 text-background-100 hover:bg-main-400 hover:shadow-button active:bg-main-500 active:shadow-none';
 const filledDisabledClasses: Record<MainButtonSize, string> = {
   L: 'bg-background-250 text-background-500',
   M: 'bg-background-250 text-background-500',
   S: 'bg-background-300 text-background-500',
 };
 const strokeEnabledClasses =
-  'border-main-400 bg-transparent text-main-400 hover:border-main-500 hover:text-main-500 active:border-main-400 active:bg-main-400 active:text-background-100';
+  'border-main-400 bg-background-100 text-main-400 hover:border-main-500 hover:text-main-500 active:border-main-400 active:bg-main-400 active:text-background-100';
 const strokeDisabledClasses =
-  'border-background-500 bg-transparent text-background-500';
+  'border-background-500 bg-background-100 text-background-500';
 
 const joinClassNames = (...classNames: Array<string | false | undefined>) =>
   classNames.filter(Boolean).join(' ');
