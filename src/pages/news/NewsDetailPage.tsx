@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { type SVGProps, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
 import Chip from "@/components/Chips";
+import MainButton from "@/components/MainButton";
 import CommentStat from "@/components/post-stat/CommentStat";
 import DateStat from "@/components/post-stat/DateStat";
 import ScrapStat from "@/components/post-stat/ScrapStat";
@@ -11,7 +12,7 @@ import ViewStat from "@/components/post-stat/ViewStat";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import AIMsgIcon from "@/assets/icons/AIMsg.svg?react";
-import ExportIcon from "@/assets/icons/Export.svg?react";
+import ArrowUpRightIcon from "@/assets/icons/arrow-up-right.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ShareIcon from "@/assets/icons/Share.svg?react";
 import UpdateAtIcon from "@/assets/icons/UpdateAt.svg?react";
@@ -46,13 +47,22 @@ const relatedNews = Array.from({ length: 3 }, (_, index) => ({
 
 const noop = () => {};
 
+function HomepageArrowIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <ArrowUpRightIcon
+      {...props}
+      className="bodeum-icon-color h-[14px] w-[14px] shrink-0 text-background-100"
+    />
+  );
+}
+
 export default function NewsDetailPage() {
   const location = useLocation();
   const { id, sourceTab } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const detailState = location.state as { item?: NewsListItem } | null;
   const selectedSourceTab = isNewsSourceTab(sourceTab) ? sourceTab : undefined;
-  const cardItem = selectedSourceTab ? detailState?.item ?? getNewsListItemById(id) : undefined;
+  const cardItem = selectedSourceTab ? (detailState?.item ?? getNewsListItemById(id)) : undefined;
   const breadcrumbLabel = selectedSourceTab ? breadcrumbLabelMap[selectedSourceTab] : "소식";
   const organization = cardItem?.services[0] ?? "";
   const activityInfo = [
@@ -67,7 +77,7 @@ export default function NewsDetailPage() {
   ];
 
   useEffect(() => {
-    setBreadcrumb([{ label: "소식" }, { label: breadcrumbLabel }]);
+    setBreadcrumb([{ label: "소식" }, { label: breadcrumbLabel }, { label: " " }]);
 
     return () => setBreadcrumb([]);
   }, [breadcrumbLabel, setBreadcrumb]);
@@ -118,7 +128,7 @@ export default function NewsDetailPage() {
               </div>
 
               <div className="flex gap-[8px] border-t border-background-250 pt-[12px]">
-                <ButtonFill label="홈페이지" icon={ExportIcon} iconPosition="right" />
+                <ButtonFill label="홈페이지" icon={HomepageArrowIcon} iconPosition="right" />
                 <ButtonOutline label="스크랩" icon={ScrapIcon} iconPosition="left" />
                 <ButtonOutline label="공유" tone="black" icon={ShareIcon} iconPosition="left" />
               </div>
@@ -164,11 +174,14 @@ export default function NewsDetailPage() {
         </div>
 
         <div>
-          <aside className="flex h-[80px] w-[400px] items-center gap-[12px] rounded-[8px] bg-main-200 px-[30px] py-2 text-left">
-            <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center ">
+          <MainButton
+            size="M"
+            className="h-[80px] w-[400px] justify-start gap-[10px] rounded-[8px] px-[30px] py-2 text-left [&:not(:active)]:bg-main-200"
+          >
+            <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center ">
               <AIMsgIcon className="h-[32px] w-[32px]" aria-hidden="true" />
             </span>
-            <span>
+            <span className="flex flex-col gap-1 whitespace-normal">
               <span className="block text-h6 text-main-400">
                 빠르고 간단한 정보 관련 안내는 AI 큐레이션에게
               </span>
@@ -176,7 +189,7 @@ export default function NewsDetailPage() {
                 AI 챗봇을 통해 질문해보세요
               </span>
             </span>
-          </aside>
+          </MainButton>
         </div>
       </div>
     </div>
