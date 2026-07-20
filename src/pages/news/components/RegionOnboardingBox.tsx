@@ -10,7 +10,6 @@ type RegionOnboardingBoxProps = {
 };
 
 const selectClassName = "z-[80] min-w-0 flex-1";
-const dropdownClassName = "!mt-[-15px] !max-h-[427px]";
 
 export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboardingBoxProps) {
   const titleId = useId();
@@ -57,7 +56,6 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
                 placeholder="시/도"
                 ariaLabel="시/도 선택"
                 className={selectClassName}
-                dropdownClassName={dropdownClassName}
               />
               <Select
                 variant="L"
@@ -68,7 +66,6 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
                 ariaLabel="구/군 선택"
                 disabled={shouldBlockDistrictSelect}
                 className={selectClassName}
-                dropdownClassName={dropdownClassName}
               />
             </div>
           </div>

@@ -59,7 +59,7 @@ const dropdownVariantClass: Record<SelectVariant, string> = {
 };
 
 const dropdownMaxHeight: Record<SelectVariant, number> = {
-  L: 240,
+  L: 416.42,
   S: 200,
 };
 
