@@ -9,7 +9,9 @@ export default function DetailLayout() {
         <BackTopBar />
 
         <main className="flex-1 overflow-y-auto">
-          <Outlet />
+          <div className="mx-auto min-w-[1200px] max-w-[1400px]">
+            <Outlet />
+          </div>
         </main>
       </div>
     </BreadcrumbProvider>
