@@ -43,6 +43,7 @@ export const infoCategoryMap = {
     label: "취업",
     icon: EmploymentIcon,
     bgColor: "bg-sub-red-2",
+    textColor: "text-sub-red",
     buttonClass:
       "bg-sub-red-2 text-sub-red active:bg-sub-red active:text-sub-red-2",
   },
