@@ -70,7 +70,7 @@ const currentItems = useMemo(() => {
       <div className="flex gap-[10px] items-center">
         <LocationButton
           value={location}
-          onClick={() => { console.log("click"); setLocationOpen(true) }}
+          onClick={() => setLocationOpen(true)}
         />
         <CountButton
           category={parentCategory}
