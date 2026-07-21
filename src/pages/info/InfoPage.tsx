@@ -8,12 +8,19 @@ import InfoItem from "@/components/InfoItem";
 import { infoMockData } from "@/mocks/info";
 import CountButton from "./components/button/CountButton";
 import LocationButton from "./components/button/LocationButton";
+import { Select } from "@/components/Select";
 
 const PAGE_SIZE = 14;
+const selectOptions = [
+  { label: "조회순", value: "views" },
+  { label: "최신순", value: "latest" },
+  { label: "스크랩순", value: "scrap" },
+];
 
 export default function InfoPage() {
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
+  const [sort, setSort] = useState("views");
   const navigate = useNavigate();
   
   const [location, setLocation] = useState("경기도 수원시");
@@ -71,11 +78,23 @@ const currentItems = useMemo(() => {
           의 정보를 모았어요
         </h2>
       </div>
-      <CategoryChips
-        parentCategory={parentCategory}
-        subCategory={subCategory}
-        onChange={setSubCategory}
-      />
+
+      <div className="flex items-center justify-between">
+        <CategoryChips
+          parentCategory={parentCategory}
+          subCategory={subCategory}
+          onChange={setSubCategory}
+        />
+        <Select
+          options={selectOptions}
+          value={sort}
+          onChange={setSort}
+          placeholder="조회순"
+          variant="S"
+          className="w-[120px]"
+        />
+      </div>
+      
 
       <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
         {currentItems.map((item) => (
