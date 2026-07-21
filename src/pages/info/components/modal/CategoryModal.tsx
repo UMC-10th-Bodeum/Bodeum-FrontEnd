@@ -31,8 +31,6 @@ export default function CategoryModal({
   const [selectedCategory, setSelectedCategory] =
     useState<ParentCategory | null>(null);
 
-  if (!open) return null;
-
   const handleComplete = () => {
     if (!selectedCategory) return;
     onSelect(selectedCategory);
