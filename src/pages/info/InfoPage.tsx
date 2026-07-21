@@ -98,23 +98,30 @@ const currentItems = useMemo(() => {
         />
       </div>
       
+      {currentItems.length === 0 ? (
+        <div className="flex h-[200px] items-center justify-center text-background-500">
+          조건에 맞는 정보가 없습니다.
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
+            {currentItems.map((item) => (
+              <InfoItem
+                key={item.id}
+                {...item}
+                onClick={() => navigate(`/info/${item.type}/${item.id}`)}
+                onScrapClick={() => console.log(item.id)}
+              />
+            ))}
+          </div>
 
-      <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
-        {currentItems.map((item) => (
-          <InfoItem
-            key={item.id}
-            {...item}
-            onClick={() => navigate(`/info/${item.type}/${item.id}`)}
-            onScrapClick={() => console.log(item.id)}
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
           />
-        ))}
-      </div>
-
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onChange={setPage}
-      />
+        </>
+      )}
 
       {locationOpen && (
         <LocationModal
