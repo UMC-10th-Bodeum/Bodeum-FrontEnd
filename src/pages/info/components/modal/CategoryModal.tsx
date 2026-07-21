@@ -67,6 +67,7 @@ export default function CategoryModal({
               key={type}
               type={type}
               count={count}
+              selected={selectedCategory === type}
               onClick={() => setSelectedCategory(type)}
             />
           ))}
