@@ -9,6 +9,7 @@ import { infoMockData } from "@/mocks/info";
 import CountButton from "./components/button/CountButton";
 import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
+import LocationModal from "./components/modal/LocationModal";
 
 const PAGE_SIZE = 14;
 const sortOptions = [
@@ -61,13 +62,14 @@ const currentItems = useMemo(() => {
   
   return (
     <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
+      
       <h2 className="text-h1-info -mb-[10px]">
         NN님,
       </h2>
       <div className="flex gap-[10px] items-center">
         <LocationButton
           value={location}
-          onClick={() => setLocationOpen(true)}
+          onClick={() => { console.log("click"); setLocationOpen(true) }}
         />
         <CountButton
           category={parentCategory}
@@ -113,12 +115,17 @@ const currentItems = useMemo(() => {
         onChange={setPage}
       />
 
-      {/* <LocationModal
-  open={locationOpen}
-  onClose={() => setLocationOpen(false)}
-  onSelect={setLocation}
-/>
-
+      {locationOpen && (
+  <LocationModal
+    location={location}
+    onClose={() => setLocationOpen(false)}
+    onComplete={(location) => {
+      setLocation(location);
+      setLocationOpen(false);
+    }}
+  />
+)}
+      {/*
 <CategoryModal
   open={categoryOpen}
   onClose={() => setCategoryOpen(false)}

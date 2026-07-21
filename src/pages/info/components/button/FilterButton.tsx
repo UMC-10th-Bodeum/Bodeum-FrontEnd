@@ -16,7 +16,7 @@ export default function FilterButton({
   let style = "";
 
   if (disabled) {
-    style = "bg-background-100 text-gray-400 cursor-not-allowed";
+    style = "bg-main-100 text-background-600";
   } else if (variant === "location") {
     style = "bg-background-200 hover:shadow-sm";
   } else {
