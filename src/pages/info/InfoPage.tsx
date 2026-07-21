@@ -11,10 +11,10 @@ import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
 
 const PAGE_SIZE = 14;
-const selectOptions = [
-  { label: "조회순", value: "views" },
-  { label: "최신순", value: "latest" },
-  { label: "스크랩순", value: "scrap" },
+const sortOptions = [
+  { label: "조회순", value: "VIEW" },
+  { label: "저장순", value: "SCRAP" },
+  { label: "후기순", value: "REVIEW" },
 ];
 
 export default function InfoPage() {
@@ -86,7 +86,7 @@ const currentItems = useMemo(() => {
           onChange={setSubCategory}
         />
         <Select
-          options={selectOptions}
+          options={sortOptions}
           value={sort}
           onChange={setSort}
           placeholder="조회순"
