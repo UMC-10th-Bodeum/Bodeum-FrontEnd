@@ -9,7 +9,7 @@ export default function AIChatButton() {
     <MainButton
       size="M"
       onClick={() => navigate("/aichat")}
-      className="h-[80px] w-[400px] justify-start gap-[10px] rounded-[8px] px-[30px] py-2 text-left [&:not(:active)]:bg-main-200"
+      className="h-[80px] w-full justify-start gap-[10px] rounded-[8px] px-[30px] py-2 text-left [&:not(:active)]:bg-main-200"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center">
         <AIMsgIcon className="h-8 w-8" aria-hidden="true" />

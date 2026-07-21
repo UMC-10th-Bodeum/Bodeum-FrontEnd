@@ -71,7 +71,7 @@ export default function InfoDetailPage() {
       </main>
 
       {/* right */}
-      <aside className="sticky top-5 h-fit w-[340px] space-y-4">
+      <aside className="sticky top-5 h-fit w-[400px] space-y-4">
         {/* <SummaryCard data={detail} /> */}
         <AIChatButton />
         {/* <FloatingChatCard /> */}
