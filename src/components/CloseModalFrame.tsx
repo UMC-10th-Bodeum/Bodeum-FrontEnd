@@ -26,7 +26,7 @@ export default function CloseModalFrame({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div
-        className={`relative flex w-[624px] flex-col rounded-[40px] bg-background-100 px-[44px] py-[44px] ${className ?? ""}`}
+        className={`relative flex w-[624px] flex-col rounded-[20px] bg-background-100 px-[44px] py-[44px] ${className ?? ""}`}
       >
         <button
           type="button"
@@ -38,7 +38,7 @@ export default function CloseModalFrame({
 
         <div className="mt-2 flex-1">{children}</div>
 
-        <div className="mt-[40px] flex gap-6">
+        <div className="mt-[40px] flex gap-[16px]">
           <MainButton
             size="L"
             className="flex-1 !bg-background-250 !text-background-500 hover:!bg-background-250 active:!bg-background-250"

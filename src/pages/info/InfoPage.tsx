@@ -10,6 +10,7 @@ import CountButton from "./components/button/CountButton";
 import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
+import CategoryModal from "./components/modal/CategoryModal";
 
 const PAGE_SIZE = 14;
 const sortOptions = [
@@ -116,21 +117,26 @@ const currentItems = useMemo(() => {
       />
 
       {locationOpen && (
-  <LocationModal
-    location={location}
-    onClose={() => setLocationOpen(false)}
-    onComplete={(location) => {
-      setLocation(location);
-      setLocationOpen(false);
-    }}
-  />
-)}
-      {/*
-<CategoryModal
-  open={categoryOpen}
-  onClose={() => setCategoryOpen(false)}
-  onSelect={...}
-/> */}
+        <LocationModal
+          location={location}
+          onClose={() => setLocationOpen(false)}
+          onComplete={(location) => {
+            setLocation(location);
+            setLocationOpen(false);
+          }}
+        />
+      )}
+      {categoryOpen && (
+        <CategoryModal
+          category={parentCategory}
+          count={235}
+          onClose={() => setCategoryOpen(false)}
+          onSelect={(category) => {
+            navigate(`/info?category=${category}`);
+            setCategoryOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };
