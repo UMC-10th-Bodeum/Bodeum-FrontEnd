@@ -6,6 +6,7 @@ import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 import { mockInfoDetail } from "@/mocks/infoDetail";
 import DetailHeader from "./components/Detail/DetailHeader";
+import AIChatButton from "@/components/AIChatButton";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -72,7 +73,7 @@ export default function InfoDetailPage() {
       {/* right */}
       <aside className="sticky top-5 h-fit w-[340px] space-y-4">
         {/* <SummaryCard data={detail} /> */}
-
+        <AIChatButton />
         {/* <FloatingChatCard /> */}
       </aside>
     </div>
