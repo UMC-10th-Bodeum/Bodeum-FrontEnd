@@ -60,6 +60,7 @@ export default function InfoDetailPage() {
       {/* left */}
       <main className="flex-1 space-y-5">
         <DetailHeader image={detail.thumbnail} />
+        <h1>{id}</h1>
 
         {/* <IntroSection data={detail} /> */}
 

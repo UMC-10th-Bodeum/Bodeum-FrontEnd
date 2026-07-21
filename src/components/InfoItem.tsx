@@ -7,7 +7,6 @@ import InfoItemWelfareIcon from "@/assets/icons/InfoItem-welfare.svg?react";
 import InfoItemEmploymentIcon from "@/assets/icons/InfoItem-employment.svg?react";
 import InfoItemEducationIcon from "@/assets/icons/Infoitem-education.svg?react";
 import InfoItemNewsIcon from "@/assets/icons/InfoItem-news.svg?react";
-import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 import type { ChipVariant } from "@/components/Chips";
 import type { ComponentType, ReactNode, SVGProps } from "react";
