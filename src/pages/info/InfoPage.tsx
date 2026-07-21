@@ -6,6 +6,8 @@ import CategoryChips from "./components/CategoryChips";
 import Pagination from "@/components/pagination/Pagination";
 import InfoItem from "@/components/InfoItem";
 import { infoMockData } from "@/mocks/info";
+import CountButton from "./components/button/CountButton";
+import LocationButton from "./components/button/LocationButton";
 
 const PAGE_SIZE = 14;
 
@@ -13,6 +15,10 @@ export default function InfoPage() {
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  const [location, setLocation] = useState("경기도 수원시");
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
   
   const categoryParam = searchParams.get("category");
   const parentCategory = (categoryParam && categoryParam in infoSubCategoryMap)
@@ -48,6 +54,23 @@ const currentItems = useMemo(() => {
   
   return (
     <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
+      <h2 className="text-h1-info -mb-[10px]">
+        NN님,
+      </h2>
+      <div className="flex gap-[10px] items-center">
+        <LocationButton
+          value={location}
+          onClick={() => setLocationOpen(true)}
+        />
+        <CountButton
+          category={parentCategory}
+          count={235}
+          onClick={() => setCategoryOpen(true)}
+        />
+        <h2 className="text-h1-info">
+          의 정보를 모았어요
+        </h2>
+      </div>
       <CategoryChips
         parentCategory={parentCategory}
         subCategory={subCategory}
@@ -70,6 +93,18 @@ const currentItems = useMemo(() => {
         totalPages={totalPages}
         onChange={setPage}
       />
+
+      {/* <LocationModal
+  open={locationOpen}
+  onClose={() => setLocationOpen(false)}
+  onSelect={setLocation}
+/>
+
+<CategoryModal
+  open={categoryOpen}
+  onClose={() => setCategoryOpen(false)}
+  onSelect={...}
+/> */}
     </div>
   );
 };
