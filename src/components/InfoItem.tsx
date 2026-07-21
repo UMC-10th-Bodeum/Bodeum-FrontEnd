@@ -11,6 +11,7 @@ import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 import type { ChipVariant } from "@/components/Chips";
 import type { ComponentType, ReactNode, SVGProps } from "react";
+import CategoryLabel from "@/components/CategoryLabel";
 
 export type InfoItemCategory = ParentCategory | "PROGRAM";
 
@@ -77,8 +78,7 @@ export default function InfoItem({
   onClick,
   onScrapClick,
 }: InfoItemProps) {
-  const { label, bgColor, textColor } =
-    type === "PROGRAM" ? programCategoryInfo : infoCategoryMap[type];
+  const isProgram = type === "PROGRAM";
   const Icon = infoItemIconMap[type];
   const pressedBorderColor = infoItemPressedBorderMap[type];
   const iconSize = infoItemIconSizeMap[type];
@@ -110,11 +110,15 @@ export default function InfoItem({
 
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-[4px]">
-            <span
-              className={`shrink-0 rounded-[10px] ${bgColor} px-2 py-[5.5px] text-h5-list leading-none ${textColor}`}
-            >
-              {label}
-            </span>
+            {isProgram ? (
+              <span
+                className={`shrink-0 rounded-[10px] ${programCategoryInfo.bgColor} px-2 py-[4px] text-h5-list leading-none ${programCategoryInfo.textColor}`}
+              >
+                {programCategoryInfo.label}
+              </span>
+            ) : (
+              <CategoryLabel category={type} />
+            )}
             <h3 className="truncate text-h2-list text-background-600">{name}</h3>
           </div>
 
