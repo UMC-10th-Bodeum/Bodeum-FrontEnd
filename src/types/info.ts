@@ -19,63 +19,30 @@ export interface Category {
   sub_category_ko: string;
 }
 
-export interface InfoDetail {
-  id: number;
-
-  category: string;
-  subCategory: string;
-  organizationType: string;
-
-  name: string;
-
-  thumbnail: string;
-
-  address: string;
-  district: string;
-  phone: string;
-  website?: string;
-
-  views: number;
-  scraps: number;
-  reviews: number;
-
-  updatedAt: string;
-
-  introduction: string;
-
-  specialties: string[];
-
-  hours: BusinessHour[];
-
-  notice: string;
-
-  location: {
-    lat: number;
-    lng: number;
-    distance: string;
-  };
-
-  reviewList: Review[];
-}
-
-export interface BusinessHour {
+export interface OperationHour {
   day: string;
-  open?: string;
-  close?: string;
-  description?: string;
-  closed: boolean;
+  time: string;
 }
 
-export interface Review {
-  id: number;
+export interface InfoDetail {
+  infoId: number;
+  category: ParentCategory;
+  name: string;
+  introduction: string;
+  tags: string[];
+  operationHours: OperationHour[];
+  address: string;
+  phone: string;
+  latitude: number;
+  longitude: number;
+  isScraped: boolean;
+  avgRating: number;
+  reviewCount: number;
+}
 
-  nickname: string;
-
-  profileImage?: string;
-
-  rating: number;
-
-  createdAt: string;
-
-  content: string;
+export interface GetInfoDetailResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: InfoDetail;
 }

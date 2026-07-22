@@ -7,6 +7,7 @@ import type { ParentCategory } from "@/types/info";
 import { mockInfoDetail } from "@/mocks/infoDetail";
 import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
+import IntroSection from "./components/Detail/IntroSection";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -61,8 +62,10 @@ export default function InfoDetailPage() {
       <main className="flex-1 space-y-5">
         <DetailHeader image={detail.thumbnail} />
         <h1>{id}</h1>
-
-        {/* <IntroSection data={detail} /> */}
+        <IntroSection
+          introduction={detail.introduction}
+          tags={detail.tags}
+        />
 
         {/* <BusinessHoursSection hours={detail.hours} /> */}
 
@@ -78,5 +81,5 @@ export default function InfoDetailPage() {
         {/* <FloatingChatCard /> */}
       </aside>
     </div>
-  )
+  );
 }
