@@ -1,4 +1,4 @@
-import type { HomePostPreviewResponse, InfoItemCountsResponse, RecommendedNewsResponse } from "@/types/home";
+import type { HomeNewsPreviewResponse, HomePostPreviewResponse, InfoItemCountsResponse, RecommendedNewsResponse } from "@/types/home";
 import api from "./axios";
 
 // 추천 소식 Top 5 조회
@@ -19,7 +19,25 @@ export const getInfoItemCounts = async () => {
   return data.result;
 };
 
-// 인기글/최신글 미리보기
+// 활동소식/지역소식 미리보기 조회
+export const getHomeNewsPreview = async (
+  newsType: "LOCAL" | "ACTIVITY",
+  limit = 3,
+) => {
+  const { data } = await api.get<HomeNewsPreviewResponse>(
+    "/api/v1/home/news/preview",
+    {
+      params: {
+        newsType,
+        limit,
+      },
+    },
+  );
+  
+  return data.result;
+};
+
+// 인기글/최신글 미리보기 조회
 export const getHomePostPreview = async (
   sort: "popular" | "latest",
   limit = 3,

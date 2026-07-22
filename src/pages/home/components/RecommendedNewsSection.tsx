@@ -3,6 +3,7 @@ import NewsCard from "./NewsCard";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
 import type { RecommendedNews } from "@/types/home";
+import { useHomeNewsPreview } from "@/hooks/useHome";
 
 interface RecommendedNewsSectionProps {
   news: RecommendedNews[];
@@ -11,6 +12,9 @@ interface RecommendedNewsSectionProps {
 export default function RecommendedNewsSection({
   news,
 }: RecommendedNewsSectionProps) {
+  const { data: activityNews = [] } = useHomeNewsPreview("ACTIVITY");
+  const { data: localNews = [] } = useHomeNewsPreview("LOCAL");
+
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
       <div>
@@ -31,13 +35,25 @@ export default function RecommendedNewsSection({
 
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
         <PostSection title="활동소식">
-          {postList.map((post) => (
-            <PostListItem key={post.id} {...post} />
+          {activityNews.map((news) => (
+            <PostListItem
+              key={news.newsId}
+              title={news.title}
+              region={String(news.region)}
+              likes={news.likeCount}
+              views={news.viewCount}
+            />
           ))}
         </PostSection>
         <PostSection title="지역소식">
-          {postList.map((post) => (
-            <PostListItem key={post.id} {...post} />
+          {localNews.map((news) => (
+            <PostListItem
+              key={news.newsId}
+              title={news.title}
+              region={String(news.region)}
+              likes={news.likeCount}
+              views={news.viewCount}
+            />
           ))}
         </PostSection>
       </div>

@@ -16,6 +16,21 @@ export interface RecommendedNewsResponse {
   result: RecommendedNews[];
 }
 
+export interface HomeNewsPreview {
+  newsId: number;
+  region: number;
+  title: string;
+  likeCount: number;
+  viewCount: number;
+}
+
+export interface HomeNewsPreviewResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: HomeNewsPreview[];
+}
+
 // 바로 찾는 필수 정보
 export interface InfoItemCounts {
   institution: number;
