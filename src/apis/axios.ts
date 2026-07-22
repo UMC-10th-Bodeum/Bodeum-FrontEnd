@@ -1,4 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
+import { clearAuthTokens, storeAuthTokens } from "./authStorage";
 import reissueTokens from "./reissueTokens";
 
 interface RetryRequestConfig extends InternalAxiosRequestConfig {
@@ -12,6 +13,30 @@ interface TokenInfo {
 }
 
 let refreshPromise: Promise<TokenInfo | null> | null = null;
+
+function replaceLogoutRefreshToken(
+  request: RetryRequestConfig,
+  refreshToken: string,
+) {
+  if (!request.url?.endsWith("/api/v1/auth/logout") || !request.data) {
+    return;
+  }
+
+  try {
+    const requestData =
+      typeof request.data === "string"
+        ? JSON.parse(request.data)
+        : { ...request.data };
+
+    requestData.refreshToken = refreshToken;
+    request.data =
+      typeof request.data === "string"
+        ? JSON.stringify(requestData)
+        : requestData;
+  } catch {
+    request.data = JSON.stringify({ refreshToken });
+  }
+}
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -59,19 +84,16 @@ api.interceptors.response.use(
       const newTokens = await refreshPromise;
 
       if (newTokens) {
-        localStorage.setItem("tokenType", newTokens.tokenType);
-        localStorage.setItem("accessToken", newTokens.accessToken);
-        localStorage.setItem("refreshToken", newTokens.refreshToken);
+        storeAuthTokens(newTokens);
 
         originalRequest.headers.Authorization =
           `${newTokens.tokenType} ${newTokens.accessToken}`;
+        replaceLogoutRefreshToken(originalRequest, newTokens.refreshToken);
 
         return api(originalRequest);
       }
 
-      localStorage.removeItem("tokenType");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+      clearAuthTokens();
 
       console.error("토큰 재발급에 실패했습니다.");
     }

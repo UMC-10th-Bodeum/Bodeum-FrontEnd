@@ -1,20 +1,26 @@
 import Logo from "@/assets/icons/Logo_kr.svg?react";
 import KakaoIcon from "@/assets/icons/KakaoIcon.svg?react";
 import NaverIcon from "@/assets/icons/NaverIcon.svg?react";
+import type { SocialProvider } from "@/apis/authApi";
 
 type AuthLoginCardProps = {
-  onAuthenticate: () => void;
+  onAuthenticate: (provider: SocialProvider) => void;
+  isRedirecting?: boolean;
 };
-
-type SocialProvider = "naver" | "kakao";
 
 type SocialLoginButtonProps = {
   provider: SocialProvider;
   label: string;
   onClick: () => void;
+  disabled?: boolean;
 };
 
-function SocialLoginButton({ provider, label, onClick }: SocialLoginButtonProps) {
+function SocialLoginButton({
+  provider,
+  label,
+  onClick,
+  disabled = false,
+}: SocialLoginButtonProps) {
   const isNaver = provider === "naver";
   const icon = isNaver ? (
     <NaverIcon className="size-[18px] text-background-100" aria-hidden="true" />
@@ -26,10 +32,12 @@ function SocialLoginButton({ provider, label, onClick }: SocialLoginButtonProps)
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       style={{ backgroundColor: isNaver ? "#03A94D" : "#FEE500" }}
       className={[
         "flex h-[48px] w-[536px] max-w-full cursor-pointer items-center justify-center rounded-[10px] px-[24px] py-[12px]",
         "text-h3-category focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400",
+        "disabled:cursor-not-allowed disabled:opacity-60",
         isNaver ? "text-background-100" : "text-background-600",
       ].join(" ")}
     >
@@ -43,7 +51,10 @@ function SocialLoginButton({ provider, label, onClick }: SocialLoginButtonProps)
   );
 }
 
-export default function AuthLoginCard({ onAuthenticate }: AuthLoginCardProps) {
+export default function AuthLoginCard({
+  onAuthenticate,
+  isRedirecting = false,
+}: AuthLoginCardProps) {
   return (
     <div className="flex w-full max-w-[624px] flex-col items-center justify-center gap-[40px]">
       <section className="flex w-full flex-col items-start rounded-[20px] bg-background-100 p-[44px] shadow-[0_0_15px_rgb(102_128_155_/_0.1)] max-sm:p-[24px]">
@@ -63,12 +74,14 @@ export default function AuthLoginCard({ onAuthenticate }: AuthLoginCardProps) {
             <SocialLoginButton
               provider="naver"
               label="네이버 로그인"
-              onClick={onAuthenticate}
+              onClick={() => onAuthenticate("naver")}
+              disabled={isRedirecting}
             />
             <SocialLoginButton
               provider="kakao"
               label="카카오 로그인"
-              onClick={onAuthenticate}
+              onClick={() => onAuthenticate("kakao")}
+              disabled={isRedirecting}
             />
           </div>
         </div>

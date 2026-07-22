@@ -5,8 +5,10 @@ import InfoPage from "@/pages/info/InfoPage";
 import DetailLayout from "@/layouts/DetailLayout";
 import InfoDetailPage from "@/pages/info/InfoDetailPage";
 import AuthPage from "@/pages/auth/AuthPage";
+import AuthCallbackPage from "@/pages/auth/AuthCallbackPage";
 import NewsPage from "@/pages/news/NewsPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
+import AccountApiTestPage from "@/pages/test/AccountApiTestPage";
 
 export const router = createBrowserRouter([
   {
@@ -24,11 +26,19 @@ export const router = createBrowserRouter([
         path: "/news",
         element: <NewsPage />,
       },
+      {
+        path: "/test/account",
+        element: <AccountApiTestPage />,
+      },
     ],
   },
   {
     path: "/auth",
     element: <AuthPage />,
+  },
+  {
+    path: "/auth/callback",
+    element: <AuthCallbackPage />,
   },
   {
     element: <DetailLayout />,

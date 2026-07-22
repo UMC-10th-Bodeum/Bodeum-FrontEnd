@@ -30,6 +30,7 @@ type OnboardingStepCardProps = {
   onNext: () => void;
   onClose: () => void;
   onSkip: () => void;
+  isSubmitting?: boolean;
 };
 
 type FormGroupProps = {
@@ -442,12 +443,19 @@ function StepHeader({
   );
 }
 
-function SkipButton({ onClick }: { onClick: () => void }) {
+function SkipButton({
+  onClick,
+  disabled = false,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-[4px] text-h3-onboard text-background-500"
+      disabled={disabled}
+      className="flex cursor-pointer items-center gap-[4px] text-h3-onboard text-background-500 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <span>건너뛰기</span>
       <span aria-hidden="true">&gt;</span>
@@ -490,6 +498,7 @@ export default function OnboardingStepCard({
   onNext,
   onClose,
   onSkip,
+  isSubmitting = false,
 }: OnboardingStepCardProps) {
   const titleId = useId();
   const childNameId = useId();
@@ -727,7 +736,7 @@ export default function OnboardingStepCard({
     <div className="flex w-full min-w-0 flex-col gap-[44px]">
       {content}
       <div className="flex w-full justify-center">
-        <SkipButton onClick={onSkip} />
+        <SkipButton onClick={onSkip} disabled={isSubmitting} />
       </div>
     </div>
   );
@@ -736,13 +745,13 @@ export default function OnboardingStepCard({
     return (
       <OnboardBoxFrame
         buttonCount={1}
-        rightButtonText="다음"
+        rightButtonText={isSubmitting ? "저장 중..." : "다음"}
         showClose
         showOverlay={false}
-        rightButtonDisabled={!isComplete}
+        rightButtonDisabled={!isComplete || isSubmitting}
         className="w-[624px]! gap-[16px]! p-[44px]! max-sm:px-[24px]! max-sm:py-[32px]!"
         ariaLabelledby={titleId}
-        onClose={onClose}
+        onClose={isSubmitting ? undefined : onClose}
         onRightButtonClick={onNext}
       >
         {frameChildren}
@@ -754,13 +763,16 @@ export default function OnboardingStepCard({
     <OnboardBoxFrame
       buttonCount={2}
       leftButtonText="이전"
-      rightButtonText={step === 3 ? "완료" : "다음"}
+      rightButtonText={
+        isSubmitting ? "저장 중..." : step === 3 ? "완료" : "다음"
+      }
       showClose
       showOverlay={false}
-      rightButtonDisabled={!isComplete}
+      leftButtonDisabled={isSubmitting}
+      rightButtonDisabled={!isComplete || isSubmitting}
       className="w-[624px]! gap-[16px]! p-[44px]! max-sm:px-[24px]! max-sm:py-[32px]!"
       ariaLabelledby={titleId}
-      onClose={onClose}
+      onClose={isSubmitting ? undefined : onClose}
       onLeftButtonClick={onPrev}
       onRightButtonClick={onNext}
     >
