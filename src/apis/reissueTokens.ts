@@ -1,4 +1,4 @@
-import apiClient from "./axios";
+import refreshApi from "./refreshApi";
 
 interface RefreshResponse {
   isSuccess: boolean;
@@ -21,7 +21,7 @@ export default async function reissueTokens() {
   }
 
   try {
-    const { data } = await apiClient.post<RefreshResponse>(
+    const { data } = await refreshApi.post<RefreshResponse>(
       "/api/v1/auth/refresh",
       {
         refreshToken,
