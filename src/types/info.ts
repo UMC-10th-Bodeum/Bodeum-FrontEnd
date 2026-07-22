@@ -19,6 +19,42 @@ export interface Category {
   sub_category_ko: string;
 }
 
+export interface InfoItemResponse {
+  infoItemId: number;
+  name: string;
+  mainCategory: ParentCategory;
+  mainCategoryKo: string;
+  subCategoryId: number;
+  subCategory: string;
+  subCategoryKo: string;
+  address: string;
+  sido: string;
+  sigungu: string;
+  phone: string;
+  homepageUrl: string | null;
+  viewCount: number;
+  scrapCount: number;
+  reviewCount: number;
+}
+
+export interface InfoPageResponse {
+  selectedMainCategory: ParentCategory | null;
+  selectedMainCategoryKo: string | null;
+  selectedSubCategoryId: number | null;
+  selectedSubCategory: string | null;
+  selectedSubCategoryKo: string | null;
+  items: {
+    content: InfoItemResponse[];
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+    first: boolean;
+    last: boolean;
+    empty: boolean;
+  };
+}
+
 export interface OperationHour {
   day: string;
   time: string;
