@@ -2,19 +2,10 @@ import { postList } from "@/mocks/post";
 import NewsCard from "./NewsCard";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
-
-interface News {
-  id: number;
-  title: string;
-  region: string;
-  category: string;
-  dDay: number;
-  views: number;
-  thumbnail?: string;
-}
+import type { RecommendedNews } from "@/types/home";
 
 interface RecommendedNewsSectionProps {
-  news: News[];
+  news: RecommendedNews[];
 }
 
 export default function RecommendedNewsSection({
@@ -32,7 +23,7 @@ export default function RecommendedNewsSection({
       <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
         {news.map((item) => (
           <NewsCard
-            key={item.id}
+            key={item.newsId}
             {...item}
           />
         ))}

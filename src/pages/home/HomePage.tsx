@@ -3,51 +3,14 @@ import CommunitySection from "./components/CommunitySection";
 import NoticeBanner from "./components/NoticeBanner";
 import RecommendedNewsSection from "./components/RecommendedNewsSection";
 import RequiredInfoSection from "./components/RequiredInfoSection";
-
-const news = [
-  {
-    id: 1,
-    title: "2026 발달재활서비스 바우처 신청 안내",
-    region: "서울",
-    category: "강남구",
-    dDay: 21,
-    views: 1204,
-  },
-  {
-    id: 2,
-    title: "2026 발달재활서비스 바우처 신청 안내",
-    region: "서울",
-    category: "강남구",
-    dDay: 21,
-    views: 1204,
-  },
-  {
-    id: 3,
-    title: "2026 발달재활서비스 바우처 신청 안내",
-    region: "서울",
-    category: "강남구",
-    dDay: 21,
-    views: 1204,
-  },
-  {
-    id: 4,
-    title: "2026 발달재활서비스 바우처 신청 안내",
-    region: "서울",
-    category: "강남구",
-    dDay: 21,
-    views: 1204,
-  },
-  {
-    id: 5,
-    title: "2026 발달재활서비스 바우처 신청 안내",
-    region: "서울",
-    category: "강남구",
-    dDay: 21,
-    views: 1204,
-  },
-];
+import { useRecommendedNews } from "@/hooks/useHome";
 
 export default function HomePage() {
+  const { data: news = [], isPending, isError } = useRecommendedNews();
+
+  if (isPending) return <div>Loading...</div>;
+  if (isError) return <div>Error</div>;
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-[18px] px-[32px] py-[20px]">
