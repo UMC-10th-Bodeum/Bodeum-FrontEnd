@@ -8,6 +8,7 @@ import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
 import IntroSection from "./components/Detail/IntroSection";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
+import LocationSection from "./components/Detail/LocationSection";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -69,7 +70,7 @@ export default function InfoDetailPage() {
 
         <BusinessHoursSection hours={detail.operationHours} />
 
-        {/* <LocationSection location={detail.location} /> */}
+        <LocationSection address={detail.address} />
 
         {/* <ReviewSection /> */}
       </main>
