@@ -1,19 +1,19 @@
-import type { HomeNewsPreviewResponse, HomePostPreviewResponse, InfoItemCountsResponse, RecommendedNewsResponse } from "@/types/home";
+import type { HomeNewsPreviewResponse, HomePostPreviewResponse, InfoItemCountsResponse, RecommendedCommunityPostResponse, RecommendedNewsResponse } from "@/types/home";
 import api from "./axios";
-
-// 추천 소식 Top 5 조회
-export const getRecommendedNews = async () => {
-  const { data } = await api.get<RecommendedNewsResponse>(
-    "/api/v1/news/recommended",
-  );
-
-  return data.result;
-};
 
 // 카테고리별 정보 건수 조회
 export const getInfoItemCounts = async () => {
   const { data } = await api.get<InfoItemCountsResponse>(
     "/api/v1/info-items/counts",
+  );
+
+  return data.result;
+};
+
+// 추천 소식 Top 5 조회
+export const getRecommendedNews = async () => {
+  const { data } = await api.get<RecommendedNewsResponse>(
+    "/api/v1/news/recommended",
   );
 
   return data.result;
@@ -33,7 +33,22 @@ export const getHomeNewsPreview = async (
       },
     },
   );
-  
+
+  return data.result;
+};
+
+// 커뮤니티 추천게시글 조회
+export const getRecommendedCommunityPosts = async (limit = 5) => {
+  const { data } =
+    await api.get<RecommendedCommunityPostResponse>(
+      "/api/v1/community/posts/recommended",
+      {
+        params: {
+          limit,
+        },
+      },
+    );
+    console.log(data)
   return data.result;
 };
 

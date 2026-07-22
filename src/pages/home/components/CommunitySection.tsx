@@ -4,16 +4,11 @@ import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
 import { useNavigate } from "react-router-dom";
 import type { CommunityPost } from "@/types/community"
-import { useHomePostPreview } from "@/hooks/useHome";
+import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
 
-interface CommunitySectionProps {
-  posts: CommunityPost[];
-}
-
-export default function CommunitySection({
-  posts
-}: CommunitySectionProps) {
+export default function CommunitySection() {
   const navigate = useNavigate();
+  const { data: posts = [] } = useRecommendedCommunityPosts();
   const { data: popularPosts = [] } = useHomePostPreview("popular");
   const { data: latestPosts = [] } = useHomePostPreview("latest");
 

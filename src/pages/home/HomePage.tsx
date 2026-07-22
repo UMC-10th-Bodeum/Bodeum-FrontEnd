@@ -20,9 +20,7 @@ export default function HomePage() {
 
         <RecommendedNewsSection news={news} />
       
-        <CommunitySection
-          posts={communityPosts}
-        />
+        <CommunitySection />
       </div>
     </div>
   );

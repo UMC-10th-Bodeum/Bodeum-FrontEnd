@@ -48,6 +48,30 @@ export interface InfoItemCountsResponse {
 }
 
 // 커뮤니티
+export interface DisabilityTag {
+  code: string;
+  label: string;
+}
+
+export interface RecommendedCommunityPost {
+  postId: number;
+  disabilityTags: DisabilityTag[];
+  categoryName: string;
+  authorDisplay: string;
+  title: string;
+  content: string;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+}
+
+export interface RecommendedCommunityPostResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: RecommendedCommunityPost[];
+}
+
 export interface HomePostPreview {
   postId: number;
   categoryName: string;

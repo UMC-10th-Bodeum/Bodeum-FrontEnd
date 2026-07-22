@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHomeNewsPreview, getHomePostPreview, getInfoItemCounts, getRecommendedNews } from "@/apis/home";
+import { getHomeNewsPreview, getHomePostPreview, getInfoItemCounts, getRecommendedCommunityPosts, getRecommendedNews } from "@/apis/home";
 
 export const useRecommendedNews = () => {
   return useQuery({
@@ -32,5 +32,12 @@ export const useHomeNewsPreview = (
   return useQuery({
     queryKey: ["homeNewsPreview", newsType, limit],
     queryFn: () => getHomeNewsPreview(newsType, limit),
+  });
+};
+
+export const useRecommendedCommunityPosts = (limit = 5) => {
+  return useQuery({
+    queryKey: ["recommendedCommunityPosts", limit],
+    queryFn: () => getRecommendedCommunityPosts(limit),
   });
 };

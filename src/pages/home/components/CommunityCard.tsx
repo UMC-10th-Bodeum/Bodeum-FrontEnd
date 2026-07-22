@@ -4,27 +4,33 @@ import ViewIcon from "@/assets/icons/Views.svg?react";
 import PostTag from "@/components/PostTag";
 import type { DiagnosisType } from "@/types/diagnosis";
 
+interface DisabilityTag {
+  code: string;
+  label: string;
+}
+
 interface CommunityCardProps {
-  diagnosis: DiagnosisType;
-  author: string;
-  createdAt: string;
+  disabilityTags: DisabilityTag[];
+  categoryName: string;
+  authorDisplay: string;
   title: string;
   content: string;
-  likes: number;
-  comments: number;
-  views: number;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
   onClick?: () => void;
 }
 
+
 export default function CommunityCard({
-  diagnosis,
-  author,
-  createdAt,
+  disabilityTags,
+  categoryName,
+  authorDisplay,
   title,
   content,
-  likes,
-  comments,
-  views,
+  likeCount,
+  commentCount,
+  viewCount,
   onClick,
 }: CommunityCardProps) {
   return (
@@ -34,11 +40,17 @@ export default function CommunityCard({
     >
       <div className="mb-[8px] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <PostTag type={diagnosis} />
-          <span className="text-body-sub text-background-500">{author}</span>
+          {disabilityTags.map((tag) => (
+            <PostTag
+              key={tag.code}
+              type={tag.code as DiagnosisType}
+              label={tag.label}
+            />
+          ))}
+          <span className="text-body-sub text-background-500">{authorDisplay}</span>
         </div>
 
-        <span className="text-body-sub text-background-500">{createdAt}</span>
+        <span className="text-body-sub text-background-500">{categoryName}</span>
       </div>
 
       <h3 className="mb-[8px] line-clamp-1 text-h5-list text-background-600">
@@ -52,17 +64,17 @@ export default function CommunityCard({
       <div className="mt-[8px] flex items-center gap-[14px] border-t border-background-250 pt-[8px] text-h4-list text-background-500">
         <div className="flex items-center gap-1">
           <HeartIcon className="h-[12px] w-[12px]" />
-          <span>{likes}</span>
+          <span>{likeCount}</span>
         </div>
 
         <div className="flex items-center gap-1">
           <CommentIcon className="h-[12px] w-[12px]" />
-          <span>{comments}</span>
+          <span>{commentCount}</span>
         </div>
 
         <div className="flex items-center gap-1">
           <ViewIcon className="h-[12px] w-[12px]" />
-          <span>{views.toLocaleString()}</span>
+          <span>{viewCount.toLocaleString()}</span>
         </div>
       </div>
     </button>
