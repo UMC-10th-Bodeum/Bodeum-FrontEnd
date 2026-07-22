@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
@@ -8,6 +7,7 @@ import { mockInfoDetail } from "@/mocks/infoDetail";
 import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
 import IntroSection from "./components/Detail/IntroSection";
+import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -67,7 +67,7 @@ export default function InfoDetailPage() {
           tags={detail.tags}
         />
 
-        {/* <BusinessHoursSection hours={detail.hours} /> */}
+        <BusinessHoursSection hours={detail.operationHours} />
 
         {/* <LocationSection location={detail.location} /> */}
 

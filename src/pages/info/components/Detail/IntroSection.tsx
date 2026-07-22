@@ -14,7 +14,7 @@ export default function IntroSection({
   return (
     <Section
       title="소개"
-      icon={<IntroIcon className="size-5 text-gray-700" />}
+      icon={<IntroIcon className="h-[16px] w-[16px] text-gray-700" />}
     >
       <span className="text-h3-onboard text-background-600">
         {introduction}
