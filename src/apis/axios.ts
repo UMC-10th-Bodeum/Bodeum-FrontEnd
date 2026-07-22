@@ -74,7 +74,6 @@ api.interceptors.response.use(
       localStorage.removeItem("refreshToken");
 
       console.error("토큰 재발급에 실패했습니다.");
-      // window.location.href = "/login";
     }
 
     return Promise.reject(error);
