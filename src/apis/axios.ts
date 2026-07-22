@@ -19,7 +19,7 @@ if (!baseUrl) {
   throw new Error("VITE_BASE_URL이 설정되지 않았습니다.");
 }
 
-const apiClient = axios.create({
+const api = axios.create({
   baseURL: baseUrl,
   timeout: 10000,
   headers: {
@@ -27,7 +27,7 @@ const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem("accessToken");
   const tokenType = localStorage.getItem("tokenType") ?? "Bearer";
 
@@ -38,7 +38,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-apiClient.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as RetryRequestConfig;
@@ -66,7 +66,7 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization =
           `${newTokens.tokenType} ${newTokens.accessToken}`;
 
-        return apiClient(originalRequest);
+        return api(originalRequest);
       }
 
       localStorage.removeItem("tokenType");
@@ -81,4 +81,4 @@ apiClient.interceptors.response.use(
   },
 );
 
-export default apiClient;
+export default api;
