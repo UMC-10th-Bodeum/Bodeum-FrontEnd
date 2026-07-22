@@ -1,3 +1,4 @@
+// 추천 소식 Top 5
 export interface RecommendedNews {
   newsId: number;
   title: string;
@@ -15,6 +16,7 @@ export interface RecommendedNewsResponse {
   result: RecommendedNews[];
 }
 
+// 바로 찾는 필수 정보
 export interface InfoItemCounts {
   institution: number;
   hospital: number;
@@ -28,4 +30,21 @@ export interface InfoItemCountsResponse {
   code: string;
   message: string;
   result: InfoItemCounts;
+}
+
+// 커뮤니티
+export interface HomePostPreview {
+  postId: number;
+  categoryName: string;
+  title: string;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+}
+
+export interface HomePostPreviewResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: HomePostPreview[];
 }
