@@ -44,7 +44,7 @@ export default function NewsCard({
           
           <ViewIcon className="h-[12px] w-[12px] ml-[8px] mr-[4px]" />
           <span className="text-body-sub leading-none text-background-500 mr-[4px]">조회</span>
-          <span className="text-h4-list leading-none text-gray-500">{viewCount.toLocaleString()}</span>
+          <span className="text-h4-list leading-none text-gray-500">{viewCount}</span>
         </div>
       </div>
     </button>

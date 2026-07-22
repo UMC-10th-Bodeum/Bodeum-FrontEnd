@@ -3,7 +3,6 @@ import MainButton from "@/components/MainButton";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
 import { useNavigate } from "react-router-dom";
-import type { CommunityPost } from "@/types/community"
 import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
 
 export default function CommunitySection() {
@@ -42,7 +41,7 @@ export default function CommunitySection() {
       <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
         <div className="inline-flex gap-4">
           {posts.map((post) => (
-            <CommunityCard key={post.id} {...post} />
+            <CommunityCard key={post.postId} {...post} />
           ))}
         </div>
       </div>
