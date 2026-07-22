@@ -4,14 +4,12 @@ import { useLocation, useParams } from "react-router-dom";
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
 import Chip from "@/components/Chips";
-import MainButton from "@/components/MainButton";
 import CommentStat from "@/components/post-stat/CommentStat";
 import DateStat from "@/components/post-stat/DateStat";
 import ScrapStat from "@/components/post-stat/ScrapStat";
 import ViewStat from "@/components/post-stat/ViewStat";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
-import AIMsgIcon from "@/assets/icons/AIMsg.svg?react";
 import ArrowUpRightIcon from "@/assets/icons/arrow-up-right.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ShareIcon from "@/assets/icons/Share.svg?react";
@@ -22,6 +20,7 @@ import PostSection from "../home/components/PostSection";
 import HeartStat from "@/components/post-stat/HeartStat";
 import { isNewsSourceTab, type NewsSourceTab } from "@/constants/newsSourceTab";
 import { getNewsListItemById, type NewsListItem } from "./data/newsMockData";
+import AIChatButton from "@/components/AIChatButton";
 
 const breadcrumbLabelMap: Record<NewsSourceTab, string> = {
   activity: "활동소식",
@@ -175,24 +174,7 @@ export default function NewsDetailPage() {
           </div>
         </div>
 
-        <div>
-          <MainButton
-            size="M"
-            className="h-[80px] w-[400px] justify-start gap-[10px] rounded-[8px] px-[30px] py-2 text-left [&:not(:active)]:bg-main-200"
-          >
-            <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center ">
-              <AIMsgIcon className="h-[32px] w-[32px]" aria-hidden="true" />
-            </span>
-            <span className="flex flex-col gap-1 whitespace-normal">
-              <span className="block text-h6 text-main-400">
-                빠르고 간단한 정보 관련 안내는 AI 큐레이션에게
-              </span>
-              <span className="block text-h3-category-sub text-background-600">
-                AI 챗봇을 통해 질문해보세요
-              </span>
-            </span>
-          </MainButton>
-        </div>
+        <AIChatButton />
       </div>
     </div>
   );
