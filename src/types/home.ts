@@ -14,3 +14,18 @@ export interface RecommendedNewsResponse {
   message: string;
   result: RecommendedNews[];
 }
+
+export interface InfoItemCounts {
+  institution: number;
+  hospital: number;
+  welfare: number;
+  employment: number;
+  education: number;
+}
+
+export interface InfoItemCountsResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: InfoItemCounts;
+}
