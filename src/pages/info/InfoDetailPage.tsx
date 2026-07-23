@@ -59,8 +59,7 @@ export default function InfoDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
-      {/* left */}
-      <main className="flex-1 space-y-5">
+      <main className="w-[680px]  space-y-[10px]">
         <DetailHeader image={undefined} />
         {/* <IntroSection
           introduction={detail.introduction}
@@ -84,8 +83,7 @@ export default function InfoDetailPage() {
         />
       </main>
 
-      {/* right */}
-      <aside className=" top-5 h-fit w-[400px] space-y-4">
+      <aside className="top-5 h-fit w-[400px] space-y-4">
         <SummaryCard
           name={detail.name}
           mainCategory={detail.mainCategory}
