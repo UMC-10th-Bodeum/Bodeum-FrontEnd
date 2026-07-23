@@ -16,7 +16,7 @@ interface Props {
 
 export default function ReviewCard({ review }: Props) {
   return (
-    <div className="flex gap-[6px] pt-[6px] border-b border-background-250">
+    <div className="flex gap-[6px] pt-[16px] pb-[10px] border-b border-background-250">
       <ProfileIcon />
 
       <div className="flex-1">

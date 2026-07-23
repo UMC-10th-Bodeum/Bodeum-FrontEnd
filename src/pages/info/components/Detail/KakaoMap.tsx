@@ -3,9 +3,13 @@ import { loadKakaoMap } from "@/utils/loadKakaoMap";
 
 interface KakaoMapProps {
   address: string;
+  onLocationLoaded?: (lat: number, lng: number) => void;
 }
 
-export default function KakaoMap({ address }: KakaoMapProps) {
+export default function KakaoMap({
+  address,
+  onLocationLoaded,
+}: KakaoMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,10 +26,12 @@ export default function KakaoMap({ address }: KakaoMapProps) {
         if (status !== window.kakao.maps.services.Status.OK || !result.length)
           return;
 
-        const position = new window.kakao.maps.LatLng(
-          Number(result[0].y),
-          Number(result[0].x)
-        );
+        const lat = Number(result[0].y);
+        const lng = Number(result[0].x);
+
+        onLocationLoaded?.(lat, lng);
+
+        const position = new window.kakao.maps.LatLng(lat, lng);
 
         const map = new window.kakao.maps.Map(mapRef.current!, {
           center: position,
@@ -46,5 +52,5 @@ export default function KakaoMap({ address }: KakaoMapProps) {
     };
   }, [address]);
 
-  return <div ref={mapRef} className="h-[360px] w-full rounded-[10px]" />;
-}
+  return <div ref={mapRef} className="h-[313px] w-full rounded-[10px]" />;
+};

@@ -6,7 +6,6 @@ import type { ParentCategory } from "@/types/info";
 import { infoDetailMockData, infoReviewMockData } from "@/mocks/infoDetail";
 import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
-import IntroSection from "./components/Detail/IntroSection";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
@@ -74,13 +73,10 @@ export default function InfoDetailPage() {
 
         <ReviewSection
           reviews={reviewData.reviews}
-  averageRating={reviewData.avgRating}
-  totalReviewCount={reviewData.totalCount}
+          averageRating={reviewData.avgRating}
+          totalReviewCount={reviewData.totalCount}
           onWriteReview={() => {
             // 후기 작성 페이지 이동 or 모달
-          }}
-          onMore={() => {
-            // 후기 전체 보기
           }}
         />
       </main>

@@ -19,13 +19,19 @@ export function loadKakaoMap(): Promise<void> {
     script.async = true;
 
     script.onload = () => {
-      window.kakao.maps.load(() => resolve());
+      console.log("SDK loaded");
+      window.kakao.maps.load(() => {
+        console.log("maps.load 완료");
+        resolve();
+      });
     };
 
-    script.onerror = () => reject(new Error("카카오맵 SDK 로드 실패"));
-
+    script.onerror = () => {
+      kakaoMapPromise = null;
+      reject(new Error("카카오맵 SDK 로드 실패"));
+    };
     document.head.appendChild(script);
   });
 
   return kakaoMapPromise;
-}
+};

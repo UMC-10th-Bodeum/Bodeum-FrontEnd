@@ -1,11 +1,12 @@
-import { useEffect, useRef } from "react";
-
 import Section from "./Section";
 import LocationIcon from "@/assets/icons/Location.svg?react";
 import KakaoMap from "./KakaoMap";
+import { useEffect, useState } from "react";
+import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
 
 interface Props {
   address: string;
+  homepageUrl: string;
 }
 
 declare global {
@@ -14,51 +15,101 @@ declare global {
   }
 }
 
-export default function LocationSection({ address }: Props) {
-  const mapRef = useRef<HTMLDivElement>(null);
+function getDistance(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+) {
+  const R = 6371;
+
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export default function LocationSection({ address, homepageUrl }: Props) {
+  const [currentLocation, setCurrentLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  const [placeLocation, setPlaceLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
-    window.kakao.maps.load(() => {
-      const geocoder = new window.kakao.maps.services.Geocoder();
+    if (!navigator.geolocation) return;
 
-      geocoder.addressSearch(address, (result, status) => {
-        if (status !== window.kakao.maps.services.Status.OK) return;
-
-        const { x, y } = result[0];
-
-        const position = new window.kakao.maps.LatLng(Number(y), Number(x));
-
-        const map = new window.kakao.maps.Map(mapRef.current!, {
-          center: position,
-          level: 3,
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setCurrentLocation({
+          lat: coords.latitude,
+          lng: coords.longitude,
         });
+      },
+      (err) => {
+        console.error(err);
+      }
+    );
+  }, []);
 
-        new window.kakao.maps.Marker({
-          map,
-          position,
-        });
-      });
-    });
-  }, [address]);
+  const distance =
+    currentLocation && placeLocation
+      ? getDistance(
+          currentLocation.lat,
+          currentLocation.lng,
+          placeLocation.lat,
+          placeLocation.lng
+        )
+      : null;
 
   return (
     <Section
       title="위치 정보"
       icon={<LocationIcon className="h-[16px] w-[16px]" />}
     >
-      <div
-        ref={mapRef}
-        className="h-[360px] w-full rounded-[10px]"
+      <KakaoMap
+        address={address}
+        onLocationLoaded={(lat, lng) =>
+          setPlaceLocation({ lat, lng })
+        }
       />
-      <div>
-        <KakaoMap address={address} />
-      </div>
-      <div className="item-center flex flex-row text-h6-list text-background-500">
-        <LocationIcon className="h-[12px] w-[12px] mt-[3.2px]" />
-        <p> 내 위치에서 약 3.1km</p>
+      <div className="flex flex-row items-center text-h6-list text-background-500 mt-[13px]">
+        <LocationIcon className="h-[12px] w-[12px]" />
+        <p className="ml-1">
+          {distance !== null
+            ? `내 위치에서 약 ${distance.toFixed(1)}km`
+            : "거리 계산 중..."}
+        </p>
       </div>
       
-      <p className="mt-4 text-h5 text-background-500">{address}</p>
+      <a
+        href={homepageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 flex h-[36px] w-[128px] items-center rounded-[10px] border border-background-300 bg-background-100 px-[16px]"
+      >
+        <ChevronLeftIcon className="mr-[4px] h-[14px] w-[14px] text-background-500" />
+
+        {/* <img
+          src={NaverMapLogo}
+          alt="네이버지도"
+          className="mr-5 h-10 w-10"
+        /> */}
+
+        <span className="text-h4-list text-[#5E626E]">
+          네이버지도
+        </span>
+      </a>
     </Section>
   );
 }
