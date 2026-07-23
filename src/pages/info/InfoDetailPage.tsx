@@ -4,11 +4,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
+import { mockInfoDetail } from "@/mocks/infoDetail";
+import DetailHeader from "./components/Detail/DetailHeader";
+import AIChatButton from "@/components/AIChatButton";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const navigate = useNavigate();
+  const detail = mockInfoDetail;
 
   const infoCategory = category
     ? infoCategoryMap[category as ParentCategory]
@@ -52,11 +56,27 @@ export default function InfoDetailPage() {
   }, [category, setBreadcrumb]);
 
   return (
-    <div className="flex min-h-screen flex-col px-[32px] py-[20px] bg-background-100 gap-[18px]">
-      <h1 className="text-h5-bold text-gray-900">InfoDetail</h1>
-      <span className="text-body2 text-gray-500">
-        {infoCategory?.label} &gt; {id}
-      </span>
+    <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
+      {/* left */}
+      <main className="flex-1 space-y-5">
+        <DetailHeader image={detail.thumbnail} />
+        <h1>{id}</h1>
+
+        {/* <IntroSection data={detail} /> */}
+
+        {/* <BusinessHoursSection hours={detail.hours} /> */}
+
+        {/* <LocationSection location={detail.location} /> */}
+
+        {/* <ReviewSection /> */}
+      </main>
+
+      {/* right */}
+      <aside className="sticky top-5 h-fit w-[400px] space-y-4">
+        {/* <SummaryCard data={detail} /> */}
+        <AIChatButton />
+        {/* <FloatingChatCard /> */}
+      </aside>
     </div>
   )
 }
