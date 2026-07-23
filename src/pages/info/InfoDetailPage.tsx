@@ -69,7 +69,10 @@ export default function InfoDetailPage() {
 
         <BusinessHoursSection hours={detail.businessHours} />
 
-        <LocationSection address={detail.address} />
+        <LocationSection
+          address={detail.address}
+          homepageUrl={detail.homepageUrl}
+        />
 
         <ReviewSection
           reviews={reviewData.reviews}

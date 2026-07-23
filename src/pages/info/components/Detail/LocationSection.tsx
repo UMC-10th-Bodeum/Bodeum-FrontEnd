@@ -6,7 +6,7 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
 
 interface Props {
   address: string;
-  homepageUrl: string;
+  homepageUrl: string | null;
 }
 
 declare global {
@@ -93,7 +93,7 @@ export default function LocationSection({ address, homepageUrl }: Props) {
       </div>
       
       <a
-        href={homepageUrl}
+        href={homepageUrl ?? "#"}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 flex h-[36px] w-[128px] items-center rounded-[10px] border border-background-300 bg-background-100 px-[16px]"
