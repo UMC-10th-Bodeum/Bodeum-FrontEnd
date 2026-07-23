@@ -7,11 +7,13 @@ import ButtonOutline from "@/components/ButtonOutline";
 import { useState } from "react";
 
 interface Review {
-  id: number;
+  reviewId: number;
   rating: number;
   nickname: string;
   createdAt: string;
   content: string;
+  helpfulCount: number;
+  isHelpful: boolean;
 }
 
 interface ReviewSectionProps {
@@ -19,7 +21,6 @@ interface ReviewSectionProps {
   totalReviewCount: number;
   averageRating: number;
   onWriteReview: () => void;
-  onMore: () => void;
 }
 
 const INITIAL_COUNT = 3;
@@ -59,7 +60,7 @@ export default function ReviewSection({
 
           <div className="my-[14px] flex flex-col">
             {visibleReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+              <ReviewCard key={review.reviewId} review={review} />
             ))}
           </div>
             

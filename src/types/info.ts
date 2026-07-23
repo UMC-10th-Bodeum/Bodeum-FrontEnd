@@ -80,6 +80,7 @@ export interface InfoDetail {
   reviewCount: number;
   isScrapped: boolean;
   businessHours: BusinessHour[];
+  updatedAt: string;
 }
 
 export interface BusinessHour {

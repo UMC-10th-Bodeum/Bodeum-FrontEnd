@@ -9,9 +9,10 @@ import AIChatButton from "@/components/AIChatButton";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
+import SummaryCard from "./components/Detail/SummaryCard";
 
 export default function InfoDetailPage() {
-  const { category, id } = useParams();
+  const { category } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const navigate = useNavigate();
   const detail = infoDetailMockData.result;
@@ -61,7 +62,6 @@ export default function InfoDetailPage() {
       {/* left */}
       <main className="flex-1 space-y-5">
         <DetailHeader image={undefined} />
-        <h1>{id}</h1>
         {/* <IntroSection
           introduction={detail.introduction}
           tags={detail.tags}
@@ -71,7 +71,7 @@ export default function InfoDetailPage() {
 
         <LocationSection
           address={detail.address}
-          homepageUrl={detail.homepageUrl}
+          homepageUrl={detail.homepageUrl ?? undefined}
         />
 
         <ReviewSection
@@ -79,16 +79,26 @@ export default function InfoDetailPage() {
           averageRating={reviewData.avgRating}
           totalReviewCount={reviewData.totalCount}
           onWriteReview={() => {
-            // 후기 작성 페이지 이동 or 모달
+            // 후기 작성 페이지 이동 
           }}
         />
       </main>
 
       {/* right */}
       <aside className=" top-5 h-fit w-[400px] space-y-4">
-        {/* <SummaryCard data={detail} /> */}
+        <SummaryCard
+          name={detail.name}
+          mainCategory={detail.mainCategory}
+          subCategory={detail.subCategoryKo}
+          homepageUrl={detail.homepageUrl ?? undefined}
+          viewCount={detail.viewCount}
+          scrapCount={detail.scrapCount}
+          reviewCount={detail.reviewCount}
+          isScrapped={detail.isScrapped}
+          onScrap={() => { }}
+          onShare={() => { }}
+        />
         <AIChatButton />
-        {/* <FloatingChatCard /> */}
       </aside>
     </div>
   );

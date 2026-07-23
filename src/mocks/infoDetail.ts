@@ -20,6 +20,7 @@ export const infoDetailMockData: InfoDetailResponse = {
     viewCount: 221,
     scrapCount: 33,
     reviewCount: 11,
+    updatedAt: "2026.05.04",
     isScrapped: false,
     businessHours: [
       {

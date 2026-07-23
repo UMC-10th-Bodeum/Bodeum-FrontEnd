@@ -3,11 +3,13 @@ import StarIcon from "@/assets/icons/Star.svg?react";
 import FeedbackButton from "@/components/FeedbackButton";
 
 interface Review {
-  id: number;
+  reviewId: number;
   rating: number;
   nickname: string;
   createdAt: string;
   content: string;
+  helpfulCount: number;
+  isHelpful: boolean;
 }
 
 interface Props {

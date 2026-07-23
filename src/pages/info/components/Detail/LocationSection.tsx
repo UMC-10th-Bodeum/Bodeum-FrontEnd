@@ -6,7 +6,7 @@ import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
 
 interface Props {
   address: string;
-  homepageUrl: string | null;
+  homepageUrl?: string;
 }
 
 declare global {
