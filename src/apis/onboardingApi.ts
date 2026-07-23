@@ -75,7 +75,7 @@ type OnboardingStepResponse = {
   nextStep: NextStep;
 };
 
-type OnboardingStatusResponse = {
+export type OnboardingStatusResponse = {
   childProfileRegistered: boolean;
   interestRegionRegistered: boolean;
   guardianProfileRegistered: boolean;
@@ -349,11 +349,9 @@ export async function getRegions() {
 
 export async function getOnboardingResume(options?: {
   allowResolved?: boolean;
+  status?: OnboardingStatusResponse;
 }): Promise<OnboardingResume> {
-  const { data: statusData } = await api.get<
-    ApiResponse<OnboardingStatusResponse>
-  >("/api/v1/users/me/onboarding-status");
-  const status = statusData.result;
+  const status = options?.status ?? (await getOnboardingStatus());
 
   if (status.nextStep === "TERMS") {
     return {
@@ -378,6 +376,14 @@ export async function getOnboardingResume(options?: {
     step: resolveOnboardingStep(status),
     form: buildOnboardingDraft(profile),
   };
+}
+
+export async function getOnboardingStatus() {
+  const { data } = await api.get<
+    ApiResponse<OnboardingStatusResponse>
+  >("/api/v1/users/me/onboarding-status");
+
+  return data.result;
 }
 
 export async function registerChildProfile(input: ChildProfileInput) {

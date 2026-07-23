@@ -6,6 +6,7 @@ import refreshApi from "./refreshApi";
 export {
   AUTH_STATE_CHANGED_EVENT,
   clearAuthTokens,
+  hasStoredAuthSession,
   storeAuthTokens,
 } from "./authStorage";
 
@@ -81,16 +82,39 @@ export async function submitAgreements(values: AgreementFormValues) {
   return data.result;
 }
 
-export async function logoutCurrentUser() {
+type LogoutCurrentUserOptions = {
+  clearImmediately?: boolean;
+};
+
+export async function logoutCurrentUser(
+  options: LogoutCurrentUserOptions = {},
+) {
   const refreshToken = localStorage.getItem("refreshToken");
+  const accessToken = localStorage.getItem("accessToken");
+  const tokenType = localStorage.getItem("tokenType") ?? "Bearer";
+  const logoutRequest = refreshToken
+    ? api.post<ApiResponse<null>>(
+        "/api/v1/auth/logout",
+        { refreshToken },
+        {
+          headers: accessToken
+            ? { Authorization: `${tokenType} ${accessToken}` }
+            : undefined,
+        },
+      )
+    : null;
+
+  if (options.clearImmediately) {
+    clearAuthTokens();
+  }
 
   try {
-    if (refreshToken) {
-      await api.post<ApiResponse<null>>("/api/v1/auth/logout", {
-        refreshToken,
-      });
+    if (logoutRequest) {
+      await logoutRequest;
     }
   } finally {
-    clearAuthTokens();
+    if (!options.clearImmediately) {
+      clearAuthTokens();
+    }
   }
 }

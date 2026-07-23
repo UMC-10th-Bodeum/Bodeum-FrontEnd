@@ -1,0 +1,198 @@
+import axios from "axios";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { getApiErrorMessage } from "@/apis/apiError";
+import { hasStoredAuthSession } from "@/apis/authApi";
+import { getOnboardingStatus } from "@/apis/onboardingApi";
+import { showToast } from "@/components/Toast";
+
+import {
+  consumeLoginToast,
+  getStoredAuthNextStep,
+  storeAuthNextStep,
+} from "../authProgressStorage";
+import { clearAgreementBrowserSession } from "../agreementBrowserSession";
+import {
+  clearOnboardingBrowserSession,
+  completeInterruptedOnboarding,
+  wasOnboardingBrowserSessionInterrupted,
+} from "../onboardingBrowserSession";
+import AuthLoadErrorState from "./AuthLoadErrorState";
+import AuthLoadingState from "./AuthLoadingState";
+
+type AuthStateGateProps = {
+  children: ReactNode;
+};
+
+function isUnauthorizedError(error: unknown) {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
+function showPendingLoginToast() {
+  const pendingToast = consumeLoginToast();
+
+  if (!pendingToast) {
+    return;
+  }
+
+  showToast(
+    "blue",
+    pendingToast.nickname
+      ? `${pendingToast.nickname}님, 환영합니다! 보듬이 보호자님의 곁에서 함께하겠습니다`
+      : "로그인되었습니다. 보듬에 오신 것을 환영합니다!",
+  );
+}
+
+export default function AuthStateGate({ children }: AuthStateGateProps) {
+  const navigate = useNavigate();
+  const [isChecking, setIsChecking] = useState(hasStoredAuthSession);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const trustedHome = useRef(false);
+
+  useEffect(() => {
+    if (trustedHome.current) {
+      setIsChecking(false);
+      return;
+    }
+
+    if (!hasStoredAuthSession()) {
+      setIsChecking(false);
+      setErrorMessage(null);
+      return;
+    }
+
+    let cancelled = false;
+    setIsChecking(true);
+    setErrorMessage(null);
+
+    const resolveAuthState = async () => {
+      try {
+        const storedNextStep = getStoredAuthNextStep();
+
+        if (storedNextStep === "HOME") {
+          trustedHome.current = true;
+          clearAgreementBrowserSession();
+          clearOnboardingBrowserSession();
+          showPendingLoginToast();
+          setIsChecking(false);
+          return;
+        }
+
+        if (storedNextStep === "TERMS") {
+          clearOnboardingBrowserSession();
+          navigate("/auth?flow=agreement", { replace: true });
+          return;
+        }
+
+        if (storedNextStep === "ONBOARDING") {
+          clearAgreementBrowserSession();
+
+          if (!(await wasOnboardingBrowserSessionInterrupted())) {
+            if (cancelled) {
+              return;
+            }
+
+            navigate("/auth?flow=onboarding", { replace: true });
+            return;
+          }
+
+          const result = await completeInterruptedOnboarding();
+
+          if (result.nextStep !== "HOME") {
+            throw new Error(
+              "중단된 온보딩의 건너뛰기 상태를 확인하지 못했습니다.",
+            );
+          }
+
+          trustedHome.current = true;
+          storeAuthNextStep("HOME");
+          clearOnboardingBrowserSession();
+
+          if (!cancelled) {
+            showToast(
+              "blue",
+              "가입이 완료되었습니다. 보듬에 오신 것을 환영합니다!",
+            );
+            setIsChecking(false);
+            navigate("/", { replace: true });
+          }
+          return;
+        }
+
+        const status = await getOnboardingStatus();
+
+        if (cancelled) {
+          return;
+        }
+
+        if (status.nextStep === "HOME") {
+          trustedHome.current = true;
+          clearAgreementBrowserSession();
+          storeAuthNextStep("HOME");
+          clearOnboardingBrowserSession();
+          showPendingLoginToast();
+          setIsChecking(false);
+          return;
+        }
+
+        if (status.nextStep === "ONBOARDING") {
+          clearAgreementBrowserSession();
+          storeAuthNextStep("ONBOARDING");
+          navigate("/auth?flow=onboarding", { replace: true });
+          return;
+        }
+
+        storeAuthNextStep("TERMS");
+        clearOnboardingBrowserSession();
+        navigate("/auth?flow=agreement", { replace: true });
+        return;
+      } catch (error: unknown) {
+        if (cancelled) {
+          return;
+        }
+
+        if (isUnauthorizedError(error)) {
+          setIsChecking(false);
+          return;
+        }
+
+        setErrorMessage(
+          getApiErrorMessage(
+            error,
+            "로그인 및 회원가입 진행 상태를 확인하지 못했습니다.",
+          ),
+        );
+        setIsChecking(false);
+      }
+    };
+
+    void resolveAuthState();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, retry]);
+
+  if (isChecking) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-main-150 px-[20px] py-[40px]">
+        <AuthLoadingState message="로그인 상태를 확인하고 있습니다." />
+      </main>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-main-150 px-[20px] py-[40px]">
+        <AuthLoadErrorState
+          message={errorMessage}
+          onRetry={() => setRetry((current) => current + 1)}
+        />
+      </main>
+    );
+  }
+
+  return children;
+}

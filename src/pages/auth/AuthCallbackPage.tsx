@@ -9,6 +9,15 @@ import {
 } from "@/apis/authApi";
 import { showToast } from "@/components/Toast";
 
+import {
+  queueLoginToast,
+  storeAuthNextStep,
+} from "./authProgressStorage";
+import {
+  clearAgreementBrowserSession,
+  clearAgreementInterruptedLogoutNotice,
+} from "./agreementBrowserSession";
+import { resolvePostLoginNextStep } from "./authFlow";
 import AuthLoadingState from "./components/AuthLoadingState";
 
 const callbackErrorMessages: Record<string, string> = {
@@ -58,18 +67,25 @@ export default function AuthCallbackPage() {
     void exchangeSocialLoginCode(code)
       .then((result) => {
         storeAuthTokens(result);
+        const nextStep = resolvePostLoginNextStep(result);
+        storeAuthNextStep(nextStep);
 
-        if (result.nextStep === "TERMS") {
+        if (nextStep === "TERMS") {
           navigate("/auth?flow=agreement", { replace: true });
           return;
         }
 
-        if (result.nextStep === "ONBOARDING") {
+        clearAgreementInterruptedLogoutNotice();
+
+        if (nextStep === "ONBOARDING") {
+          clearAgreementBrowserSession();
           navigate("/auth?flow=onboarding", { replace: true });
           return;
         }
 
-        if (result.nextStep === "HOME") {
+        if (nextStep === "HOME") {
+          clearAgreementBrowserSession();
+          queueLoginToast(result.nickname);
           navigate("/", { replace: true });
           return;
         }

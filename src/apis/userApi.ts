@@ -1,11 +1,6 @@
 import api from "./axios";
-import { clearAuthTokens, storeAuthTokens } from "./authStorage";
 import type { ApiResponse } from "./apiTypes";
 import reissueTokens from "./reissueTokens";
-
-type RefreshedTokens = NonNullable<Awaited<ReturnType<typeof reissueTokens>>>;
-
-let briefRefreshPromise: Promise<RefreshedTokens | null> | null = null;
 
 export type CodeLabel = {
   code: string;
@@ -55,16 +50,6 @@ async function requestUserBrief() {
   return data.result;
 }
 
-function refreshBriefTokens() {
-  if (!briefRefreshPromise) {
-    briefRefreshPromise = reissueTokens().finally(() => {
-      briefRefreshPromise = null;
-    });
-  }
-
-  return briefRefreshPromise;
-}
-
 export async function getUserBrief() {
   const brief = await requestUserBrief();
 
@@ -72,32 +57,18 @@ export async function getUserBrief() {
     return brief;
   }
 
-  const refreshedTokens = await refreshBriefTokens();
+  const refreshedTokens = await reissueTokens();
 
   if (!refreshedTokens) {
-    clearAuthTokens();
     return brief;
   }
 
-  storeAuthTokens(refreshedTokens);
   return requestUserBrief();
 }
 
 export async function getMyProfile() {
   const { data } = await api.get<ApiResponse<UserProfile>>(
     "/api/v1/users/me/profile",
-  );
-
-  return data.result;
-}
-
-export async function withdrawCurrentUser(reason?: string) {
-  const trimmedReason = reason?.trim();
-  const { data } = await api.delete<ApiResponse<{ success: boolean }>>(
-    "/api/v1/users/me",
-    {
-      data: trimmedReason ? { reason: trimmedReason } : undefined,
-    },
   );
 
   return data.result;

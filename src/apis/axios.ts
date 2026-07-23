@@ -1,18 +1,9 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
-import { clearAuthTokens, storeAuthTokens } from "./authStorage";
 import reissueTokens from "./reissueTokens";
 
 interface RetryRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
-
-interface TokenInfo {
-  tokenType: string;
-  accessToken: string;
-  refreshToken: string;
-}
-
-let refreshPromise: Promise<TokenInfo | null> | null = null;
 
 function replaceLogoutRefreshToken(
   request: RetryRequestConfig,
@@ -75,25 +66,15 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      if (!refreshPromise) {
-        refreshPromise = reissueTokens().finally(() => {
-          refreshPromise = null;
-        });
-      }
-
-      const newTokens = await refreshPromise;
+      const newTokens = await reissueTokens();
 
       if (newTokens) {
-        storeAuthTokens(newTokens);
-
         originalRequest.headers.Authorization =
           `${newTokens.tokenType} ${newTokens.accessToken}`;
         replaceLogoutRefreshToken(originalRequest, newTokens.refreshToken);
 
         return api(originalRequest);
       }
-
-      clearAuthTokens();
 
       console.error("토큰 재발급에 실패했습니다.");
     }

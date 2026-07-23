@@ -7,6 +7,9 @@ import {
 import { getApiErrorMessage } from "@/apis/apiError";
 import { getUserBrief, type UserBrief } from "@/apis/userApi";
 import { showToast } from "@/components/Toast";
+import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
+import { clearAgreementBrowserSession } from "@/pages/auth/agreementBrowserSession";
+import { clearOnboardingBrowserSession } from "@/pages/auth/onboardingBrowserSession";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SideNav from "./SideNav";
@@ -64,6 +67,9 @@ export default function SideBar() {
         ),
       );
     } finally {
+      clearAuthProgress();
+      clearAgreementBrowserSession();
+      clearOnboardingBrowserSession();
       logoutInFlight.current = false;
       navigate("/");
     }

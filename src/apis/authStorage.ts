@@ -23,3 +23,10 @@ export function clearAuthTokens() {
   localStorage.removeItem("refreshToken");
   notifyAuthStateChanged();
 }
+
+export function hasStoredAuthSession() {
+  return Boolean(
+    localStorage.getItem("accessToken") ||
+      localStorage.getItem("refreshToken"),
+  );
+}

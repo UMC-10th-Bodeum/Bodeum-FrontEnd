@@ -8,48 +8,58 @@ import AuthPage from "@/pages/auth/AuthPage";
 import AuthCallbackPage from "@/pages/auth/AuthCallbackPage";
 import NewsPage from "@/pages/news/NewsPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
-import AccountApiTestPage from "@/pages/test/AccountApiTestPage";
+import AuthStateGate from "@/pages/auth/components/AuthStateGate";
+import AuthBrowserSessionGuard from "@/pages/auth/components/AuthBrowserSessionGuard";
 
 export const router = createBrowserRouter([
   {
-    element: <MainLayout />,
+    element: <AuthBrowserSessionGuard />,
     children: [
       {
-        path: "/",
-        element: <HomePage />,
+        element: (
+          <AuthStateGate>
+            <MainLayout />
+          </AuthStateGate>
+        ),
+        children: [
+          {
+            path: "/",
+            element: <HomePage />,
+          },
+          {
+            path: "/info",
+            element: <InfoPage />,
+          },
+          {
+            path: "/news",
+            element: <NewsPage />,
+          },
+        ],
       },
       {
-        path: "/info",
-        element: <InfoPage />,
+        path: "/auth",
+        element: <AuthPage />,
       },
       {
-        path: "/news",
-        element: <NewsPage />,
+        path: "/auth/callback",
+        element: <AuthCallbackPage />,
       },
       {
-        path: "/test/account",
-        element: <AccountApiTestPage />,
-      },
-    ],
-  },
-  {
-    path: "/auth",
-    element: <AuthPage />,
-  },
-  {
-    path: "/auth/callback",
-    element: <AuthCallbackPage />,
-  },
-  {
-    element: <DetailLayout />,
-    children: [
-      {
-        path: "/info/:category/:id",
-        element: <InfoDetailPage />,
-      },
-      {
-        path: "/news/:sourceTab/:id",
-        element: <NewsDetailPage />,
+        element: (
+          <AuthStateGate>
+            <DetailLayout />
+          </AuthStateGate>
+        ),
+        children: [
+          {
+            path: "/info/:category/:id",
+            element: <InfoDetailPage />,
+          },
+          {
+            path: "/news/:sourceTab/:id",
+            element: <NewsDetailPage />,
+          },
+        ],
       },
     ],
   },
