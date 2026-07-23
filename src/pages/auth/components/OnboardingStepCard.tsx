@@ -733,7 +733,7 @@ export default function OnboardingStepCard({
   );
 
   const frameChildren = (
-    <div className="flex w-full min-w-0 flex-col gap-[44px]">
+    <div className="flex w-full min-w-0 flex-col gap-[28px]">
       {content}
       <div className="flex w-full justify-center">
         <SkipButton onClick={onSkip} disabled={isSubmitting} />
@@ -749,7 +749,7 @@ export default function OnboardingStepCard({
         showClose
         showOverlay={false}
         rightButtonDisabled={!isComplete || isSubmitting}
-        className="w-[624px]! gap-[16px]! p-[44px]! max-sm:px-[24px]! max-sm:py-[32px]!"
+        className="w-[624px]! gap-[16px]! px-[44px]! py-[36px]! max-sm:px-[24px]! max-sm:py-[32px]!"
         ariaLabelledby={titleId}
         onClose={isSubmitting ? undefined : onClose}
         onRightButtonClick={onNext}
@@ -770,7 +770,7 @@ export default function OnboardingStepCard({
       showOverlay={false}
       leftButtonDisabled={isSubmitting}
       rightButtonDisabled={!isComplete || isSubmitting}
-      className="w-[624px]! gap-[16px]! p-[44px]! max-sm:px-[24px]! max-sm:py-[32px]!"
+      className="w-[624px]! gap-[16px]! px-[44px]! py-[36px]! max-sm:px-[24px]! max-sm:py-[32px]!"
       ariaLabelledby={titleId}
       onClose={isSubmitting ? undefined : onClose}
       onLeftButtonClick={onPrev}
