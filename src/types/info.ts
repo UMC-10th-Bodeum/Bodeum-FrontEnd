@@ -55,30 +55,59 @@ export interface InfoPageResponse {
   };
 }
 
-export interface OperationHour {
-  day: string;
-  time: string;
-}
-
-export interface InfoDetail {
-  infoId: number;
-  category: ParentCategory;
-  name: string;
-  introduction: string;
-  tags: string[];
-  operationHours: OperationHour[];
-  address: string;
-  phone: string;
-  latitude: number;
-  longitude: number;
-  isScraped: boolean;
-  avgRating: number;
-  reviewCount: number;
-}
-
-export interface GetInfoDetailResponse {
+export interface InfoDetailResponse {
   isSuccess: boolean;
   code: string;
   message: string;
   result: InfoDetail;
+}
+
+export interface InfoDetail {
+  infoItemId: number;
+  name: string;
+  mainCategory: ParentCategory;
+  mainCategoryKo: string;
+  subCategoryId: number;
+  subCategory: string;
+  subCategoryKo: string;
+  address: string;
+  sido: string;
+  sigungu: string;
+  phone: string | null;
+  homepageUrl: string | null;
+  viewCount: number;
+  scrapCount: number;
+  reviewCount: number;
+  isScrapped: boolean;
+  businessHours: BusinessHour[];
+}
+
+export interface BusinessHour {
+  dayOfWeek:
+    | "월요일"
+    | "화요일"
+    | "수요일"
+    | "목요일"
+    | "금요일"
+    | "토요일"
+    | "일요일";
+  openTime: string | null;
+  closeTime: string | null;
+}
+
+// 리뷰
+export interface Review {
+  reviewId: number;
+  rating: number;
+  nickname: string;
+  createdAt: string;
+  content: string;
+  helpfulCount: number;
+  isHelpful: boolean;
+}
+
+export interface InfoReviewResponse {
+  avgRating: number;
+  totalCount: number;
+  reviews: Review[];
 }

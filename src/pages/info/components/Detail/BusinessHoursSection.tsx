@@ -1,9 +1,9 @@
 import ClockIcon from "@/assets/icons/Clock.svg?react";
-import type { OperationHour } from "@/types/info";
+import type { BusinessHour } from "@/types/info";
 import Section from "./Section";
 
 interface BusinessHoursSectionProps {
-  hours: OperationHour[];
+  hours: BusinessHour[];
 }
 
 export default function BusinessHoursSection({
@@ -22,17 +22,17 @@ export default function BusinessHoursSection({
     >
       
       <div className="flex flex-col gap-y-[10px] overflow-hidden rounded-[8px] ">
-        {hours.map(({ day, time }) => (
+        {hours.map(({ dayOfWeek, openTime, closeTime }) => (
           <div
-            key={day}
+            key={dayOfWeek}
             className="flex items-center justify-between py-[7px] border-b border-background-250"
           >
-            <span className="text-h4-list text-background-500">{day}</span>
+            <span className="text-h4-list text-background-500">{dayOfWeek}</span>
 
-            {time === "휴무" ? (
+            {openTime === "휴무" ? (
               <span className="text-h6 text-sub-red">휴무</span>
             ) : (
-              <span className="text-h6 text-background-600">{time}</span>
+                <span className="text-h6 text-background-600">{openTime} ~ {closeTime}</span>
             )}
           </div>
         ))}

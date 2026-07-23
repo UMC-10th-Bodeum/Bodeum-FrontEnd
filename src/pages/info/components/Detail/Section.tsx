@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 interface SectionProps {
-  title: string;
+  title: ReactNode;
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -20,9 +20,13 @@ export default function Section({
       className={`w-[680px] rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[20px] ${className}`}
     >
       {headerTop && <div className="mb-[14px]">{headerTop}</div>}
-      <div className="mb-[14px] flex items-center gap-[4px]">
+      <div className="mb-[14px] flex items-center gap-[8px]">
         {icon}
-        <h2 className="text-h2-list text-background-600">{title}</h2>
+        {typeof title === "string" ? (
+          <h2 className="text-h2-list text-background-600">{title}</h2>
+        ) : (
+          title
+        )}
       </div>
       {children}
     </section>
