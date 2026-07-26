@@ -57,7 +57,7 @@ export default function SummaryCard({
   return (
     <div className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
       <div className="px-[25px] py-[24px]">
-        <div className="flex items-center gap-[10px] mb-[12px]">
+        <div className="flex item-center gap-[10px] mb-[12px]">
           <CategoryLabel category={mainCategory as any} />
           
           <PostTag
