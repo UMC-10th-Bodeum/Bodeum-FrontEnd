@@ -102,12 +102,12 @@ export default function LocationSection({ address, homepageUrl }: Props) {
 
         {/* <img
           src={NaverMapLogo}
-          alt="네이버지도"
+          alt="카카오"
           className="mr-5 h-10 w-10"
         /> */}
 
         <span className="text-h4-list text-[#5E626E]">
-          네이버지도
+          카카오지도
         </span>
       </a>
     </Section>
