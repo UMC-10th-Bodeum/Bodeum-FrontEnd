@@ -53,6 +53,7 @@ interface InfoItemProps {
   isScrapped?: boolean;
   onClick?: () => void;
   onScrapClick?: () => void;
+  clickable?: boolean;
 }
 
 export default function InfoItem({
@@ -66,6 +67,7 @@ export default function InfoItem({
   isScrapped = false,
   onClick,
   onScrapClick,
+  clickable = true,
 }: InfoItemProps) {
   const Icon = infoItemIconMap[mainCategory];
   const pressedBorderColor = infoItemPressedBorderMap[mainCategory];
@@ -74,7 +76,7 @@ export default function InfoItem({
   return (
     <BaseInfoCard
       pressedBorderColor={pressedBorderColor}
-      onClick={onClick}
+      onClick={clickable ? onClick : undefined}
       icon={
         <div className="flex h-[66px] w-[66px] shrink-0 items-center justify-center rounded-[10px] bg-main-100">
           <Icon className={iconSize} />

@@ -7,6 +7,7 @@ import InfoDetailPage from "@/pages/info/InfoDetailPage";
 import AuthPage from "@/pages/auth/AuthPage";
 import NewsPage from "@/pages/news/NewsPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
+import WriteReviewPage from "@/pages/info/WriteReviewPage";
 
 export const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
         path: "/news/:sourceTab/:id",
         element: <NewsDetailPage />,
       },
+      {
+        path: "/info/:category/:id/review/write",
+        element: <WriteReviewPage />,
+      }
     ],
   },
 ]);

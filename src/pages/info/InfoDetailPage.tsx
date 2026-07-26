@@ -12,7 +12,7 @@ import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
 
 export default function InfoDetailPage() {
-  const { category } = useParams();
+  const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const navigate = useNavigate();
   const detail = infoDetailMockData.result;
@@ -77,9 +77,9 @@ export default function InfoDetailPage() {
           reviews={reviewData.reviews}
           averageRating={reviewData.avgRating}
           totalReviewCount={reviewData.totalCount}
-          onWriteReview={() => {
-            // 후기 작성 페이지 이동 
-          }}
+          onWriteReview={() =>
+            navigate(`/info/${category}/${id}/review/write`)
+          }
         />
       </main>
 
