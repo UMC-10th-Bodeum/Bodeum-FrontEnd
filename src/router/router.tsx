@@ -9,6 +9,10 @@ import InfoDetailPage from "@/pages/info/InfoDetailPage";
 import InfoPage from "@/pages/info/InfoPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
 import NewsPage from "@/pages/news/NewsPage";
+import WriteReviewPage from "@/pages/info/WriteReviewPage";
+import CommunityPage from "@/pages/community/CommunityPage";
+import CommunityDetailPage from "@/pages/community/CommunityDetailPage";
+import CommunityWritePage from "@/pages/community/CommunityWritePage";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +34,15 @@ export const router = createBrowserRouter([
         path: "/news",
         element: <NewsPage />,
       },
+      {
+        path: "/community",
+        element: <CommunityPage />,
+      },
+      {
+        path: "/community/:id",
+        element: <CommunityDetailPage />,
+        handle: { header: "back" },
+      },
     ],
   },
   {
@@ -46,6 +59,14 @@ export const router = createBrowserRouter([
       {
         path: "/news/:sourceTab/:id",
         element: <NewsDetailPage />,
+      },
+      {
+        path: "/info/:category/:id/review/write",
+        element: <WriteReviewPage />,
+      },
+      {
+        path: "/community/write",
+        element: <CommunityWritePage />,
       },
     ],
   },

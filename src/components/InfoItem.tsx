@@ -7,10 +7,10 @@ import InfoItemWelfareIcon from "@/assets/icons/InfoItem-welfare.svg?react";
 import InfoItemEmploymentIcon from "@/assets/icons/InfoItem-employment.svg?react";
 import InfoItemEducationIcon from "@/assets/icons/Infoitem-education.svg?react";
 import InfoItemNewsIcon from "@/assets/icons/InfoItem-news.svg?react";
-import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 import type { ChipVariant } from "@/components/Chips";
 import type { ComponentType, ReactNode, SVGProps } from "react";
+import CategoryLabel from "@/components/CategoryLabel";
 
 export type InfoItemCategory = ParentCategory | "PROGRAM";
 
@@ -51,25 +51,27 @@ const infoItemIconSizeMap = {
 const noop = () => {};
 
 interface InfoItemProps {
-  type: InfoItemCategory;
+  mainCategory: InfoItemCategory;
   name: string;
   address: string;
-  services: string[];
+  subCategoryKo: string;
   chipText?: ReactNode;
   chipVariant?: ChipVariant;
+  phone: string;
   viewCount: number;
   scrapCount: number;
+  reviewCount: number;
   isScrapped?: boolean;
   onClick?: () => void;
   onScrapClick?: () => void;
 }
 
 export default function InfoItem({
-  type,
+  mainCategory,
   name,
   address,
-  services,
-  chipText,
+  subCategoryKo,
+  phone,
   chipVariant = "default",
   viewCount,
   scrapCount,
@@ -77,11 +79,10 @@ export default function InfoItem({
   onClick,
   onScrapClick,
 }: InfoItemProps) {
-  const { label, bgColor, textColor } =
-    type === "PROGRAM" ? programCategoryInfo : infoCategoryMap[type];
-  const Icon = infoItemIconMap[type];
-  const pressedBorderColor = infoItemPressedBorderMap[type];
-  const iconSize = infoItemIconSizeMap[type];
+  const isProgram = mainCategory === "PROGRAM";
+const Icon = infoItemIconMap[mainCategory];
+const pressedBorderColor = infoItemPressedBorderMap[mainCategory];
+const iconSize = infoItemIconSizeMap[mainCategory];
   const isClickable = Boolean(onClick);
   const interactiveSurfaceStyle = isClickable
     ? `group-hover:shadow-[0.76px_1.51px_11.36px_0px_#00000026] ${pressedBorderColor}`
@@ -110,18 +111,22 @@ export default function InfoItem({
 
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-[4px]">
-            <span
-              className={`shrink-0 rounded-[10px] ${bgColor} px-2 py-[5.5px] text-h5-list leading-none ${textColor}`}
-            >
-              {label}
-            </span>
+            {isProgram ? (
+              <span
+                className={`shrink-0 rounded-[10px] ${programCategoryInfo.bgColor} px-2 py-[4px] text-h5-list leading-none ${programCategoryInfo.textColor}`}
+              >
+                {programCategoryInfo.label}
+              </span>
+            ) : (
+              <CategoryLabel category={mainCategory} />
+            )}
             <h3 className="truncate text-h2-list text-background-600">{name}</h3>
           </div>
 
           <p className="mt-1 truncate text-h6-list text-background-600">{address}</p>
-          {services.length > 0 && (
+          {subCategoryKo && (
             <p className="mt-0.5 truncate text-body-sub text-background-500">
-              {services.join(" · ")}
+              {subCategoryKo}
             </p>
           )}
         </div>
@@ -129,9 +134,9 @@ export default function InfoItem({
 
       <div className="flex h-[64px] w-[130px] shrink-0 flex-col items-end justify-center gap-[11px]">
         <div className="flex h-[33px] w-full items-end justify-center">
-          {chipText && (
+          {phone && (
             <Chip variant={chipVariant} className="min-w-[100px]">
-              {chipText}
+              {phone}
             </Chip>
           )}
         </div>

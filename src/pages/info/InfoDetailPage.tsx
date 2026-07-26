@@ -1,14 +1,23 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
+import { infoDetailMockData, infoReviewMockData } from "@/mocks/infoDetail";
+import DetailHeader from "./components/Detail/DetailHeader";
+import AIChatButton from "@/components/AIChatButton";
+import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
+import LocationSection from "./components/Detail/LocationSection";
+import ReviewSection from "./components/Detail/review/ReviewSection";
+import SummaryCard from "./components/Detail/SummaryCard";
+import IntroSection from "./components/Detail/IntroSection";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const navigate = useNavigate();
+  const detail = infoDetailMockData.result;
+  const reviewData = infoReviewMockData.result;
 
   const infoCategory = category
     ? infoCategoryMap[category as ParentCategory]
@@ -30,33 +39,66 @@ export default function InfoDetailPage() {
 
   // 임시
   useEffect(() => {
-    if (!category) return;
+  if (!category) return;
 
-    setBreadcrumb([
-      {
-        label: "정보",
-        onClick: () => {
-          // 모달 열기
-        },
-      },
-      {
-        label: infoCategory?.label ?? "",
-        onClick: () => navigate(`/info?category=${category}`),
-      },
-      {
-        label: "드림발달클리닉",
-      },
-    ]);
+  setBreadcrumb([
+    {
+      label: "정보",
+      onClick: () => {},
+    },
+    {
+      label: infoCategory?.label ?? "",
+      onClick: () => navigate(`/info?category=${category}`),
+    },
+    {
+      label: detail.name,
+    },
+  ]);
 
-    return () => setBreadcrumb([]);
-  }, [category, setBreadcrumb]);
+  return () => setBreadcrumb([]);
+}, [category, detail.name, infoCategory, navigate, setBreadcrumb]);
 
   return (
-    <div className="flex min-h-screen flex-col px-[32px] py-[20px] bg-background-100 gap-[18px]">
-      <h1 className="text-h5-bold text-gray-900">InfoDetail</h1>
-      <span className="text-body2 text-gray-500">
-        {infoCategory?.label} &gt; {id}
-      </span>
+    <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
+      <main className="w-[680px]  space-y-[10px]">
+        <DetailHeader image={undefined} />
+        <IntroSection
+          // introduction={detail.introduction}
+          // tags={detail.tags}
+        />
+
+        <BusinessHoursSection hours={detail.businessHours} />
+
+        <LocationSection
+          address={detail.address}
+          homepageUrl={detail.homepageUrl ?? undefined}
+        />
+
+        <ReviewSection
+          reviews={reviewData.reviews}
+          averageRating={reviewData.avgRating}
+          totalReviewCount={reviewData.totalCount}
+          onWriteReview={() =>
+            navigate(`/info/${category}/${id}/review/write`)
+          }
+        />
+      </main>
+
+      <aside className="top-5 h-fit w-[400px] space-y-4">
+        <SummaryCard
+          name={detail.name}
+          mainCategory={detail.mainCategory}
+          subCategory={detail.subCategoryKo}
+          homepageUrl={detail.homepageUrl ?? undefined}
+          viewCount={detail.viewCount}
+          scrapCount={detail.scrapCount}
+          reviewCount={detail.reviewCount}
+          isScrapped={detail.isScrapped}
+          onScrap={() => { }}
+          onShare={() => { }}
+        />
+        <AIChatButton />
+      </aside>
     </div>
-  )
+  );
 }

@@ -1,18 +1,16 @@
-import CommunityCard from "./CommunityCard";
+import CommunityCard from "@/components/CommunityCard";
 import MainButton from "@/components/MainButton";
 import PostSection from "./PostSection";
 import { postList } from "@/mocks/post";
 import PostListItem from "./PostListItem";
 import { useNavigate } from "react-router-dom";
-import type { CommunityPost } from "@/types/community"
+import type { CommunityPost } from "@/types/community";
 
 interface CommunitySectionProps {
   posts: CommunityPost[];
 }
 
-export default function CommunitySection({
-  posts
-}: CommunitySectionProps) {
+export default function CommunitySection({ posts }: CommunitySectionProps) {
   const navigate = useNavigate();
 
   return (
@@ -26,17 +24,10 @@ export default function CommunitySection({
         </div>
 
         <div className="flex gap-[10px]">
-          <MainButton
-            size="S"
-            onClick={() => navigate("/community/write")}
-          >
+          <MainButton size="S" onClick={() => navigate("/community/write")}>
             글쓰기
           </MainButton>
-          <MainButton
-            size="S"
-            stroke
-            onClick={() => navigate("/community")}
-          >
+          <MainButton size="S" stroke onClick={() => navigate("/community")}>
             전체보기
           </MainButton>
         </div>
