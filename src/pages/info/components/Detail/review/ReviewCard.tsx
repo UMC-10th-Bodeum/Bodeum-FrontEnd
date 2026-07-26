@@ -50,8 +50,8 @@ export default function ReviewCard({ review }: Props) {
 
         <FeedbackButton
           feedbackType="Good"
-          defaultSelected={false}
-          defaultCount={0}
+          defaultSelected={review.isHelpful}
+          defaultCount={review.helpfulCount}
           className="text-h6-list"
         />
       </div>
