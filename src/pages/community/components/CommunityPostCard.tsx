@@ -39,7 +39,10 @@ export default function CommunityPostCard({
       }}
       onKeyDown={(event) => {
         if ((event.target as HTMLElement).closest("button")) return;
-        if (event.key === "Enter" || event.key === " ") onClick?.();
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick?.();
+        }
       }}
       className="flex h-[102px] w-[578px] min-w-0 cursor-pointer flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] hover:shadow-[1px_2px_15px_0px_#00000026] active:border-main-400"
     >

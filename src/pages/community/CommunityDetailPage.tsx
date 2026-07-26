@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import ButtonOutline from "@/components/ButtonOutline";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
@@ -43,29 +43,62 @@ const relatedPosts = Array.from({ length: 5 }, (_, index) => ({
 export default function CommunityDetailPage() {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const { setBreadcrumb } = useBreadcrumb();
   const routeState = location.state as {
     post?: DetailPost;
     category?: CommunityCategory;
   } | null;
 
-  const post = useMemo<DetailPost>(() => {
-    if (routeState?.post) {
-      return { ...defaultPost, ...routeState.post, content: detailBody };
+  const post = useMemo<DetailPost | undefined>(() => {
+    const postId = id && /^[1-9]\d*$/.test(id) ? Number(id) : undefined;
+    const matched =
+      postId !== undefined && Number.isSafeInteger(postId)
+        ? communityPosts.find((item) => item.id === postId)
+        : undefined;
+
+    if (!matched) {
+      return undefined;
     }
 
-    const matched = communityPosts.find((item) => item.id === Number(id));
-    return matched ? { ...defaultPost, ...matched, content: detailBody } : defaultPost;
+    const statePost =
+      routeState?.post?.id === matched.id ? routeState.post : undefined;
+
+    return {
+      ...defaultPost,
+      ...matched,
+      ...statePost,
+      content: detailBody,
+    };
   }, [id, routeState]);
 
-  const selectedCategory = routeState?.category ?? post.category;
-  const categoryLabel = communityCategoryMap[selectedCategory];
+  const selectedCategory = post
+    ? routeState?.category ?? post.category
+    : undefined;
+  const categoryLabel = selectedCategory
+    ? communityCategoryMap[selectedCategory]
+    : "게시글을 찾을 수 없습니다";
 
   useEffect(() => {
     setBreadcrumb([{ label: "커뮤니티" }, { label: categoryLabel }]);
 
     return () => setBreadcrumb([]);
   }, [categoryLabel, setBreadcrumb]);
+
+  if (!post) {
+    return (
+      <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
+        <div className="mx-auto flex w-[680px] flex-col items-center rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
+          <h1 className="text-h2-list text-background-600">
+            게시글을 찾을 수 없습니다
+          </h1>
+          <p className="mt-[8px] text-h5 text-background-500">
+            삭제되었거나 존재하지 않는 게시글입니다.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
@@ -82,10 +115,22 @@ export default function CommunityDetailPage() {
           <p className="text-h2-list text-background-600">{categoryLabel} 게시판의 다른 글</p>
           <div className="space-y-[8px]">
             {relatedPosts.map((item) => (
-              <CommunityRelatedPostCard key={item.id} {...item} />
+              <CommunityRelatedPostCard
+                key={item.id}
+                {...item}
+                onClick={() =>
+                  navigate(`/community/${item.id}`, {
+                    state: { category: selectedCategory },
+                  })
+                }
+              />
             ))}
           </div>
-          <ButtonOutline label="더보기" onClick={() => {}} className="w-full h-[40px]" />
+          <ButtonOutline
+            label="더보기"
+            onClick={() => navigate("/community")}
+            className="w-full h-[40px]"
+          />
         </section>
       </div>
     </div>

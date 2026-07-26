@@ -15,5 +15,8 @@ export const communityCategoryEntries = Object.entries(
 export function isCommunityCategory(
   value: string | null,
 ): value is CommunityCategory {
-  return value !== null && value in communityCategoryMap;
+  return (
+    value !== null &&
+    Object.prototype.hasOwnProperty.call(communityCategoryMap, value)
+  );
 }

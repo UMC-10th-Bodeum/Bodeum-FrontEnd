@@ -33,7 +33,10 @@ export default function CommunityRelatedPostCard({
       }}
       onKeyDown={(event) => {
         if ((event.target as HTMLElement).closest("button")) return;
-        if (event.key === "Enter" || event.key === " ") onClick?.();
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick?.();
+        }
       }}
       className="flex h-[44px] w-[1128px] cursor-pointer items-center rounded-[10px] border border-transparent bg-background-200 px-[16px] py-[12px] text-left transition-[border-color,box-shadow] duration-300 ease-out hover:shadow-[1px_2px_15px_0px_#00000026] active:border-background-500"
     >
