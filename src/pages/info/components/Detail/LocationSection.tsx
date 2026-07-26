@@ -3,6 +3,7 @@ import LocationIcon from "@/assets/icons/Location.svg?react";
 import KakaoMap from "./KakaoMap";
 import { useEffect, useState } from "react";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
+import KAKAOMapLogo from "@/assets/icons/KAKAOMapLogo.svg?react"
 
 interface Props {
   address: string;
@@ -96,18 +97,14 @@ export default function LocationSection({ address, homepageUrl }: Props) {
         href={homepageUrl ?? "#"}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 flex h-[36px] w-[128px] items-center rounded-[10px] border border-background-300 bg-background-100 px-[16px]"
+        className="mt-4 flex h-[36px] w-[133px] items-center rounded-[10px] border border-background-300 bg-background-100 px-[16px]"
       >
         <ChevronLeftIcon className="mr-[4px] h-[14px] w-[14px] text-background-500" />
 
-        {/* <img
-          src={NaverMapLogo}
-          alt="카카오"
-          className="mr-5 h-10 w-10"
-        /> */}
+        <KAKAOMapLogo />
 
-        <span className="text-h4-list text-[#5E626E]">
-          카카오지도
+        <span className="ml-[3px] text-h4-list text-background-500 leading-none">
+          카카오 지도
         </span>
       </a>
     </Section>
