@@ -10,6 +10,7 @@ import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
+import IntroSection from "./components/Detail/IntroSection";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -61,10 +62,10 @@ export default function InfoDetailPage() {
     <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
       <main className="w-[680px]  space-y-[10px]">
         <DetailHeader image={undefined} />
-        {/* <IntroSection
-          introduction={detail.introduction}
-          tags={detail.tags}
-        /> */}
+        <IntroSection
+          // introduction={detail.introduction}
+          // tags={detail.tags}
+        />
 
         <BusinessHoursSection hours={detail.businessHours} />
 
