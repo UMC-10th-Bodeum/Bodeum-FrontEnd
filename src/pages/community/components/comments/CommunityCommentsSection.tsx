@@ -53,6 +53,28 @@ export default function CommunityCommentsSection({
     setComment("");
   };
 
+  const submitReply = (parentCommentId: number, content: string) => {
+    setComments((current) =>
+      current.map((item) =>
+        item.id === parentCommentId
+          ? {
+              ...item,
+              replies: [
+                ...(item.replies ?? []),
+                {
+                  id: Date.now(),
+                  author: "나",
+                  createdAt: "방금 전",
+                  content,
+                  likes: 0,
+                },
+              ],
+            }
+          : item,
+      ),
+    );
+  };
+
   return (
     <section className="pt-[16px]">
       <p className="text-h2-list text-background-600">
@@ -70,6 +92,7 @@ export default function CommunityCommentsSection({
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return;
             if (event.key === "Enter") submitComment();
           }}
           placeholder="이웃 부모에게 따뜻한 댓글을 남겨주세요"
@@ -95,6 +118,7 @@ export default function CommunityCommentsSection({
               onToggleReplyForm={() =>
                 setReplyTargetId((current) => (current === item.id ? null : item.id))
               }
+              onSubmitReply={submitReply}
             />
           ))}
         </ul>

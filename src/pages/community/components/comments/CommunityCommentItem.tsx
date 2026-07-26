@@ -8,12 +8,14 @@ interface CommunityCommentItemProps {
   comment: CommunityComment;
   replyFormOpen: boolean;
   onToggleReplyForm: () => void;
+  onSubmitReply: (parentCommentId: number, content: string) => void;
 }
 
 export default function CommunityCommentItem({
   comment,
   replyFormOpen,
   onToggleReplyForm,
+  onSubmitReply,
 }: CommunityCommentItemProps) {
   return (
     <li className="border-b border-background-250 py-[20px]">
@@ -39,7 +41,11 @@ export default function CommunityCommentItem({
       ))}
 
       {replyFormOpen && (
-        <CommunityReplyForm targetAuthor={comment.author} onCancel={onToggleReplyForm} />
+        <CommunityReplyForm
+          targetAuthor={comment.author}
+          onCancel={onToggleReplyForm}
+          onSubmit={(content) => onSubmitReply(comment.id, content)}
+        />
       )}
     </li>
   );

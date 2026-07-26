@@ -3,7 +3,7 @@ import { useState } from "react";
 interface CommunityReplyFormProps {
   targetAuthor: string;
   onCancel: () => void;
-  onSubmit?: (content: string) => void;
+  onSubmit: (content: string) => void;
 }
 
 export default function CommunityReplyForm({
@@ -22,11 +22,13 @@ export default function CommunityReplyForm({
     const value = reply.trim();
     if (!value) return;
 
-    onSubmit?.(value);
+    onSubmit(value);
+    setReply("");
+    onCancel();
   };
 
   return (
-    <div className="relative ml-[18px] mt-[18px] bg-background-200 px-[70px] py-[18px] before:absolute before:left-[17px] before:top-[18px] before:h-[25px] before:w-[25px] before:border-b before:border-l before:border-background-250">
+    <div className="relative ml-[18px] mt-[18px] bg-background-200 px-[70px] py-[18px] before:absolute before:left-[17px] before:top-[18px] before:h-[25px] before:w-[25px] before:border-b before:border-l before:border-background-300">
       <textarea
         value={reply}
         onChange={(event) => setReply(event.target.value)}
