@@ -1,6 +1,5 @@
 import { useState } from "react";
 import StarFilledIcon from "@/assets/icons/Star.svg?react";
-// import StarHalfIcon from "@/assets/icons/StarHalf.svg?react";
 import StarOutlineIcon from "@/assets/icons/StarOutline.svg?react";
 
 interface RatingInputProps {
@@ -15,26 +14,6 @@ export default function RatingInput({
   const [hover, setHover] = useState<number | null>(null);
 
   const current = hover ?? value;
-
-  const handleMove = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    star: number,
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const isLeft = e.clientX - rect.left < rect.width / 2;
-
-    setHover(isLeft ? star - 0.5 : star);
-  };
-
-  const handleClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    star: number,
-  ) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const isLeft = e.clientX - rect.left < rect.width / 2;
-
-    onChange(isLeft ? star - 0.5 : star);
-  };
 
   return (
     <div>
@@ -51,20 +30,15 @@ export default function RatingInput({
       >
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => {
-            let Icon = StarOutlineIcon;
-
-            if (current >= star) {
-              Icon = StarFilledIcon;
-            } else if (current >= star - 0.5) {
-              Icon = StarFilledIcon; // StarHalfIcon
-            }
+            const Icon =
+              star <= current ? StarFilledIcon : StarOutlineIcon;
 
             return (
               <button
                 key={star}
                 type="button"
-                onMouseMove={(e) => handleMove(e, star)}
-                onClick={(e) => handleClick(e, star)}
+                onMouseEnter={() => setHover(star)}
+                onClick={() => onChange(star)}
                 className="transition-transform hover:scale-110"
               >
                 <Icon className="h-6 w-6" />
@@ -74,7 +48,7 @@ export default function RatingInput({
         </div>
 
         <span className="ml-[12px] text-h2-onboard text-main-400">
-          {current.toFixed(1)}
+          {current}
         </span>
       </div>
     </div>
