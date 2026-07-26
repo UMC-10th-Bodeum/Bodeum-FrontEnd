@@ -2,15 +2,16 @@ import PostTag from "@/components/PostTag";
 import Section from "./Section"
 import IntroIcon from "@/assets/icons/Paper.svg?react";
 
-interface IntroSectionProps {
-  // introduction: string;
-  // tags: string[];
-}
+// interface IntroSectionProps {
+//   // introduction: string;
+//   // tags: string[];
+// }
 
-export default function IntroSection({
-  // introduction,
-  // tags,
-}: IntroSectionProps) {
+export default function IntroSection( //{
+//   // introduction,
+//   // tags,
+  // }: IntroSectionProps
+) {
   return (
     <Section
       title="소개"
