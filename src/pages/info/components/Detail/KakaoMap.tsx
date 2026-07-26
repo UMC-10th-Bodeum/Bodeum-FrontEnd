@@ -14,16 +14,17 @@ export default function KakaoMap({
 
   useEffect(() => {
     let marker: kakao.maps.Marker | null = null;
+    let cancelled = false;
 
     const initMap = async () => {
       await loadKakaoMap();
 
-      if (!mapRef.current) return;
+      if (cancelled || !mapRef.current) return;
 
       const geocoder = new window.kakao.maps.services.Geocoder();
 
       geocoder.addressSearch(address, (result, status) => {
-        if (status !== window.kakao.maps.services.Status.OK || !result.length)
+        if (cancelled || status !== window.kakao.maps.services.Status.OK || !result.length)
           return;
 
         const lat = Number(result[0].y);
@@ -48,6 +49,7 @@ export default function KakaoMap({
     initMap();
 
     return () => {
+      cancelled = true;
       marker?.setMap(null);
     };
   }, [address]);
