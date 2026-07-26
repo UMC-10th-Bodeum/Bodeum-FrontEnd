@@ -55,17 +55,20 @@ export default function CommunityPage() {
   const category: CommunityCategory | "ALL" = isCommunityCategory(categoryParam)
     ? categoryParam
     : "ALL";
-  const [sort, setSort] = useState<SortKey>("views");
+  const [sort, setSort] = useState<SortKey | "">("");
   const [page, setPage] = useState(1);
 
   const posts = useMemo(() => {
-    return repeatedPosts.filter(
+    const filteredPosts = repeatedPosts.filter(
       (post) =>
         post.title.includes(keyword) ||
         post.content.includes(keyword) ||
         post.board.includes(keyword),
     );
-  }, [keyword]);
+    const activeSort: SortKey = sort || "views";
+
+    return [...filteredPosts].sort((a, b) => b[activeSort] - a[activeSort]);
+  }, [keyword, sort]);
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
     if (value === "ALL") {
@@ -105,6 +108,7 @@ export default function CommunityPage() {
               options={sortOptions}
               value={sort}
               onChange={(value) => setSort(value as SortKey)}
+              placeholder="조회순"
               variant="S"
               ariaLabel="게시글 정렬"
               className="w-[120px]"
