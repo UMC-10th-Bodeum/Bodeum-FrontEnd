@@ -12,7 +12,7 @@ type AuthorVisibility = "PROFILE" | "ANONYMOUS";
 
 type CommunityWriteFormProps = {
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (authorVisibility: AuthorVisibility) => void;
 };
 
 const categoryOptions = communityCategoryEntries.map(([value, label]) => ({
@@ -40,14 +40,13 @@ export default function CommunityWriteForm({
 
   const isSubmittable =
     category !== null &&
-    authorVisibility !== null &&
     title.trim().length > 0 &&
     content.trim().length > 0;
 
   const submitPost = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!isSubmittable) return;
-    onSubmit();
+    onSubmit(authorVisibility ?? "PROFILE");
   };
 
   return (
