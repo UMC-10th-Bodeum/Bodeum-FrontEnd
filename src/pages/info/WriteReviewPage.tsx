@@ -12,7 +12,6 @@ import RatingInput from "./ReviewWrite/RatingInput";
 import ReviewTextArea from "./ReviewWrite/ReviewTextArea";
 import ImageUploader from "./ReviewWrite/ImageUploader";
 import ButtonFill from "@/components/ButtonFill";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 
 export default function WriteReviewPage() {
