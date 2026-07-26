@@ -1,32 +1,48 @@
 import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
+import type { ComponentType, SVGProps } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface BackButtonProps {
-    to?: string;
-    label?: string;
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+type DetailBackButtonTone = "default" | "danger";
+
+interface DetailBackButtonProps {
+  icon?: IconComponent;
+  label?: string;
+  onClick?: () => void;
+  tone?: DetailBackButtonTone;
 }
 
-function DetailBackButton({ to, label = "뒤로가기" }: BackButtonProps) {
-    const navigate = useNavigate();
+function DetailBackButton({
+  icon: Icon = ChevronLeftIcon,
+  label = "뒤로가기",
+  onClick,
+  tone = "default",
+}: DetailBackButtonProps) {
+  const navigate = useNavigate();
 
-    const handleClick = () => {
-        if (to !== undefined) {
-            navigate(to);
-        } else {
-            navigate(-1);
-        }
-    };
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+      return;
+    }
 
-    return (
-        <button
-            type="button"
-            onClick={handleClick}
-            className="inline-flex items-center cursor-pointer gap-2 rounded-[10px] border border-background-300 bg-background-100 px-4 py-2 text-h4-list text-background-500 hover:border-background-300 hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] active:border-background-600 active:bg-background-600 active:text-background-100"
-        >
-            <ChevronLeftIcon aria-hidden="true" className="h-4 w-4 relative top-[1px]" />
-            {label}
-        </button>
-    );
+    navigate(-1);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border bg-background-100 px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] ${
+        tone === "danger"
+          ? "border-sub-red text-sub-red active:bg-sub-red active:border-background-100 active:text-background-100"
+          : "border-background-300 text-background-500 active:border-background-600 active:text-background-600"
+      }`}
+    >
+      <Icon aria-hidden="true" className="bodeum-icon-color relative top-[1px] h-4 w-4" />
+      {label}
+    </button>
+  );
 }
 
 export default DetailBackButton;
