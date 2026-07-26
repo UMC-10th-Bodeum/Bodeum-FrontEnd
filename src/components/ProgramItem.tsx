@@ -17,9 +17,9 @@ const programCategoryInfo = {
 interface ProgramItemProps {
   name: string;
   address: string;
-  institutionName: string;
-  chipText: string;
-  chipVariant: ChipVariant;
+  services: string[];
+  chipText?: string;
+  chipVariant?: ChipVariant;
   viewCount: number;
   scrapCount: number;
   isScrapped?: boolean;
@@ -30,7 +30,7 @@ interface ProgramItemProps {
 export default function ProgramItem({
   name,
   address,
-  institutionName,
+  services,
   chipText,
   chipVariant,
   viewCount,
@@ -66,7 +66,7 @@ export default function ProgramItem({
           </p>
 
           <p className="mt-0.5 truncate text-body-sub text-background-500">
-            {institutionName}
+            {services}
           </p>
         </div>
       }
