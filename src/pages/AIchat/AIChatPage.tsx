@@ -17,16 +17,11 @@ import {
 } from "./components";
 
 const SUGGESTIONS = [
-  "바우처 신청 방법 알려주세요",
-  "강남구 재활센터 추천해줘",
-  "자폐스펙트럼 지원 제도 요약",
-  "장애 진단 후 첫 번째로 해야 할 일",
-];
-
-const MOCK_FOLLOW_UP_SUGGESTIONS = [
-  "지원 대상도 알려주세요",
-  "신청할 때 필요한 서류는 무엇인가요?",
-  "비슷한 지원 제도도 찾아주세요",
+  "참고하면 좋을 복지사이트 알려줘",
+  "우리 동네 재활센터 추천해줘",
+  "장애아동 의료비 지원이 궁금해",
+  "장애 진단 후 첫번째로 해야 할 일",
+  "바우처 신청 방법 알려줘",
 ];
 
 type MockAuthState = {
@@ -491,7 +486,7 @@ export default function AIChatPage() {
         key={message.id}
         message={message.text}
         resource={message.resource}
-        suggestions={message.suggestions ?? MOCK_FOLLOW_UP_SUGGESTIONS}
+        suggestions={message.suggestions}
         showFeedback
         onSuggestionClick={(suggestion) => handleSend(suggestion)}
         onBadFeedback={() => {
@@ -653,10 +648,12 @@ export default function AIChatPage() {
         </AiChatPanel>
       </div>
 
-      <AiChatStateSwitcher
-        activeScenario={activeScenario}
-        onChange={handleScenarioChange}
-      />
+      {import.meta.env.DEV && (
+        <AiChatStateSwitcher
+          activeScenario={activeScenario}
+          onChange={handleScenarioChange}
+        />
+      )}
 
       {entryModal}
 

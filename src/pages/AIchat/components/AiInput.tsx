@@ -7,7 +7,6 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type TextareaHTMLAttributes,
-  type WheelEvent,
 } from "react";
 
 export type AiInputVariant = "default" | "input" | "typing" | "variant4";
@@ -78,6 +77,8 @@ export default function AiInput({
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       onSubmit?.();
@@ -129,14 +130,25 @@ export default function AiInput({
     event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
-  const handleScrollbarWheel = (event: WheelEvent<HTMLSpanElement>) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  useEffect(() => {
+    if (!isOverflowing) return;
 
-    event.preventDefault();
-    textarea.scrollTop += event.deltaY;
-    syncScrollThumb(textarea);
-  };
+    const track = scrollbarTrackRef.current;
+    if (!track) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      event.preventDefault();
+      textarea.scrollTop += event.deltaY;
+      syncScrollThumb(textarea);
+    };
+
+    track.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => track.removeEventListener("wheel", handleWheel);
+  }, [isOverflowing, syncScrollThumb]);
 
   return (
     <div
@@ -169,7 +181,6 @@ export default function AiInput({
           onPointerMove={handleScrollbarPointerMove}
           onPointerUp={handleScrollbarPointerUp}
           onPointerCancel={handleScrollbarPointerUp}
-          onWheel={handleScrollbarWheel}
           className="relative w-[8px] self-stretch shrink-0 touch-none overflow-hidden rounded-[12px] bg-background-250"
         >
           <span

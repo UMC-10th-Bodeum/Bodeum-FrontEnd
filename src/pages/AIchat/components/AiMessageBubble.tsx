@@ -21,11 +21,6 @@ OO님의 정보를 바탕으로
 
 무엇이 궁금하신가요?`;
 
-const defaultResource: AiCurationResource = {
-  title: "📌 2026 발달재활서비스 바우처 신청 안내 >",
-  meta: "복지 정보 · D-7 · 서울 강남구",
-};
-
 export default function AiMessageBubble({
   variant = "ai",
   message,
@@ -75,7 +70,7 @@ export default function AiMessageBubble({
     );
   }
 
-  const visibleResource = resource === undefined ? defaultResource : resource;
+  const visibleResource = resource;
 
   return (
     <div
