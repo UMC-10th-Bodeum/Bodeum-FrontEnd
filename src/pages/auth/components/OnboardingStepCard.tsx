@@ -30,6 +30,7 @@ type OnboardingStepCardProps = {
   onNext: () => void;
   onClose: () => void;
   onSkip: () => void;
+  isSubmitting?: boolean;
 };
 
 type FormGroupProps = {
@@ -70,7 +71,7 @@ const sidoNames = [
   "부산광역시",
   "대구광역시",
   "인천광역시",
-  "광주광역시",
+  "전남광주통합특별시",
   "대전광역시",
   "울산광역시",
   "세종특별자치시",
@@ -79,7 +80,6 @@ const sidoNames = [
   "충청북도",
   "충청남도",
   "전북특별자치도",
-  "전라남도",
   "경상북도",
   "경상남도",
   "제주특별자치도",
@@ -143,18 +143,47 @@ const districtNamesByRegion: Record<string, string[]> = {
     "군위군",
   ],
   인천광역시: [
-    "강화군",
-    "계양구",
-    "남동구",
-    "동구",
+    "제물포구",
+    "영종구",
     "미추홀구",
-    "부평구",
-    "서구",
     "연수구",
+    "남동구",
+    "부평구",
+    "계양구",
+    "서해구",
+    "검단구",
+    "강화군",
     "옹진군",
-    "중구",
   ],
-  광주광역시: ["광산구", "남구", "동구", "북구", "서구"],
+  전남광주통합특별시: [
+    "목포시",
+    "여수시",
+    "순천시",
+    "나주시",
+    "광양시",
+    "동구",
+    "서구",
+    "남구",
+    "북구",
+    "광산구",
+    "담양군",
+    "곡성군",
+    "구례군",
+    "고흥군",
+    "보성군",
+    "화순군",
+    "장흥군",
+    "강진군",
+    "해남군",
+    "영암군",
+    "무안군",
+    "함평군",
+    "영광군",
+    "장성군",
+    "완도군",
+    "진도군",
+    "신안군",
+  ],
   대전광역시: ["대덕구", "동구", "서구", "유성구", "중구"],
   울산광역시: ["남구", "동구", "북구", "울주군", "중구"],
   세종특별자치시: [],
@@ -257,30 +286,6 @@ const districtNamesByRegion: Record<string, string[]> = {
     "정읍시",
     "진안군",
   ],
-  전라남도: [
-    "강진군",
-    "고흥군",
-    "곡성군",
-    "광양시",
-    "구례군",
-    "나주시",
-    "담양군",
-    "목포시",
-    "무안군",
-    "보성군",
-    "순천시",
-    "신안군",
-    "여수시",
-    "영광군",
-    "영암군",
-    "완도군",
-    "장성군",
-    "장흥군",
-    "진도군",
-    "함평군",
-    "해남군",
-    "화순군",
-  ],
   경상북도: [
     "경산시",
     "경주시",
@@ -328,43 +333,11 @@ const districtNamesByRegion: Record<string, string[]> = {
   제주특별자치도: ["서귀포시", "제주시"],
 };
 
-const topLevelCityRegions = new Set([
-  "서울특별시",
-  "부산광역시",
-  "대구광역시",
-  "인천광역시",
-  "광주광역시",
-  "대전광역시",
-  "울산광역시",
-  "세종특별자치시",
-]);
+const regionOptions = createOptions(sidoNames);
 
-const regionOptions: SelectOption[] = [];
-const districtOptionsByRegion: Record<string, SelectOption[]> = {};
-
-sidoNames.forEach((sido) => {
-  const childRegions = districtNamesByRegion[sido] ?? [];
-
-  if (topLevelCityRegions.has(sido)) {
-    regionOptions.push({ label: sido, value: sido });
-    districtOptionsByRegion[sido] = createOptions(childRegions);
-    return;
-  }
-
-  const cityRegions = childRegions.filter((region) => region.endsWith("시"));
-  const countyRegions = childRegions.filter((region) => region.endsWith("군"));
-
-  if (countyRegions.length) {
-    regionOptions.push({ label: sido, value: sido });
-    districtOptionsByRegion[sido] = createOptions(countyRegions);
-  }
-
-  cityRegions.forEach((city) => {
-    const value = `${sido} ${city}`;
-    regionOptions.push({ label: value, value });
-    districtOptionsByRegion[value] = [];
-  });
-});
+const districtOptionsByRegion: Record<string, SelectOption[]> = Object.fromEntries(
+  sidoNames.map((sido) => [sido, createOptions(districtNamesByRegion[sido] ?? [])]),
+);
 
 const monthOptions: SelectOption[] = Array.from({ length: 12 }, (_, index) => {
   const month = index + 1;
@@ -470,12 +443,19 @@ function StepHeader({
   );
 }
 
-function SkipButton({ onClick }: { onClick: () => void }) {
+function SkipButton({
+  onClick,
+  disabled = false,
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-[4px] text-h3-onboard text-background-500"
+      disabled={disabled}
+      className="flex cursor-pointer items-center gap-[4px] text-h3-onboard text-background-500 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <span>건너뛰기</span>
       <span aria-hidden="true">&gt;</span>
@@ -518,6 +498,7 @@ export default function OnboardingStepCard({
   onNext,
   onClose,
   onSkip,
+  isSubmitting = false,
 }: OnboardingStepCardProps) {
   const titleId = useId();
   const childNameId = useId();
@@ -630,14 +611,12 @@ export default function OnboardingStepCard({
             </div>
           </FormGroup>
           <FormGroup label="자녀 특징 키워드(선택)" htmlFor={childKeywordsId}>
-            <Input
+            <LimitedTextInput
               id={childKeywordsId}
               value={form.childKeywords}
-              onChange={(event) =>
-                updateField("childKeywords", event.target.value)
-              }
+              onChange={(value) => updateField("childKeywords", value)}
               placeholder="아이와 닮은 친구를 찾기 위한 키워드를 입력해주세요(소심함, 활발함, 소리 예민 등)"
-              className="w-full max-w-[536px] [&_input::placeholder]:text-h3-onboard"
+              maxLength={100}
             />
           </FormGroup>
         </>
@@ -652,14 +631,14 @@ export default function OnboardingStepCard({
             titleAfter="은 무엇인가요?"
             description="선택하신 관심사와 활동 지역을 바탕으로 맞춤 정보가 세팅됩니다"
           />
-          <FormGroup label="가장 큰 관심사 (최대 3개 선택)*" as="fieldset">
+          <FormGroup label="가장 큰 관심사 (최대 2개 선택)*" as="fieldset">
             <div className="flex w-full flex-wrap gap-[13px]">
               {interestOptions.map((option) => (
                 <SelectableChip
                   key={option}
                   label={option}
                   selected={form.interests.includes(option)}
-                  onClick={() => toggleListValue("interests", option, 3)}
+                  onClick={() => toggleListValue("interests", option, 2)}
                 />
               ))}
             </div>
@@ -684,9 +663,9 @@ export default function OnboardingStepCard({
                 value={form.district}
                 options={districtOptions}
                 onChange={(value) => updateField("district", value)}
-                placeholder="구/군"
+                placeholder="시/군/구"
                 disabled={!form.sido || !districtRequired}
-                ariaLabel="주 활동 지역 구/군"
+                ariaLabel="주 활동 지역 시/군/구"
                 className="min-w-[160px] flex-1"
               />
             </div>
@@ -757,7 +736,7 @@ export default function OnboardingStepCard({
     <div className="flex w-full min-w-0 flex-col gap-[28px]">
       {content}
       <div className="flex w-full justify-center">
-        <SkipButton onClick={onSkip} />
+        <SkipButton onClick={onSkip} disabled={isSubmitting} />
       </div>
     </div>
   );
@@ -766,13 +745,13 @@ export default function OnboardingStepCard({
     return (
       <OnboardBoxFrame
         buttonCount={1}
-        rightButtonText="다음"
+        rightButtonText={isSubmitting ? "저장 중..." : "다음"}
         showClose
         showOverlay={false}
-        rightButtonDisabled={!isComplete}
+        rightButtonDisabled={!isComplete || isSubmitting}
         className="w-[624px]! gap-[16px]! px-[44px]! py-[36px]! max-sm:px-[24px]! max-sm:py-[32px]!"
         ariaLabelledby={titleId}
-        onClose={onClose}
+        onClose={isSubmitting ? undefined : onClose}
         onRightButtonClick={onNext}
       >
         {frameChildren}
@@ -784,13 +763,16 @@ export default function OnboardingStepCard({
     <OnboardBoxFrame
       buttonCount={2}
       leftButtonText="이전"
-      rightButtonText={step === 3 ? "완료" : "다음"}
+      rightButtonText={
+        isSubmitting ? "저장 중..." : step === 3 ? "완료" : "다음"
+      }
       showClose
       showOverlay={false}
-      rightButtonDisabled={!isComplete}
+      leftButtonDisabled={isSubmitting}
+      rightButtonDisabled={!isComplete || isSubmitting}
       className="w-[624px]! gap-[16px]! px-[44px]! py-[36px]! max-sm:px-[24px]! max-sm:py-[32px]!"
       ariaLabelledby={titleId}
-      onClose={onClose}
+      onClose={isSubmitting ? undefined : onClose}
       onLeftButtonClick={onPrev}
       onRightButtonClick={onNext}
     >

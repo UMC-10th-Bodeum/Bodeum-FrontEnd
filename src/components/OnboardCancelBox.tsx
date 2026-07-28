@@ -11,6 +11,8 @@ type OnboardCancelBoxProps = {
   rightButtonText: ReactNode;
   onLeftButtonClick?: MouseEventHandler<HTMLButtonElement>;
   onRightButtonClick?: MouseEventHandler<HTMLButtonElement>;
+  leftButtonDisabled?: boolean;
+  rightButtonDisabled?: boolean;
   className?: string;
   rightButtonColor?: OnboardBoxFrameButtonColor;
 };
@@ -22,6 +24,8 @@ export default function OnboardCancelBox({
   rightButtonText,
   onLeftButtonClick,
   onRightButtonClick,
+  leftButtonDisabled = false,
+  rightButtonDisabled = false,
   className,
   rightButtonColor = 'main-400',
 }: OnboardCancelBoxProps) {
@@ -35,6 +39,8 @@ export default function OnboardCancelBox({
       rightButtonColor={rightButtonColor}
       className={className}
       ariaLabelledby={titleId}
+      leftButtonDisabled={leftButtonDisabled}
+      rightButtonDisabled={rightButtonDisabled}
       onLeftButtonClick={onLeftButtonClick}
       onRightButtonClick={onRightButtonClick}
     >

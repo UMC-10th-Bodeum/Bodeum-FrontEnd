@@ -1,76 +1,102 @@
 import { createBrowserRouter } from "react-router-dom";
+
 import MainLayout from "../layouts/MainLayout";
 import HomePage from "../pages/home/HomePage";
-import InfoPage from "@/pages/info/InfoPage";
+import AIChatPage from "@/pages/AIchat/AIChatPage";
+import AuthPage from "@/pages/auth/AuthPage";
+import AuthCallbackPage from "@/pages/auth/AuthCallbackPage";
 import DetailLayout from "@/layouts/DetailLayout";
 import InfoDetailPage from "@/pages/info/InfoDetailPage";
-import AuthPage from "@/pages/auth/AuthPage";
-import NewsPage from "@/pages/news/NewsPage";
+import InfoPage from "@/pages/info/InfoPage";
 import NewsDetailPage from "@/pages/news/NewsDetailPage";
+import NewsPage from "@/pages/news/NewsPage";
 import WriteReviewPage from "@/pages/info/WriteReviewPage";
 import CommunityPage from "@/pages/community/CommunityPage";
 import CommunityDetailPage from "@/pages/community/CommunityDetailPage";
 import CommunityWritePage from "@/pages/community/CommunityWritePage";
+import AuthStateGate from "@/pages/auth/components/AuthStateGate";
+import AuthBrowserSessionGuard from "@/pages/auth/components/AuthBrowserSessionGuard";
 import MyPage from "@/pages/mypage/MyPage";
 import ProfileSettingsPage from "@/pages/mypage/ProfileSettingsPage";
 
 export const router = createBrowserRouter([
   {
-    element: <MainLayout />,
+    element: <AuthBrowserSessionGuard />,
     children: [
       {
-        path: "/",
-        element: <HomePage />,
+        element: (
+          <AuthStateGate>
+            <MainLayout />
+          </AuthStateGate>
+        ),
+        children: [
+          {
+            path: "/",
+            element: <HomePage />,
+          },
+          {
+            path: "/aichat",
+            element: <AIChatPage />,
+          },
+          {
+            path: "/info",
+            element: <InfoPage />,
+          },
+          {
+            path: "/news",
+            element: <NewsPage />,
+          },
+          {
+            path: "/community",
+            element: <CommunityPage />,
+          },
+          {
+            path: "/community/:id",
+            element: <CommunityDetailPage />,
+            handle: { header: "back" },
+          },
+          {
+            path: "/mypage",
+            element: <MyPage />,
+          },
+          {
+            path: "/mypage/settings",
+            element: <ProfileSettingsPage />,
+          },
+        ],
       },
       {
-        path: "/info",
-        element: <InfoPage />,
+        path: "/auth",
+        element: <AuthPage />,
       },
       {
-        path: "/news",
-        element: <NewsPage />,
+        path: "/auth/callback",
+        element: <AuthCallbackPage />,
       },
       {
-        path: "/community",
-        element: <CommunityPage />,
-      },
-      {
-        path: "/community/:id",
-        element: <CommunityDetailPage />,
-        handle: { header: "back" },
-      },
-      {
-        path: "/mypage",
-        element: <MyPage />,
-      },
-      {
-        path: "/mypage/settings",
-        element: <ProfileSettingsPage />,
-      },
-    ],
-  },
-  {
-    path: "/auth",
-    element: <AuthPage />,
-  },
-  {
-    element: <DetailLayout />,
-    children: [
-      {
-        path: "/info/:category/:id",
-        element: <InfoDetailPage />,
-      },
-      {
-        path: "/news/:sourceTab/:id",
-        element: <NewsDetailPage />,
-      },
-      {
-        path: "/info/:category/:id/review/write",
-        element: <WriteReviewPage />,
-      },
-      {
-        path: "/community/write",
-        element: <CommunityWritePage />,
+        element: (
+          <AuthStateGate>
+            <DetailLayout />
+          </AuthStateGate>
+        ),
+        children: [
+          {
+            path: "/info/:category/:id",
+            element: <InfoDetailPage />,
+          },
+          {
+            path: "/news/:sourceTab/:id",
+            element: <NewsDetailPage />,
+          },
+          {
+            path: "/info/:category/:id/review/write",
+            element: <WriteReviewPage />,
+          },
+          {
+            path: "/community/write",
+            element: <CommunityWritePage />,
+          },
+        ],
       },
     ],
   },
