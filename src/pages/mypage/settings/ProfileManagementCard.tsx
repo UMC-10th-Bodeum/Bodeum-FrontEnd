@@ -115,7 +115,7 @@ export default function ProfileManagementCard({
         <div className="grid grid-cols-2 gap-[12px]">
           <Select
             variant="L"
-            ariaLabel="시·도 선택"
+            ariaLabel="시/도 선택"
             options={regionOptions.map((option) => ({
               ...option,
               label: sidoDisplayNameByRegion[option.value] ?? option.label,
@@ -134,7 +134,7 @@ export default function ProfileManagementCard({
           />
           <Select
             variant="L"
-            ariaLabel="시·군·구 선택"
+            ariaLabel="시/군/구 선택"
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
             disabled={!isEditing}
