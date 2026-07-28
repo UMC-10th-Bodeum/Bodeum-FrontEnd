@@ -1,18 +1,40 @@
 import { useState } from "react";
-import Input from "@/components/Input";
+import HeaderSearchBar from "@/components/HeaderSearchBar";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchTopBar() {
   const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate();
 
+  const results = [
+    {
+      id: 1,
+      title: "서울대학교병원",
+      category: "병원",
+    },
+    {
+      id: 2,
+      title: "서울시립장애인복지관",
+      category: "복지",
+    },
+    {
+      id: 3,
+      title: "한국장애인고용공단",
+      category: "취업",
+    },
+  ];
   return (
     <header className="h-[60px] border-b border-background-250 bg-background-100 px-[20px] py-[10px]">
-      <Input
-        search
+      <HeaderSearchBar
         value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-        placeholder="기관 · 병원 · 복지 · 취업 · 교육 정보를 검색해보세요"
-        className="w-full"
-      />
+        onChange={setKeyword}
+        results={results.filter((item) =>
+          item.title.includes(keyword)
+        )}
+        onSelect={(item) => {
+          navigate(`/info/${item.id}`);
+        }}
+      />;
     </header>
   );
 }

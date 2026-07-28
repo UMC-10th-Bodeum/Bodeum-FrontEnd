@@ -52,7 +52,7 @@ export default function Input({
   `}
     >
       {search && (
-        <SearchIcon className="mr-[15px] h-[18px] w-[18px] shrink-0" />
+        <SearchIcon className="text-background-500 mr-[15px] h-[18px] w-[18px] shrink-0" />
       )}
 
       <input
