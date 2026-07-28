@@ -1,24 +1,54 @@
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import SettingIcon from "@/assets/icons/Setting.svg?react";
 import ButtonOutline from "@/components/ButtonOutline";
+import { diagnosisMap } from "@/constants/diagnosis";
+import { sidoDisplayNameByRegion } from "@/constants/regions";
 import { myPageTabs } from "../data/myPageData";
+import type { ProfileSettingsForm } from "../settings/types";
 import type { MyPageTabKey } from "../types";
 
 interface ProfileSummaryCardProps {
+  profile: ProfileSettingsForm;
   counts: Record<MyPageTabKey, number>;
   onSettingsClick: () => void;
 }
 
-export default function ProfileSummaryCard({ counts, onSettingsClick }: ProfileSummaryCardProps) {
+function getChildAge(birthYear: string, birthMonth: string) {
+  if (!birthYear) {
+    return null;
+  }
+
+  const today = new Date();
+  const year = Number(birthYear);
+  const month = Number(birthMonth);
+  const hasBirthdayPassed = !month || today.getMonth() + 1 >= month;
+
+  return Math.max(0, today.getFullYear() - year - (hasBirthdayPassed ? 0 : 1));
+}
+
+export default function ProfileSummaryCard({
+  profile,
+  counts,
+  onSettingsClick,
+}: ProfileSummaryCardProps) {
+  const diagnosisLabel =
+    profile.diagnoses.map((diagnosis) => diagnosisMap[diagnosis].label).join(", ") ||
+    "집중 케어 미등록";
+  const childAge = getChildAge(profile.birthYear, profile.birthMonth);
+  const region = [sidoDisplayNameByRegion[profile.region] ?? profile.region, profile.district]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <section className="w-[900px] rounded-[10px] bg-main-500 px-[40px] py-[28px] text-background-100">
       <div className="flex items-center">
         <ProfileIcon className="h-[90px] w-[90px] shrink-0" aria-label="보듬 부모님 프로필" />
 
         <div className="ml-[19px]">
-          <h1 className="text-h1-onboard">보듬 부모님</h1>
+          <h1 className="text-h1-onboard">{profile.parentNickname}</h1>
           <p className="mt-[19px] text-h3-onboard">
-            LEVEL 1 · 자폐스펙트럼 · N세 아이 · 서울 강남구
+            LEVEL 1 · {diagnosisLabel} · {childAge === null ? "연령 미등록" : `${childAge}세 아이`}{" "}
+            · {region || "지역 미등록"}
           </p>
         </div>
 

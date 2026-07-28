@@ -31,3 +31,10 @@ export interface MyPageTab {
   key: MyPageTabKey;
   label: string;
 }
+
+export interface ActivityPointStat {
+  id: "post" | "answer" | "helpful" | "accepted";
+  label: string;
+  pointsPerAction: number;
+  count: number;
+}

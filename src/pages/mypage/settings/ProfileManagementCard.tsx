@@ -27,6 +27,25 @@ const diagnosisEntries = Object.entries(diagnosisMap) as Array<
   [DiagnosisType, (typeof diagnosisMap)[DiagnosisType]]
 >;
 
+function isValidBirthDate(birthYear: string, birthMonth: string) {
+  if (!birthYear || !birthMonth) {
+    return false;
+  }
+
+  const year = Number(birthYear);
+  const month = Number(birthMonth);
+
+  if (!Number.isInteger(year) || year <= 0 || !Number.isInteger(month) || month < 1 || month > 12) {
+    return false;
+  }
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+
+  return year < currentYear || (year === currentYear && month <= currentMonth);
+}
+
 export default function ProfileManagementCard({
   form,
   isEditing,
@@ -38,6 +57,7 @@ export default function ProfileManagementCard({
   const canApply =
     form.parentNickname.trim().length > 0 &&
     form.childNickname.trim().length > 0 &&
+    isValidBirthDate(form.birthYear, form.birthMonth) &&
     form.diagnoses.length > 0;
   const regionSelectTriggerClassName =
     "h-[44px] !border-background-250 !bg-background-200 !text-background-500";

@@ -1,4 +1,4 @@
-import type { MyPageItem, MyPageTab, MyPageTabKey } from "../types";
+import type { ActivityPointStat, MyPageItem, MyPageTab, MyPageTabKey } from "../types";
 
 export const initialMyPageItems: Record<MyPageTabKey, MyPageItem[]> = {
   saved: Array.from({ length: 6 }, (_, index) => ({
@@ -36,3 +36,10 @@ export const initialMyPageCounts: Record<MyPageTabKey, number> = {
   posts: 24,
   comments: 24,
 };
+
+export const initialActivityPointStats: ActivityPointStat[] = [
+  { id: "post", label: "게시글 작성", pointsPerAction: 5, count: 24 },
+  { id: "answer", label: "답변 작성", pointsPerAction: 4, count: 18 },
+  { id: "helpful", label: "도움돼요", pointsPerAction: 5, count: 12 },
+  { id: "accepted", label: "답변 채택", pointsPerAction: 20, count: 3 },
+];

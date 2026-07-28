@@ -5,13 +5,15 @@ export const initialProfileSettings: ProfileSettingsForm = {
   region: "서울특별시",
   district: "강남구",
   childNickname: "보듬 부모님",
-  birthYear: "",
-  birthMonth: "",
+  birthYear: "2021",
+  birthMonth: "4",
   diagnoses: ["AUTISM"],
 };
 
+const currentYear = new Date().getFullYear();
+
 export const birthYearOptions = Array.from({ length: 27 }, (_, index) => {
-  const year = String(2026 - index);
+  const year = String(currentYear - index);
   return { label: `${year}년`, value: year };
 });
 

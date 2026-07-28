@@ -1,19 +1,15 @@
 import BadgeIcon from "@/assets/icons/Badge.svg?react";
 import BadgeHelpIcon from "@/assets/icons/BadgeHelp.svg?react";
+import type { ActivityPointStat } from "../types";
 
 interface ActivityPointCardProps {
+  activities: ActivityPointStat[];
   onOpenBadgeGrade: () => void;
   onOpenBadgeHelp: () => void;
 }
 
-const activities = [
-  "게시글 작성 (+5pt)",
-  "답변 작성 (+4pt)",
-  "도움돼요 (+5pt)",
-  "답변 채택 (+20pt)",
-];
-
 export default function ActivityPointCard({
+  activities,
   onOpenBadgeGrade,
   onOpenBadgeHelp,
 }: ActivityPointCardProps) {
@@ -23,11 +19,18 @@ export default function ActivityPointCard({
         <h2 className="text-h3-category-sub text-background-600">나의 활동(포인트)</h2>
 
         <div className="mt-[8px] flex flex-col gap-[8px]">
-          {activities.map((label) => (
-            <div key={label} className="flex w-[260px] h-[32px] items-center justify-between">
-              <span className="text-h4-list text-background-500">{label}</span>
+          {activities.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex h-[32px] w-[260px] items-center justify-between"
+            >
+              <span className="text-h4-list text-background-500">
+                {activity.label} (+{activity.pointsPerAction}pt)
+              </span>
               <span className="flex h-[32px] w-[137px] items-center rounded-[8px] bg-background-200 px-3 py-2 text-h4-list text-main-400">
-                NN<span className="text-background-600">pt · </span>N
+                {activity.pointsPerAction * activity.count}
+                <span className="text-background-600">pt · </span>
+                {activity.count}
                 <span className="text-background-600">회</span>
               </span>
             </div>

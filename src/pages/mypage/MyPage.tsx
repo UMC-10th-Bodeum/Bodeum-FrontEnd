@@ -6,13 +6,19 @@ import BadgeHelpModal from "./components/BadgeHelpModal";
 import MyPageCard from "./components/MyPageCard";
 import MyPageTabs from "./components/MyPageTabs";
 import ProfileSummaryCard from "./components/ProfileSummaryCard";
-import { initialMyPageCounts, initialMyPageItems } from "./data/myPageData";
+import {
+  initialActivityPointStats,
+  initialMyPageCounts,
+  initialMyPageItems,
+} from "./data/myPageData";
 import type { MyPageTabKey } from "./types";
+import { useMyPageProfile } from "./myPageProfileContext";
 
 type BadgeModalType = "grade" | "help" | null;
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const { profile } = useMyPageProfile();
   const [activeTab, setActiveTab] = useState<MyPageTabKey>("saved");
   const [items, setItems] = useState(initialMyPageItems);
   const [counts, setCounts] = useState(initialMyPageCounts);
@@ -32,11 +38,15 @@ export default function MyPage() {
   return (
     <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto w-[896px]">
-        <ProfileSummaryCard counts={counts} onSettingsClick={() => navigate("/mypage/settings")} />
+        <ProfileSummaryCard
+          profile={profile}
+          counts={counts}
+          onSettingsClick={() => navigate("/mypage/settings")}
+        />
 
         <div className="mt-[18px] grid grid-cols-[576px_299px] gap-x-[18px] gap-y-[16px]">
           <section className="col-start-1 row-start-1">
-            <MyPageTabs activeTab={activeTab} onChange={setActiveTab} />
+            <MyPageTabs activeTab={activeTab} counts={counts} onChange={setActiveTab} />
           </section>
 
           <div className="col-start-1 row-start-2 flex flex-col gap-[8px]">
@@ -57,6 +67,7 @@ export default function MyPage() {
 
           <div className="col-start-2 row-start-2 self-start">
             <ActivityPointCard
+              activities={initialActivityPointStats}
               onOpenBadgeGrade={() => setBadgeModal("grade")}
               onOpenBadgeHelp={() => setBadgeModal("help")}
             />
