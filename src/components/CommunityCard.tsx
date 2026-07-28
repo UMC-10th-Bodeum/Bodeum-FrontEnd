@@ -41,13 +41,9 @@ export default function CommunityCard({
         <span className="text-body-sub text-background-500">{createdAt}</span>
       </div>
 
-      <h3 className="mb-[8px] line-clamp-1 text-h5-list text-background-600">
-        {title}
-      </h3>
+      <h3 className="mb-[8px] line-clamp-1 text-h5-list text-background-600">{title}</h3>
 
-      <p className="line-clamp-2 flex-1 text-h6-list text-background-500">
-        {content}
-      </p>
+      <p className="line-clamp-2 flex-1 text-h6-list text-background-500">{content}</p>
 
       <div className="mt-[8px] flex items-center gap-[14px] border-t border-background-250 pt-[8px] text-h4-list text-background-500">
         <div className="flex items-center gap-1">

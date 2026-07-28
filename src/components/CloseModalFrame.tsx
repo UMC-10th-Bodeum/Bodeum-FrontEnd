@@ -11,6 +11,7 @@ interface CloseModalFrameProps {
   onRightButtonClick?: MouseEventHandler<HTMLButtonElement>;
   rightButtonDisabled?: boolean;
   className?: string;
+  showCloseButton?: boolean;
 }
 
 export default function CloseModalFrame({
@@ -22,19 +23,22 @@ export default function CloseModalFrame({
   onRightButtonClick,
   rightButtonDisabled,
   className,
+  showCloseButton = true,
 }: CloseModalFrameProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div
         className={`relative flex w-[624px] flex-col rounded-[20px] bg-background-100 px-[44px] py-[44px] ${className ?? ""}`}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-[20px] right-[20px] z-10"
-        >
-          <CloseIcon />
-        </button>
+        {showCloseButton && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-[20px] right-[20px] z-10"
+          >
+            <CloseIcon />
+          </button>
+        )}
 
         <div className="mt-2 flex-1">{children}</div>
 
