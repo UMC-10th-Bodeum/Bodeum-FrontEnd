@@ -6,10 +6,11 @@ type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 type DetailBackButtonTone = "default" | "danger";
 
 interface DetailBackButtonProps {
-  icon?: IconComponent;
+  icon?: IconComponent | null;
   label?: string;
   onClick?: () => void;
   tone?: DetailBackButtonTone;
+  className?: string;
 }
 
 function DetailBackButton({
@@ -17,6 +18,7 @@ function DetailBackButton({
   label = "뒤로가기",
   onClick,
   tone = "default",
+  className,
 }: DetailBackButtonProps) {
   const navigate = useNavigate();
 
@@ -37,9 +39,14 @@ function DetailBackButton({
         tone === "danger"
           ? "border-sub-red text-sub-red active:bg-sub-red active:border-background-100 active:text-background-100"
           : "border-background-300 text-background-500 active:border-background-600 active:text-background-600"
-      }`}
+      } ${className ?? ""}`}
     >
-      <Icon aria-hidden="true" className="bodeum-icon-color relative top-[1px] h-4 w-4" />
+      {Icon && (
+        <Icon
+          aria-hidden="true"
+          className="bodeum-icon-color relative top-[1px] h-4 w-4"
+        />
+      )}
       {label}
     </button>
   );

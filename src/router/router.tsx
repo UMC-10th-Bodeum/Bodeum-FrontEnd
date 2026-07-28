@@ -11,6 +11,8 @@ import WriteReviewPage from "@/pages/info/WriteReviewPage";
 import CommunityPage from "@/pages/community/CommunityPage";
 import CommunityDetailPage from "@/pages/community/CommunityDetailPage";
 import CommunityWritePage from "@/pages/community/CommunityWritePage";
+import MyPage from "@/pages/mypage/MyPage";
+import ProfileSettingsPage from "@/pages/mypage/ProfileSettingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +38,14 @@ export const router = createBrowserRouter([
         path: "/community/:id",
         element: <CommunityDetailPage />,
         handle: { header: "back" },
+      },
+      {
+        path: "/mypage",
+        element: <MyPage />,
+      },
+      {
+        path: "/mypage/settings",
+        element: <ProfileSettingsPage />,
       },
     ],
   },

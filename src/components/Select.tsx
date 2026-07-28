@@ -21,6 +21,7 @@ export interface SelectProps {
   variant?: SelectVariant;
   disabled?: boolean;
   className?: string;
+  triggerClassName?: string;
   dropdownClassName?: string;
 }
 
@@ -94,6 +95,7 @@ export function Select({
   variant = "S",
   disabled,
   className,
+  triggerClassName: customTriggerClassName,
   dropdownClassName,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -347,6 +349,7 @@ export function Select({
           disabled ? "" : triggerHoverClass[variant],
           triggerPlaceholderClass[variant][String(isPlaceholder) as "true" | "false"],
         ].join(" "),
+    customTriggerClassName ?? "",
   ].join(" ");
   const dropdownPositionClass =
     openDirection === "top" ? "bottom-full mb-[8px]" : "top-full mt-[8px]";

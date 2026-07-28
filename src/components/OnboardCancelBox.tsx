@@ -2,6 +2,7 @@ import { useId } from 'react';
 import type { MouseEventHandler, ReactNode } from 'react';
 
 import OnboardBoxFrame from './OnboardBoxFrame';
+import type { OnboardBoxFrameButtonColor } from './OnboardBoxFrame';
 
 type OnboardCancelBoxProps = {
   title: ReactNode;
@@ -11,6 +12,7 @@ type OnboardCancelBoxProps = {
   onLeftButtonClick?: MouseEventHandler<HTMLButtonElement>;
   onRightButtonClick?: MouseEventHandler<HTMLButtonElement>;
   className?: string;
+  rightButtonColor?: OnboardBoxFrameButtonColor;
 };
 
 export default function OnboardCancelBox({
@@ -21,6 +23,7 @@ export default function OnboardCancelBox({
   onLeftButtonClick,
   onRightButtonClick,
   className,
+  rightButtonColor = 'main-400',
 }: OnboardCancelBoxProps) {
   const titleId = useId();
 
@@ -29,7 +32,7 @@ export default function OnboardCancelBox({
       buttonCount={2}
       leftButtonText={leftButtonText}
       rightButtonText={rightButtonText}
-      rightButtonColor="main-400"
+      rightButtonColor={rightButtonColor}
       className={className}
       ariaLabelledby={titleId}
       onLeftButtonClick={onLeftButtonClick}
