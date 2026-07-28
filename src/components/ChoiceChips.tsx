@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ChoiceChipsProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
-  "children" | "aria-pressed" | "disabled"
+  "children" | "aria-pressed"
 > & {
   label: ReactNode;
   selected?: boolean;
@@ -14,6 +14,7 @@ const joinClassNames = (...classNames: Array<string | false | undefined>) =>
 export default function ChoiceChips({
   label,
   selected = false,
+  disabled = false,
   className,
   type = "button",
   ...buttonProps
@@ -22,6 +23,7 @@ export default function ChoiceChips({
     <button
       {...buttonProps}
       type={type}
+      disabled={disabled}
       aria-pressed={selected}
       data-state={selected ? "selected" : "default"}
       className={joinClassNames(
@@ -31,7 +33,9 @@ export default function ChoiceChips({
         selected
           ? "border-main-400 bg-main-200 text-main-400"
           : "border-background-300 bg-background-100 text-background-500",
-        "cursor-pointer active:border-t-[0.96px]! active:border-t-main-400! active:bg-main-400! active:text-background-100!",
+        disabled
+          ? "cursor-default"
+          : "cursor-pointer active:border-t-[0.96px]! active:border-t-main-400! active:bg-main-400! active:text-background-100!",
         className,
       )}
     >

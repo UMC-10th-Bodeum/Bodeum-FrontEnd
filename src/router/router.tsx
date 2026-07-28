@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import HomePage from "../pages/home/HomePage";
@@ -16,6 +16,9 @@ import CommunityDetailPage from "@/pages/community/CommunityDetailPage";
 import CommunityWritePage from "@/pages/community/CommunityWritePage";
 import AuthStateGate from "@/pages/auth/components/AuthStateGate";
 import AuthBrowserSessionGuard from "@/pages/auth/components/AuthBrowserSessionGuard";
+import MyPage from "@/pages/mypage/MyPage";
+import ProfileSettingsPage from "@/pages/mypage/ProfileSettingsPage";
+import MyPageProfileProvider from "@/pages/mypage/MyPageProfileProvider";
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +55,24 @@ export const router = createBrowserRouter([
             path: "/community/:id",
             element: <CommunityDetailPage />,
             handle: { header: "back" },
+          },
+          {
+            path: "/mypage",
+            element: (
+              <MyPageProfileProvider>
+                <Outlet />
+              </MyPageProfileProvider>
+            ),
+            children: [
+              {
+                index: true,
+                element: <MyPage />,
+              },
+              {
+                path: "settings",
+                element: <ProfileSettingsPage />,
+              },
+            ],
           },
         ],
       },
