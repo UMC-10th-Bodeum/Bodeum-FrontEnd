@@ -7,6 +7,7 @@ interface UserSectionProps {
   disability?: string;
   level?: number;
   age?: number;
+  profileImageUrl?: string | null;
   onButtonClick?: () => void;
 }
 
@@ -16,18 +17,33 @@ export default function UserSection({
   disability,
   level,
   age,
+  profileImageUrl,
   onButtonClick,
 }: UserSectionProps) {
   const isGuest = type === "guest";
   const isEmpty = type === "empty";
+  const childSummary = [
+    level !== undefined ? `Level${level}` : null,
+    age !== undefined ? `${age}세 아이` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="rounded-[8px] border border-background-250 bg-background-100">
       <div className="flex w-[181px] px-[8px] py-[12px]">
-        <ProfileIcon className="w-[30px] h-[30px] mr-[9px]" />
+        {profileImageUrl ? (
+          <img
+            src={profileImageUrl}
+            alt="프로필"
+            className="mr-[9px] h-[30px] w-[30px] shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <ProfileIcon className="mr-[9px] h-[30px] w-[30px] shrink-0" />
+        )}
 
-        <div className="flex flex-col mr-[12px]">
-          <h3 className="text-h4-list text-background-600">
+        <div className="mr-[4px] flex min-w-0 flex-1 flex-col">
+          <h3 className="truncate text-h4-list text-background-600">
             {isGuest ? "환영합니다!" : `${name ?? "___"}님`}
           </h3>
 
@@ -39,12 +55,15 @@ export default function UserSection({
             </p>
           ) : !isEmpty ? (
             <>
-              <p className="mt-2 text-body-sub text-background-500">
+              <p
+                className="mt-2 truncate text-body-sub text-background-500"
+                title={disability}
+              >
                 {disability ?? "-"}
               </p>
 
               <p className="text-body-sub text-background-500">
-                Level{level ?? " ? "} · {age ?? " ? "}세 아이
+                {childSummary || "자녀 정보 미등록"}
               </p>
             </>
           ) : null}
