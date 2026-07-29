@@ -22,6 +22,8 @@ export type UserBrief = {
 export type UserProfile = {
   userId: number;
   nickname: string | null;
+  email: string | null;
+  provider: string;
   profileImageUrl: string | null;
   point: number;
   level: number;
@@ -40,6 +42,12 @@ export type UserProfile = {
   guardianNickname: string | null;
   guardianType: string | null;
   communityRoleType: string | null;
+  joinedAt: string;
+  updatedAt: string;
+};
+
+export type UserWithdrawResult = {
+  success: boolean;
 };
 
 async function requestUserBrief() {
@@ -69,6 +77,14 @@ export async function getUserBrief() {
 export async function getMyProfile() {
   const { data } = await api.get<ApiResponse<UserProfile>>(
     "/api/v1/users/me/profile",
+  );
+
+  return data.result;
+}
+
+export async function withdrawCurrentUser() {
+  const { data } = await api.delete<ApiResponse<UserWithdrawResult>>(
+    "/api/v1/users/me",
   );
 
   return data.result;

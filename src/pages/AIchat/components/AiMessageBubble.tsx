@@ -4,27 +4,24 @@ export type AiMessageBubbleVariant = "ai" | "user" | "loading";
 
 export type AiCurationResource = {
   title: string;
-  meta: string;
+  url?: string;
 };
 
 type AiMessageBubbleProps = {
   variant?: AiMessageBubbleVariant;
   message?: string;
   resource?: AiCurationResource | null;
+  resources?: AiCurationResource[];
+  warning?: string | null;
   className?: string;
 };
-
-const defaultAiMessage = `안녕하세요! 저는 보듬 AI 큐레이션 입니다 😊
-
-OO님의 정보를 바탕으로
-복지 바우처, 재활 기관, 지원 제도 등 발달장애 아동 양육에 필요한 정보를 쉽고 빠르게 안내해드려요.
-
-무엇이 궁금하신가요?`;
 
 export default function AiMessageBubble({
   variant = "ai",
   message,
   resource,
+  resources,
+  warning,
   className,
 }: AiMessageBubbleProps) {
   if (variant === "loading") {
@@ -70,28 +67,50 @@ export default function AiMessageBubble({
     );
   }
 
-  const visibleResource = resource;
+  const visibleResources = resources ?? (resource ? [resource] : []);
 
   return (
     <div
       className={`flex w-full max-w-[800px] flex-col items-start gap-[20px] rounded-bl-[12px] rounded-br-[12px] rounded-tr-[12px] border border-main-100 bg-background-100 px-[20px] py-[12px] ${className ?? ""}`}
     >
       <p className="w-full whitespace-pre-wrap break-words text-h3-onboard text-background-600">
-        {message ?? defaultAiMessage}
+        {message}
       </p>
 
-      {visibleResource && (
-        <button
-          type="button"
-          className="flex w-full cursor-pointer flex-col items-start gap-[6px] rounded-[10px] border border-main-100 bg-main-100 px-[16px] py-[10px] text-left transition-colors hover:bg-main-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400"
+      {warning && (
+        <p
+          role="note"
+          className="w-full rounded-[10px] bg-sub-yellow-2 px-[16px] py-[10px] text-body-sub text-background-600"
         >
-          <span className="w-full text-h6 text-background-600">
-            {visibleResource.title}
-          </span>
-          <span className="w-full text-body-sub text-background-500">
-            {visibleResource.meta}
-          </span>
-        </button>
+          {warning}
+        </p>
+      )}
+
+      {visibleResources.length > 0 && (
+        <div className="flex w-full flex-col gap-[10px]">
+          {visibleResources.map((visibleResource, index) => (
+            <a
+              key={`${visibleResource.title}-${visibleResource.url ?? ""}-${index}`}
+              href={visibleResource.url || undefined}
+              target={visibleResource.url ? "_blank" : undefined}
+              rel={visibleResource.url ? "noreferrer" : undefined}
+              aria-disabled={!visibleResource.url}
+              className={`flex w-full flex-col items-start gap-[6px] rounded-[10px] border border-main-100 bg-main-100 px-[16px] py-[10px] text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400 ${
+                visibleResource.url
+                  ? "cursor-pointer hover:bg-main-150"
+                  : "cursor-default"
+              }`}
+            >
+              <span className="w-full text-h6 text-background-600">
+                📌 {visibleResource.title} &gt;
+              </span>
+            </a>
+          ))}
+          <p className="w-full text-body-sub text-background-400">
+            해당 출처는 믿을 수 있는 공공기관 및 전문 사이트의 정보를 바탕으로
+            제공됩니다.
+          </p>
+        </div>
       )}
     </div>
   );
