@@ -1,5 +1,7 @@
 import AiLoading from "@/assets/icons/AILoading.png";
 
+import AiMarkdown from "./AiMarkdown";
+
 export type AiMessageBubbleVariant = "ai" | "user" | "loading";
 
 export type AiCurationResource = {
@@ -73,9 +75,7 @@ export default function AiMessageBubble({
     <div
       className={`flex w-full max-w-[800px] flex-col items-start gap-[20px] rounded-bl-[12px] rounded-br-[12px] rounded-tr-[12px] border border-main-100 bg-background-100 px-[20px] py-[12px] ${className ?? ""}`}
     >
-      <p className="w-full whitespace-pre-wrap break-words text-h3-onboard text-background-600">
-        {message}
-      </p>
+      <AiMarkdown>{message ?? ""}</AiMarkdown>
 
       {warning && (
         <p
