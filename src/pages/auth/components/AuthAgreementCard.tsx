@@ -4,6 +4,7 @@ import CheckboxBlankIcon from "@/assets/icons/CheckboxBlank.svg?react";
 import CheckboxOutlineIcon from "@/assets/icons/CheckboxOutline.svg?react";
 import OnboardBoxFrame from "@/components/OnboardBoxFrame";
 import type { AgreementFormValues } from "@/apis/authApi";
+import { legalLinks } from "@/constants/legalLinks";
 
 type AuthAgreementCardProps = {
   onSubmit: (agreements: AgreementFormValues) => void;
@@ -17,6 +18,7 @@ type AgreementRowProps = {
   label: string;
   required?: boolean;
   onChange: () => void;
+  href: string;
 };
 
 function AgreementCheckboxIcon({ checked }: { checked: boolean }) {
@@ -35,6 +37,7 @@ function AgreementRow({
   label,
   required = false,
   onChange,
+  href,
 }: AgreementRowProps) {
   return (
     <div className="flex w-full items-center justify-between">
@@ -55,12 +58,15 @@ function AgreementRow({
           {label}
         </span>
       </label>
-      <button
-        type="button"
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${label} 전문보기`}
         className="cursor-pointer text-h3-onboard text-background-500 underline"
       >
         더보기
-      </button>
+      </a>
     </div>
   );
 }
@@ -141,17 +147,20 @@ export default function AuthAgreementCard({
               required
               label="이용 약관 동의"
               onChange={() => toggleAgreement("terms")}
+              href={legalLinks.termsOfService}
             />
             <AgreementRow
               checked={agreements.privacy}
               required
               label="개인정보처리방침"
               onChange={() => toggleAgreement("privacy")}
+              href={legalLinks.privacyPolicy}
             />
             <AgreementRow
               checked={agreements.ai}
               label="AI 챗봇 이용 동의 방침"
               onChange={() => toggleAgreement("ai")}
+              href={legalLinks.aiChatTerms}
             />
           </div>
         </div>

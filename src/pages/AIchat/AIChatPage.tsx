@@ -17,7 +17,6 @@ import {
   getAiChatStarter,
   getAiMessageHistory,
   getAiTermsAgreement,
-  getAiTermsContent,
   getTodayAiMessages,
   type AiChatStarter,
   type AiFeedbackReason,
@@ -26,7 +25,6 @@ import {
   type AiMessage,
   type AiMessageCursor,
   type AiMessageSource,
-  type AiTermsContent,
 } from "@/apis/aiChatApi";
 import { getApiErrorMessage } from "@/apis/apiError";
 import {
@@ -37,6 +35,7 @@ import {
 import { getUserBrief } from "@/apis/userApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
+import { legalLinks } from "@/constants/legalLinks";
 import {
   hasRevealedAiChatHistory,
   hasStartedAiChatSession,
@@ -164,17 +163,6 @@ function wait(milliseconds: number) {
   });
 }
 
-function formatTermsUpdatedAt(updatedAt: string) {
-  const date = new Date(updatedAt);
-  if (Number.isNaN(date.getTime())) return updatedAt;
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-}
-
 function mapSourceToResource(
   source: AiMessageSource | undefined,
 ): AiCurationResource | null {
@@ -290,9 +278,6 @@ export default function AIChatPage() {
   );
   const [noticeChecked, setNoticeChecked] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [termsContent, setTermsContent] = useState<AiTermsContent | null>(null);
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
-  const [isTermsLoading, setIsTermsLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [historySections, setHistorySections] = useState<HistorySection[]>([]);
@@ -357,8 +342,6 @@ export default function AIChatPage() {
     setIsConsentSubmitting(false);
     setIsGuideSubmitting(false);
     setIsFeedbackSubmitting(false);
-    setIsTermsModalOpen(false);
-    setIsTermsLoading(false);
   }, []);
 
   const initializeAiChat = useCallback(async () => {
@@ -386,8 +369,6 @@ export default function AIChatPage() {
       setIsConsentSubmitting(false);
       setIsGuideSubmitting(false);
       setIsFeedbackSubmitting(false);
-      setIsTermsModalOpen(false);
-      setIsTermsLoading(false);
       setAccessState("login-required");
       return;
     }
@@ -973,35 +954,6 @@ export default function AIChatPage() {
     }
   };
 
-  const handleTermsContentOpen = async () => {
-    const sessionGeneration = sessionGenerationRef.current;
-    setIsTermsModalOpen(true);
-    if (termsContent || isTermsLoading) return;
-
-    setIsTermsLoading(true);
-    try {
-      const content = await getAiTermsContent();
-      if (sessionGeneration !== sessionGenerationRef.current) return;
-
-      setTermsContent(content);
-    } catch (error: unknown) {
-      if (sessionGeneration !== sessionGenerationRef.current) return;
-
-      setIsTermsModalOpen(false);
-      showToast(
-        "yellow",
-        getApiErrorMessage(
-          error,
-          "AI 챗봇 이용 동의 방침을 불러오지 못했습니다.",
-        ),
-      );
-    } finally {
-      if (sessionGeneration === sessionGenerationRef.current) {
-        setIsTermsLoading(false);
-      }
-    }
-  };
-
   const handleGuideSubmit = async () => {
     if (!noticeChecked || isGuideSubmitting) return;
 
@@ -1102,7 +1054,7 @@ export default function AIChatPage() {
     authResolution === "authenticated" && isGuideOpen,
   );
   const entryModal =
-    isTermsModalOpen ? null : entryModalType === "login-required" ? (
+    entryModalType === "login-required" ? (
       <CenteredModal>
         <OnboardCancelBox
           title="로그인하고 더 많은 기능을 이용해 보세요!"
@@ -1133,13 +1085,14 @@ export default function AIChatPage() {
                   label="(선택) AI 챗봇 이용 동의 방침"
                   className="gap-[4px] text-h2-onboard text-background-500"
                 />
-                <button
-                  type="button"
-                  onClick={() => void handleTermsContentOpen()}
+                <a
+                  href={legalLinks.aiChatTerms}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="cursor-pointer text-h3-onboard text-background-500 underline underline-offset-2"
                 >
                   전문보기
-                </button>
+                </a>
               </div>
             </div>
           }
@@ -1206,8 +1159,7 @@ export default function AIChatPage() {
             isHistoryLoading ||
             authResolution !== "authenticated" ||
             accessState !== "ready" ||
-            isGuideOpen ||
-            isTermsModalOpen
+            isGuideOpen
           }
           inputMaxLength={MAX_MESSAGE_LENGTH}
           showHistoryButton={showHistoryButton}
@@ -1306,33 +1258,6 @@ export default function AIChatPage() {
         </CenteredModal>
       )}
 
-      {isTermsModalOpen && (
-        <CenteredModal>
-          <OnboardCancelBox
-            title={termsContent?.title ?? "AI 챗봇 이용 동의 방침"}
-            description={
-              isTermsLoading ? (
-                "약관 내용을 불러오고 있습니다."
-              ) : (
-                <div className="flex max-h-[360px] w-full flex-col gap-[16px] overflow-y-auto pr-[8px] [scrollbar-color:#C1C6D1_transparent] [scrollbar-width:thin]">
-                  <p className="whitespace-pre-wrap">{termsContent?.content}</p>
-                  {termsContent?.updatedAt && (
-                    <p className="text-body-sub text-background-400">
-                      최종 수정일 {formatTermsUpdatedAt(termsContent.updatedAt)}
-                    </p>
-                  )}
-                </div>
-              )
-            }
-            leftButtonText="닫기"
-            rightButtonText="확인"
-            leftButtonDisabled={isTermsLoading}
-            rightButtonDisabled={isTermsLoading}
-            onLeftButtonClick={() => setIsTermsModalOpen(false)}
-            onRightButtonClick={() => setIsTermsModalOpen(false)}
-          />
-        </CenteredModal>
-      )}
     </div>
   );
 }
