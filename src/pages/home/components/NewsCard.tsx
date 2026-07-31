@@ -1,8 +1,10 @@
 import ImagePlaceholder from "@/assets/images/news-img.svg";
 import PostTag from "@/components/PostTag";
 import ViewIcon from "@/assets/icons/Views.svg?react";
+import { useNavigate } from "react-router-dom";
 
 interface NewsCardProps {
+  newsId: number;
   title: string;
   region: number;
   status: string;
@@ -13,17 +15,19 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({
+  newsId,
   title,
   region,
   status,
   dDay,
   viewCount,
   thumbnailUrl,
-  onClick,
 }: NewsCardProps) {
+  const navigate = useNavigate();
+
   return (
     <button
-      onClick={onClick}
+      onClick={() => navigate(`/news/${newsId}`)}
       className="shrink-0 w-[210px] overflow-hidden rounded-[8px] border border-background-250 bg-white text-left cursor-pointer"
     >
       <img

@@ -1,4 +1,3 @@
-import { postList } from "@/mocks/post";
 import NewsCard from "./NewsCard";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
