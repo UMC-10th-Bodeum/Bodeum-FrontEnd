@@ -25,7 +25,6 @@ const sortOptions = [
 const categoryOptionsByTab: Record<NewsTabValue, SelectOption[]> = {
   activity: [
     { label: "카테고리", value: "all" },
-    { label: "바우처 · 지원금", value: "voucher-subsidy" },
     { label: "모집 · 참여", value: "recruit-participation" },
     { label: "교육 · 세미나", value: "education-seminar" },
     { label: "혜택 · 복지서비스", value: "benefit-welfare-service" },

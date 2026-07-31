@@ -10,6 +10,8 @@ interface DetailBackButtonProps {
   label?: string;
   onClick?: () => void;
   tone?: DetailBackButtonTone;
+  selected?: boolean;
+  selectedClassName?: string;
   className?: string;
 }
 
@@ -18,6 +20,8 @@ function DetailBackButton({
   label = "뒤로가기",
   onClick,
   tone = "default",
+  selected,
+  selectedClassName,
   className,
 }: DetailBackButtonProps) {
   const navigate = useNavigate();
@@ -35,10 +39,13 @@ function DetailBackButton({
     <button
       type="button"
       onClick={handleClick}
-      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border bg-background-100 px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] ${
-        tone === "danger"
-          ? "border-sub-red text-sub-red active:bg-sub-red active:border-background-100 active:text-background-100"
-          : "border-background-300 text-background-500 active:border-background-600 active:text-background-600"
+      aria-pressed={selected}
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] ${
+        selected && selectedClassName
+          ? selectedClassName
+          : tone === "danger"
+            ? "border-sub-red bg-background-100 text-sub-red active:bg-sub-red active:border-background-100 active:text-background-100"
+            : "border-background-300 bg-background-100 text-background-500 active:border-background-600 active:text-background-600"
       } ${className ?? ""}`}
     >
       {Icon && (

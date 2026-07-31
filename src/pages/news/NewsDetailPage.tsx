@@ -18,13 +18,12 @@ import GalleryMainImage from "@/assets/icons/gallery-main.svg";
 import PostListItem from "../home/components/PostListItem";
 import PostSection from "../home/components/PostSection";
 import HeartStat from "@/components/post-stat/HeartStat";
-import { isNewsSourceTab, type NewsSourceTab } from "@/constants/newsSourceTab";
-import { getNewsListItemById, type NewsListItem } from "./data/newsMockData";
+import { getNewsListItemById, type NewsListItem, type NewsType } from "./data/newsMockData";
 import AIChatButton from "@/components/AIChatButton";
 
-const breadcrumbLabelMap: Record<NewsSourceTab, string> = {
-  activity: "활동소식",
-  region: "지역 소식",
+const breadcrumbLabelMap: Record<NewsType, string> = {
+  ACTIVITY: "활동소식",
+  LOCAL: "지역 소식",
 };
 
 const detailExtra = {
@@ -57,20 +56,21 @@ function HomepageArrowIcon(props: SVGProps<SVGSVGElement>) {
 
 export default function NewsDetailPage() {
   const location = useLocation();
-  const { id, sourceTab } = useParams();
+  const { id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
-  const detailState = location.state as { item?: NewsListItem } | null;
-  const selectedSourceTab = isNewsSourceTab(sourceTab) ? sourceTab : undefined;
-  const routeItem = selectedSourceTab ? getNewsListItemById(id) : undefined;
+  const detailState = location.state as {
+    item?: NewsListItem;
+  } | null;
+  const routeItem = getNewsListItemById(id);
   const stateItem = detailState?.item;
   const cardItem = routeItem && stateItem?.id === routeItem.id ? stateItem : routeItem;
-  const breadcrumbLabel = selectedSourceTab ? breadcrumbLabelMap[selectedSourceTab] : "소식";
+  const breadcrumbLabel = cardItem ? breadcrumbLabelMap[cardItem.newsType] : "소식";
   const organization = cardItem?.services[0] ?? "";
   const activityInfo = [
     ["진행기간", detailExtra.period],
     ["신청기간", detailExtra.period],
     ["지역", cardItem?.address ?? ""],
-    ["추천기관", organization],
+    ["주관기관", organization],
     ["대상", detailExtra.target],
     ["문의", detailExtra.phone],
     ["담당자", organization],
@@ -78,7 +78,7 @@ export default function NewsDetailPage() {
   ];
 
   useEffect(() => {
-    setBreadcrumb([{ label: "소식" }, { label: breadcrumbLabel }, { label: " " }]);
+    setBreadcrumb([{ label: "소식" }, { label: breadcrumbLabel }]);
 
     return () => setBreadcrumb([]);
   }, [breadcrumbLabel, setBreadcrumb]);

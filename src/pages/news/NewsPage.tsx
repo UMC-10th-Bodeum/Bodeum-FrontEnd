@@ -16,6 +16,11 @@ export default function NewsPage() {
   const [sort, setSort] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
+  const selectedNewsType =
+    selectedTab === "activity" ? "ACTIVITY" : "LOCAL";
+  const filteredNewsListItems = newsListItems.filter(
+    (item) => item.newsType === selectedNewsType,
+  );
 
   const openRegionOnboarding = () => {
     setShowRegionOnboarding(true);
@@ -28,7 +33,7 @@ export default function NewsPage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-[18px] px-[32px] py-[20px]">
+      <div className="flex flex-col gap-[18px] px-[32px] py-[20px]">
         <div className="py-[20px]">
           <RecommendedNewsTopSection />
         </div>
@@ -53,8 +58,8 @@ export default function NewsPage() {
             category={category}
             onCategoryChange={setCategory}
           />
-          <NewsListSection items={newsListItems} sourceTab={selectedTab} />
-          <nav aria-label="소식 페이지네이션" className="p-2 mb-[21.2px]">
+          <NewsListSection items={filteredNewsListItems} />
+          <nav aria-label="소식 페이지네이션" className="p-2">
             <Pagination currentPage={page} totalPages={120} onChange={setPage} />
           </nav>
         </div>

@@ -4,6 +4,7 @@ import { useBlocker, useNavigate } from "react-router-dom";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import type { CommunityPostPayload } from "@/types/community";
 
 import CommunityWriteForm from "./components/write/CommunityWriteForm";
 
@@ -33,10 +34,17 @@ export default function CommunityWritePage() {
     }
   }, [blocker.state]);
 
-  const publishPost = () => {
+  const publishPost = (payload: CommunityPostPayload) => {
     allowNavigationRef.current = true;
     showToast("green", "게시물이 성공적으로 등록 됐습니다!");
-    navigate("/community");
+    navigate("/community", {
+      state: {
+        publishedPost: {
+          ...payload,
+          id: Date.now(),
+        },
+      },
+    });
   };
 
   const continueWriting = () => {
