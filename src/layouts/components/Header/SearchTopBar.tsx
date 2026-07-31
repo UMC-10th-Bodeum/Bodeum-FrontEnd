@@ -4,15 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { searchMockData } from "@/mocks/search";
 
 export default function SearchTopBar() {
-  console.log("SearchTopBar");
   const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
 
-  const results = searchMockData.result.infoResults.map((item) => ({
-    id: item.infoId,
+  const results = searchMockData.result.items.map((item) => ({
+    id: item.infoItemId,
     title: item.name,
     category: item.category,
-    address: item.address,
+    tags: item.tags,
   }));
   
   return (

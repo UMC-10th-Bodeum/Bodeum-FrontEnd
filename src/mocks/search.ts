@@ -1,48 +1,47 @@
-import type { SearchSuggestionResponse } from "@/types/search";
+import type { SearchResponse, SearchSuggestionResponse } from "@/types/search";
 
-export const searchMockData = {
+export const searchMockData: SearchResponse = {
   isSuccess: true,
   code: "COMMON200_1",
   message: "성공으로 요청을 처리했습니다.",
   result: {
-    infoResults: [
+    items: [
       {
-        infoId: 1,
+        infoItemId: 1,
         category: "HOSPITAL",
+        categoryLabel: "병원",
         name: "드림발달클리닉",
-        address: "서울특별시 강남구 테헤란로 123",
-        viewCount: 2184,
+        tags: ["언어치료", "ABA"],
       },
       {
-        infoId: 2,
+        infoItemId: 2,
         category: "HOSPITAL",
+        categoryLabel: "병원",
         name: "서울연세희망의원",
-        address: "서울특별시 강남구 역삼동",
-        viewCount: 1350,
+        tags: ["소아청소년과"],
       },
       {
-        infoId: 5,
+        infoItemId: 5,
         category: "HOSPITAL",
+        categoryLabel: "병원",
         name: "다시온의원",
-        address: "서울특별시 강남구 역삼동",
-        viewCount: 1350,
+        tags: ["재활의학과"],
       },
       {
-        infoId: 3,
+        infoItemId: 3,
         category: "WELFARE",
+        categoryLabel: "복지",
         name: "서울시립장애인복지관",
-        address: "서울특별시 강동구 천호동",
-        viewCount: 930,
+        tags: ["복지관", "상담"],
       },
       {
-        infoId: 4,
+        infoItemId: 4,
         category: "EMPLOYMENT",
+        categoryLabel: "취업",
         name: "한국장애인고용공단",
-        address: "경기도 성남시 분당구",
-        viewCount: 2010,
+        tags: ["취업지원"],
       },
     ],
-    totalCount: 8,
   },
 };
 

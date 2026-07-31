@@ -95,3 +95,5 @@ export const searchCategoryIconMap = {
   EMPLOYMENT: SearchEmploymentIcon,
   EDUCATION: SearchEducationIcon,
 } as const;
+
+export type InfoCategory = keyof typeof infoCategoryMap;

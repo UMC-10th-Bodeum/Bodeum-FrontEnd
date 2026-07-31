@@ -1,9 +1,20 @@
+import type { InfoCategory } from "@/constants/infoCategory";
+
 export interface InfoSearchResult {
-  infoId: number;
-  category: "INSTITUTION" | "HOSPITAL" | "WELFARE" | "EMPLOYMENT" | "EDUCATION";
+  infoItemId: number;
   name: string;
-  address: string;
-  viewCount: number;
+  category: InfoCategory;
+  categoryLabel: string;
+  tags: string[];
+}
+
+export interface SearchResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    items: InfoSearchResult[];
+  };
 }
 
 export interface SearchSuggestion {
