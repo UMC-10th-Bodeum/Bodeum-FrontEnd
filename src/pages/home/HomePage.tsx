@@ -7,8 +7,21 @@ import { useRecommendedNews } from "@/hooks/useHome";
 export default function HomePage() {
   const { data: news = [], isPending, isError } = useRecommendedNews();
 
-  if (isPending) return <div>Loading...</div>;
-  if (isError) return <div>Error</div>;
+  if (isPending) {
+    return (
+      <div className="flex h-[calc(100vh-60px)] items-center justify-center text-h2-list text-background-500">
+        불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-[calc(100vh-60px)] items-center justify-center text-h2-list text-background-500">
+        데이터를 불러오지 못했습니다.
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
