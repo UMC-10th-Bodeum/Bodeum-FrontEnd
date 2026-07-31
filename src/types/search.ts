@@ -6,28 +6,16 @@ export interface InfoSearchResult {
   viewCount: number;
 }
 
-export interface NewsSearchResult {
-  newsId: number;
-  title: string;
-  region: string;
-  viewCount: number;
+export interface SearchSuggestion {
+  text: string;
+  type: "NEWS_TITLE" | "COMMUNITY_TITLE";
 }
 
-export interface CommunitySearchResult {
-  postId: number;
-  categoryName: string;
-  title: string;
-  viewCount: number;
-}
-
-export interface SearchResponse {
+export interface SearchSuggestionResponse {
   isSuccess: boolean;
   code: string;
   message: string;
   result: {
-    infoResults: InfoSearchResult[];
-    newsResults: NewsSearchResult[];
-    communityResults: CommunitySearchResult[];
-    totalCount: number;
+    suggestions: SearchSuggestion[];
   };
 }

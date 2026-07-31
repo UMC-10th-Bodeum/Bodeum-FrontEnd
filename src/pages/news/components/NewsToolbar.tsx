@@ -3,6 +3,7 @@ import ChevronLeft from "@/assets/icons/ChevronLeft.svg?react";
 import Input from "@/components/Input";
 import { Select, type SelectOption } from "@/components/Select";
 import type { NewsTabValue } from "./NewsTabs";
+import { searchSuggestionMockData } from "@/mocks/search";
 
 interface NewsToolbarProps {
   tab: NewsTabValue;
@@ -14,6 +15,7 @@ interface NewsToolbarProps {
   onSortChange: (value: string) => void;
   category: string;
   onCategoryChange: (value: string) => void;
+  onSearch: (keyword: string) => void;
 }
 
 const sortOptions = [
@@ -48,19 +50,32 @@ export default function NewsToolbar({
   onSortChange,
   category,
   onCategoryChange,
+  onSearch,
 }: NewsToolbarProps) {
   const categoryOptions = categoryOptionsByTab[tab];
   const selectedRegionLabel = selectedRegion || "전체 지역";
   const selectedRegionButtonStateClass = selectedRegion
     ? "border-main-400 text-background-600"
     : "border-background-250 text-background-500";
-
+  
+  const suggestions =
+    keyword.trim().length >= 2
+      ? searchSuggestionMockData.result.suggestions.filter((item) =>
+        item.text.includes(keyword)
+      )
+      : [];
+  
   return (
     <div className="flex flex-wrap items-center gap-[12px]">
       <Input
         search
         value={keyword}
         onChange={(event) => onKeywordChange(event.target.value)}
+        suggestions={suggestions}
+        onSuggestionClick={(text) => {
+          onKeywordChange(text);
+        }}
+        onEnter={onSearch}
         placeholder="소식을 검색해보세요"
         className="w-[640px]"
       />

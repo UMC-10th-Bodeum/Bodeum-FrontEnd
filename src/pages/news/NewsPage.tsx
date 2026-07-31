@@ -35,6 +35,10 @@ export default function NewsPage() {
     setShowRegionOnboarding(false);
   };
 
+  const handleSearch = (keyword: string) => {
+    console.log("검색:", keyword);
+  };
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-[18px] px-[32px] py-[20px]">
@@ -54,6 +58,7 @@ export default function NewsPage() {
           <NewsToolbar
             tab={selectedTab}
             keyword={keyword}
+            onSearch={handleSearch}
             onKeywordChange={setKeyword}
             selectedRegion={selectedRegion}
             onSelectedRegionClick={openRegionOnboarding}

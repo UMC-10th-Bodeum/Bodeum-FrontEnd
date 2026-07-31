@@ -110,7 +110,7 @@ export default function HeaderSearchBar({
             rounded-[10px]
             border border-background-200
             bg-white
-            shadow-lg
+            shadow-[1px_2px_15px_0px_#00000026]
             overflow-hidden
             z-50
             px-1 py-2
