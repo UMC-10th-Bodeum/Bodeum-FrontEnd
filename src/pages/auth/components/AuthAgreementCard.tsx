@@ -3,9 +3,11 @@ import { useId, useState } from "react";
 import CheckboxBlankIcon from "@/assets/icons/CheckboxBlank.svg?react";
 import CheckboxOutlineIcon from "@/assets/icons/CheckboxOutline.svg?react";
 import OnboardBoxFrame from "@/components/OnboardBoxFrame";
+import type { AgreementFormValues } from "@/apis/authApi";
 
 type AuthAgreementCardProps = {
-  onSubmit: () => void;
+  onSubmit: (agreements: AgreementFormValues) => void;
+  isSubmitting?: boolean;
 };
 
 type AgreementKey = "terms" | "privacy" | "ai";
@@ -63,7 +65,10 @@ function AgreementRow({
   );
 }
 
-export default function AuthAgreementCard({ onSubmit }: AuthAgreementCardProps) {
+export default function AuthAgreementCard({
+  onSubmit,
+  isSubmitting = false,
+}: AuthAgreementCardProps) {
   const titleId = useId();
   const [agreements, setAgreements] = useState<Record<AgreementKey, boolean>>({
     terms: false,
@@ -91,12 +96,12 @@ export default function AuthAgreementCard({ onSubmit }: AuthAgreementCardProps) 
     <div className="[&>div:first-child]:hidden">
       <OnboardBoxFrame
         buttonCount={1}
-        rightButtonText="다음"
+        rightButtonText={isSubmitting ? "저장 중..." : "다음"}
         showOverlay={false}
-        rightButtonDisabled={!requiredChecked}
+        rightButtonDisabled={!requiredChecked || isSubmitting}
         className="w-[624px]! p-[44px]! shadow-[0_0_15px_rgb(102_128_155_/_0.1)] max-sm:px-[24px]! max-sm:py-[32px]!"
         ariaLabelledby={titleId}
-        onRightButtonClick={onSubmit}
+        onRightButtonClick={() => onSubmit(agreements)}
       >
         <div className="flex w-full flex-col gap-[44px]">
           <div className="flex w-full flex-col gap-[24px]">
