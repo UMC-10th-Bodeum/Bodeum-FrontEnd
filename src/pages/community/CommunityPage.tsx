@@ -6,12 +6,18 @@ import { Select } from "@/components/Select";
 import CommunitySection from "./components/CommunitySection";
 import CommunityPostCard from "./components/CommunityPostCard";
 import { communityPosts } from "@/mocks/community";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
+  communityCategoryMap,
   communityCategoryEntries,
   isCommunityCategory,
   type CommunityCategory,
 } from "@/constants/communityCategory";
+import type { CommunityPostPayload } from "@/types/community";
+
+type CommunityPageLocationState = {
+  publishedPost?: CommunityPostPayload & { id: number };
+};
 
 const categories: Array<{
   value: CommunityCategory | "ALL";
@@ -35,7 +41,6 @@ const repeatedPosts = Array.from({ length: 14 }, (_, index) => {
   return {
     id: index + 1,
     category,
-    board: "게시판 내용",
     title: "ABA 치료 6개월째, 드디어 눈맞춤이 됐어요 😭",
     content:
       "처음엔 정말 막막했는데 여기 선배 부모님들 덕분에 ABA 치료사와 연결하고 꾸준히 했더니 드디어 반응이 생겼습니다.",
@@ -49,7 +54,9 @@ const repeatedPosts = Array.from({ length: 14 }, (_, index) => {
 
 export default function CommunityPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const publishedPost = (location.state as CommunityPageLocationState | null)?.publishedPost;
   const categoryParam = searchParams.get("category");
   const [keyword, setKeyword] = useState("");
   const category: CommunityCategory | "ALL" = isCommunityCategory(categoryParam)
@@ -59,16 +66,29 @@ export default function CommunityPage() {
   const [page, setPage] = useState(1);
 
   const posts = useMemo(() => {
-    const filteredPosts = repeatedPosts.filter(
+    const availablePosts = publishedPost
+      ? [
+          {
+            ...publishedPost,
+            likes: 0,
+            comments: 0,
+            views: 0,
+            imageCount: publishedPost.images.length,
+            createdAt: "방금 전",
+          },
+          ...repeatedPosts,
+        ]
+      : repeatedPosts;
+    const filteredPosts = availablePosts.filter(
       (post) =>
         post.title.includes(keyword) ||
         post.content.includes(keyword) ||
-        post.board.includes(keyword),
+        communityCategoryMap[post.category].includes(keyword),
     );
     const activeSort: SortKey = sort || "views";
 
     return [...filteredPosts].sort((a, b) => b[activeSort] - a[activeSort]);
-  }, [keyword, sort]);
+  }, [keyword, publishedPost, sort]);
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
     if (value === "ALL") {
@@ -80,7 +100,7 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
-      <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
+      <div className="flex flex-col px-[32px] py-[20px]">
         <CommunitySection posts={communityPosts} />
 
         <div className="mt-[18px] flex flex-col gap-[16px]">
@@ -127,7 +147,10 @@ export default function CommunityPage() {
                       post: {
                         ...post,
                         diagnosis: "AUTISM",
-                        author: "NN님 · Level1 · 자폐스펙트럼 · N세 아이",
+                        author:
+                          "authorVisibility" in post && post.authorVisibility === "ANONYMOUS"
+                            ? "익명 부모님"
+                            : "NN님 · Level1 · 자폐스펙트럼 · N세 아이",
                       },
                     },
                   })
