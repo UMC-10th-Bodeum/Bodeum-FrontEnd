@@ -15,7 +15,7 @@ export default function SearchTopBar() {
         onChange={setKeyword}
         results={results}
         onSelect={(item) => {
-          navigate(`/info/${item.infoItemId}`)
+          navigate(`/info/${item.category}/${item.infoItemId}`)
         }}
       />
     </header>
