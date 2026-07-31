@@ -1,3 +1,5 @@
+import { resetAiChatSession } from "@/utils/aiChatSession";
+
 export const AUTH_STATE_CHANGED_EVENT = "bodeum:auth-state-changed";
 
 export type AuthTokens = {
@@ -21,6 +23,7 @@ export function clearAuthTokens() {
   localStorage.removeItem("tokenType");
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+  resetAiChatSession();
   notifyAuthStateChanged();
 }
 

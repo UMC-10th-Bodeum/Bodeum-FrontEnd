@@ -17,7 +17,8 @@ export interface RecommendedNews {
   newsId: number;
   title: string;
   thumbnailUrl: string;
-  region: number;
+  regionLevel1: string;
+  regionLevel2: string;
   dDay: string;
   status: string;
   viewCount: number;
@@ -32,7 +33,8 @@ export interface RecommendedNewsResponse {
 
 export interface HomeNewsPreview {
   newsId: number;
-  region: number;
+  regionLevel1: string,
+  regionLevel2: string,
   title: string;
   likeCount: number;
   viewCount: number;

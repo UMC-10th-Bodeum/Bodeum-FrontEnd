@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 interface NewsCardProps {
   newsId: number;
   title: string;
-  region: number;
+  regionLevel1: string;
+  regionLevel2: string;
   status: string;
   dDay: string;
   viewCount: number;
@@ -17,7 +18,8 @@ interface NewsCardProps {
 export default function NewsCard({
   newsId,
   title,
-  region,
+  regionLevel1,
+  regionLevel2,
   status,
   dDay,
   viewCount,
@@ -39,7 +41,7 @@ export default function NewsCard({
         <p className="line-clamp-1 leading-none text-h6 text-background-600">{title}</p>
 
         <div className="text-body-label text-background-400">
-          {region ?? "-"} 
+        {`${regionLevel1} · ${regionLevel2}`}
         </div>
 
         <div className="flex items-center">

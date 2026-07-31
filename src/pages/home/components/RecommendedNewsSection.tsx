@@ -45,7 +45,7 @@ export default function RecommendedNewsSection() {
             <PostListItem
               key={news.newsId}
               title={news.title}
-              region={String(news.region)}
+              region={`${news.regionLevel1} ${news.regionLevel2}`}
               likes={news.likeCount}
               views={news.viewCount}
               onClick={() => navigate(`/news/${news.newsId}`)}
@@ -57,7 +57,7 @@ export default function RecommendedNewsSection() {
             <PostListItem
               key={news.newsId}
               title={news.title}
-              region={String(news.region)}
+              region={`${news.regionLevel1} ${news.regionLevel2}`}
               likes={news.likeCount}
               views={news.viewCount}
               onClick={() => navigate(`/news/${news.newsId}`)}
