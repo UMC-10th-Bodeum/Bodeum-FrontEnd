@@ -5,10 +5,12 @@ export interface InfoSearchResult {
   name: string;
   category: InfoCategory;
   categoryLabel: string;
+  regionLevel1: string;
+  regionLevel2: string;
   tags: string[];
 }
 
-export interface SearchResponse {
+export interface InfoSearchResponse {
   isSuccess: boolean;
   code: string;
   message: string;

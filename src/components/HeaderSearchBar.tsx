@@ -2,19 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import SearchIcon from "@/assets/icons/Search.svg?react";
 import { searchCategoryIconMap, infoCategoryMap } from "@/constants/infoCategory";
 import CancelIcon from "@/assets/icons/Cancel-rounded.svg?react";
-
-export interface SearchResult {
-  id: number;
-  title: string;
-  category: keyof typeof infoCategoryMap;
-  address: string;
-}
+import type { InfoSearchResult } from "@/types/search";
 
 interface HeaderSearchBarProps {
   value: string;
   onChange: (value: string) => void;
-  results: SearchResult[];
-  onSelect: (item: SearchResult) => void;
+  results: InfoSearchResult[];
+  onSelect: (item: InfoSearchResult) => void;
   placeholder?: string;
   className?: string;
 }
@@ -58,7 +52,7 @@ export default function HeaderSearchBar({
     );
   };
 
-  const grouped = results.reduce<Record<string, SearchResult[]>>((acc, item) => {
+  const grouped = results.reduce<Record<string, InfoSearchResult[]>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
     acc[item.category].push(item);
     return acc;
@@ -147,7 +141,7 @@ export default function HeaderSearchBar({
 
                   return (
                     <button
-                      key={item.id}
+                      key={item.infoItemId}
                       type="button"
                       onClick={() => {
                         onSelect(item);
@@ -166,11 +160,11 @@ export default function HeaderSearchBar({
 
                       <div className="flex flex-col">
                         <span className="text-h3-category-sub text-background-500">
-                          {highlightText(item.title, value)}
+                          {highlightText(item.name, value)}
                         </span>
 
                         <span className="text-h3-onboard text-background-400">
-                          {item.address}
+                          {[item.regionLevel1, item.regionLevel2].filter(Boolean).join(" ")}
                         </span>
                       </div>
                     </button>
