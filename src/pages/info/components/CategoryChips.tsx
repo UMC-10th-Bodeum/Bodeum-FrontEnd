@@ -4,6 +4,7 @@ import {
   infoSubCategoryMap,
 } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
+import AwardIcon from "@/assets/icons/Award.svg?react";
 
 interface CategoryChipsProps {
   parentCategory: ParentCategory;
@@ -27,6 +28,7 @@ export default function CategoryChips({
             key={item.id}
             category={parentCategory}
             label={item.label}
+            icon={AwardIcon}
             selected={subCategory === item.value}
             onClick={() => onChange(item.value)}
           />
