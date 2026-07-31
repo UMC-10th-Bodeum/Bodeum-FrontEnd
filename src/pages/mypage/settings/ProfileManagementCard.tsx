@@ -1,8 +1,8 @@
+import { useEffect, useState } from "react";
 import ButtonOutline from "@/components/ButtonOutline";
 import ButtonFill from "@/components/ButtonFill";
 import ChoiceChips from "@/components/ChoiceChips";
 import Input from "@/components/Input";
-import { Select } from "@/components/Select";
 import { diagnosisMap } from "@/constants/diagnosis";
 import {
   districtOptionsByRegion,
@@ -13,6 +13,7 @@ import type { DiagnosisType } from "@/types/diagnosis";
 import { birthMonthOptions, birthYearOptions } from "./data";
 import type { ProfileSettingsForm } from "./types";
 import ProfileImagePicker from "./components/ProfileImagePicker";
+import ProfileSelect from "./components/ProfileSelect";
 
 interface ProfileManagementCardProps {
   form: ProfileSettingsForm;
@@ -26,6 +27,8 @@ interface ProfileManagementCardProps {
 const diagnosisEntries = Object.entries(diagnosisMap) as Array<
   [DiagnosisType, (typeof diagnosisMap)[DiagnosisType]]
 >;
+
+type ProfileSelectField = "region" | "district" | "birthYear" | "birthMonth";
 
 function isValidBirthDate(birthYear: string, birthMonth: string) {
   if (!birthYear || !birthMonth) {
@@ -54,14 +57,21 @@ export default function ProfileManagementCard({
   onCancel,
   onApply,
 }: ProfileManagementCardProps) {
+  const [selectedFields, setSelectedFields] = useState<Set<ProfileSelectField>>(
+    () => new Set(),
+  );
+
+  useEffect(() => {
+    if (!isEditing) {
+      setSelectedFields(new Set());
+    }
+  }, [isEditing]);
+
   const canApply =
     form.parentNickname.trim().length > 0 &&
     form.childNickname.trim().length > 0 &&
     isValidBirthDate(form.birthYear, form.birthMonth) &&
     form.diagnoses.length > 0;
-  const regionSelectTriggerClassName =
-    "h-[44px] !border-background-250 !bg-background-200 !text-background-500";
-
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -75,6 +85,10 @@ export default function ProfileManagementCard({
       : [...form.diagnoses, diagnosis];
 
     updateField("diagnoses", diagnoses);
+  };
+
+  const markSelectAsSelected = (field: ProfileSelectField) => {
+    setSelectedFields((current) => new Set(current).add(field));
   };
 
   return (
@@ -140,7 +154,7 @@ export default function ProfileManagementCard({
       <div className="mt-[24px]">
         <span className="mb-[12px] block text-h3-onboard text-background-500">지역</span>
         <div className="grid grid-cols-2 gap-[12px]">
-          <Select
+          <ProfileSelect
             variant="L"
             ariaLabel="시/도 선택"
             options={regionOptions.map((option) => ({
@@ -149,25 +163,29 @@ export default function ProfileManagementCard({
             }))}
             value={form.region}
             disabled={!isEditing}
-            onChange={(region) =>
+            changed={isEditing && selectedFields.has("region")}
+            onChange={(region) => {
+              markSelectAsSelected("region");
               onChange({
                 ...form,
                 region,
                 district: districtOptionsByRegion[region]?.[0]?.value ?? "",
-              })
-            }
+              });
+            }}
             className="w-full"
-            triggerClassName={regionSelectTriggerClassName}
           />
-          <Select
+          <ProfileSelect
             variant="L"
             ariaLabel="시/군/구 선택"
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
             disabled={!isEditing}
-            onChange={(district) => updateField("district", district)}
+            changed={isEditing && selectedFields.has("district")}
+            onChange={(district) => {
+              markSelectAsSelected("district");
+              updateField("district", district);
+            }}
             className="w-full"
-            triggerClassName={regionSelectTriggerClassName}
           />
         </div>
       </div>
@@ -195,27 +213,33 @@ export default function ProfileManagementCard({
       <div className="mt-[26px]">
         <span className="mb-[12px] block text-h3-onboard text-background-500">자녀 생년월일*</span>
         <div className="grid grid-cols-2 gap-[14px]">
-          <Select
+          <ProfileSelect
             variant="L"
             ariaLabel="출생 연도"
             options={birthYearOptions}
             value={form.birthYear}
             disabled={!isEditing}
-            onChange={(birthYear) => updateField("birthYear", birthYear)}
+            changed={isEditing && selectedFields.has("birthYear")}
+            onChange={(birthYear) => {
+              markSelectAsSelected("birthYear");
+              updateField("birthYear", birthYear);
+            }}
             placeholder="년도"
             className="w-full"
-            triggerClassName="h-[44px]"
           />
-          <Select
+          <ProfileSelect
             variant="L"
             ariaLabel="출생 월"
             options={birthMonthOptions}
             value={form.birthMonth}
             disabled={!isEditing}
-            onChange={(birthMonth) => updateField("birthMonth", birthMonth)}
+            changed={isEditing && selectedFields.has("birthMonth")}
+            onChange={(birthMonth) => {
+              markSelectAsSelected("birthMonth");
+              updateField("birthMonth", birthMonth);
+            }}
             placeholder="월"
             className="w-full"
-            triggerClassName="h-[44px]"
           />
         </div>
       </div>
