@@ -4,6 +4,11 @@ import HospitalIcon from "@/assets/icons/hospital.svg?react";
 import WelfareIcon from "@/assets/icons/welfare.svg?react";
 import EmploymentIcon from "@/assets/icons/employment.svg?react";
 import EducationIcon from "@/assets/icons/education.svg?react";
+import SearchInstitutionIcon from "@/assets/icons/searchInstitution.svg?react";
+import SearchHospitalIcon from "@/assets/icons/searchHospital.svg?react";
+import SearchWelfareIcon from "@/assets/icons/searchWelfare.svg?react";
+import SearchEmploymentIcon from "@/assets/icons/searchEmployment.svg?react";
+import SearchEducationIcon from "@/assets/icons/searchEducation.svg?react";
 
 export const infoCategoryMap = {
   INSTITUTION: {
@@ -82,3 +87,11 @@ export const infoSubCategoryMap: Record<ParentCategory, readonly InfoSubCategory
     { id: 21, value: "STANDARD_WORKPLACE", label: "장애인 표준 사업장" },
   ],
 };
+
+export const searchCategoryIconMap = {
+  INSTITUTION: SearchInstitutionIcon,
+  HOSPITAL: SearchHospitalIcon,
+  WELFARE: SearchWelfareIcon,
+  EMPLOYMENT: SearchEmploymentIcon,
+  EDUCATION: SearchEducationIcon,
+} as const;

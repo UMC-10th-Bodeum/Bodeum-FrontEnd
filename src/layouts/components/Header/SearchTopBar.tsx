@@ -1,28 +1,20 @@
 import { useState } from "react";
 import HeaderSearchBar from "@/components/HeaderSearchBar";
 import { useNavigate } from "react-router-dom";
+import { searchMockData } from "@/mocks/search";
 
 export default function SearchTopBar() {
+  console.log("SearchTopBar");
   const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
 
-  const results = [
-    {
-      id: 1,
-      title: "서울대학교병원",
-      category: "병원",
-    },
-    {
-      id: 2,
-      title: "서울시립장애인복지관",
-      category: "복지",
-    },
-    {
-      id: 3,
-      title: "한국장애인고용공단",
-      category: "취업",
-    },
-  ];
+  const results = searchMockData.result.infoResults.map((item) => ({
+    id: item.infoId,
+    title: item.name,
+    category: item.category,
+    address: item.address,
+  }));
+  
   return (
     <header className="h-[60px] border-b border-background-250 bg-background-100 px-[20px] py-[10px]">
       <HeaderSearchBar
@@ -32,9 +24,9 @@ export default function SearchTopBar() {
           item.title.includes(keyword)
         )}
         onSelect={(item) => {
-          navigate(`/info/${item.id}`);
+          navigate(`/info/${item.id}`)
         }}
-      />;
+      />
     </header>
   );
 }

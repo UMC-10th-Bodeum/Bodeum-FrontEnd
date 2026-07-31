@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import SearchIcon from "@/assets/icons/Search.svg?react";
+import { searchCategoryIconMap, infoCategoryMap } from "@/constants/infoCategory";
+import CancelIcon from "@/assets/icons/Cancel-rounded.svg?react";
 
 export interface SearchResult {
   id: number;
   title: string;
-  category: string;
+  category: keyof typeof infoCategoryMap;
+  address: string;
 }
 
 interface HeaderSearchBarProps {
@@ -26,6 +29,7 @@ export default function HeaderSearchBar({
 }: HeaderSearchBarProps) {
   const [focused, setFocused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -37,6 +41,22 @@ export default function HeaderSearchBar({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function highlightText(text: string, keyword: string) {
+    if (!keyword.trim()) return text;
+
+    const parts = text.split(new RegExp(`(${keyword})`, "gi"));
+
+    return parts.map((part, index) =>
+      part.toLowerCase() === keyword.toLowerCase() ? (
+        <span key={index} className="text-background-600">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
 
   const grouped = results.reduce<Record<string, SearchResult[]>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
@@ -51,14 +71,13 @@ export default function HeaderSearchBar({
           flex h-[40px] items-center rounded-[10px]
           border px-[20px]
           transition-colors
-          ${
-            focused
-              ? "border-main-400 bg-background-100"
-              : "border-background-200 bg-background-200"
+          ${focused
+            ? "border-main-400 bg-background-100"
+            : "border-background-200 bg-background-200"
           }
         `}
       >
-        <SearchIcon className="mr-[15px] h-[18px] w-[18px] shrink-0" />
+        <SearchIcon className="mr-[15px] h-[18px] w-[18px] shrink-0 text-background-500" />
 
         <input
           value={value}
@@ -73,6 +92,15 @@ export default function HeaderSearchBar({
             outline-none
           "
         />
+        {value.trim() !== "" && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="ml-2 shrink-0"
+          >
+            <CancelIcon />
+          </button>
+        )}
       </div>
 
       {focused && value.trim() !== "" && (
@@ -85,41 +113,69 @@ export default function HeaderSearchBar({
             shadow-lg
             overflow-hidden
             z-50
+            px-1 py-2
           "
         >
           {results.length === 0 ? (
-            <div className="py-10 text-center text-body2 text-background-400 items-center justify-center ">
-              <SearchIcon className="h-[50px] w-[50px] text-background-300"/>
-              <span>검색결과가 없어요</span>
-              <span>검색어를 변경해보세요</span>
+            <div
+              className="flex flex-col items-center justify-center py-[25.5px]"
+            >
+              <SearchIcon className="mb-3 h-[50px] w-[50px] text-background-300" />
+
+              <p className="text-h3-category-sub text-background-700">
+                검색결과가 없어요
+              </p>
+
+              <p className="text-h6 text-background-400">
+                검색어를 변경해보세요
+              </p>
             </div>
           ) : (
             Object.entries(grouped).map(([category, items]) => (
               <div key={category}>
-                <div className="px-5 pt-4 pb-2 text-caption text-background-400">
-                  {category}
+                <div className="p-2 text-h3-category-sub text-background-400">
+                  {
+                    infoCategoryMap[
+                      category as keyof typeof infoCategoryMap
+                    ]?.label
+                  }
                 </div>
 
-                {items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => {
-                      onSelect(item);
-                      setFocused(false);
-                    }}
-                    className="
-                      flex w-full items-center
-                      px-5 py-3
-                      text-left
-                      hover:bg-background-100
-                    "
-                  >
-                    <span className="text-body1 text-background-700">
-                      {item.title}
-                    </span>
-                  </button>
-                ))}
+                {items.map((item) => {
+                  const Icon =
+                    searchCategoryIconMap[item.category as keyof typeof searchCategoryIconMap];
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        onSelect(item);
+                        setFocused(false);
+                      }}
+                      className="
+                        flex w-full items-center
+                        p-3 rounded-[10px]
+                        text-left
+                        hover:bg-background-200
+                        active:bg-background-200
+                        active:border active:border-background-300
+                      "
+                    >
+                      <Icon className="mr-2 h-6 w-6 shrink-0" />
+
+                      <div className="flex flex-col">
+                        <span className="text-h3-category-sub text-background-500">
+                          {highlightText(item.title, value)}
+                        </span>
+
+                        <span className="text-h3-onboard text-background-400">
+                          {item.address}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             ))
           )}
