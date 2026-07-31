@@ -366,10 +366,7 @@ export default function AIChatPage() {
     [],
   );
 
-  const enterConsentRequiredState = useCallback(() => {
-    sessionGenerationRef.current += 1;
-    setAuthResolution("authenticated");
-    setAccessState("consent-required");
+  const resetAiChatUiState = useCallback(() => {
     setMessages([]);
     setHistorySections([]);
     setHiddenTodayMessages([]);
@@ -377,8 +374,6 @@ export default function AIChatPage() {
     setHasPreviousMessages(false);
     setIsHistoryRevealed(false);
     setIsGuideOpen(false);
-    setNoticeChecked(false);
-    setConsentChecked(false);
     setFeedbackOpen(false);
     setFeedbackMessageId(null);
     setSelectedFeedbackReasons([]);
@@ -392,6 +387,15 @@ export default function AIChatPage() {
     setIsFeedbackSubmitting(false);
   }, []);
 
+  const enterConsentRequiredState = useCallback(() => {
+    sessionGenerationRef.current += 1;
+    setAuthResolution("authenticated");
+    setAccessState("consent-required");
+    resetAiChatUiState();
+    setNoticeChecked(false);
+    setConsentChecked(false);
+  }, [resetAiChatUiState]);
+
   const initializeAiChat = useCallback(async () => {
     const requestId = ++initializeRequestRef.current;
 
@@ -399,24 +403,7 @@ export default function AIChatPage() {
       authSessionPresentRef.current = false;
       setAuthResolution("guest");
       resetAiChatSession();
-      setIsHistoryRevealed(false);
-      setHistorySections([]);
-      setHiddenTodayMessages([]);
-      setHasHiddenTodayMessages(false);
-      setHasPreviousMessages(false);
-      setMessages([]);
-      setIsGuideOpen(false);
-      setFeedbackOpen(false);
-      setFeedbackMessageId(null);
-      setSelectedFeedbackReasons([]);
-      setFeedbackByMessage({});
-      setInputValue("");
-      sendInFlightRef.current = false;
-      setIsSending(false);
-      setIsHistoryLoading(false);
-      setIsConsentSubmitting(false);
-      setIsGuideSubmitting(false);
-      setIsFeedbackSubmitting(false);
+      resetAiChatUiState();
       setAccessState("login-required");
       return;
     }
@@ -527,7 +514,7 @@ export default function AIChatPage() {
         ),
       );
     }
-  }, [enterConsentRequiredState]);
+  }, [enterConsentRequiredState, resetAiChatUiState]);
 
   useEffect(() => {
     void initializeAiChat();
@@ -967,10 +954,12 @@ export default function AIChatPage() {
       return <AiMessageBot key={message.id} variant="loading" />;
     }
 
-    const selectedFeedback = message.serverId
-      ? feedbackByMessage[message.serverId] === "HELPFUL"
+    const serverId = message.serverId;
+    const hasServerId = serverId !== undefined;
+    const selectedFeedback = hasServerId
+      ? feedbackByMessage[serverId] === "HELPFUL"
         ? "helpful"
-        : feedbackByMessage[message.serverId] === "INCORRECT"
+        : feedbackByMessage[serverId] === "INCORRECT"
           ? "incorrect"
           : null
       : null;
@@ -982,17 +971,17 @@ export default function AIChatPage() {
         resources={message.resources}
         warning={message.warning}
         suggestions={message.suggestions}
-        showFeedback={message.serverId !== undefined}
+        showFeedback={hasServerId}
         selectedFeedback={selectedFeedback}
         onSuggestionClick={(suggestion) => void handleSend(suggestion)}
         onGoodFeedback={
-          message.serverId
-            ? () => void handleHelpfulFeedback(message.serverId!)
+          hasServerId
+            ? () => void handleHelpfulFeedback(serverId)
             : undefined
         }
         onBadFeedback={
-          message.serverId
-            ? () => openIncorrectFeedback(message.serverId!)
+          hasServerId
+            ? () => openIncorrectFeedback(serverId)
             : undefined
         }
       />
