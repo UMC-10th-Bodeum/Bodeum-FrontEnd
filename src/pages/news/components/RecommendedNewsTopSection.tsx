@@ -1,4 +1,5 @@
 import NewsCard from "@/pages/home/components/NewsCard";
+import { useNavigate } from "react-router-dom";
 
 interface News {
   id: number;
@@ -15,6 +16,8 @@ interface RecommendedNewsTopSectionProps {
 }
 
 export default function RecommendedNewsTopSection({ news }: RecommendedNewsTopSectionProps) {
+  const navigate = useNavigate();
+
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
       <div>
@@ -26,7 +29,11 @@ export default function RecommendedNewsTopSection({ news }: RecommendedNewsTopSe
 
       <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
         {news.map((item) => (
-          <NewsCard key={item.id} {...item} />
+          <NewsCard
+            key={item.id}
+            {...item}
+            onClick={() => navigate(`/news/${item.id}`)}
+          />
         ))}
       </div>
     </section>

@@ -1,14 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import type { NewsSourceTab } from "@/constants/newsSourceTab";
 import type { NewsListItem } from "../data/newsMockData";
 import ProgramItem from "@/components/ProgramItem";
 
 interface NewsListSectionProps {
   items: NewsListItem[];
-  sourceTab: NewsSourceTab;
 }
 
-export default function NewsListSection({ items, sourceTab }: NewsListSectionProps) {
+export default function NewsListSection({ items }: NewsListSectionProps) {
   const navigate = useNavigate();
 
   return (
@@ -29,7 +27,7 @@ export default function NewsListSection({ items, sourceTab }: NewsListSectionPro
           viewCount={item.viewCount}
           scrapCount={item.scrapCount}
           isScrapped={item.isScrapped}
-          onClick={() => navigate(`/news/${sourceTab}/${item.id}`, { state: { item } })}
+          onClick={() => navigate(`/news/${item.id}`, { state: { item } })}
         />
       ))}
     </section>

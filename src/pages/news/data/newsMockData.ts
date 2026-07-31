@@ -1,8 +1,11 @@
 import type { ChipVariant } from "@/components/Chips";
 import type { InfoItemCategory } from "@/components/InfoItem";
 
+export type NewsType = "ACTIVITY" | "LOCAL";
+
 export interface NewsListItem {
   id: number;
+  newsType: NewsType;
   type: InfoItemCategory;
   name: string;
   address: string;
@@ -16,6 +19,7 @@ export interface NewsListItem {
 
 export const newsListItems: NewsListItem[] = Array.from({ length: 14 }, (_, index) => ({
   id: index + 1,
+  newsType: index % 2 === 0 ? "ACTIVITY" : "LOCAL",
   type: "PROGRAM",
   name: "드림발달클리닉",
   address: "경기 수원시",

@@ -25,6 +25,11 @@ export default function NewsPage() {
   const [sort, setSort] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
+  const selectedNewsType =
+    selectedTab === "activity" ? "ACTIVITY" : "LOCAL";
+  const filteredNewsListItems = newsListItems.filter(
+    (item) => item.newsType === selectedNewsType,
+  );
 
   const openRegionOnboarding = () => {
     setShowRegionOnboarding(true);
@@ -62,7 +67,7 @@ export default function NewsPage() {
             category={category}
             onCategoryChange={setCategory}
           />
-          <NewsListSection items={newsListItems} sourceTab={selectedTab} />
+          <NewsListSection items={filteredNewsListItems} />
           <nav aria-label="소식 페이지네이션" className="p-2">
             <Pagination currentPage={page} totalPages={120} onChange={setPage} />
           </nav>
