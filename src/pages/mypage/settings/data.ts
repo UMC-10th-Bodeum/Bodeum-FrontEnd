@@ -1,6 +1,8 @@
 import type { ProfileSettingsForm } from "./types";
 
 export const initialProfileSettings: ProfileSettingsForm = {
+  profileImageUrl: null,
+  profileImageFile: null,
   parentNickname: "보듬 부모님",
   region: "서울특별시",
   district: "강남구",

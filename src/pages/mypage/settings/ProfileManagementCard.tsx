@@ -3,7 +3,6 @@ import ButtonFill from "@/components/ButtonFill";
 import ChoiceChips from "@/components/ChoiceChips";
 import Input from "@/components/Input";
 import { Select } from "@/components/Select";
-import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import { diagnosisMap } from "@/constants/diagnosis";
 import {
   districtOptionsByRegion,
@@ -13,6 +12,7 @@ import {
 import type { DiagnosisType } from "@/types/diagnosis";
 import { birthMonthOptions, birthYearOptions } from "./data";
 import type { ProfileSettingsForm } from "./types";
+import ProfileImagePicker from "./components/ProfileImagePicker";
 
 interface ProfileManagementCardProps {
   form: ProfileSettingsForm;
@@ -84,7 +84,14 @@ export default function ProfileManagementCard({
       </h1>
 
       <div className="mt-[24px] flex items-center">
-        <ProfileIcon className="h-[90px] w-[90px] shrink-0" aria-label="보듬 부모님 프로필" />
+        <ProfileImagePicker
+          imageUrl={form.profileImageUrl}
+          imageFile={form.profileImageFile}
+          isEditing={isEditing}
+          onChange={(profileImageFile) =>
+            updateField("profileImageFile", profileImageFile)
+          }
+        />
         <div className="ml-[20px]">
           <h2 className="text-h2-list text-background-600">{form.parentNickname}</h2>
           <p className="mt-[4px] text-h4-list text-background-500">
