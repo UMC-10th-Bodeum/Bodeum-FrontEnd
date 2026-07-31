@@ -39,7 +39,8 @@ export default function HeaderSearchBar({
   function highlightText(text: string, keyword: string) {
     if (!keyword.trim()) return text;
 
-    const parts = text.split(new RegExp(`(${keyword})`, "gi"));
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const parts = text.split(new RegExp(`(${escapedKeyword})`, "gi"));
 
     return parts.map((part, index) =>
       part.toLowerCase() === keyword.toLowerCase() ? (
