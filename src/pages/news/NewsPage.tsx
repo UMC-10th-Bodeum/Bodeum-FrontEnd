@@ -11,6 +11,7 @@ import { newsListItems } from "./data/newsMockData";
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
   const [keyword, setKeyword] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
   const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
   const [sort, setSort] = useState("");
@@ -32,7 +33,8 @@ export default function NewsPage() {
   };
 
   const handleSearch = (keyword: string) => {
-    console.log("검색:", keyword);
+    setSearchKeyword(keyword);
+    setPage(1);
   };
 
   return (
