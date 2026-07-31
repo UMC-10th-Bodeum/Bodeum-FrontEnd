@@ -75,6 +75,7 @@ export default function HeaderSearchBar({
         <SearchIcon className="mr-[15px] h-[18px] w-[18px] shrink-0 text-background-500" />
 
         <input
+          aria-label="정보 검색"
           value={value}
           onFocus={() => setFocused(true)}
           onChange={(e) => onChange(e.target.value)}
@@ -89,11 +90,12 @@ export default function HeaderSearchBar({
         />
         {value.trim() !== "" && (
           <button
+            aria-label="검색어 지우기"
             type="button"
             onClick={() => onChange("")}
             className="ml-2 shrink-0"
           >
-            <CancelIcon />
+            <CancelIcon aria-hidden="true" />
           </button>
         )}
       </div>
