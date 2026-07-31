@@ -10,7 +10,6 @@ export default function CommunitySection() {
   const { data: posts = [] } = useRecommendedCommunityPosts();
   const { data: popularPosts = [] } = useHomePostPreview("popular");
   const { data: latestPosts = [] } = useHomePostPreview("latest");
-  console.log(posts)
 
   return (
     <section className="w-full min-w-0 overflow-hidden">

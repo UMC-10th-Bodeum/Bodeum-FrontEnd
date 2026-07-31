@@ -1,5 +1,14 @@
-import type { HomeNewsPreviewResponse, HomePostPreviewResponse, InfoItemCountsResponse, RecommendedCommunityPostResponse, RecommendedNewsResponse } from "@/types/home";
+import type { HomeBannerResponse, HomeNewsPreviewResponse, HomePostPreviewResponse, InfoItemCountsResponse, RecommendedCommunityPostResponse, RecommendedNewsResponse } from "@/types/home";
 import api from "./axios";
+
+// 공지사항 배너 조회
+export const getHomeBanner = async () => {
+  const { data } = await api.get<HomeBannerResponse>(
+    "/api/v1/home/banner",
+  );
+
+  return data.result;
+};
 
 // 카테고리별 정보 건수 조회
 export const getInfoItemCounts = async () => {
@@ -48,7 +57,6 @@ export const getRecommendedCommunityPosts = async (limit = 5) => {
         },
       },
     );
-    console.log(data)
   return data.result;
 };
 

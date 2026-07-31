@@ -1,3 +1,17 @@
+// 배너
+export interface HomeBannerResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    newsId: number;
+    title: string;
+    dDay: number;
+    summary: string;
+    linkUrl: string;
+  };
+}
+
 // 추천 소식 Top 5
 export interface RecommendedNews {
   newsId: number;

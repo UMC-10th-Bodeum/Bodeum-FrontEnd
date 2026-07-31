@@ -13,7 +13,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-[18px] px-[32px] py-[20px]">
-        <NoticeBanner title="2026년 발달재활서비스 바우처 신청 기간 안내 — D-7" description="5월 31일까지 복지로에서 신청 가능합니다" />
+        <NoticeBanner />
 
         <RequiredInfoSection />
 

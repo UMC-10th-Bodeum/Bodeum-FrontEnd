@@ -1,5 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHomeNewsPreview, getHomePostPreview, getInfoItemCounts, getRecommendedCommunityPosts, getRecommendedNews } from "@/apis/home";
+import { getHomeBanner, getHomeNewsPreview, getHomePostPreview, getInfoItemCounts, getRecommendedCommunityPosts, getRecommendedNews } from "@/apis/home";
+
+export const useHomeBanner = () => {
+  return useQuery({
+    queryKey: ["homeBanner"],
+    queryFn: getHomeBanner,
+  });
+};
 
 export const useRecommendedNews = () => {
   return useQuery({
