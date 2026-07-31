@@ -33,7 +33,7 @@ export default function MyPageCard({ item, onDelete }: MyPageCardProps) {
               aria-hidden="true"
             />
           ) : item.type === "post" ? (
-            <PostIcon className="h-[18px] w-[18px]" aria-hidden="true" />
+            <PostIcon className="h-[15.75px] w-[15.75px]" aria-hidden="true" />
           ) : (
             <ScrapIcon className="h-[18px] w-[18px] [&_path]:stroke-[1.2]" aria-hidden="true" />
           )}
