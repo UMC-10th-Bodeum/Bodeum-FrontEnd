@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useRef } from "react";
 import ButtonOutline from "@/components/ButtonOutline";
 import ButtonFill from "@/components/ButtonFill";
 import ChoiceChips from "@/components/ChoiceChips";
@@ -29,6 +29,14 @@ const diagnosisEntries = Object.entries(diagnosisMap) as Array<
 >;
 
 type ProfileSelectField = "region" | "district" | "birthYear" | "birthMonth";
+type ProfileSelectValues = Pick<ProfileSettingsForm, ProfileSelectField>;
+
+const getProfileSelectValues = (form: ProfileSettingsForm): ProfileSelectValues => ({
+  region: form.region,
+  district: form.district,
+  birthYear: form.birthYear,
+  birthMonth: form.birthMonth,
+});
 
 function isValidBirthDate(birthYear: string, birthMonth: string) {
   if (!birthYear || !birthMonth) {
@@ -57,15 +65,7 @@ export default function ProfileManagementCard({
   onCancel,
   onApply,
 }: ProfileManagementCardProps) {
-  const [selectedFields, setSelectedFields] = useState<Set<ProfileSelectField>>(
-    () => new Set(),
-  );
-
-  useEffect(() => {
-    if (!isEditing) {
-      setSelectedFields(new Set());
-    }
-  }, [isEditing]);
+  const initialSelectValuesRef = useRef<ProfileSelectValues | null>(null);
 
   const canApply =
     form.parentNickname.trim().length > 0 &&
@@ -87,8 +87,14 @@ export default function ProfileManagementCard({
     updateField("diagnoses", diagnoses);
   };
 
-  const markSelectAsSelected = (field: ProfileSelectField) => {
-    setSelectedFields((current) => new Set(current).add(field));
+  const startEditing = () => {
+    initialSelectValuesRef.current = getProfileSelectValues(form);
+    onStartEdit();
+  };
+
+  const hasSelectChanged = (field: ProfileSelectField) => {
+    const initialValues = initialSelectValuesRef.current;
+    return isEditing && initialValues !== null && initialValues[field] !== form[field];
   };
 
   return (
@@ -129,7 +135,7 @@ export default function ProfileManagementCard({
         ) : (
           <ButtonOutline
             label="프로필 편집"
-            onClick={onStartEdit}
+            onClick={startEditing}
             className="ml-auto h-[44px] w-[110px] !text-h2-onboard"
           />
         )}
@@ -163,9 +169,8 @@ export default function ProfileManagementCard({
             }))}
             value={form.region}
             disabled={!isEditing}
-            changed={isEditing && selectedFields.has("region")}
+            changed={hasSelectChanged("region")}
             onChange={(region) => {
-              markSelectAsSelected("region");
               onChange({
                 ...form,
                 region,
@@ -180,11 +185,8 @@ export default function ProfileManagementCard({
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
             disabled={!isEditing}
-            changed={isEditing && selectedFields.has("district")}
-            onChange={(district) => {
-              markSelectAsSelected("district");
-              updateField("district", district);
-            }}
+            changed={hasSelectChanged("district")}
+            onChange={(district) => updateField("district", district)}
             className="w-full"
           />
         </div>
@@ -219,11 +221,8 @@ export default function ProfileManagementCard({
             options={birthYearOptions}
             value={form.birthYear}
             disabled={!isEditing}
-            changed={isEditing && selectedFields.has("birthYear")}
-            onChange={(birthYear) => {
-              markSelectAsSelected("birthYear");
-              updateField("birthYear", birthYear);
-            }}
+            changed={hasSelectChanged("birthYear")}
+            onChange={(birthYear) => updateField("birthYear", birthYear)}
             placeholder="년도"
             className="w-full"
           />
@@ -233,11 +232,8 @@ export default function ProfileManagementCard({
             options={birthMonthOptions}
             value={form.birthMonth}
             disabled={!isEditing}
-            changed={isEditing && selectedFields.has("birthMonth")}
-            onChange={(birthMonth) => {
-              markSelectAsSelected("birthMonth");
-              updateField("birthMonth", birthMonth);
-            }}
+            changed={hasSelectChanged("birthMonth")}
+            onChange={(birthMonth) => updateField("birthMonth", birthMonth)}
             placeholder="월"
             className="w-full"
           />
