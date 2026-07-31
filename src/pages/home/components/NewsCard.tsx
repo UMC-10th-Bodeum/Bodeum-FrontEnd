@@ -41,7 +41,7 @@ export default function NewsCard({
         <p className="line-clamp-1 leading-none text-h6 text-background-600">{title}</p>
 
         <div className="text-body-label text-background-400">
-        {`${regionLevel1} · ${regionLevel2}`}
+          {[regionLevel1, regionLevel2].filter(Boolean).join(" · ") || "-"}
         </div>
 
         <div className="flex items-center">
