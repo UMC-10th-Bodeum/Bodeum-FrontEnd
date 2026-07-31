@@ -1,6 +1,7 @@
 import InfoCategoryCard from "@/components/InfoCategoryCard";
 import { useNavigate } from "react-router-dom";
 import type { ParentCategory } from "@/types/info";
+import { useInfoItemCounts } from "@/hooks/useHome";
 
 const categories: ParentCategory[] = [
   "INSTITUTION",
@@ -12,6 +13,7 @@ const categories: ParentCategory[] = [
 
 export default function RequiredInfoSection() {
   const navigate = useNavigate();
+  const { data: counts } = useInfoItemCounts();
 
   return (
     <section className="overflow-hidden rounded-[10px] bg-background-200 px-[20px] py-[19.6px]">
@@ -30,7 +32,15 @@ export default function RequiredInfoSection() {
           <InfoCategoryCard
             key={type}
             type={type}
-            count={235}
+            count={
+              {
+                INSTITUTION: counts?.institution ?? 0,
+                HOSPITAL: counts?.hospital ?? 0,
+                WELFARE: counts?.welfare ?? 0,
+                EMPLOYMENT: counts?.employment ?? 0,
+                EDUCATION: counts?.education ?? 0,
+              }[type]
+            }
             onClick={() => navigate(`/info?category=${type}`)}
           />
         ))}

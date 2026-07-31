@@ -1,13 +1,24 @@
+import { useRecommendedNews } from "@/hooks/useHome";
 import NewsCard from "@/pages/home/components/NewsCard";
-import { useNavigate } from "react-router-dom";
-import type { NewsListItem } from "../data/newsMockData";
 
-interface RecommendedNewsTopSectionProps {
-  items: NewsListItem[];
-}
+export default function RecommendedNewsTopSection() {
+  const { data: news = [], isPending, isError } = useRecommendedNews();
 
-export default function RecommendedNewsTopSection({ items }: RecommendedNewsTopSectionProps) {
-  const navigate = useNavigate();
+  if (isPending) {
+    return (
+      <div className="flex h-[220px] items-center justify-center text-h6 text-background-500">
+        추천 소식을 불러오는 중입니다...
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-[220px] items-center justify-center text-h6 text-background-500">
+        추천 소식을 불러오지 못했습니다.
+      </div>
+    );
+  }
 
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
@@ -19,22 +30,9 @@ export default function RecommendedNewsTopSection({ items }: RecommendedNewsTopS
       </div>
 
       <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
-        {items.map((item) => {
-          const [region, ...districtParts] = item.address.split(" ");
-
-          return (
-            <NewsCard
-              key={item.id}
-              title={item.name}
-              region={region}
-              category={districtParts.join(" ")}
-              dDay={item.daysRemaining}
-              views={item.viewCount}
-              thumbnail={item.thumbnail}
-              onClick={() => navigate(`/news/${item.id}`, { state: { item } })}
-            />
-          );
-        })}
+        {news.map((item) => (
+          <NewsCard key={item.newsId} {...item} />
+        ))}
       </div>
     </section>
   );

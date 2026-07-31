@@ -6,7 +6,7 @@ import NewsToolbar from "./components/NewsToolbar";
 import NewsListSection from "./components/NewsListSection";
 import RegionOnboardingBox from "./components/RegionOnboardingBox";
 import { formatRegionDisplayLabel } from "@/constants/regions";
-import { newsListItems, recommendedNewsItems } from "./data/newsMockData";
+import { newsListItems } from "./data/newsMockData";
 
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
@@ -35,7 +35,7 @@ export default function NewsPage() {
     <main className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="flex flex-col gap-[18px] px-[32px] py-[20px]">
         <div className="py-[20px]">
-          <RecommendedNewsTopSection items={recommendedNewsItems} />
+          <RecommendedNewsTopSection />
         </div>
 
         <div className="flex flex-col gap-[16px]">

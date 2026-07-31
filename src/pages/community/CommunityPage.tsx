@@ -5,7 +5,6 @@ import Pagination from "@/components/pagination/Pagination";
 import { Select } from "@/components/Select";
 import CommunitySection from "./components/CommunitySection";
 import CommunityPostCard from "./components/CommunityPostCard";
-import { communityPosts } from "@/mocks/community";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   communityCategoryMap,
@@ -48,7 +47,7 @@ const repeatedPosts = Array.from({ length: 14 }, (_, index) => {
     comments: 38,
     views: 1204,
     imageCount: 3,
-    createdAt: "2시간 전",
+    createdAt: "2026-07-31T03:53:05.460Z",
   };
 });
 
@@ -100,8 +99,8 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
-      <div className="flex flex-col px-[32px] py-[20px]">
-        <CommunitySection posts={communityPosts} />
+      <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
+        <CommunitySection />
 
         <div className="mt-[18px] flex flex-col gap-[16px]">
           <div className="flex flex-wrap gap-[16px]">

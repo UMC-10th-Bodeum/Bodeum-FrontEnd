@@ -116,7 +116,7 @@ export default function SideBar() {
                   return;
                 }
 
-                navigate("/");
+                navigate("/mypage");
               }}
             />
           )}

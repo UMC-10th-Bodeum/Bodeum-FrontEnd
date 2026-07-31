@@ -1,14 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import ButtonFill from "@/components/ButtonFill";
 import CommunityCard from "@/components/CommunityCard";
-import type { CommunityPost } from "@/types/community";
+import { useRecommendedCommunityPosts } from "@/hooks/useHome";
 
-interface CommunitySectionProps {
-  posts: CommunityPost[];
-}
-
-export default function CommunitySection({ posts }: CommunitySectionProps) {
+export default function CommunitySection() {
   const navigate = useNavigate();
+  const { data: posts = [] } = useRecommendedCommunityPosts();
 
   return (
     <section className="w-full min-w-0 overflow-hidden">
@@ -30,11 +27,7 @@ export default function CommunitySection({ posts }: CommunitySectionProps) {
       <div className="no-scrollbar w-full min-w-0 overflow-x-auto">
         <div className="inline-flex gap-4">
           {posts.map((post) => (
-            <CommunityCard
-              key={post.id}
-              {...post}
-              onClick={() => navigate(`/community/${post.id}`, { state: { post } })}
-            />
+            <CommunityCard key={post.postId} {...post} />
           ))}
         </div>
       </div>
