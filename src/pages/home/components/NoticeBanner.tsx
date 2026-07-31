@@ -16,7 +16,7 @@ export default function NoticeBanner() {
     <button
       type="button"
       onClick={handleClick}
-      className="flex w-full items-center justify-between overflow-hidden rounded-[10px] border border-sub-yellow bg-background-100 px-[18px] py-[12px] text-left"
+      className="flex w-full items-center justify-between overflow-hidden rounded-[10px] border border-sub-yellow bg-background-100 px-[18px] py-[12px] text-left cursor-pointer"
     >
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-4">
