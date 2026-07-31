@@ -19,7 +19,6 @@ import AuthBrowserSessionGuard from "@/pages/auth/components/AuthBrowserSessionG
 import MyPage from "@/pages/mypage/MyPage";
 import ProfileSettingsPage from "@/pages/mypage/ProfileSettingsPage";
 import MyPageProfileProvider from "@/pages/mypage/MyPageProfileProvider";
-import TestPage from "@/pages/test/TestPage";
 
 export const router = createBrowserRouter([
   {
@@ -85,14 +84,6 @@ export const router = createBrowserRouter([
         path: "/auth/callback",
         element: <AuthCallbackPage />,
       },
-      ...(import.meta.env.DEV
-        ? [
-            {
-              path: "/test",
-              element: <TestPage />,
-            },
-          ]
-        : []),
       {
         element: (
           <AuthStateGate>

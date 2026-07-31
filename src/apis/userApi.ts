@@ -46,10 +46,6 @@ export type UserProfile = {
   updatedAt: string;
 };
 
-export type UserWithdrawResult = {
-  success: boolean;
-};
-
 async function requestUserBrief() {
   const { data } = await api.get<ApiResponse<UserBrief>>(
     "/api/v1/users/me/brief",
@@ -77,14 +73,6 @@ export async function getUserBrief() {
 export async function getMyProfile() {
   const { data } = await api.get<ApiResponse<UserProfile>>(
     "/api/v1/users/me/profile",
-  );
-
-  return data.result;
-}
-
-export async function withdrawCurrentUser() {
-  const { data } = await api.delete<ApiResponse<UserWithdrawResult>>(
-    "/api/v1/users/me",
   );
 
   return data.result;
