@@ -48,6 +48,7 @@ export default function CommunitySection() {
               likes={post.likeCount}
               talks={post.commentCount}
               views={post.viewCount}
+              onClick={() => navigate(`/communuty/${post.postId}`)}
             />
           ))}
         </PostSection>
@@ -60,6 +61,7 @@ export default function CommunitySection() {
               likes={post.likeCount}
               talks={post.commentCount}
               views={post.viewCount}
+              onClick={() => navigate(`/communuty/${post.postId}`)}
             />
           ))}
         </PostSection>

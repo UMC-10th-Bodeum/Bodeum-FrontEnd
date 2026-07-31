@@ -2,8 +2,10 @@ import NewsCard from "./NewsCard";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
 import { useHomeNewsPreview, useRecommendedNews } from "@/hooks/useHome";
+import { useNavigate } from "react-router-dom";
 
 export default function RecommendedNewsSection() {
+  const navigate = useNavigate();
   const { data: activityNews = [] } = useHomeNewsPreview("ACTIVITY");
   const { data: localNews = [] } = useHomeNewsPreview("LOCAL");
   const {
@@ -11,7 +13,6 @@ export default function RecommendedNewsSection() {
     isPending,
     isError,
   } = useRecommendedNews();
-  console.log(news)
 
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
@@ -47,6 +48,7 @@ export default function RecommendedNewsSection() {
               region={String(news.region)}
               likes={news.likeCount}
               views={news.viewCount}
+              onClick={() => navigate(`/news/${news.newsId}`)}
             />
           ))}
         </PostSection>
@@ -58,6 +60,7 @@ export default function RecommendedNewsSection() {
               region={String(news.region)}
               likes={news.likeCount}
               views={news.viewCount}
+              onClick={() => navigate(`/news/${news.newsId}`)}
             />
           ))}
         </PostSection>
