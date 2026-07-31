@@ -1,21 +1,12 @@
 import NewsCard from "@/pages/home/components/NewsCard";
 import { useNavigate } from "react-router-dom";
-
-interface News {
-  id: number;
-  title: string;
-  region: string;
-  category: string;
-  dDay: number;
-  views: number;
-  thumbnail?: string;
-}
+import type { NewsListItem } from "../data/newsMockData";
 
 interface RecommendedNewsTopSectionProps {
-  news: News[];
+  items: NewsListItem[];
 }
 
-export default function RecommendedNewsTopSection({ news }: RecommendedNewsTopSectionProps) {
+export default function RecommendedNewsTopSection({ items }: RecommendedNewsTopSectionProps) {
   const navigate = useNavigate();
 
   return (
@@ -28,13 +19,22 @@ export default function RecommendedNewsTopSection({ news }: RecommendedNewsTopSe
       </div>
 
       <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
-        {news.map((item) => (
-          <NewsCard
-            key={item.id}
-            {...item}
-            onClick={() => navigate(`/news/${item.id}`)}
-          />
-        ))}
+        {items.map((item) => {
+          const [region, ...districtParts] = item.address.split(" ");
+
+          return (
+            <NewsCard
+              key={item.id}
+              title={item.name}
+              region={region}
+              category={districtParts.join(" ")}
+              dDay={item.daysRemaining}
+              views={item.viewCount}
+              thumbnail={item.thumbnail}
+              onClick={() => navigate(`/news/${item.id}`, { state: { item } })}
+            />
+          );
+        })}
       </div>
     </section>
   );
