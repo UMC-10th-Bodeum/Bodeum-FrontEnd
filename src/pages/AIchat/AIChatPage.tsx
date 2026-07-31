@@ -37,11 +37,13 @@ import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
 import {
+  ensureAiChatLoginSession,
+  getAiChatSessionStarter,
   hasRevealedAiChatHistory,
-  hasStartedAiChatSession,
   markAiChatHistoryAsRevealed,
   markAiChatSessionAsStarted,
   resetAiChatSession,
+  storeAiChatSessionStarter,
 } from "@/utils/aiChatSession";
 
 import {
@@ -54,8 +56,8 @@ import {
   type AiInputVariant,
 } from "./components";
 import {
+  partitionMessagesByLoginSession,
   resolveAiChatEntryModal,
-  resolveAiChatEntryFlow,
   shouldShowPreviousHistoryButton,
 } from "./aiChatFlow";
 import {
@@ -174,7 +176,10 @@ function mapSourceToResource(
   };
 }
 
-function mapApiMessage(message: AiMessage): ChatMessage {
+function mapApiMessage(
+  message: AiMessage,
+  suggestions?: string[],
+): ChatMessage {
   if (message.senderType === "USER") {
     return {
       id: message.aiMessageId,
@@ -192,6 +197,7 @@ function mapApiMessage(message: AiMessage): ChatMessage {
       .map(mapSourceToResource)
       .filter((resource): resource is AiCurationResource => resource !== null),
     warning: message.warning?.message ?? null,
+    suggestions,
   };
 }
 
@@ -211,6 +217,42 @@ function deduplicateMessages(messages: AiMessage[]) {
   ).sort(
     (left, right) =>
       new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime(),
+  );
+}
+
+function mapCurrentSessionMessages(
+  messages: AiMessage[],
+  starter: AiChatStarter,
+) {
+  const hasPersistedGreeting = messages.some(
+    (message) =>
+      message.senderType === "AI" && message.answerStatus === "GREETING",
+  );
+
+  const mappedMessages = messages.map((message) =>
+    mapApiMessage(
+      message,
+      message.senderType === "AI" && message.answerStatus === "GREETING"
+        ? starter.suggestedQuestions
+        : undefined,
+    ),
+  );
+
+  return hasPersistedGreeting
+    ? mappedMessages
+    : [mapStarterMessage(starter), ...mappedMessages];
+}
+
+function collectFeedbackByMessage(messages: AiMessage[]) {
+  return messages.reduce<Record<number, AiFeedbackType>>(
+    (feedbackByMessage, message) => {
+      if (message.feedback) {
+        feedbackByMessage[message.aiMessageId] = message.feedback.feedbackType;
+      }
+
+      return feedbackByMessage;
+    },
+    {},
   );
 }
 
@@ -247,13 +289,20 @@ async function getRetainedHistorySections() {
     cursor = page.nextCursor;
   }
 
-  return Array.from(groups.entries())
+  const feedbackByMessage = collectFeedbackByMessage(
+    Array.from(groups.values()).flat(),
+  );
+  const sections = Array.from(groups.entries())
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([dateTime, items]) => ({
       date: formatChatDate(dateTime),
       dateTime,
-      messages: deduplicateMessages(items).map(mapApiMessage),
+      messages: deduplicateMessages(items).map((message) =>
+        mapApiMessage(message),
+      ),
     }));
+
+  return { sections, feedbackByMessage };
 }
 
 export default function AIChatPage() {
@@ -319,7 +368,6 @@ export default function AIChatPage() {
 
   const enterConsentRequiredState = useCallback(() => {
     sessionGenerationRef.current += 1;
-    resetAiChatSession();
     setAuthResolution("authenticated");
     setAccessState("consent-required");
     setMessages([]);
@@ -392,6 +440,11 @@ export default function AIChatPage() {
 
       setAuthResolution("authenticated");
 
+      const loginSession = ensureAiChatLoginSession(
+        null,
+        window.localStorage.getItem("accessToken"),
+      );
+
       const terms = await getAiTermsAgreement();
       if (requestId !== initializeRequestRef.current) return;
 
@@ -406,37 +459,47 @@ export default function AIChatPage() {
       ]);
       if (requestId !== initializeRequestRef.current) return;
 
-      const sessionStarted = hasStartedAiChatSession();
       const historyRevealed = hasRevealedAiChatHistory();
-      const entryFlow = resolveAiChatEntryFlow({
-        hasTodayMessages: room.hasTodayMessages,
-        loginSessionStarted: sessionStarted,
-        historyRevealed,
-      });
+      const sessionStarter = getAiChatSessionStarter() ?? starter;
+      storeAiChatSessionStarter(sessionStarter);
 
-      const [todayMessages, retainedHistory] = await Promise.all([
-        room.hasTodayMessages ? getAllTodayMessages() : Promise.resolve([]),
+      const [todayMessages, retainedHistoryResult] = await Promise.all([
+        getAllTodayMessages(),
         historyRevealed && room.hasPreviousMessages
           ? getRetainedHistorySections()
-          : Promise.resolve([]),
+          : Promise.resolve({
+              sections: [] as HistorySection[],
+              feedbackByMessage: {} as Record<number, AiFeedbackType>,
+            }),
       ]);
       if (requestId !== initializeRequestRef.current) return;
 
-      const mappedTodayMessages = todayMessages.map(mapApiMessage);
+      const partitionedTodayMessages = partitionMessagesByLoginSession(
+        todayMessages,
+        loginSession.sessionStartedAt,
+      );
+      const mappedHiddenTodayMessages =
+        partitionedTodayMessages.beforeLogin.map((message) =>
+          mapApiMessage(message),
+        );
       setMessages(
-        entryFlow.entryContent === "today-messages" &&
-          mappedTodayMessages.length > 0
-          ? mappedTodayMessages
-          : [mapStarterMessage(starter)],
+        mapCurrentSessionMessages(
+          partitionedTodayMessages.currentSession,
+          sessionStarter,
+        ),
       );
-      setHistorySections(retainedHistory);
-      setHiddenTodayMessages(
-        entryFlow.keepTodayMessagesHidden ? mappedTodayMessages : [],
+      setHistorySections(retainedHistoryResult.sections);
+      setHiddenTodayMessages(mappedHiddenTodayMessages);
+      setHasHiddenTodayMessages(
+        !historyRevealed && mappedHiddenTodayMessages.length > 0,
       );
-      setHasHiddenTodayMessages(entryFlow.keepTodayMessagesHidden);
       setHasPreviousMessages(room.hasPreviousMessages);
       setIsHistoryRevealed(historyRevealed);
       setIsGuideOpen(room.showGuideModal);
+      setFeedbackByMessage({
+        ...collectFeedbackByMessage(todayMessages),
+        ...retainedHistoryResult.feedbackByMessage,
+      });
       setAccessState("ready");
       markAiChatSessionAsStarted();
     } catch (error: unknown) {
@@ -710,7 +773,9 @@ export default function AIChatPage() {
             break;
           }
 
-          const syncedMessages = persistedTail.map(mapApiMessage);
+          const syncedMessages = persistedTail.map((message) =>
+            mapApiMessage(message),
+          );
           syncResult = hasSyncedAnswer ? "answered" : "persisted";
 
           setMessages((current) => {
@@ -791,15 +856,22 @@ export default function AIChatPage() {
     setIsHistoryLoading(true);
 
     try {
-      const retainedHistory = hasPreviousMessages
+      const retainedHistoryResult = hasPreviousMessages
         ? await getRetainedHistorySections()
-        : [];
+        : {
+            sections: [] as HistorySection[],
+            feedbackByMessage: {} as Record<number, AiFeedbackType>,
+          };
       if (!isCurrentSession(sessionGeneration)) return;
 
       const mappedTodayMessages = hasHiddenTodayMessages
         ? hiddenTodayMessages
         : [];
-      setHistorySections(retainedHistory);
+      setHistorySections(retainedHistoryResult.sections);
+      setFeedbackByMessage((current) => ({
+        ...current,
+        ...retainedHistoryResult.feedbackByMessage,
+      }));
       setHiddenTodayMessages(mappedTodayMessages);
       historyRevealTargetRef.current =
         mappedTodayMessages.length > 0 ? "today" : "past";

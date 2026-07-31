@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  partitionMessagesByLoginSession,
   resolveAiChatEntryModal,
-  resolveAiChatEntryFlow,
   shouldShowPreviousHistoryButton,
 } from "../src/pages/AIchat/aiChatFlow.ts";
 
@@ -17,47 +17,36 @@ test("비로그인 상태에서는 다른 조건보다 로그인 유도 모달�
   assert.equal(resolveAiChatEntryModal("ready", false), null);
 });
 
-test("오늘 대화가 없으면 첫 발화로 입장하고 기록 버튼은 어제를 향한다", () => {
+test("오늘 대화를 로그인 시각 전후로 나눈다", () => {
+  const messages = [
+    { id: 1, createdAt: "2026-07-31T09:59:59+09:00" },
+    { id: 2, createdAt: "2026-07-31T10:00:00+09:00" },
+    { id: 3, createdAt: "2026-07-31T10:05:00+09:00" },
+  ];
+
   assert.deepEqual(
-    resolveAiChatEntryFlow({
-      hasTodayMessages: false,
-      loginSessionStarted: true,
-      historyRevealed: false,
-    }),
+    partitionMessagesByLoginSession(
+      messages,
+      "2026-07-31T10:00:00+09:00",
+    ),
     {
-      entryContent: "starter",
-      keepTodayMessagesHidden: false,
-      historyTarget: "past",
+      beforeLogin: [messages[0]],
+      currentSession: [messages[1], messages[2]],
     },
   );
 });
 
-test("로그아웃하지 않은 세션에 오늘 대화가 있으면 오늘 대화를 표시한다", () => {
-  assert.deepEqual(
-    resolveAiChatEntryFlow({
-      hasTodayMessages: true,
-      loginSessionStarted: true,
-      historyRevealed: false,
-    }),
-    {
-      entryContent: "today-messages",
-      keepTodayMessagesHidden: false,
-      historyTarget: "past",
-    },
-  );
-});
+test("잘못된 시각의 메시지는 현재 세션에 노출하지 않는다", () => {
+  const invalidMessage = { id: 1, createdAt: "invalid" };
 
-test("재로그인 후에는 오늘 대화도 숨기고 첫 발화로 입장한다", () => {
   assert.deepEqual(
-    resolveAiChatEntryFlow({
-      hasTodayMessages: true,
-      loginSessionStarted: false,
-      historyRevealed: false,
-    }),
+    partitionMessagesByLoginSession(
+      [invalidMessage],
+      "2026-07-31T10:00:00+09:00",
+    ),
     {
-      entryContent: "starter",
-      keepTodayMessagesHidden: true,
-      historyTarget: "today",
+      beforeLogin: [invalidMessage],
+      currentSession: [],
     },
   );
 });

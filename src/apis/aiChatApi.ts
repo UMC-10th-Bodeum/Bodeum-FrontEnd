@@ -2,7 +2,12 @@ import api from "./axios";
 import type { ApiResponse } from "./apiTypes";
 
 export type AiSenderType = "USER" | "AI";
-export type AiAnswerStatus = "ANSWERED" | "LINK_GUIDANCE" | "NO_EVIDENCE";
+export type AiAnswerStatus =
+  | "GREETING"
+  | "ANSWERED"
+  | "LINK_GUIDANCE"
+  | "REGION_REQUIRED"
+  | "NO_EVIDENCE";
 export type AiSourceType = "INFO" | "NEWS" | "SITE";
 export type AiFeedbackType = "HELPFUL" | "INCORRECT";
 export type AiFeedbackReason =
@@ -56,6 +61,11 @@ export type AiMessage = {
   content: string;
   createdAt: string;
   sources: AiMessageSource[];
+  feedback: {
+    aiFeedbackId: number;
+    feedbackType: AiFeedbackType;
+    reasons: AiFeedbackReason[] | null;
+  } | null;
   warning?: {
     type: "INCORRECT_SOURCE";
     message: string;

@@ -1,5 +1,3 @@
-export type AiChatEntryContent = "starter" | "today-messages";
-export type AiChatHistoryTarget = "past" | "today";
 export type AiChatEntryModal =
   | "login-required"
   | "consent-required"
@@ -23,32 +21,34 @@ export function resolveAiChatEntryModal(
   return null;
 }
 
-type ResolveAiChatEntryFlowOptions = {
-  hasTodayMessages: boolean;
-  loginSessionStarted: boolean;
-  historyRevealed: boolean;
+type TimestampedMessage = {
+  createdAt: string;
 };
 
-export type AiChatEntryFlow = {
-  entryContent: AiChatEntryContent;
-  keepTodayMessagesHidden: boolean;
-  historyTarget: AiChatHistoryTarget;
-};
+export function partitionMessagesByLoginSession<T extends TimestampedMessage>(
+  messages: T[],
+  sessionStartedAt: string,
+) {
+  const sessionStartedTimestamp = new Date(sessionStartedAt).getTime();
 
-export function resolveAiChatEntryFlow({
-  hasTodayMessages,
-  loginSessionStarted,
-  historyRevealed,
-}: ResolveAiChatEntryFlowOptions): AiChatEntryFlow {
-  const showTodayMessages =
-    hasTodayMessages && (loginSessionStarted || historyRevealed);
-  const keepTodayMessagesHidden = hasTodayMessages && !showTodayMessages;
+  return messages.reduce<{
+    beforeLogin: T[];
+    currentSession: T[];
+  }>(
+    (partitioned, message) => {
+      const messageTimestamp = new Date(message.createdAt).getTime();
+      const isCurrentSessionMessage =
+        Number.isFinite(sessionStartedTimestamp) &&
+        Number.isFinite(messageTimestamp) &&
+        messageTimestamp >= sessionStartedTimestamp;
 
-  return {
-    entryContent: showTodayMessages ? "today-messages" : "starter",
-    keepTodayMessagesHidden,
-    historyTarget: keepTodayMessagesHidden ? "today" : "past",
-  };
+      partitioned[
+        isCurrentSessionMessage ? "currentSession" : "beforeLogin"
+      ].push(message);
+      return partitioned;
+    },
+    { beforeLogin: [], currentSession: [] },
+  );
 }
 
 type ShouldShowPreviousHistoryButtonOptions = {
