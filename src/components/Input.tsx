@@ -72,8 +72,10 @@ export default function Input({
 
   const filteredSuggestions = suggestions.filter((item) =>
     searchType === "news"
-      ? item.type === "NEWS_TITLE"
-      : item.type === "COMMUNITY_TITLE"
+    ? item.type === "NEWS_TITLE"
+    : searchType === "community"
+      ? item.type === "COMMUNITY_TITLE"
+      : true
   );
 
   return (
