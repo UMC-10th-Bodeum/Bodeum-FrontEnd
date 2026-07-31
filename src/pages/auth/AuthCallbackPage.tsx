@@ -8,6 +8,7 @@ import {
   storeAuthTokens,
 } from "@/apis/authApi";
 import { showToast } from "@/components/Toast";
+import { startAiChatLoginSession } from "@/utils/aiChatSession";
 
 import {
   queueLoginToast,
@@ -67,6 +68,7 @@ export default function AuthCallbackPage() {
     void exchangeSocialLoginCode(code)
       .then((result) => {
         storeAuthTokens(result);
+        startAiChatLoginSession(result.userId, result.accessToken);
         const nextStep = resolvePostLoginNextStep(result);
         storeAuthNextStep(nextStep);
 

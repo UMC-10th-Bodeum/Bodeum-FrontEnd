@@ -11,9 +11,13 @@ type AiMessageBotProps = {
   variant?: Extract<AiMessageBubbleVariant, "ai" | "loading">;
   message?: string;
   resource?: AiCurationResource | null;
+  resources?: AiCurationResource[];
+  warning?: string | null;
   suggestions?: string[];
   showFeedback?: boolean;
+  selectedFeedback?: "helpful" | "incorrect" | null;
   onSuggestionClick?: (suggestion: string) => void;
+  onGoodFeedback?: () => void;
   onBadFeedback?: () => void;
   className?: string;
 };
@@ -22,9 +26,13 @@ export default function AiMessageBot({
   variant = "ai",
   message,
   resource,
+  resources,
+  warning,
   suggestions = [],
   showFeedback = variant === "ai",
+  selectedFeedback = null,
   onSuggestionClick,
+  onGoodFeedback,
   onBadFeedback,
   className,
 }: AiMessageBotProps) {
@@ -40,6 +48,8 @@ export default function AiMessageBot({
             variant={variant}
             message={message}
             resource={resource}
+            resources={resources}
+            warning={warning}
             className={variant === "ai" ? "w-full" : undefined}
           />
         </div>
@@ -65,11 +75,14 @@ export default function AiMessageBot({
             feedbackType="Good"
             label="도움이 됐어요"
             showCount={false}
+            selected={selectedFeedback === "helpful"}
+            onClick={onGoodFeedback}
           />
           <FeedbackButton
             feedbackType="Bad"
             label="정보가 틀려요"
             showCount={false}
+            selected={selectedFeedback === "incorrect"}
             onClick={onBadFeedback}
           />
         </div>

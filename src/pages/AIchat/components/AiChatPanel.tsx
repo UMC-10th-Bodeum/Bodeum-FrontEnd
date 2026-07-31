@@ -1,4 +1,4 @@
-import { useState, type ReactNode, type RefObject, type UIEventHandler } from "react";
+import { useState, type ReactNode, type RefObject } from "react";
 
 import AIMsgIcon from "@/assets/icons/AIMsg.svg?react";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
@@ -35,12 +35,12 @@ type AiChatPanelProps = {
   inputValue: string;
   inputVariant?: AiInputVariant;
   inputDisabled?: boolean;
+  inputMaxLength?: number;
   showHistoryButton?: boolean;
   messagesRef?: RefObject<HTMLDivElement | null>;
   onInputChange: (value: string) => void;
   onSend: () => void;
   onHistoryClick?: () => void;
-  onMessagesScroll?: UIEventHandler<HTMLDivElement>;
 };
 
 export default function AiChatPanel({
@@ -48,12 +48,12 @@ export default function AiChatPanel({
   inputValue,
   inputVariant = "default",
   inputDisabled = false,
+  inputMaxLength,
   showHistoryButton = true,
   messagesRef,
   onInputChange,
   onSend,
   onHistoryClick,
-  onMessagesScroll,
 }: AiChatPanelProps) {
   const canSend = inputValue.trim().length > 0 && !inputDisabled;
   const [isInputExpanded, setIsInputExpanded] = useState(false);
@@ -92,7 +92,6 @@ export default function AiChatPanel({
 
       <div
         ref={messagesRef}
-        onScroll={onMessagesScroll}
         className="h-[544px] w-full shrink-0 overflow-x-hidden overflow-y-auto bg-background-200 px-[26px] [scrollbar-color:#C1C6D1_transparent] [scrollbar-width:thin]"
       >
         <div className="flex w-full flex-col items-start">{children}</div>
@@ -108,6 +107,7 @@ export default function AiChatPanel({
             value={inputValue}
             variant={inputVariant}
             disabled={inputDisabled}
+            maxLength={inputMaxLength}
             onValueChange={onInputChange}
             onExpandedChange={setIsInputExpanded}
             onSubmit={onSend}

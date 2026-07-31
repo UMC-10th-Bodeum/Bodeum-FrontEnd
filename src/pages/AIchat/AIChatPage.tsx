@@ -1,54 +1,100 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
+import {
+  agreeToAiTerms,
+  confirmAiChatGuide,
+  createAiFeedback,
+  createAiMessage,
+  getAiChatRoom,
+  getAiChatStarter,
+  getAiMessageHistory,
+  getAiTermsAgreement,
+  getTodayAiMessages,
+  type AiChatStarter,
+  type AiFeedbackReason,
+  type AiFeedbackType,
+  type AiHistoryDateGroup,
+  type AiMessage,
+  type AiMessageCursor,
+  type AiMessageSource,
+} from "@/apis/aiChatApi";
+import { getApiErrorMessage } from "@/apis/apiError";
+import {
+  AUTH_STATE_CHANGED_EVENT,
+  clearAuthTokens,
+  hasStoredAuthSession,
+} from "@/apis/authApi";
+import { getUserBrief } from "@/apis/userApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
+import { legalLinks } from "@/constants/legalLinks";
+import {
+  ensureAiChatLoginSession,
+  getAiChatSessionStarter,
+  hasRevealedAiChatHistory,
+  markAiChatHistoryAsRevealed,
+  markAiChatSessionAsStarted,
+  resetAiChatSession,
+  storeAiChatSessionStarter,
+} from "@/utils/aiChatSession";
 
 import {
   AiCheckbox,
   AiChatPanel,
-  AiChatStateSwitcher,
   AiMessageBot,
   AiMessageBubble,
   DateDivider,
   type AiCurationResource,
-  type AiChatScenario,
   type AiInputVariant,
 } from "./components";
+import {
+  partitionMessagesByLoginSession,
+  resolveAiChatEntryModal,
+  shouldShowPreviousHistoryButton,
+} from "./aiChatFlow";
+import {
+  getAiChatErrorCode,
+  isAiChatTransportUncertainError,
+  isAiTermsNotAgreedError,
+} from "./aiChatErrors";
 
-const SUGGESTIONS = [
-  "참고하면 좋을 복지사이트 알려줘",
-  "우리 동네 재활센터 추천해줘",
-  "장애아동 의료비 지원이 궁금해",
-  "장애 진단 후 첫번째로 해야 할 일",
-  "바우처 신청 방법 알려줘",
+const MAX_MESSAGE_LENGTH = 500;
+const MAX_PAGINATION_REQUESTS = 50;
+const SEND_SYNC_MAX_ATTEMPTS = 6;
+const SEND_SYNC_INTERVAL_MS = 2_000;
+const TERMINAL_AI_GENERATION_ERROR_CODES = new Set([
+  "AI_RESPONSE_FAILED",
+  "AI_RESPONSE_TIMEOUT",
+  "AI_SOURCE_INVALID",
+]);
+
+const FEEDBACK_REASONS: Array<{
+  label: string;
+  value: AiFeedbackReason;
+}> = [
+  { label: "신청 기간이나 운영 시간", value: "TIME" },
+  { label: "지원 대상(자격 요건)", value: "ELIGIBILITY" },
+  { label: "금액이나 혜택 내용", value: "BENEFIT" },
+  { label: "전화번호나 위치 정보", value: "INSTITUTION_INFO" },
+  { label: "기타", value: "ETC" },
 ];
 
-type MockAuthState = {
-  isLoggedIn: boolean;
-  hasChatConsent: boolean;
-  isFirstVisit: boolean;
-};
+type AccessState =
+  | "loading"
+  | "login-required"
+  | "consent-required"
+  | "ready"
+  | "error";
 
-const DEFAULT_MOCK_SCENARIO: AiChatScenario = "first-entry";
-
-const MOCK_SCENARIO_STATE: Record<AiChatScenario, MockAuthState> = {
-  "first-entry": {
-    isLoggedIn: true,
-    hasChatConsent: true,
-    isFirstVisit: true,
-  },
-  "login-required": {
-    isLoggedIn: false,
-    hasChatConsent: true,
-    isFirstVisit: true,
-  },
-  "consent-required": {
-    isLoggedIn: true,
-    hasChatConsent: false,
-    isFirstVisit: false,
-  },
-};
+type AuthResolution = "checking" | "guest" | "authenticated";
 
 type UserMessage = {
   id: number;
@@ -58,9 +104,11 @@ type UserMessage = {
 
 type BotMessage = {
   id: number;
+  serverId?: number;
   role: "bot";
   text: string;
-  resource?: AiCurationResource | null;
+  resources?: AiCurationResource[];
+  warning?: string | null;
   suggestions?: string[];
 };
 
@@ -71,212 +119,11 @@ type LoadingMessage = {
 
 type ChatMessage = UserMessage | BotMessage | LoadingMessage;
 
-const welcomeMessage: BotMessage = {
-  id: 1,
-  role: "bot",
-  text: `안녕하세요! 저는 보듬 AI 큐레이션 입니다 😊
-
-OO님의 정보를 바탕으로
-복지 바우처, 재활 기관, 지원 제도 등 발달장애 아동 양육에 필요한 정보를 쉽고 빠르게 안내해드려요.
-
-무엇이 궁금하신가요?`,
-  resource: {
-    title: "📌 2026 발달재활서비스 바우처 신청 안내 >",
-    meta: "복지 정보 · D-7 · 서울 강남구",
-  },
-  suggestions: SUGGESTIONS,
-};
-
-const CHAT_RETENTION_DAYS = 7;
-
-const historySections: Array<{
+type HistorySection = {
   date: string;
   dateTime: string;
   messages: ChatMessage[];
-}> = [
-  {
-    date: "2026년 7월 10일 금요일",
-    dateTime: "2026-07-10",
-    messages: [
-      {
-        id: -20,
-        role: "user",
-        text: "장애 진단을 받은 뒤 가장 먼저 뭘 해야 해?",
-      },
-      {
-        id: -19,
-        role: "bot",
-        text: `진단서와 검사 결과를 정리한 뒤 거주지 주민센터에서 장애 등록 절차를 확인해보세요.
-이후 발달장애인지원센터에 상담을 신청하면 이용 가능한 복지 서비스를 함께 안내받을 수 있어요.`,
-        resource: {
-          title: "📌 장애 등록 및 복지 서비스 신청 순서 >",
-          meta: "복지 정보 · 신청 절차",
-        },
-      },
-    ],
-  },
-  {
-    date: "2026년 7월 11일 토요일",
-    dateTime: "2026-07-11",
-    messages: [
-      {
-        id: -18,
-        role: "user",
-        text: "발달재활서비스 바우처 신청 조건이 궁금해",
-      },
-      {
-        id: -17,
-        role: "bot",
-        text: `발달재활서비스는 연령과 장애 등록 여부, 가구 소득 등을 기준으로 지원 대상을 확인해요.
-거주지 주민센터에서 현재 적용되는 기준과 필요한 서류를 확인해보세요.`,
-        resource: {
-          title: "📌 발달재활서비스 지원 대상 안내 >",
-          meta: "복지 정보 · 보건복지부",
-        },
-      },
-      {
-        id: -16,
-        role: "user",
-        text: "신청할 때 필요한 서류도 알려줘",
-      },
-      {
-        id: -15,
-        role: "bot",
-        text: `신분증, 소득 확인 자료, 발달재활서비스 의뢰서나 검사 자료 등이 필요할 수 있어요.
-가구 상황에 따라 달라지므로 방문 전에 주민센터에 준비 서류를 확인해 주세요.`,
-      },
-    ],
-  },
-  {
-    date: "2026년 7월 12일 일요일",
-    dateTime: "2026-07-12",
-    messages: [
-      {
-        id: -14,
-        role: "user",
-        text: "아이 돌봄 지원도 같이 받을 수 있어?",
-      },
-      {
-        id: -13,
-        role: "bot",
-        text: `일부 돌봄 지원은 발달재활서비스와 함께 이용할 수 있어요.
-다만 사업별 중복 지원 기준이 다르므로 신청 전에 관할 기관에 확인하는 것이 좋아요.`,
-        resource: {
-          title: "📌 장애아가족 양육지원사업 안내 >",
-          meta: "돌봄 정보 · 여성가족부",
-        },
-      },
-    ],
-  },
-  {
-    date: "2026년 7월 13일 월요일",
-    dateTime: "2026-07-13",
-    messages: [
-      {
-        id: -12,
-        role: "user",
-        text: "감각통합치료 기관을 고를 때 뭘 봐야 해?",
-      },
-      {
-        id: -11,
-        role: "bot",
-        text: `치료사의 자격과 경력, 초기 평가 방식, 보호자 상담 주기부터 확인해보세요.
-아이의 목표를 구체적으로 설명하고 치료 계획을 함께 조정할 수 있는지도 중요해요.`,
-        resource: {
-          title: "📌 우리 아이에게 맞는 재활기관 찾기 >",
-          meta: "기관 이용 정보 · 보듬",
-        },
-      },
-      {
-        id: -10,
-        role: "user",
-        text: "상담할 때 꼭 물어봐야 하는 것도 있어?",
-      },
-      {
-        id: -9,
-        role: "bot",
-        text: `주당 치료 횟수와 회기 시간, 보호자 상담 방식, 대기 기간을 확인해보세요.
-결석이나 일정 변경 시 보강 기준과 바우처 결제 방식도 미리 물어보는 것이 좋아요.`,
-      },
-    ],
-  },
-  {
-    date: "2026년 7월 14일 화요일",
-    dateTime: "2026-07-14",
-    messages: [
-      {
-        id: -8,
-        role: "user",
-        text: "학교 방과 후 지원 프로그램 알려줘",
-      },
-      {
-        id: -7,
-        role: "bot",
-        text: `학교와 지역 복지관에서 운영하는 방과 후 활동 및 돌봄 프로그램을 확인할 수 있어요.
-학교 특수교육 담당자나 거주지 발달장애인지원센터에 먼저 문의해보세요.`,
-        resource: {
-          title: "📌 발달장애인 방과후활동서비스 안내 >",
-          meta: "교육·돌봄 정보 · 신청 가능",
-        },
-      },
-    ],
-  },
-  {
-    date: "2026년 7월 15일 수요일",
-    dateTime: "2026-07-15",
-    messages: [
-      {
-        id: -6,
-        role: "user",
-        text: "강남구 재활센터 추천해줘",
-      },
-      {
-        id: -5,
-        role: "bot",
-        text: `강남구에서 이용할 수 있는 재활 기관을 찾았어요.
-아이의 연령과 필요한 치료 영역을 함께 확인한 뒤 기관에 문의해보세요.`,
-        resource: {
-          title: "📌 우리아이 발달지원센터 이용 안내 >",
-          meta: "기관 정보 · 서울 강남구",
-        },
-      },
-      {
-        id: -4,
-        role: "user",
-        text: "언어치료가 가능한 곳 위주로 알려줘",
-      },
-      {
-        id: -3,
-        role: "bot",
-        text: `언어재활사가 상주하고 초기 언어 평가를 제공하는 기관을 우선 확인해보세요.
-기관마다 대상 연령과 대기 기간이 다르므로 전화 상담 후 방문 예약을 권장해요.`,
-      },
-      {
-        id: -2,
-        role: "user",
-        text: "토요일에도 운영하는 기관이 있을까?",
-      },
-      {
-        id: -1,
-        role: "bot",
-        text: `토요일에 운영하는 기관도 있지만 평일보다 치료 시간과 인원이 제한될 수 있어요.
-희망 기관에 주말 운영 시간과 신규 접수 가능 여부를 먼저 확인해 주세요.`,
-      },
-    ],
-  },
-];
-
-const retainedHistorySections = historySections.slice(
-  -(CHAT_RETENTION_DAYS - 1),
-);
-
-const FEEDBACK_REASONS = [
-  "신청 기간이나 운영 시간",
-  "지원 대상(자격 요건)",
-  "금액이나 혜택 내용",
-  "전화번호나 위치 정보",
-  "기타",
-];
+};
 
 function CenteredModal({ children }: { children: ReactNode }) {
   return (
@@ -294,79 +141,520 @@ function UserMessageRow({ text }: { text: string }) {
   );
 }
 
+function formatChatDate(date: string) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long",
+  }).format(new Date(`${date}T00:00:00`));
+}
+
+function getTodayDateTime() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function wait(milliseconds: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
+}
+
+function mapSourceToResource(
+  source: AiMessageSource | undefined,
+): AiCurationResource | null {
+  if (!source) return null;
+
+  return {
+    title: source.sourceTitle,
+    url: source.sourceUrl,
+  };
+}
+
+function mapApiMessage(
+  message: AiMessage,
+  suggestions?: string[],
+): ChatMessage {
+  if (message.senderType === "USER") {
+    return {
+      id: message.aiMessageId,
+      role: "user",
+      text: message.content,
+    };
+  }
+
+  return {
+    id: message.aiMessageId,
+    serverId: message.aiMessageId,
+    role: "bot",
+    text: message.content,
+    resources: message.sources
+      .map(mapSourceToResource)
+      .filter((resource): resource is AiCurationResource => resource !== null),
+    warning: message.warning?.message ?? null,
+    suggestions,
+  };
+}
+
+function mapStarterMessage(starter: AiChatStarter): BotMessage {
+  return {
+    id: 0,
+    role: "bot",
+    text: starter.greeting,
+    resources: [],
+    suggestions: starter.suggestedQuestions,
+  };
+}
+
+function deduplicateMessages(messages: AiMessage[]) {
+  return Array.from(
+    new Map(messages.map((message) => [message.aiMessageId, message])).values(),
+  ).sort(
+    (left, right) =>
+      new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime(),
+  );
+}
+
+function mapCurrentSessionMessages(
+  messages: AiMessage[],
+  starter: AiChatStarter,
+) {
+  const hasPersistedGreeting = messages.some(
+    (message) =>
+      message.senderType === "AI" && message.answerStatus === "GREETING",
+  );
+
+  const mappedMessages = messages.map((message) =>
+    mapApiMessage(
+      message,
+      message.senderType === "AI" && message.answerStatus === "GREETING"
+        ? starter.suggestedQuestions
+        : undefined,
+    ),
+  );
+
+  return hasPersistedGreeting
+    ? mappedMessages
+    : [mapStarterMessage(starter), ...mappedMessages];
+}
+
+function collectFeedbackByMessage(messages: AiMessage[]) {
+  return messages.reduce<Record<number, AiFeedbackType>>(
+    (feedbackByMessage, message) => {
+      if (message.feedback) {
+        feedbackByMessage[message.aiMessageId] = message.feedback.feedbackType;
+      }
+
+      return feedbackByMessage;
+    },
+    {},
+  );
+}
+
+async function getAllTodayMessages() {
+  let cursor: AiMessageCursor | undefined;
+  let messages: AiMessage[] = [];
+
+  for (let requestCount = 0; requestCount < MAX_PAGINATION_REQUESTS; requestCount += 1) {
+    const page = await getTodayAiMessages(cursor);
+    messages = [...page.messages, ...messages];
+
+    if (!page.hasNext || !page.nextCursor) break;
+    cursor = page.nextCursor;
+  }
+
+  return deduplicateMessages(messages);
+}
+
+async function getRetainedHistorySections() {
+  let cursor: AiMessageCursor | undefined;
+  const groups = new Map<string, AiMessage[]>();
+
+  for (let requestCount = 0; requestCount < MAX_PAGINATION_REQUESTS; requestCount += 1) {
+    const page = await getAiMessageHistory(cursor);
+
+    page.messages.forEach((group: AiHistoryDateGroup) => {
+      groups.set(group.date, [
+        ...(groups.get(group.date) ?? []),
+        ...group.items,
+      ]);
+    });
+
+    if (!page.hasNext || !page.nextCursor) break;
+    cursor = page.nextCursor;
+  }
+
+  const feedbackByMessage = collectFeedbackByMessage(
+    Array.from(groups.values()).flat(),
+  );
+  const sections = Array.from(groups.entries())
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([dateTime, items]) => ({
+      date: formatChatDate(dateTime),
+      dateTime,
+      messages: deduplicateMessages(items).map((message) =>
+        mapApiMessage(message),
+      ),
+    }));
+
+  return { sections, feedbackByMessage };
+}
+
 export default function AIChatPage() {
   const navigate = useNavigate();
   const messagesRef = useRef<HTMLDivElement>(null);
-  const historySectionRef = useRef<HTMLDivElement>(null);
-  const todaySectionRef = useRef<HTMLDivElement>(null);
+  const latestHistorySectionRef = useRef<HTMLDivElement>(null);
+  const latestHiddenTodayMessageRef = useRef<HTMLDivElement>(null);
   const historyScrollAnimationRef = useRef<number | null>(null);
-  const nextIdRef = useRef(2);
-  const pendingTimers = useRef<Array<ReturnType<typeof window.setTimeout>>>([]);
+  const historyRevealBottomOffsetRef = useRef<number | null>(null);
+  const historyRevealTargetRef = useRef<"past" | "today">("past");
+  const nextLocalIdRef = useRef(-1);
+  const initializeRequestRef = useRef(0);
+  const sessionGenerationRef = useRef(0);
+  const authSessionPresentRef = useRef(hasStoredAuthSession());
+  const sendInFlightRef = useRef(false);
 
-  const [activeScenario, setActiveScenario] = useState<AiChatScenario>(
-    DEFAULT_MOCK_SCENARIO,
+  const [accessState, setAccessState] = useState<AccessState>(() =>
+    hasStoredAuthSession() ? "loading" : "login-required",
   );
-  const [authState, setAuthState] = useState<MockAuthState>(
-    MOCK_SCENARIO_STATE[DEFAULT_MOCK_SCENARIO],
+  const [authResolution, setAuthResolution] = useState<AuthResolution>(() =>
+    hasStoredAuthSession() ? "checking" : "guest",
   );
   const [noticeChecked, setNoticeChecked] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showHistoryButton, setShowHistoryButton] = useState(true);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [historySections, setHistorySections] = useState<HistorySection[]>([]);
+  const [hiddenTodayMessages, setHiddenTodayMessages] = useState<ChatMessage[]>([]);
+  const [hasHiddenTodayMessages, setHasHiddenTodayMessages] = useState(false);
+  const [hasPreviousMessages, setHasPreviousMessages] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [isHistoryRevealed, setIsHistoryRevealed] = useState(
+    hasRevealedAiChatHistory,
+  );
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isConsentSubmitting, setIsConsentSubmitting] = useState(false);
+  const [isGuideSubmitting, setIsGuideSubmitting] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(null);
   const [selectedFeedbackReasons, setSelectedFeedbackReasons] = useState<
-    string[]
+    AiFeedbackReason[]
   >([]);
+  const [feedbackByMessage, setFeedbackByMessage] = useState<
+    Record<number, AiFeedbackType>
+  >({});
+  const [isFeedbackSubmitting, setIsFeedbackSubmitting] = useState(false);
+
+  const todayDateTime = useMemo(getTodayDateTime, []);
+  const todayDate = useMemo(() => formatChatDate(todayDateTime), [todayDateTime]);
 
   const inputVariant: AiInputVariant = useMemo(() => {
     if (inputValue.includes("\n") || inputValue.length > 70) return "variant4";
     return inputValue.length > 0 ? "typing" : "default";
   }, [inputValue]);
 
+  const isCurrentSession = useCallback(
+    (generation: number) =>
+      generation === sessionGenerationRef.current &&
+      hasStoredAuthSession(),
+    [],
+  );
+
+  const resetAiChatUiState = useCallback(() => {
+    setMessages([]);
+    setHistorySections([]);
+    setHiddenTodayMessages([]);
+    setHasHiddenTodayMessages(false);
+    setHasPreviousMessages(false);
+    setIsHistoryRevealed(false);
+    setIsGuideOpen(false);
+    setFeedbackOpen(false);
+    setFeedbackMessageId(null);
+    setSelectedFeedbackReasons([]);
+    setFeedbackByMessage({});
+    setInputValue("");
+    sendInFlightRef.current = false;
+    setIsSending(false);
+    setIsHistoryLoading(false);
+    setIsConsentSubmitting(false);
+    setIsGuideSubmitting(false);
+    setIsFeedbackSubmitting(false);
+  }, []);
+
+  const enterConsentRequiredState = useCallback(() => {
+    sessionGenerationRef.current += 1;
+    setAuthResolution("authenticated");
+    setAccessState("consent-required");
+    resetAiChatUiState();
+    setNoticeChecked(false);
+    setConsentChecked(false);
+  }, [resetAiChatUiState]);
+
+  const initializeAiChat = useCallback(async () => {
+    const requestId = ++initializeRequestRef.current;
+
+    if (!hasStoredAuthSession()) {
+      authSessionPresentRef.current = false;
+      setAuthResolution("guest");
+      resetAiChatSession();
+      resetAiChatUiState();
+      setAccessState("login-required");
+      return;
+    }
+
+    authSessionPresentRef.current = true;
+    setAuthResolution("checking");
+    setAccessState("loading");
+    setIsGuideOpen(false);
+
+    try {
+      const user = await getUserBrief();
+      if (requestId !== initializeRequestRef.current) return;
+
+      if (!user.isLoggedIn) {
+        setAuthResolution("guest");
+        setAccessState("login-required");
+        setMessages([]);
+        clearAuthTokens();
+        return;
+      }
+
+      setAuthResolution("authenticated");
+
+      const loginSession = ensureAiChatLoginSession(
+        null,
+        window.localStorage.getItem("accessToken"),
+      );
+
+      const terms = await getAiTermsAgreement();
+      if (requestId !== initializeRequestRef.current) return;
+
+      if (!terms.aiTermsAgreed) {
+        enterConsentRequiredState();
+        return;
+      }
+
+      const [room, starter] = await Promise.all([
+        getAiChatRoom(),
+        getAiChatStarter(),
+      ]);
+      if (requestId !== initializeRequestRef.current) return;
+
+      const historyRevealed = hasRevealedAiChatHistory();
+      const sessionStarter = getAiChatSessionStarter() ?? starter;
+      storeAiChatSessionStarter(sessionStarter);
+
+      const [todayMessages, retainedHistoryResult] = await Promise.all([
+        getAllTodayMessages(),
+        historyRevealed && room.hasPreviousMessages
+          ? getRetainedHistorySections()
+          : Promise.resolve({
+              sections: [] as HistorySection[],
+              feedbackByMessage: {} as Record<number, AiFeedbackType>,
+            }),
+      ]);
+      if (requestId !== initializeRequestRef.current) return;
+
+      const partitionedTodayMessages = partitionMessagesByLoginSession(
+        todayMessages,
+        loginSession.sessionStartedAt,
+      );
+      const mappedHiddenTodayMessages =
+        partitionedTodayMessages.beforeLogin.map((message) =>
+          mapApiMessage(message),
+        );
+      setMessages(
+        mapCurrentSessionMessages(
+          partitionedTodayMessages.currentSession,
+          sessionStarter,
+        ),
+      );
+      setHistorySections(retainedHistoryResult.sections);
+      setHiddenTodayMessages(mappedHiddenTodayMessages);
+      setHasHiddenTodayMessages(
+        !historyRevealed && mappedHiddenTodayMessages.length > 0,
+      );
+      setHasPreviousMessages(room.hasPreviousMessages);
+      setIsHistoryRevealed(historyRevealed);
+      setIsGuideOpen(room.showGuideModal);
+      setFeedbackByMessage({
+        ...collectFeedbackByMessage(todayMessages),
+        ...retainedHistoryResult.feedbackByMessage,
+      });
+      setAccessState("ready");
+      markAiChatSessionAsStarted();
+    } catch (error: unknown) {
+      if (requestId !== initializeRequestRef.current) return;
+
+      if (isAiTermsNotAgreedError(error)) {
+        enterConsentRequiredState();
+        return;
+      }
+
+      if (!hasStoredAuthSession()) {
+        setAuthResolution("guest");
+        setAccessState("login-required");
+        setMessages([]);
+        return;
+      }
+
+      setAuthResolution("authenticated");
+      setAccessState("error");
+      showToast(
+        "yellow",
+        getApiErrorMessage(
+          error,
+          "AI 챗봇 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+        ),
+      );
+    }
+  }, [enterConsentRequiredState, resetAiChatUiState]);
+
+  useEffect(() => {
+    void initializeAiChat();
+
+    const handleAuthStateChanged = () => {
+      const hasSession = hasStoredAuthSession();
+
+      if (hasSession === authSessionPresentRef.current) return;
+
+      authSessionPresentRef.current = hasSession;
+      sessionGenerationRef.current += 1;
+      if (!hasSession) setAuthResolution("guest");
+      void initializeAiChat();
+    };
+
+    const handleStorageChanged = (event: StorageEvent) => {
+      if (
+        event.key === "accessToken" ||
+        event.key === "refreshToken" ||
+        event.key === null
+      ) {
+        handleAuthStateChanged();
+      }
+    };
+
+    window.addEventListener(AUTH_STATE_CHANGED_EVENT, handleAuthStateChanged);
+    window.addEventListener("storage", handleStorageChanged);
+    return () => {
+      initializeRequestRef.current += 1;
+      sessionGenerationRef.current += 1;
+      window.removeEventListener(
+        AUTH_STATE_CHANGED_EVENT,
+        handleAuthStateChanged,
+      );
+      window.removeEventListener("storage", handleStorageChanged);
+    };
+  }, [initializeAiChat]);
+
   useEffect(() => {
     const animationFrame = window.requestAnimationFrame(() => {
-      if (messagesRef.current) {
+      if (messagesRef.current && !isHistoryLoading) {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
       }
     });
 
     return () => window.cancelAnimationFrame(animationFrame);
-  }, [messages]);
+  }, [messages, isHistoryLoading]);
 
   useEffect(() => {
-    const timers = pendingTimers.current;
+    const bottomOffset = historyRevealBottomOffsetRef.current;
+    if (!isHistoryRevealed || bottomOffset === null) return;
 
-    return () => {
-      timers.forEach((timer) => window.clearTimeout(timer));
+    const revealFrame = window.requestAnimationFrame(() => {
+      const messagesContainer = messagesRef.current;
+      const historyTarget =
+        historyRevealTargetRef.current === "today"
+          ? latestHiddenTodayMessageRef.current
+          : latestHistorySectionRef.current;
+
+      if (!messagesContainer || !historyTarget) {
+        historyRevealBottomOffsetRef.current = null;
+        return;
+      }
+
+      const startTop = Math.max(
+        0,
+        messagesContainer.scrollHeight - bottomOffset,
+      );
+      messagesContainer.scrollTop = startTop;
+
+      const targetTop =
+        messagesContainer.scrollTop +
+        historyTarget.getBoundingClientRect().top -
+        messagesContainer.getBoundingClientRect().top;
+      const distance = targetTop - messagesContainer.scrollTop;
+      const animationStartTop = messagesContainer.scrollTop;
+      const duration = 900;
+      const startedAt = window.performance.now();
+
+      const animateScroll = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const easedProgress = 1 - Math.pow(1 - progress, 4);
+
+        messagesContainer.scrollTop =
+          animationStartTop + distance * easedProgress;
+
+        if (progress < 1) {
+          historyScrollAnimationRef.current =
+            window.requestAnimationFrame(animateScroll);
+          return;
+        }
+
+        messagesContainer.scrollTop = targetTop;
+        historyScrollAnimationRef.current = null;
+        historyRevealBottomOffsetRef.current = null;
+      };
+
+      historyScrollAnimationRef.current =
+        window.requestAnimationFrame(animateScroll);
+    });
+
+    return () => window.cancelAnimationFrame(revealFrame);
+  }, [isHistoryRevealed]);
+
+  useEffect(
+    () => () => {
       if (historyScrollAnimationRef.current !== null) {
         window.cancelAnimationFrame(historyScrollAnimationRef.current);
       }
-    };
-  }, []);
-
-  const buildMockAnswer = (question: string): BotMessage => ({
-    id: nextIdRef.current++,
-    role: "bot",
-    text: `“${question}”에 대해 확인한 내용을 안내해드릴게요.\n\n신청 대상과 지원 범위는 거주 지역과 아이의 연령에 따라 달라질 수 있어요. 아래 안내를 먼저 확인한 뒤, 관할 주민센터 또는 공식 기관에 최종 문의해 주세요.`,
-    resource: {
-      title: "📌 발달재활서비스 바우처 신청 안내 >",
-      meta: "복지 정보 · 보건복지부 · 신청 가능",
     },
-  });
+    [],
+  );
 
-  const handleSend = (preset?: string) => {
+  const handleSend = async (preset?: string) => {
     const text = (preset ?? inputValue).trim();
-    if (!text || isLoading) return;
+    if (
+      !text ||
+      sendInFlightRef.current ||
+      isSending ||
+      accessState !== "ready" ||
+      !hasStoredAuthSession()
+    ) {
+      return;
+    }
+
+    const sessionGeneration = sessionGenerationRef.current;
+    sendInFlightRef.current = true;
+    const knownServerMessageIds = new Set(
+      [...messages, ...hiddenTodayMessages]
+        .filter((message) => message.id > 0)
+        .map((message) => message.id),
+    );
 
     const userMessage: UserMessage = {
-      id: nextIdRef.current++,
+      id: nextLocalIdRef.current--,
       role: "user",
       text,
     };
     const loadingMessage: LoadingMessage = {
-      id: nextIdRef.current++,
+      id: nextLocalIdRef.current--,
       role: "loading",
     };
 
@@ -374,102 +662,287 @@ export default function AIChatPage() {
       window.cancelAnimationFrame(historyScrollAnimationRef.current);
       historyScrollAnimationRef.current = null;
     }
-    setShowHistoryButton(true);
+
     setInputValue("");
-    setIsLoading(true);
+    setIsSending(true);
     setMessages((current) => [...current, userMessage, loadingMessage]);
 
-    const timer = window.setTimeout(() => {
-      const answer = buildMockAnswer(text);
+    try {
+      const answer = await createAiMessage(text);
+      if (!isCurrentSession(sessionGeneration)) return;
+
       setMessages((current) => [
         ...current.filter((message) => message.id !== loadingMessage.id),
-        answer,
+        mapApiMessage(answer),
       ]);
-      setIsLoading(false);
-    }, 1400);
+    } catch (error: unknown) {
+      if (!isCurrentSession(sessionGeneration)) return;
 
-    pendingTimers.current.push(timer);
-  };
-
-  const handleScenarioChange = (scenario: AiChatScenario) => {
-    setActiveScenario(scenario);
-    setAuthState({ ...MOCK_SCENARIO_STATE[scenario] });
-    setNoticeChecked(false);
-    setConsentChecked(false);
-    setFeedbackOpen(false);
-    setSelectedFeedbackReasons([]);
-  };
-
-  const handleReturnToPrevious = () => {
-    navigate(-1);
-  };
-
-  const getSectionTop = (section: HTMLDivElement | null) => {
-    const messagesContainer = messagesRef.current;
-
-    if (!messagesContainer || !section) return null;
-
-    return (
-      messagesContainer.scrollTop +
-      section.getBoundingClientRect().top -
-      messagesContainer.getBoundingClientRect().top
-    );
-  };
-
-  const getHistorySectionTop = () =>
-    getSectionTop(historySectionRef.current);
-
-  const updateHistoryButtonVisibility = () => {
-    const messagesContainer = messagesRef.current;
-    const todaySectionTop = getSectionTop(todaySectionRef.current);
-
-    if (!messagesContainer || todaySectionTop === null) {
-      return;
-    }
-
-    const maxScrollTop =
-      messagesContainer.scrollHeight - messagesContainer.clientHeight;
-    const todayScrollBoundary = Math.min(todaySectionTop, maxScrollTop);
-    const isViewingToday =
-      messagesContainer.scrollTop >= todayScrollBoundary - 2;
-
-    setShowHistoryButton(isViewingToday);
-  };
-
-  const handleHistoryClick = () => {
-    const messagesContainer = messagesRef.current;
-    const historySectionTop = getHistorySectionTop();
-
-    if (!messagesContainer || historySectionTop === null) return;
-
-    if (historyScrollAnimationRef.current !== null) {
-      window.cancelAnimationFrame(historyScrollAnimationRef.current);
-    }
-
-    const startTop = messagesContainer.scrollTop;
-    const distance = historySectionTop - startTop;
-    const duration = 900;
-    const startedAt = window.performance.now();
-
-    const animateScroll = (now: number) => {
-      const progress = Math.min((now - startedAt) / duration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 4);
-
-      messagesContainer.scrollTop = startTop + distance * easedProgress;
-
-      if (progress < 1) {
-        historyScrollAnimationRef.current =
-          window.requestAnimationFrame(animateScroll);
+      if (isAiTermsNotAgreedError(error)) {
+        enterConsentRequiredState();
         return;
       }
 
-      messagesContainer.scrollTop = historySectionTop;
-      historyScrollAnimationRef.current = null;
-      updateHistoryButtonVisibility();
-    };
+      const errorCode = getAiChatErrorCode(error);
+      const isTerminalGenerationError =
+        errorCode !== undefined &&
+        TERMINAL_AI_GENERATION_ERROR_CODES.has(errorCode);
+      const isTransportUncertain = isAiChatTransportUncertainError(error);
+      const maxSyncAttempts = isTransportUncertain
+        ? SEND_SYNC_MAX_ATTEMPTS
+        : 1;
+      let syncResult: "answered" | "persisted" | "not-persisted" | "unknown" =
+        "unknown";
 
-    historyScrollAnimationRef.current =
-      window.requestAnimationFrame(animateScroll);
+      for (let attempt = 0; attempt < maxSyncAttempts; attempt += 1) {
+        if (attempt > 0) await wait(SEND_SYNC_INTERVAL_MS);
+        if (!isCurrentSession(sessionGeneration)) return;
+
+        try {
+          const latestTodayMessages = await getAllTodayMessages();
+          if (!isCurrentSession(sessionGeneration)) return;
+
+          const persistedUserIndex = latestTodayMessages.findIndex(
+            (message) =>
+              message.senderType === "USER" &&
+              message.content === text &&
+              !knownServerMessageIds.has(message.aiMessageId),
+          );
+
+          if (persistedUserIndex < 0) {
+            if (attempt + 1 < maxSyncAttempts) continue;
+
+            syncResult = "not-persisted";
+            setMessages((current) =>
+              current.filter(
+                (message) =>
+                  message.id !== loadingMessage.id &&
+                  message.id !== userMessage.id,
+              ),
+            );
+            setInputValue(text);
+            break;
+          }
+
+          const persistedTail = latestTodayMessages.slice(persistedUserIndex);
+          const hasSyncedAnswer = persistedTail.some(
+            (message, index) => index > 0 && message.senderType === "AI",
+          );
+
+          if (
+            isTransportUncertain &&
+            !hasSyncedAnswer &&
+            attempt + 1 < maxSyncAttempts
+          ) {
+            continue;
+          }
+
+          if (isTerminalGenerationError) {
+            syncResult = "not-persisted";
+            setMessages((current) =>
+              current.filter(
+                (message) =>
+                  message.id !== loadingMessage.id &&
+                  message.id !== userMessage.id,
+              ),
+            );
+            setInputValue(text);
+            break;
+          }
+
+          if (isTransportUncertain && !hasSyncedAnswer) {
+            syncResult = "unknown";
+            setMessages((current) =>
+              current.filter(
+                (message) => message.id !== loadingMessage.id,
+              ),
+            );
+            break;
+          }
+
+          const syncedMessages = persistedTail.map((message) =>
+            mapApiMessage(message),
+          );
+          syncResult = hasSyncedAnswer ? "answered" : "persisted";
+
+          setMessages((current) => {
+            const next = current.filter(
+              (message) =>
+                message.id !== loadingMessage.id &&
+                message.id !== userMessage.id,
+            );
+            const existingIds = new Set(next.map((message) => message.id));
+
+            return [
+              ...next,
+              ...syncedMessages.filter(
+                (message) => !existingIds.has(message.id),
+              ),
+            ];
+          });
+          break;
+        } catch (syncError: unknown) {
+          if (!isCurrentSession(sessionGeneration)) return;
+
+          if (isAiTermsNotAgreedError(syncError)) {
+            enterConsentRequiredState();
+            return;
+          }
+
+          if (attempt + 1 < maxSyncAttempts) continue;
+
+          setMessages((current) =>
+            current.filter((message) => message.id !== loadingMessage.id),
+          );
+          break;
+        }
+      }
+
+      if (syncResult === "answered") return;
+
+      showToast(
+        "yellow",
+        syncResult === "unknown"
+          ? "전송 결과를 확인하지 못했습니다. 중복 전송하지 말고 잠시 후 대화 내역을 확인해주세요."
+          : getApiErrorMessage(
+              error,
+              syncResult === "persisted"
+                ? "질문은 전송되었지만 답변을 생성하지 못했습니다."
+                : "메시지를 전송하지 못했습니다. 잠시 후 다시 시도해주세요.",
+            ),
+      );
+    } finally {
+      if (isCurrentSession(sessionGeneration)) {
+        sendInFlightRef.current = false;
+        setIsSending(false);
+      }
+    }
+  };
+
+  const handleHistoryClick = async () => {
+    const messagesContainer = messagesRef.current;
+    if (
+      !messagesContainer ||
+      isHistoryRevealed ||
+      isHistoryLoading ||
+      accessState !== "ready" ||
+      !hasStoredAuthSession()
+    ) {
+      return;
+    }
+
+    const sessionGeneration = sessionGenerationRef.current;
+
+    if (historyScrollAnimationRef.current !== null) {
+      window.cancelAnimationFrame(historyScrollAnimationRef.current);
+      historyScrollAnimationRef.current = null;
+    }
+
+    historyRevealBottomOffsetRef.current =
+      messagesContainer.scrollHeight - messagesContainer.scrollTop;
+    setIsHistoryLoading(true);
+
+    try {
+      const retainedHistoryResult = hasPreviousMessages
+        ? await getRetainedHistorySections()
+        : {
+            sections: [] as HistorySection[],
+            feedbackByMessage: {} as Record<number, AiFeedbackType>,
+          };
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      const mappedTodayMessages = hasHiddenTodayMessages
+        ? hiddenTodayMessages
+        : [];
+      setHistorySections(retainedHistoryResult.sections);
+      setFeedbackByMessage((current) => ({
+        ...current,
+        ...retainedHistoryResult.feedbackByMessage,
+      }));
+      setHiddenTodayMessages(mappedTodayMessages);
+      historyRevealTargetRef.current =
+        mappedTodayMessages.length > 0 ? "today" : "past";
+      markAiChatHistoryAsRevealed();
+      setIsHistoryRevealed(true);
+      setHasHiddenTodayMessages(false);
+    } catch (error: unknown) {
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      historyRevealBottomOffsetRef.current = null;
+
+      if (isAiTermsNotAgreedError(error)) {
+        enterConsentRequiredState();
+        return;
+      }
+
+      showToast(
+        "yellow",
+        getApiErrorMessage(
+          error,
+          "이전 대화를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+        ),
+      );
+    } finally {
+      if (isCurrentSession(sessionGeneration)) setIsHistoryLoading(false);
+    }
+  };
+
+  const handleHelpfulFeedback = async (messageId: number) => {
+    if (
+      accessState !== "ready" ||
+      !hasStoredAuthSession() ||
+      feedbackByMessage[messageId]
+    ) {
+      return;
+    }
+
+    const sessionGeneration = sessionGenerationRef.current;
+
+    setFeedbackByMessage((current) => ({
+      ...current,
+      [messageId]: "HELPFUL",
+    }));
+
+    try {
+      await createAiFeedback(messageId, { feedbackType: "HELPFUL" });
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      showToast("green", "소중한 의견 감사합니다!");
+    } catch (error: unknown) {
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      setFeedbackByMessage((current) => {
+        const next = { ...current };
+        delete next[messageId];
+        return next;
+      });
+
+      if (isAiTermsNotAgreedError(error)) {
+        enterConsentRequiredState();
+        return;
+      }
+
+      showToast(
+        "yellow",
+        getApiErrorMessage(
+          error,
+          "의견을 전달하지 못했습니다. 다시 시도해주세요.",
+        ),
+      );
+    }
+  };
+
+  const openIncorrectFeedback = (messageId: number) => {
+    if (
+      accessState !== "ready" ||
+      !hasStoredAuthSession() ||
+      feedbackByMessage[messageId]
+    ) {
+      return;
+    }
+    setFeedbackMessageId(messageId);
+    setSelectedFeedbackReasons([]);
+    setFeedbackOpen(true);
   };
 
   const renderMessage = (message: ChatMessage) => {
@@ -481,112 +954,98 @@ export default function AIChatPage() {
       return <AiMessageBot key={message.id} variant="loading" />;
     }
 
+    const serverId = message.serverId;
+    const hasServerId = serverId !== undefined;
+    const selectedFeedback = hasServerId
+      ? feedbackByMessage[serverId] === "HELPFUL"
+        ? "helpful"
+        : feedbackByMessage[serverId] === "INCORRECT"
+          ? "incorrect"
+          : null
+      : null;
+
     return (
       <AiMessageBot
         key={message.id}
         message={message.text}
-        resource={message.resource}
+        resources={message.resources}
+        warning={message.warning}
         suggestions={message.suggestions}
-        showFeedback
-        onSuggestionClick={(suggestion) => handleSend(suggestion)}
-        onBadFeedback={() => {
-          setSelectedFeedbackReasons([]);
-          setFeedbackOpen(true);
-        }}
+        showFeedback={hasServerId}
+        selectedFeedback={selectedFeedback}
+        onSuggestionClick={(suggestion) => void handleSend(suggestion)}
+        onGoodFeedback={
+          hasServerId
+            ? () => void handleHelpfulFeedback(serverId)
+            : undefined
+        }
+        onBadFeedback={
+          hasServerId
+            ? () => openIncorrectFeedback(serverId)
+            : undefined
+        }
       />
     );
   };
 
-  const entryModal = !authState.isLoggedIn ? (
-    <CenteredModal>
-      <OnboardCancelBox
-        title="로그인하고 더 많은 기능을 이용해 보세요!"
-        description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
-        leftButtonText="둘러보기"
-        rightButtonText="로그인/회원가입"
-        onLeftButtonClick={handleReturnToPrevious}
-        onRightButtonClick={() => navigate("/auth")}
-      />
-    </CenteredModal>
-  ) : !authState.hasChatConsent ? (
-    <CenteredModal>
-      <OnboardCancelBox
-        title="대화를 시작하기 전, 이용 동의가 필요해요!"
-        description={
-          <div className="flex w-full flex-col items-start gap-[20px]">
-            <p>
-              AI 챗봇 서비스 이용에 동의하시면, 지금 바로 AI와 자유롭게
-              <br />
-              대화를 나누고 필요한 정보를 실시간으로 확인하실 수 있습니다.
-            </p>
-            <div className="flex items-center gap-[8px]">
-              <AiCheckbox
-                checked={consentChecked}
-                onChange={(event) => setConsentChecked(event.target.checked)}
-                label="(선택) AI 챗봇 이용 동의 방침"
-                className="gap-[4px] text-h2-onboard text-background-500"
-              />
-              <button
-                type="button"
-                className="cursor-pointer text-h3-onboard text-background-500 underline underline-offset-2"
-              >
-                전문보기
-              </button>
-            </div>
-          </div>
-        }
-        leftButtonText="둘러보기"
-        rightButtonText="시작하기"
-        className={
-          !consentChecked
-            ? "[&>div:last-child>div:last-child>button]:pointer-events-none [&>div:last-child>div:last-child>button]:bg-background-250! [&>div:last-child>div:last-child>button]:text-background-500!"
-            : undefined
-        }
-        onLeftButtonClick={handleReturnToPrevious}
-        onRightButtonClick={() => {
-          if (!consentChecked) return;
-          setAuthState((current) => ({ ...current, hasChatConsent: true }));
-        }}
-      />
-    </CenteredModal>
-  ) : authState.isFirstVisit ? (
-    <CenteredModal>
-      <OnboardCancelBox
-        title="AI 챗봇 이용 전 안내드립니다"
-        description={
-          <div className="flex w-full flex-col items-start gap-[16px]">
-            <p>
-              보듬 AI의 답변은 참고용이며 정확하지 않을 수 있습니다.
-              <br />
-              중요한 복지 혜택이나 바우처 신청 전,
-              <br />
-              정확한 요건은 반드시 공식 기관을 통해 다시 한번 확인해 주세요.
-            </p>
-            <AiCheckbox
-              checked={noticeChecked}
-              onChange={(event) => setNoticeChecked(event.target.checked)}
-              label="네, 확인했습니다"
-              className="gap-[4px] text-h2-onboard text-background-500"
-            />
-          </div>
-        }
-        leftButtonText="둘러보기"
-        rightButtonText="시작하기"
-        className={
-          !noticeChecked
-            ? "[&>div:last-child>div:last-child>button]:pointer-events-none [&>div:last-child>div:last-child>button]:bg-background-250! [&>div:last-child>div:last-child>button]:text-background-500!"
-            : undefined
-        }
-        onLeftButtonClick={handleReturnToPrevious}
-        onRightButtonClick={() => {
-          if (!noticeChecked) return;
-          setAuthState((current) => ({ ...current, isFirstVisit: false }));
-        }}
-      />
-    </CenteredModal>
-  ) : null;
+  const handleConsentSubmit = async () => {
+    if (!consentChecked || isConsentSubmitting) return;
 
-  const toggleFeedbackReason = (reason: string) => {
+    const sessionGeneration = sessionGenerationRef.current;
+    setIsConsentSubmitting(true);
+    try {
+      await agreeToAiTerms();
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      await initializeAiChat();
+    } catch (error: unknown) {
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      showToast(
+        "yellow",
+        getApiErrorMessage(
+          error,
+          "AI 챗봇 이용 동의를 저장하지 못했습니다. 다시 시도해주세요.",
+        ),
+      );
+    } finally {
+      if (isCurrentSession(sessionGeneration)) {
+        setIsConsentSubmitting(false);
+      }
+    }
+  };
+
+  const handleGuideSubmit = async () => {
+    if (!noticeChecked || isGuideSubmitting) return;
+
+    const sessionGeneration = sessionGenerationRef.current;
+    setIsGuideSubmitting(true);
+    try {
+      await confirmAiChatGuide();
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      setIsGuideOpen(false);
+    } catch (error: unknown) {
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      if (isAiTermsNotAgreedError(error)) {
+        enterConsentRequiredState();
+        return;
+      }
+
+      showToast(
+        "yellow",
+        getApiErrorMessage(
+          error,
+          "안내 확인 상태를 저장하지 못했습니다. 다시 시도해주세요.",
+        ),
+      );
+    } finally {
+      if (isCurrentSession(sessionGeneration)) setIsGuideSubmitting(false);
+    }
+  };
+
+  const toggleFeedbackReason = (reason: AiFeedbackReason) => {
     setSelectedFeedbackReasons((current) =>
       current.includes(reason)
         ? current.filter((item) => item !== reason)
@@ -594,15 +1053,155 @@ export default function AIChatPage() {
     );
   };
 
-  const submitFeedback = () => {
-    if (selectedFeedbackReasons.length === 0) return;
+  const submitFeedback = async () => {
+    if (
+      feedbackMessageId === null ||
+      selectedFeedbackReasons.length === 0 ||
+      isFeedbackSubmitting ||
+      accessState !== "ready" ||
+      !hasStoredAuthSession()
+    ) {
+      return;
+    }
 
-    setFeedbackOpen(false);
-    showToast(
-      "green",
-      "소중한 의견 감사합니다! 더 정확한 정보로 보답하겠습니다",
-    );
+    const sessionGeneration = sessionGenerationRef.current;
+    setIsFeedbackSubmitting(true);
+    try {
+      await createAiFeedback(feedbackMessageId, {
+        feedbackType: "INCORRECT",
+        reasons: selectedFeedbackReasons,
+      });
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      setFeedbackByMessage((current) => ({
+        ...current,
+        [feedbackMessageId]: "INCORRECT",
+      }));
+      setFeedbackOpen(false);
+      showToast(
+        "green",
+        "소중한 의견 감사합니다! 더 정확한 정보로 보답하겠습니다",
+      );
+    } catch (error: unknown) {
+      if (!isCurrentSession(sessionGeneration)) return;
+
+      if (isAiTermsNotAgreedError(error)) {
+        enterConsentRequiredState();
+        return;
+      }
+
+      showToast(
+        "yellow",
+        getApiErrorMessage(
+          error,
+          "의견을 전달하지 못했습니다. 다시 시도해주세요.",
+        ),
+      );
+    } finally {
+      if (isCurrentSession(sessionGeneration)) {
+        setIsFeedbackSubmitting(false);
+      }
+    }
   };
+
+  const effectiveAccessState: AccessState =
+    authResolution === "guest"
+      ? "login-required"
+      : authResolution === "authenticated"
+        ? accessState
+        : "loading";
+  const entryModalType = resolveAiChatEntryModal(
+    effectiveAccessState,
+    authResolution === "authenticated" && isGuideOpen,
+  );
+  const entryModal =
+    entryModalType === "login-required" ? (
+      <CenteredModal>
+        <OnboardCancelBox
+          title="로그인하고 더 많은 기능을 이용해 보세요!"
+          description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
+          leftButtonText="둘러보기"
+          rightButtonText="로그인/회원가입"
+          onLeftButtonClick={() => navigate(-1)}
+          onRightButtonClick={() => navigate("/auth")}
+        />
+      </CenteredModal>
+    ) : entryModalType === "consent-required" ? (
+      <CenteredModal>
+        <OnboardCancelBox
+          title="대화를 시작하기 전, 이용 동의가 필요해요!"
+          description={
+            <div className="flex w-full flex-col items-start gap-[20px]">
+              <p>
+                AI 챗봇 서비스 이용에 동의하시면, 지금 바로 AI와 자유롭게
+                <br />
+                대화를 나누고 필요한 정보를 실시간으로 확인하실 수 있습니다.
+              </p>
+              <div className="flex items-center gap-[8px]">
+                <AiCheckbox
+                  checked={consentChecked}
+                  onChange={(event) =>
+                    setConsentChecked(event.target.checked)
+                  }
+                  label="(선택) AI 챗봇 이용 동의 방침"
+                  className="gap-[4px] text-h2-onboard text-background-500"
+                />
+                <a
+                  href={legalLinks.aiChatTerms}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer text-h3-onboard text-background-500 underline underline-offset-2"
+                >
+                  전문보기
+                </a>
+              </div>
+            </div>
+          }
+          leftButtonText="둘러보기"
+          rightButtonText={isConsentSubmitting ? "저장 중..." : "시작하기"}
+          rightButtonDisabled={!consentChecked || isConsentSubmitting}
+          onLeftButtonClick={() => navigate(-1)}
+          onRightButtonClick={() => void handleConsentSubmit()}
+        />
+      </CenteredModal>
+    ) : entryModalType === "guide" ? (
+      <CenteredModal>
+        <OnboardCancelBox
+          title="AI 챗봇 이용 전 안내드립니다"
+          description={
+            <div className="flex w-full flex-col items-start gap-[16px]">
+              <p>
+                보듬 AI의 답변은 참고용이며 정확하지 않을 수 있습니다.
+                <br />
+                중요한 복지 혜택이나 바우처 신청 전,
+                <br />
+                정확한 요건은 반드시 공식 기관을 통해 다시 한번 확인해 주세요.
+              </p>
+              <AiCheckbox
+                checked={noticeChecked}
+                onChange={(event) => setNoticeChecked(event.target.checked)}
+                label="네, 확인했습니다"
+                className="gap-[4px] text-h2-onboard text-background-500"
+              />
+            </div>
+          }
+          leftButtonText="둘러보기"
+          rightButtonText={isGuideSubmitting ? "저장 중..." : "시작하기"}
+          rightButtonDisabled={!noticeChecked || isGuideSubmitting}
+          onLeftButtonClick={() => navigate(-1)}
+          onRightButtonClick={() => void handleGuideSubmit()}
+        />
+      </CenteredModal>
+    ) : null;
+
+  const showHistoryButton = shouldShowPreviousHistoryButton({
+    accessReady:
+      authResolution === "authenticated" && accessState === "ready",
+    historyRevealed: isHistoryRevealed,
+    historyLoading: isHistoryLoading,
+    hasPreviousMessages,
+    hasHiddenTodayMessages,
+  });
 
   return (
     <div className="flex min-h-[calc(100vh-60px)] justify-center bg-background-100 px-[27.5px] pb-[40px] pt-[20px]">
@@ -616,44 +1215,77 @@ export default function AIChatPage() {
         <AiChatPanel
           inputValue={inputValue}
           inputVariant={inputVariant}
-          inputDisabled={isLoading}
+          inputDisabled={
+            isSending ||
+            isHistoryLoading ||
+            authResolution !== "authenticated" ||
+            accessState !== "ready" ||
+            isGuideOpen
+          }
+          inputMaxLength={MAX_MESSAGE_LENGTH}
           showHistoryButton={showHistoryButton}
           messagesRef={messagesRef}
           onInputChange={setInputValue}
-          onSend={() => handleSend()}
-          onHistoryClick={handleHistoryClick}
-          onMessagesScroll={updateHistoryButtonVisibility}
+          onSend={() => void handleSend()}
+          onHistoryClick={() => void handleHistoryClick()}
         >
-          {retainedHistorySections.map((section, index) => (
+          {effectiveAccessState === "error" && (
             <div
-              key={section.dateTime}
-              ref={
-                index === retainedHistorySections.length - 1
-                  ? historySectionRef
-                  : undefined
-              }
-              className="w-full"
+              role="alert"
+              className="flex h-[544px] w-full flex-col items-center justify-center gap-[12px] text-center"
             >
-              <DateDivider date={section.date} dateTime={section.dateTime} />
-              {section.messages.map(renderMessage)}
+              <p className="text-h3-onboard text-background-600">
+                대화를 불러오지 못했습니다.
+              </p>
+              <button
+                type="button"
+                onClick={() => void initializeAiChat()}
+                className="cursor-pointer rounded-[10px] bg-main-400 px-[16px] py-[8px] text-h4-list text-background-100 transition-colors hover:bg-main-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400"
+              >
+                다시 시도
+              </button>
             </div>
-          ))}
-          <div ref={todaySectionRef} className="w-full">
-            <DateDivider
-              date="2026년 7월 16일 목요일"
-              dateTime="2026-07-16"
-            />
+          )}
+
+          {isHistoryRevealed &&
+            historySections.map((section, index) => (
+              <div
+                key={section.dateTime}
+                ref={
+                  index === historySections.length - 1
+                    ? latestHistorySectionRef
+                    : undefined
+                }
+                className="w-full"
+              >
+                <DateDivider date={section.date} dateTime={section.dateTime} />
+                {section.messages.map(renderMessage)}
+              </div>
+            ))}
+
+          <div className="w-full">
+            {isHistoryRevealed && (
+              <DateDivider date={todayDate} dateTime={todayDateTime} />
+            )}
+
+            {isHistoryRevealed &&
+              hiddenTodayMessages.map((message, index) => (
+                <div
+                  key={message.id}
+                  ref={
+                    index === hiddenTodayMessages.length - 1
+                      ? latestHiddenTodayMessageRef
+                      : undefined
+                  }
+                >
+                  {renderMessage(message)}
+                </div>
+              ))}
+
             {messages.map(renderMessage)}
           </div>
         </AiChatPanel>
       </div>
-
-      {import.meta.env.DEV && (
-        <AiChatStateSwitcher
-          activeScenario={activeScenario}
-          onChange={handleScenarioChange}
-        />
-      )}
 
       {entryModal}
 
@@ -665,27 +1297,28 @@ export default function AIChatPage() {
               <div className="flex w-full flex-col items-start gap-[16px]">
                 {FEEDBACK_REASONS.map((reason) => (
                   <AiCheckbox
-                    key={reason}
-                    checked={selectedFeedbackReasons.includes(reason)}
-                    onChange={() => toggleFeedbackReason(reason)}
-                    label={reason}
+                    key={reason.value}
+                    checked={selectedFeedbackReasons.includes(reason.value)}
+                    onChange={() => toggleFeedbackReason(reason.value)}
+                    label={reason.label}
                     className="gap-[4px] text-h2-onboard text-background-500"
                   />
                 ))}
               </div>
             }
             leftButtonText="취소"
-            rightButtonText="의견 전달하기"
-            className={
-              selectedFeedbackReasons.length === 0
-                ? "[&>div:last-child>div:last-child>button]:pointer-events-none [&>div:last-child>div:last-child>button]:bg-background-250! [&>div:last-child>div:last-child>button]:text-background-500!"
-                : undefined
+            rightButtonText={
+              isFeedbackSubmitting ? "전달 중..." : "의견 전달하기"
+            }
+            rightButtonDisabled={
+              selectedFeedbackReasons.length === 0 || isFeedbackSubmitting
             }
             onLeftButtonClick={() => setFeedbackOpen(false)}
-            onRightButtonClick={submitFeedback}
+            onRightButtonClick={() => void submitFeedback()}
           />
         </CenteredModal>
       )}
+
     </div>
   );
 }
