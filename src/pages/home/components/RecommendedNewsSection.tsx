@@ -1,18 +1,16 @@
 import NewsCard from "./NewsCard";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
-import type { RecommendedNews } from "@/types/home";
-import { useHomeNewsPreview } from "@/hooks/useHome";
+import { useHomeNewsPreview, useRecommendedNews } from "@/hooks/useHome";
 
-interface RecommendedNewsSectionProps {
-  news: RecommendedNews[];
-}
-
-export default function RecommendedNewsSection({
-  news,
-}: RecommendedNewsSectionProps) {
+export default function RecommendedNewsSection() {
   const { data: activityNews = [] } = useHomeNewsPreview("ACTIVITY");
   const { data: localNews = [] } = useHomeNewsPreview("LOCAL");
+  const {
+    data: news = [],
+    isPending,
+    isError,
+  } = useRecommendedNews();
 
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
@@ -23,14 +21,21 @@ export default function RecommendedNewsSection({
         </p>
       </div>
 
-      <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
-        {news.map((item) => (
-          <NewsCard
-            key={item.newsId}
-            {...item}
-          />
-        ))}
-      </div>
+      {isPending ? (
+        <div className="flex h-[180px] items-center justify-center text-background-500">
+          불러오는 중입니다...
+        </div>
+      ) : isError ? (
+        <div className="flex h-[180px] items-center justify-center text-background-500">
+          추천 소식을 불러오지 못했습니다.
+        </div>
+      ) : (
+        <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
+          {news.map((item) => (
+            <NewsCard key={item.newsId} {...item} />
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
         <PostSection title="활동소식">
