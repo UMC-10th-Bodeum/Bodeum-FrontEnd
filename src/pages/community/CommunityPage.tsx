@@ -80,7 +80,7 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
-      <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
+      <div className="flex flex-col px-[32px] py-[20px]">
         <CommunitySection posts={communityPosts} />
 
         <div className="mt-[18px] flex flex-col gap-[16px]">

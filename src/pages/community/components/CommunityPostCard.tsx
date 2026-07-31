@@ -44,7 +44,7 @@ export default function CommunityPostCard({
           onClick?.();
         }
       }}
-      className="flex h-[102px] w-[578px] min-w-0 cursor-pointer flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] hover:shadow-[1px_2px_15px_0px_#00000026] active:border-main-400"
+      className="flex h-[102px] w-full min-w-0 cursor-pointer flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] hover:shadow-[1px_2px_15px_0px_#00000026] active:border-main-400"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-2">
