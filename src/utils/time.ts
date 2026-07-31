@@ -2,6 +2,9 @@
 export function getRelativeTime(dateString: string): string {
   const now = new Date();
   const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return "날짜 정보 없음";
+  }
 
   const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
