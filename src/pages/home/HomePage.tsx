@@ -1,4 +1,3 @@
-import { communityPosts } from "@/mocks/community";
 import CommunitySection from "./components/CommunitySection";
 import NoticeBanner from "./components/NoticeBanner";
 import RecommendedNewsSection from "./components/RecommendedNewsSection";

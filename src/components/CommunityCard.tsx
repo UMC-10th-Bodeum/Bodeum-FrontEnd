@@ -2,16 +2,10 @@ import HeartIcon from "@/assets/icons/HeartDisabled.svg?react";
 import CommentIcon from "@/assets/icons/Community.svg?react";
 import ViewIcon from "@/assets/icons/Views.svg?react";
 import PostTag from "@/components/PostTag";
-import type { DiagnosisType } from "@/types/diagnosis";
 import { getRelativeTime } from "@/utils/time";
 
-interface DisabilityTag {
-  code: string;
-  label: string;
-}
-
 interface CommunityCardProps {
-  disabilityTags: DisabilityTag[];
+  categoryName: string;
   authorDisplay: string;
   title: string;
   content: string;
@@ -22,9 +16,7 @@ interface CommunityCardProps {
   onClick?: () => void;
 }
 
-
 export default function CommunityCard({
-  disabilityTags,
   authorDisplay,
   title,
   content,
@@ -32,6 +24,7 @@ export default function CommunityCard({
   commentCount,
   viewCount,
   createdAt,
+  categoryName,
   onClick,
 }: CommunityCardProps) {
   return (
@@ -41,13 +34,10 @@ export default function CommunityCard({
     >
       <div className="mb-[8px] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {disabilityTags.map((tag) => (
-            <PostTag
-              key={tag.code}
-              type={tag.code as DiagnosisType}
-              label={tag.label}
-            />
-          ))}
+          <PostTag
+            type="ETC"
+            label={categoryName}
+          />
           <span className="text-body-sub text-background-500">{authorDisplay}</span>
         </div>
 
