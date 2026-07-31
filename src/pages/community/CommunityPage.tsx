@@ -137,7 +137,7 @@ export default function CommunityPage() {
               onEnter={handleSearch}
               suggestions={suggestions}
               onSuggestionClick={(text) => {
-                setKeyword(text);
+                handleSearch(text);
               }}
               placeholder="게시글을 검색해보세요"
               className="w-[640px] h-[44px]"
