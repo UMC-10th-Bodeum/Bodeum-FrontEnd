@@ -11,6 +11,7 @@ export default function RecommendedNewsSection() {
     isPending,
     isError,
   } = useRecommendedNews();
+  console.log(news)
 
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">

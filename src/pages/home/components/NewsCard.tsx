@@ -39,12 +39,14 @@ export default function NewsCard({
         <p className="line-clamp-1 leading-none text-h6 text-background-600">{title}</p>
 
         <div className="text-body-label text-background-400">
-          {region} · {status}
+          {region ?? "-"} 
         </div>
 
         <div className="flex items-center">
-          <PostTag type="ETC" label={`D-${dDay}`} />
-          
+          <PostTag
+            type="ETC"
+            label={dDay ? `D-${dDay}` : `${status}`}
+          />
           
           <ViewIcon className="h-[12px] w-[12px] ml-[8px] mr-[4px]" />
           <span className="text-body-sub leading-none text-background-500 mr-[4px]">조회</span>
