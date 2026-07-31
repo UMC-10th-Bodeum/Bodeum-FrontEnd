@@ -42,7 +42,7 @@ export default function ImageUploader({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex h-[140px] w-[140px] flex-col items-center justify-center rounded-[10px] bg-background-250"
+            className="flex h-[140px] w-[140px] cursor-pointer flex-col items-center justify-center rounded-[10px] border border-transparent bg-background-250 hover:shadow-[1px_2px_15px_0px_#00000026] active:border-background-500 active:bg-background-300"
           >
             <PlusIcon className="mb-2 h-[32px] w-[32px]" />
 

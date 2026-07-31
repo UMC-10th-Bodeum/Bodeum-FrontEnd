@@ -10,7 +10,7 @@ import ButtonOutline from "@/components/ButtonOutline";
 import InfoItem from "./components/InfoItem";
 import RatingInput from "./ReviewWrite/RatingInput";
 import ReviewTextArea from "./ReviewWrite/ReviewTextArea";
-import ImageUploader from "./ReviewWrite/ImageUploader";
+import ImageUploader from "@/components/ImageUploader";
 import ButtonFill from "@/components/ButtonFill";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 

@@ -37,6 +37,7 @@ export default function CommunityWriteForm({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [hashtags, setHashtags] = useState("");
+  const [images, setImages] = useState<File[]>([]);
 
   const isSubmittable =
     category !== null &&
@@ -77,7 +78,7 @@ export default function CommunityWriteForm({
           onContentChange={setContent}
           onHashtagsChange={setHashtags}
         />
-        <CommunityImageField />
+        <CommunityImageField images={images} onChange={setImages} />
       </div>
 
       <div className="mt-[13px] flex justify-center gap-[8px]">

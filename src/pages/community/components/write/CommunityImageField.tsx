@@ -1,10 +1,17 @@
-import imageUpload from "@/assets/images/ImageUpload.svg";
+import ImageUploader from "@/components/ImageUploader";
 
-export default function CommunityImageField() {
+interface CommunityImageFieldProps {
+  images: File[];
+  onChange: (images: File[]) => void;
+}
+
+export default function CommunityImageField({
+  images,
+  onChange,
+}: CommunityImageFieldProps) {
   return (
     <div className="mt-[10px]">
-      <p className="text-h3-onboard text-background-500">이미지를 첨부해주세요</p>
-      <img src={imageUpload} alt="이미지 첨부" className="mt-[8px] block h-[140px] w-[140px]" />
+      <ImageUploader images={images} onChange={onChange} />
     </div>
   );
 }
