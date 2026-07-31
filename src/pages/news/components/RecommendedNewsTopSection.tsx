@@ -1,20 +1,25 @@
+import { useRecommendedNews } from "@/hooks/useHome";
 import NewsCard from "@/pages/home/components/NewsCard";
 
-interface News {
-  id: number;
-  title: string;
-  region: string;
-  category: string;
-  dDay: number;
-  views: number;
-  thumbnail?: string;
-}
+export default function RecommendedNewsTopSection() {
+  const { data: news = [], isPending, isError } = useRecommendedNews();
 
-interface RecommendedNewsTopSectionProps {
-  news: News[];
-}
+  if (isPending) {
+    return (
+      <div className="flex h-[220px] items-center justify-center text-h6 text-background-500">
+        추천 소식을 불러오는 중입니다...
+      </div>
+    )
+  }
 
-export default function RecommendedNewsTopSection({ news }: RecommendedNewsTopSectionProps) {
+  if (isError) {
+    return (
+      <div className="flex h-[220px] items-center justify-center text-h6 text-background-500">
+        추천 소식을 불러오지 못했습니다.
+      </div>
+    );
+  }
+
   return (
     <section className="flex flex-col shrink-0 overflow-hidden">
       <div>
@@ -26,7 +31,7 @@ export default function RecommendedNewsTopSection({ news }: RecommendedNewsTopSe
 
       <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
         {news.map((item) => (
-          <NewsCard key={item.id} {...item} />
+          <NewsCard key={item.newsId} {...item} />
         ))}
       </div>
     </section>
