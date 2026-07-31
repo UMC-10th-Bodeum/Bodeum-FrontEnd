@@ -3,8 +3,10 @@ import CommentIcon from "@/assets/icons/Community.svg?react";
 import ViewIcon from "@/assets/icons/Views.svg?react";
 import PostTag from "@/components/PostTag";
 import { getRelativeTime } from "@/utils/time";
+import { useNavigate } from "react-router-dom";
 
 interface CommunityCardProps {
+  postId: number;
   categoryName: string;
   authorDisplay: string;
   title: string;
@@ -13,10 +15,10 @@ interface CommunityCardProps {
   commentCount: number;
   viewCount: number;
   createdAt: string;
-  onClick?: () => void;
 }
 
 export default function CommunityCard({
+  postId,
   authorDisplay,
   title,
   content,
@@ -25,11 +27,12 @@ export default function CommunityCard({
   viewCount,
   createdAt,
   categoryName,
-  onClick,
 }: CommunityCardProps) {
+  const navigate = useNavigate();
+
   return (
     <button
-      onClick={onClick}
+      onClick={() => navigate(`/community/${postId}`)}
       className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left cursor-pointer"
     >
       <div className="mb-[8px] flex items-center justify-between">
