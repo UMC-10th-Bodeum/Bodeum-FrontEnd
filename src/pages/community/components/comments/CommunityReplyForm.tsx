@@ -46,7 +46,7 @@ export default function CommunityReplyForm({
         <MainButton size="S" stroke onClick={cancelReply}>
           취소
         </MainButton>
-        <MainButton size="S" onClick={submitReply}>
+        <MainButton size="S" disabled={!reply.trim()} onClick={submitReply}>
           작성
         </MainButton>
       </div>
