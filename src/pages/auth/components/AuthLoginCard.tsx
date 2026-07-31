@@ -2,6 +2,7 @@ import Logo from "@/assets/icons/Logo_kr.svg?react";
 import KakaoIcon from "@/assets/icons/KakaoIcon.svg?react";
 import NaverIcon from "@/assets/icons/NaverIcon.svg?react";
 import type { SocialProvider } from "@/apis/authApi";
+import { legalLinks } from "@/constants/legalLinks";
 
 type AuthLoginCardProps = {
   onAuthenticate: (provider: SocialProvider) => void;
@@ -88,12 +89,22 @@ export default function AuthLoginCard({
       </section>
 
       <div className="flex w-full items-center justify-center gap-[20px] text-h3-onboard text-background-500">
-        <button type="button" className="cursor-pointer underline">
+        <a
+          href={legalLinks.termsOfService}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer underline"
+        >
           이용약관
-        </button>
-        <button type="button" className="cursor-pointer font-medium underline">
+        </a>
+        <a
+          href={legalLinks.privacyPolicy}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer font-medium underline"
+        >
           개인정보처리방침
-        </button>
+        </a>
       </div>
     </div>
   );

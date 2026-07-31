@@ -7,6 +7,7 @@ import {
 import { getApiErrorMessage } from "@/apis/apiError";
 import { getUserBrief, type UserBrief } from "@/apis/userApi";
 import { showToast } from "@/components/Toast";
+import { legalLinks } from "@/constants/legalLinks";
 import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
 import { clearAgreementBrowserSession } from "@/pages/auth/agreementBrowserSession";
 import { clearOnboardingBrowserSession } from "@/pages/auth/onboardingBrowserSession";
@@ -127,19 +128,14 @@ export default function SideBar() {
 
         <div className="mt-auto border-t border-background-250 px-[16px]">
           <div className="mb-[16px] pt-[12px] flex text-body-sub text-background-500">
-            <button
-              type="button"
+            <a
+              href={legalLinks.privacyPolicy}
+              target="_blank"
+              rel="noopener noreferrer"
               className="cursor-pointer"
-              onClick={() =>
-                window.open(
-                  "https://app.notion.com/p/39734bae492a805aa838f4a002584537",
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-              }
             >
               개인정보처리방침
-            </button>
+            </a>
 
             <span className="mx-[4px]">|</span>
 

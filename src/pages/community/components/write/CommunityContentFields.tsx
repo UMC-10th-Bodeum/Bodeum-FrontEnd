@@ -1,3 +1,5 @@
+import Input from "@/components/Input";
+
 const MAX_CONTENT_LENGTH = 2000;
 
 type CommunityContentFieldsProps = {
@@ -8,9 +10,6 @@ type CommunityContentFieldsProps = {
   onContentChange: (value: string) => void;
   onHashtagsChange: (value: string) => void;
 };
-
-const inputClassName =
-  "h-[48px] w-full rounded-[10px] border border-background-300 bg-background-200 px-[20px] py-[12px] text-h2-onboard text-background-600 outline-none placeholder:text-background-500 focus:border-main-400";
 
 export default function CommunityContentFields({
   title,
@@ -24,14 +23,15 @@ export default function CommunityContentFields({
     <>
       <fieldset className="mt-[11px]">
         <legend className="text-h3-onboard text-background-500">본문 작성</legend>
-        <input
+        <label htmlFor="community-title" className="sr-only">
+          게시글 제목
+        </label>
+        <Input
+          id="community-title"
           value={title}
-          onChange={(event) => onTitleChange(event.target.value)}
-          required
-          maxLength={100}
+          onChange={(event) => onTitleChange(event.target.value.slice(0, 100))}
           placeholder="제목을 입력해 주세요*"
-          aria-label="게시글 제목"
-          className={`mt-[12px] ${inputClassName}`}
+          className="mt-[12px] h-[48px] w-full"
         />
         <div className="relative mt-[12px]">
           <textarea
@@ -64,12 +64,12 @@ export default function CommunityContentFields({
       >
         해시태그
       </label>
-      <input
+      <Input
         id="community-hashtags"
         value={hashtags}
         onChange={(event) => onHashtagsChange(event.target.value)}
         placeholder="해시태그를 입력해 주세요 (Ex. #발달인지, #5세 남아, #병원정보)"
-        className={`mt-[12px] ${inputClassName}`}
+        className="mt-[12px] h-[48px] w-full"
       />
     </>
   );

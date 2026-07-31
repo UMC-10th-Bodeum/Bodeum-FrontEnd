@@ -8,15 +8,6 @@ import RegionOnboardingBox from "./components/RegionOnboardingBox";
 import { formatRegionDisplayLabel } from "@/constants/regions";
 import { newsListItems } from "./data/newsMockData";
 
-const news = Array.from({ length: 5 }, (_, index) => ({
-  id: index + 1,
-  title: "2026 발달재활서비스 바우처 신청 안내",
-  region: "서울",
-  category: "강남구",
-  dDay: 21,
-  views: 1204,
-}));
-
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
   const [keyword, setKeyword] = useState("");
@@ -25,6 +16,11 @@ export default function NewsPage() {
   const [sort, setSort] = useState("");
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
+  const selectedNewsType =
+    selectedTab === "activity" ? "ACTIVITY" : "LOCAL";
+  const filteredNewsListItems = newsListItems.filter(
+    (item) => item.newsType === selectedNewsType,
+  );
 
   const openRegionOnboarding = () => {
     setShowRegionOnboarding(true);
@@ -41,9 +37,9 @@ export default function NewsPage() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-[18px] px-[32px] py-[20px]">
+      <div className="flex flex-col gap-[18px] px-[32px] py-[20px]">
         <div className="py-[20px]">
-          <RecommendedNewsTopSection news={news} />
+          <RecommendedNewsTopSection />
         </div>
 
         <div className="flex flex-col gap-[16px]">
@@ -67,8 +63,8 @@ export default function NewsPage() {
             category={category}
             onCategoryChange={setCategory}
           />
-          <NewsListSection items={newsListItems} sourceTab={selectedTab} />
-          <nav aria-label="소식 페이지네이션" className="p-2 mb-[21.2px]">
+          <NewsListSection items={filteredNewsListItems} />
+          <nav aria-label="소식 페이지네이션" className="p-2">
             <Pagination currentPage={page} totalPages={120} onChange={setPage} />
           </nav>
         </div>

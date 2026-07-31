@@ -1,17 +1,15 @@
 import CommunityCard from "@/components/CommunityCard";
 import MainButton from "@/components/MainButton";
 import PostSection from "./PostSection";
-import { postList } from "@/mocks/post";
 import PostListItem from "./PostListItem";
 import { useNavigate } from "react-router-dom";
-import type { CommunityPost } from "@/types/community";
+import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
 
-interface CommunitySectionProps {
-  posts: CommunityPost[];
-}
-
-export default function CommunitySection({ posts }: CommunitySectionProps) {
+export default function CommunitySection() {
   const navigate = useNavigate();
+  const { data: posts = [] } = useRecommendedCommunityPosts();
+  const { data: popularPosts = [] } = useHomePostPreview("popular");
+  const { data: latestPosts = [] } = useHomePostPreview("latest");
 
   return (
     <section className="w-full min-w-0 overflow-hidden">
@@ -36,19 +34,35 @@ export default function CommunitySection({ posts }: CommunitySectionProps) {
       <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
         <div className="inline-flex gap-4">
           {posts.map((post) => (
-            <CommunityCard key={post.id} {...post} />
+            <CommunityCard key={post.postId} {...post} />
           ))}
         </div>
       </div>
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
         <PostSection title="인기글">
-          {postList.map((post) => (
-            <PostListItem key={post.id} {...post} />
+          {popularPosts.map((post) => (
+            <PostListItem
+              key={post.postId}
+              title={post.title}
+              region={post.categoryName}
+              likes={post.likeCount}
+              talks={post.commentCount}
+              views={post.viewCount}
+              onClick={() => navigate(`/communuty/${post.postId}`)}
+            />
           ))}
         </PostSection>
         <PostSection title="최신글">
-          {postList.map((post) => (
-            <PostListItem key={post.id} {...post} />
+          {latestPosts.map((post) => (
+            <PostListItem
+              key={post.postId}
+              title={post.title}
+              region={post.categoryName}
+              likes={post.likeCount}
+              talks={post.commentCount}
+              views={post.viewCount}
+              onClick={() => navigate(`/communuty/${post.postId}`)}
+            />
           ))}
         </PostSection>
       </div>

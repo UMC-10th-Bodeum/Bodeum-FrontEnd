@@ -96,7 +96,7 @@ export const router = createBrowserRouter([
             element: <InfoDetailPage />,
           },
           {
-            path: "/news/:sourceTab/:id",
+            path: "/news/:id",
             element: <NewsDetailPage />,
           },
           {

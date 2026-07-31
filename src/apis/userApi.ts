@@ -22,6 +22,8 @@ export type UserBrief = {
 export type UserProfile = {
   userId: number;
   nickname: string | null;
+  email: string | null;
+  provider: string;
   profileImageUrl: string | null;
   point: number;
   level: number;
@@ -40,6 +42,8 @@ export type UserProfile = {
   guardianNickname: string | null;
   guardianType: string | null;
   communityRoleType: string | null;
+  joinedAt: string;
+  updatedAt: string;
 };
 
 async function requestUserBrief() {
