@@ -10,6 +10,7 @@ interface Suggestion {
 }
 
 interface InputProps {
+  searchType?: "news" | "community";
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   id?: string;
@@ -39,6 +40,7 @@ export default function Input({
   onEnter,
   suggestions = [],
   onSuggestionClick,
+  searchType,
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(value.trim() !== "");
@@ -51,6 +53,28 @@ export default function Input({
     : isFilled
       ? "border-0 bg-background-200 focus-within:border focus-within:border-main-400"
       : "border border-background-300 bg-background-200";
+  
+  function EmptySearchResult() {
+    return (
+      <div className="flex flex-col items-center justify-center py-[25.5px]">
+        <SearchIcon className="mb-3 h-[50px] w-[50px] text-background-300" />
+
+        <p className="text-h3-category-sub text-background-700">
+          검색결과가 없어요
+        </p>
+
+        <p className="text-h6 text-background-400">
+          검색어를 변경해보세요
+        </p>
+      </div>
+    );
+  }
+
+  const filteredSuggestions = suggestions.filter((item) =>
+    searchType === "news"
+      ? item.type === "NEWS_TITLE"
+      : item.type === "COMMUNITY_TITLE"
+  );
 
   return (
     <div className={`relative ${className}`}>
@@ -122,8 +146,7 @@ export default function Input({
       </div>
       {search &&
         isFocused &&
-        value.trim().length >= 2 &&
-        suggestions.length > 0 && (
+        value.trim().length >= 2 && (
           <div
             className="
               absolute left-0 right-0 top-[40px]
@@ -135,47 +158,51 @@ export default function Input({
               px-1 py-2
             "
           >
-            {suggestions.map((item) => {
-              const Icon =
-                item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
+            {filteredSuggestions.length === 0 ? (
+              <EmptySearchResult />
+            ) : (
+              filteredSuggestions.map((item) => {
+                const Icon =
+                  item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
               
-              const index = item.text.indexOf(value);
+                const index = item.text.indexOf(value);
 
-              return (
-                <button
-                  key={item.text}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    if (search) {
-                      inputRef.current?.blur();
-                    }
+                return (
+                  <button
+                    key={item.text}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      if (search) {
+                        inputRef.current?.blur();
+                      }
 
-                    onSuggestionClick?.(item.text);
-                  }}
-                  className="
+                      onSuggestionClick?.(item.text);
+                    }}
+                    className="
                     flex w-full items-center
                     p-3
                     hover:bg-background-200
                     text-h3-category
                     rounded-[10px]
                   "
-                >
-                  <Icon className="mr-2 text-background-400" />
-                  {index === -1 ? (
-                    <span>{item.text}</span>
-                  ) : (
-                    <span className="text-background-500">
-                      {item.text.slice(0, index)}
-                      <span className="text-background-600">
-                        {item.text.slice(index, index + value.length)}
+                  >
+                    <Icon className="mr-2 text-background-400" />
+                    {index === -1 ? (
+                      <span>{item.text}</span>
+                    ) : (
+                      <span className="text-background-500">
+                        {item.text.slice(0, index)}
+                        <span className="text-background-600">
+                          {item.text.slice(index, index + value.length)}
+                        </span>
+                        {item.text.slice(index + value.length)}
                       </span>
-                      {item.text.slice(index + value.length)}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    )}
+                  </button>
+                );
+              })
+            )}
           </div>
         )}
     </div>

@@ -68,6 +68,7 @@ export default function NewsToolbar({
     <div className="flex flex-wrap items-center gap-[12px]">
       <Input
         search
+        searchType="news"
         value={keyword}
         onChange={(event) => onKeywordChange(event.target.value)}
         suggestions={suggestions}

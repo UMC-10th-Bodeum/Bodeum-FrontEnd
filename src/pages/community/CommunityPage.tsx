@@ -131,6 +131,7 @@ export default function CommunityPage() {
           <div className="flex items-center justify-between gap-6">
             <Input
               search
+              searchType="community"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onEnter={handleSearch}
