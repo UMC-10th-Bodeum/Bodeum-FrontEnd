@@ -2,10 +2,13 @@ import HeartIcon from "@/assets/icons/HeartDisabled.svg?react";
 import CommentIcon from "@/assets/icons/Community.svg?react";
 import ViewIcon from "@/assets/icons/Views.svg?react";
 import PostTag from "@/components/PostTag";
-import type { DiagnosisType } from "@/types/diagnosis";
+import {
+  communityCategoryMap,
+  type CommunityCategory,
+} from "@/constants/communityCategory";
 
 interface CommunityCardProps {
-  diagnosis: DiagnosisType;
+  category: CommunityCategory;
   author: string;
   createdAt: string;
   title: string;
@@ -17,7 +20,7 @@ interface CommunityCardProps {
 }
 
 export default function CommunityCard({
-  diagnosis,
+  category,
   author,
   createdAt,
   title,
@@ -33,8 +36,11 @@ export default function CommunityCard({
       className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left cursor-pointer"
     >
       <div className="mb-[8px] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <PostTag type={diagnosis} />
+        <div className="flex items-center gap-2 [&>span:first-child]:!h-[20px]">
+          <PostTag
+            type="ETC"
+            label={communityCategoryMap[category]}
+          />
           <span className="text-body-sub text-background-500">{author}</span>
         </div>
 

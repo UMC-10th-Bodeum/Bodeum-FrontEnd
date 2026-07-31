@@ -9,7 +9,7 @@ interface CommunityReplyItemProps {
 
 export default function CommunityReplyItem({ reply, onReplyClick }: CommunityReplyItemProps) {
   return (
-    <div className="relative ml-[18px] mt-[16px] pl-[48.5px] before:absolute before:left-0 before:top-0 before:h-[25px] before:w-[25px] before:border-b before:border-l before:border-background-300">
+    <div className="relative ml-[18px] mt-[16px] pl-[48.5px] before:absolute before:left-0 before:top-[8px] before:h-[24px] before:w-[24px] before:border-b before:border-l before:border-background-300">
       <div className="flex min-w-0 items-center gap-[8px]">
         <ProfileIcon className="h-[24px] w-[24px] shrink-0" />
         <strong className="text-h6 text-background-600">{reply.author}</strong>

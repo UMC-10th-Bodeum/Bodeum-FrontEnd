@@ -3,10 +3,11 @@ import PostTag from "@/components/PostTag";
 import CommentStat from "@/components/post-stat/CommentStat";
 import HeartStat from "@/components/post-stat/HeartStat";
 import ViewStat from "@/components/post-stat/ViewStat";
+import { communityCategoryMap, type CommunityCategory } from "@/constants/communityCategory";
 
 interface CommunityPostCardProps {
   id: number;
-  board: string;
+  category: CommunityCategory;
   title: string;
   content: string;
   likes: number;
@@ -18,7 +19,7 @@ interface CommunityPostCardProps {
 }
 
 export default function CommunityPostCard({
-  board,
+  category,
   title,
   content,
   likes,
@@ -48,7 +49,7 @@ export default function CommunityPostCard({
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-2">
-          <PostTag type="ETC" label={board} />
+          <PostTag type="ETC" label={communityCategoryMap[category]} />
           <div className="flex gap-[14px]">
             <HeartStat
               count={likes + (liked ? 1 : 0)}
