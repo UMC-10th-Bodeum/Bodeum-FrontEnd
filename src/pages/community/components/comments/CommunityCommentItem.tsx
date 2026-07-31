@@ -18,7 +18,11 @@ export default function CommunityCommentItem({
   onSubmitReply,
 }: CommunityCommentItemProps) {
   return (
-    <li className="border-b border-background-250 py-[20px]">
+    <li
+      className={`py-[20px] ${
+        replyFormOpen ? "" : "border-b border-background-250"
+      }`}
+    >
       <div className="flex gap-[26.5px]">
         <ProfileIcon className="h-[40px] w-[40px] shrink-0" />
         <div className="min-w-0 flex-1">
