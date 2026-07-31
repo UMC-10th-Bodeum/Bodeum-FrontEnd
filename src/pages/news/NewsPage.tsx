@@ -8,15 +8,6 @@ import RegionOnboardingBox from "./components/RegionOnboardingBox";
 import { formatRegionDisplayLabel } from "@/constants/regions";
 import { newsListItems } from "./data/newsMockData";
 
-const news = Array.from({ length: 5 }, (_, index) => ({
-  id: index + 1,
-  title: "2026 발달재활서비스 바우처 신청 안내",
-  region: "서울",
-  category: "강남구",
-  dDay: 21,
-  views: 1204,
-}));
-
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
   const [keyword, setKeyword] = useState("");
@@ -39,7 +30,7 @@ export default function NewsPage() {
     <main className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-[18px] px-[32px] py-[20px]">
         <div className="py-[20px]">
-          <RecommendedNewsTopSection news={news} />
+          <RecommendedNewsTopSection />
         </div>
 
         <div className="flex flex-col gap-[16px]">
