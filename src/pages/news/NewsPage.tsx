@@ -63,7 +63,7 @@ export default function NewsPage() {
             onCategoryChange={setCategory}
           />
           <NewsListSection items={newsListItems} sourceTab={selectedTab} />
-          <nav aria-label="소식 페이지네이션" className="p-2 mb-[21.2px]">
+          <nav aria-label="소식 페이지네이션" className="p-2">
             <Pagination currentPage={page} totalPages={120} onChange={setPage} />
           </nav>
         </div>
