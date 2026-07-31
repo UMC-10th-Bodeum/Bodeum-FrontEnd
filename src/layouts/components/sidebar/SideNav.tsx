@@ -65,7 +65,7 @@ export default function SideNav() {
       <SideNavItem
         icon={<CommunityIcon />}
         label="커뮤니티"
-        active={pathname === "/community"}
+        active={pathname.startsWith("/community")}
         onClick={() => navigate("/community")}
       />
     </nav>

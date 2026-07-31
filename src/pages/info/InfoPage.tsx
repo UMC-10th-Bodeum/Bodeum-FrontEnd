@@ -4,7 +4,7 @@ import type { ParentCategory } from "@/types/info";
 import { infoSubCategoryMap } from "@/constants/infoCategory";
 import CategoryChips from "./components/CategoryChips";
 import Pagination from "@/components/pagination/Pagination";
-import InfoItem from "@/components/InfoItem";
+import InfoItem from "@/pages/info/components/InfoItem";
 import { infoMockData } from "@/mocks/info";
 import CountButton from "./components/button/CountButton";
 import LocationButton from "./components/button/LocationButton";
@@ -20,9 +20,10 @@ const sortOptions = [
 ];
 
 export default function InfoPage() {
+  const items = infoMockData.items.content;
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
-  const [sort, setSort] = useState("views");
+  const [sort, setSort] = useState("VIEW");
   const navigate = useNavigate();
   
   const [location, setLocation] = useState("경기도 수원시");
@@ -43,12 +44,12 @@ export default function InfoPage() {
   }, [parentCategory]);
 
   const filteredItems = useMemo(() => {
-  return infoMockData.filter(
+  return items.filter(
     (item) =>
-      item.type === parentCategory &&
+      item.mainCategory === parentCategory &&
       (!subCategory || item.subCategory === subCategory)
   );
-}, [parentCategory, subCategory]);
+}, [items, parentCategory, subCategory]);
 
 const currentItems = useMemo(() => {
   const start = (page - 1) * PAGE_SIZE;
@@ -56,6 +57,7 @@ const currentItems = useMemo(() => {
 }, [filteredItems, page]);
 
   const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
+  // const totalPages = data.result.items.totalPages; (api 연동시)
   
   useEffect(() => {
     setPage(1);
@@ -107,10 +109,10 @@ const currentItems = useMemo(() => {
           <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
             {currentItems.map((item) => (
               <InfoItem
-                key={item.id}
+                key={item.infoItemId}
                 {...item}
-                onClick={() => navigate(`/info/${item.type}/${item.id}`)}
-                onScrapClick={() => console.log(item.id)}
+                onClick={() => navigate(`/info/${item.mainCategory}/${item.infoItemId}`)}
+                onScrapClick={() => console.log(item.infoItemId)}
               />
             ))}
           </div>
@@ -136,7 +138,7 @@ const currentItems = useMemo(() => {
       {categoryOpen && (
         <CategoryModal
           category={parentCategory}
-          count={235}
+          count={filteredItems.length}
           onClose={() => setCategoryOpen(false)}
           onSelect={(category) => {
             navigate(`/info?category=${category}`);

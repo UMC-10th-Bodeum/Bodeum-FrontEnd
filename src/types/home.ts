@@ -63,6 +63,7 @@ export interface RecommendedCommunityPost {
   likeCount: number;
   commentCount: number;
   viewCount: number;
+  createdAt: string;
 }
 
 export interface RecommendedCommunityPostResponse {

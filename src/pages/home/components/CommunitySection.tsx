@@ -1,4 +1,4 @@
-import CommunityCard from "./CommunityCard";
+import CommunityCard from "@/components/CommunityCard";
 import MainButton from "@/components/MainButton";
 import PostSection from "./PostSection";
 import PostListItem from "./PostListItem";
@@ -22,17 +22,10 @@ export default function CommunitySection() {
         </div>
 
         <div className="flex gap-[10px]">
-          <MainButton
-            size="S"
-            onClick={() => navigate("/community/write")}
-          >
+          <MainButton size="S" onClick={() => navigate("/community/write")}>
             글쓰기
           </MainButton>
-          <MainButton
-            size="S"
-            stroke
-            onClick={() => navigate("/community")}
-          >
+          <MainButton size="S" stroke onClick={() => navigate("/community")}>
             전체보기
           </MainButton>
         </div>

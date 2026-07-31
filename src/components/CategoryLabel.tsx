@@ -12,7 +12,7 @@ export default function CategoryLabel({
 
   return (
     <span
-      className={`shrink-0 rounded-[10px] ${bgColor} px-2 py-[4px] text-h5-list leading-none ${textColor}`}
+      className={`shrink-0 rounded-[10px] ${bgColor} px-2 py-[5px] text-h5-list leading-none ${textColor}`}
     >
       {label}
     </span>

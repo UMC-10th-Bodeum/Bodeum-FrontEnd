@@ -1,7 +1,7 @@
-import InfoItem from "@/components/InfoItem";
 import { useNavigate } from "react-router-dom";
 import type { NewsSourceTab } from "@/constants/newsSourceTab";
 import type { NewsListItem } from "../data/newsMockData";
+import ProgramItem from "@/components/ProgramItem";
 
 interface NewsListSectionProps {
   items: NewsListItem[];
@@ -19,9 +19,8 @@ export default function NewsListSection({ items, sourceTab }: NewsListSectionPro
         </div>
       )}
       {items.map((item) => (
-        <InfoItem
+        <ProgramItem
           key={item.id}
-          type={item.type}
           name={item.name}
           address={item.address}
           services={item.services}

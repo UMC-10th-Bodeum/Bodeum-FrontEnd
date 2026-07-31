@@ -3,6 +3,7 @@ import CommentIcon from "@/assets/icons/Community.svg?react";
 import ViewIcon from "@/assets/icons/Views.svg?react";
 import PostTag from "@/components/PostTag";
 import type { DiagnosisType } from "@/types/diagnosis";
+import { getRelativeTime } from "@/utils/time";
 
 interface DisabilityTag {
   code: string;
@@ -11,26 +12,26 @@ interface DisabilityTag {
 
 interface CommunityCardProps {
   disabilityTags: DisabilityTag[];
-  categoryName: string;
   authorDisplay: string;
   title: string;
   content: string;
   likeCount: number;
   commentCount: number;
   viewCount: number;
+  createdAt: string;
   onClick?: () => void;
 }
 
 
 export default function CommunityCard({
   disabilityTags,
-  categoryName,
   authorDisplay,
   title,
   content,
   likeCount,
   commentCount,
   viewCount,
+  createdAt,
   onClick,
 }: CommunityCardProps) {
   return (
@@ -50,16 +51,12 @@ export default function CommunityCard({
           <span className="text-body-sub text-background-500">{authorDisplay}</span>
         </div>
 
-        <span className="text-body-sub text-background-500">{categoryName}</span>
+        <span className="text-body-sub text-background-500">{getRelativeTime(createdAt)}</span>
       </div>
 
-      <h3 className="mb-[8px] line-clamp-1 text-h5-list text-background-600">
-        {title}
-      </h3>
+      <h3 className="mb-[8px] line-clamp-1 text-h5-list text-background-600">{title}</h3>
 
-      <p className="line-clamp-2 flex-1 text-h6-list text-background-500">
-        {content}
-      </p>
+      <p className="line-clamp-2 flex-1 text-h6-list text-background-500">{content}</p>
 
       <div className="mt-[8px] flex items-center gap-[14px] border-t border-background-250 pt-[8px] text-h4-list text-background-500">
         <div className="flex items-center gap-1">
