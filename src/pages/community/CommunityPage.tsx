@@ -6,13 +6,18 @@ import { Select } from "@/components/Select";
 import CommunitySection from "./components/CommunitySection";
 import CommunityPostCard from "./components/CommunityPostCard";
 import { communityPosts } from "@/mocks/community";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   communityCategoryMap,
   communityCategoryEntries,
   isCommunityCategory,
   type CommunityCategory,
 } from "@/constants/communityCategory";
+import type { CommunityPostPayload } from "@/types/community";
+
+type CommunityPageLocationState = {
+  publishedPost?: CommunityPostPayload & { id: number };
+};
 
 const categories: Array<{
   value: CommunityCategory | "ALL";
@@ -49,7 +54,9 @@ const repeatedPosts = Array.from({ length: 14 }, (_, index) => {
 
 export default function CommunityPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const publishedPost = (location.state as CommunityPageLocationState | null)?.publishedPost;
   const categoryParam = searchParams.get("category");
   const [keyword, setKeyword] = useState("");
   const category: CommunityCategory | "ALL" = isCommunityCategory(categoryParam)
@@ -59,7 +66,20 @@ export default function CommunityPage() {
   const [page, setPage] = useState(1);
 
   const posts = useMemo(() => {
-    const filteredPosts = repeatedPosts.filter(
+    const availablePosts = publishedPost
+      ? [
+          {
+            ...publishedPost,
+            likes: 0,
+            comments: 0,
+            views: 0,
+            imageCount: publishedPost.images.length,
+            createdAt: "방금 전",
+          },
+          ...repeatedPosts,
+        ]
+      : repeatedPosts;
+    const filteredPosts = availablePosts.filter(
       (post) =>
         post.title.includes(keyword) ||
         post.content.includes(keyword) ||
@@ -68,7 +88,7 @@ export default function CommunityPage() {
     const activeSort: SortKey = sort || "views";
 
     return [...filteredPosts].sort((a, b) => b[activeSort] - a[activeSort]);
-  }, [keyword, sort]);
+  }, [keyword, publishedPost, sort]);
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
     if (value === "ALL") {
@@ -127,7 +147,10 @@ export default function CommunityPage() {
                       post: {
                         ...post,
                         diagnosis: "AUTISM",
-                        author: "NN님 · Level1 · 자폐스펙트럼 · N세 아이",
+                        author:
+                          "authorVisibility" in post && post.authorVisibility === "ANONYMOUS"
+                            ? "익명 부모님"
+                            : "NN님 · Level1 · 자폐스펙트럼 · N세 아이",
                       },
                     },
                   })

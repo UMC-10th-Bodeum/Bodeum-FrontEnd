@@ -3,16 +3,18 @@ import { useState, type FormEvent } from "react";
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
 import { communityCategoryEntries, type CommunityCategory } from "@/constants/communityCategory";
+import type {
+  CommunityAuthorVisibility,
+  CommunityPostPayload,
+} from "@/types/community";
 
 import CommunityContentFields from "./CommunityContentFields";
 import CommunityImageField from "./CommunityImageField";
 import SelectableChipGroup from "./SelectableChipGroup";
 
-type AuthorVisibility = "PROFILE" | "ANONYMOUS";
-
 type CommunityWriteFormProps = {
   onCancel: () => void;
-  onSubmit: (authorVisibility: AuthorVisibility) => void;
+  onSubmit: (payload: CommunityPostPayload) => void;
 };
 
 const categoryOptions = communityCategoryEntries.map(([value, label]) => ({
@@ -21,7 +23,7 @@ const categoryOptions = communityCategoryEntries.map(([value, label]) => ({
 }));
 
 const authorVisibilityOptions: Array<{
-  value: AuthorVisibility;
+  value: CommunityAuthorVisibility;
   label: string;
 }> = [
   { value: "PROFILE", label: "프로필 태그 공개" },
@@ -33,7 +35,7 @@ export default function CommunityWriteForm({
   onSubmit,
 }: CommunityWriteFormProps) {
   const [category, setCategory] = useState<CommunityCategory | null>(null);
-  const [authorVisibility, setAuthorVisibility] = useState<AuthorVisibility | null>(null);
+  const [authorVisibility, setAuthorVisibility] = useState<CommunityAuthorVisibility | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [hashtags, setHashtags] = useState("");
@@ -46,8 +48,16 @@ export default function CommunityWriteForm({
 
   const submitPost = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSubmittable) return;
-    onSubmit(authorVisibility ?? "PROFILE");
+    if (!isSubmittable || category === null) return;
+
+    onSubmit({
+      category,
+      authorVisibility: authorVisibility ?? "PROFILE",
+      title: title.trim(),
+      content: content.trim(),
+      hashtags: hashtags.trim(),
+      images,
+    });
   };
 
   return (
