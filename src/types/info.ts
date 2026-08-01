@@ -85,6 +85,23 @@ export interface InfoDetail {
 }
 
 // 리뷰
+export interface CreateInfoReviewRequest {
+  rating: number;
+  content: string;
+  imageUrls: string[];
+}
+
+export interface InfoReview {
+  infoReviewId: number;
+  userId: number;
+  userNickname: string;
+  rating: number;
+  content: string;
+  imageUrls: string[];
+  helpfulCount: number;
+  createdAt: string;
+}
+
 export interface Review {
   reviewId: number;
   rating: number;

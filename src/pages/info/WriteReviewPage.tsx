@@ -13,10 +13,12 @@ import ImageUploader from "@/components/ImageUploader";
 import ButtonFill from "@/components/ButtonFill";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
+import { useCreateInfoReviewMutation } from "@/hooks/queries/info/useCreateInfoReviewMutation";
 
 export default function WriteReviewPage() {
   const { category, id } = useParams();
   const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const { mutate } = useCreateInfoReviewMutation();
 
   const navigate = useNavigate();
   const { setBreadcrumb } = useBreadcrumb();
@@ -64,16 +66,26 @@ export default function WriteReviewPage() {
   }, [category]);
 
   const handleSubmit = () => {
-    console.log({
-      rating,
-      content,
-      images,
-    });
+    if (!id) return;
 
-    // TODO
-    // 후기 작성 API
-
-    navigate(-1);
+    mutate(
+      {
+        infoItemId: Number(id),
+        body: {
+          rating,
+          content,
+          imageUrls: [], // 이미지 업로드 API 붙으면 URL 넣기
+        },
+      },
+      {
+        onSuccess: () => {
+          navigate(-1);
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      },
+    );
   };
 
   return (
@@ -122,7 +134,7 @@ export default function WriteReviewPage() {
 
           <ButtonFill
             label="게시하기"
-            disabled={!isValid}
+            disabled={!isValid || isPending}
             className="w-[200px]"
             onClick={handleSubmit}
           />

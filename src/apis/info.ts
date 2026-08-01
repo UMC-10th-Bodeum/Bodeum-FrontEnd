@@ -1,5 +1,5 @@
 import type { InfoSearchResponse } from "@/types/search";
-import type { InfoDetail, InfoListResponse, ParentCategory } from "@/types/info";
+import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, ParentCategory } from "@/types/info";
 import api from "./axios";
 import type { ApiResponse } from "./apiTypes";
 
@@ -41,6 +41,19 @@ export const getInfoList = async (params: GetInfoListParams) => {
 export const getInfoDetail = async (infoItemId: number) => {
   const { data } = await api.get<ApiResponse<InfoDetail>>(
     `/api/v1/info-items/${infoItemId}`
+  );
+
+  return data.result;
+};
+
+// 정보 후기 작성
+export const createInfoReview = async (
+  infoItemId: number,
+  body: CreateInfoReviewRequest,
+) => {
+  const { data } = await api.post<ApiResponse<InfoReview>>(
+    `/api/v1/info-items/${infoItemId}/reviews`,
+    body,
   );
 
   return data.result;
