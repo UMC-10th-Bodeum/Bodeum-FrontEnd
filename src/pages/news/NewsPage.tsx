@@ -11,7 +11,7 @@ import { newsListItems } from "./data/newsMockData";
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
   const [keyword, setKeyword] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
+  // const [searchKeyword, setSearchKeyword] = useState(""); api 연동시 사용
   const [selectedRegion, setSelectedRegion] = useState("");
   const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
   const [sort, setSort] = useState("");
@@ -33,7 +33,7 @@ export default function NewsPage() {
   };
 
   const handleSearch = (keyword: string) => {
-    setSearchKeyword(keyword);
+    console.log(keyword);
     setPage(1);
   };
 
