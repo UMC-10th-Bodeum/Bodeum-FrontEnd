@@ -5,7 +5,6 @@ import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 
-import { infoDetailMockData } from "@/mocks/infoDetail";
 import ButtonOutline from "@/components/ButtonOutline";
 import InfoItem from "./components/InfoItem";
 import RatingInput from "./ReviewWrite/RatingInput";
@@ -13,6 +12,7 @@ import ReviewTextArea from "./ReviewWrite/ReviewTextArea";
 import ImageUploader from "@/components/ImageUploader";
 import ButtonFill from "@/components/ButtonFill";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
+import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 
 export default function WriteReviewPage() {
   const { category, id } = useParams();
@@ -20,8 +20,7 @@ export default function WriteReviewPage() {
 
   const navigate = useNavigate();
   const { setBreadcrumb } = useBreadcrumb();
-
-  const detail = infoDetailMockData.result;
+  const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
 
   const infoCategory = category
     ? infoCategoryMap[category as ParentCategory]
@@ -30,6 +29,14 @@ export default function WriteReviewPage() {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [images, setImages] = useState<File[]>([]);
+
+  if (isPending) {
+    return <div>로딩중...</div>;
+  }
+
+  if (isError || !detail) {
+    return <div>정보를 불러올 수 없습니다.</div>;
+  }
 
   const isValid = rating > 0 && content.trim().length > 0;
 
@@ -45,7 +52,7 @@ export default function WriteReviewPage() {
         onClick: () => navigate(`/info?category=${category}`),
       },
       {
-        label: detail.name,
+        label: detail!.name,
         onClick: () => navigate(`/info/${category}/${id}`),
       },
       {
@@ -73,12 +80,12 @@ export default function WriteReviewPage() {
     <div className="mx-auto flex max-w-[1240px] justify-center py-[20px]">
       <main className="w-[1240px] space-y-[20px]">
         <InfoItem
-          mainCategory={detail.mainCategory}
-          name={detail.name}
-          address={detail.address}
-          phone={detail.phone ?? undefined}
-          subCategoryKo={detail.subCategoryKo}
-          viewCount={detail.viewCount}
+          mainCategory={detail?.mainCategory}
+          name={detail?.name}
+          address={detail?.address}
+          phone={detail?.phone ?? undefined}
+          subCategoryKo={detail?.subCategoryKo}
+          viewCount={detail?.viewCount}
           scrapCount={detail.scrapCount}
           isScrapped={detail.isScrapped}
           clickable={false}
