@@ -22,7 +22,6 @@ export default function LocationModal({
   const [city, setCity] = useState("");
 
   const handleComplete = () => {
-    const location = `${province} ${city}`.trim();
     onComplete({
       regionLevel1: province,
       regionLevel2: city,
