@@ -11,6 +11,7 @@ import { newsListItems } from "./data/newsMockData";
 export default function NewsPage() {
   const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
   const [keyword, setKeyword] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
   const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
   const [sort, setSort] = useState("");
@@ -29,6 +30,11 @@ export default function NewsPage() {
   const completeRegionOnboarding = (region: string) => {
     setSelectedRegion(formatRegionDisplayLabel(region));
     setShowRegionOnboarding(false);
+  };
+
+  const handleSearch = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setPage(1);
   };
 
   return (
@@ -50,6 +56,7 @@ export default function NewsPage() {
           <NewsToolbar
             tab={selectedTab}
             keyword={keyword}
+            onSearch={handleSearch}
             onKeywordChange={setKeyword}
             selectedRegion={selectedRegion}
             onSelectedRegionClick={openRegionOnboarding}

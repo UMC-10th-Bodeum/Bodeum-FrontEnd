@@ -142,9 +142,13 @@ export default function SideBar() {
             <button
               type="button"
               className="cursor-pointer"
-              onClick={() => {
-                /* TODO: 공공 데이터 페이지 이동 */
-              }}
+              onClick={() =>
+                window.open(
+                  "https://app.notion.com/p/3ac34bae492a80ee99e3c6c69b794801",
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
             >
               공공 데이터
             </button>

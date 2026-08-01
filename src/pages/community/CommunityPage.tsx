@@ -17,6 +17,7 @@ import type { CommunityPostPayload } from "@/types/community";
 type CommunityPageLocationState = {
   publishedPost?: CommunityPostPayload & { id: number };
 };
+import { searchSuggestionMockData } from "@/mocks/search";
 
 const categories: Array<{
   value: CommunityCategory | "ALL";
@@ -97,6 +98,18 @@ export default function CommunityPage() {
     }
   };
 
+  const handleSearch = (keyword: string) => {
+    setKeyword(keyword);
+    setPage(1);
+  };
+
+  const suggestions =
+    keyword.trim().length >= 2
+      ? searchSuggestionMockData.result.suggestions.filter((item) =>
+        item.text.includes(keyword)
+      )
+      : [];
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
@@ -118,8 +131,14 @@ export default function CommunityPage() {
           <div className="flex items-center justify-between gap-6">
             <Input
               search
+              searchType="community"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
+              onEnter={handleSearch}
+              suggestions={suggestions}
+              onSuggestionClick={(text) => {
+                handleSearch(text);
+              }}
               placeholder="게시글을 검색해보세요"
               className="w-[640px] h-[44px]"
             />
