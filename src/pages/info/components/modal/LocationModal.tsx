@@ -7,7 +7,10 @@ import { districtOptionsByRegion, regionOptions } from "@/constants/regions";
 interface LocationModalProps {
   location: string;
   onClose: () => void;
-  onComplete: (location: string) => void;
+  onComplete: (location: {
+    regionLevel1: string;
+    regionLevel2: string;
+  }) => void;
 }
 
 export default function LocationModal({
@@ -20,7 +23,10 @@ export default function LocationModal({
 
   const handleComplete = () => {
     const location = `${province} ${city}`.trim();
-    onComplete(location);
+    onComplete({
+      regionLevel1: province,
+      regionLevel2: city,
+    });
   };
 
   const districtOptions = province

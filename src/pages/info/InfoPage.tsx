@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { ParentCategory } from "@/types/info";
 import { infoSubCategoryMap } from "@/constants/infoCategory";
 import CategoryChips from "./components/CategoryChips";
 import Pagination from "@/components/pagination/Pagination";
 import InfoItem from "@/pages/info/components/InfoItem";
-import { infoMockData } from "@/mocks/info";
 import CountButton from "./components/button/CountButton";
 import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
+import { useInfoListQuery } from "@/hooks/queries/useInfoListQuery";
 
 const PAGE_SIZE = 14;
 const sortOptions = [
@@ -20,13 +20,17 @@ const sortOptions = [
 ];
 
 export default function InfoPage() {
-  const items = infoMockData.items.content;
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const [sort, setSort] = useState("VIEW");
   const navigate = useNavigate();
   
-  const [location, setLocation] = useState("경기도 수원시");
+  const [regionLevel1, setRegionLevel1] = useState("경기도");
+  const [regionLevel2, setRegionLevel2] = useState("수원시");
+  const [location, setLocation] = useState(
+    `${regionLevel1} ${regionLevel2}`
+  );
+  
   const [locationOpen, setLocationOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   
@@ -34,34 +38,47 @@ export default function InfoPage() {
   const parentCategory = (categoryParam && categoryParam in infoSubCategoryMap)
     ? (categoryParam as ParentCategory)
     : "INSTITUTION";
-  const [subCategory, setSubCategory] = useState<string | null>(null);
+  const [subCategory, setSubCategory] = useState<number | null>(null);
+
+  const sortValue =
+  sort === "VIEW"
+    ? "viewCount,desc"
+    : sort === "SCRAP"
+      ? "scrapCount,desc"
+      : "reviewCount,desc";
+
+  const { data, isPending, isError } = useInfoListQuery({
+    category: parentCategory,
+    subCategory: subCategory ?? undefined,
+    regionLevel1,
+    regionLevel2,
+    page: page - 1,
+    size: PAGE_SIZE,
+    sort: sortValue,
+  });
+
+  const items = data?.items.content ?? [];
+  const totalPages = data?.items.totalPages ?? 0;
+  const count = data?.items.totalElements ?? 0;
 
   useEffect(() => {
     const subCategories = infoSubCategoryMap[parentCategory];
     if (subCategories && subCategories.length > 0) {
-      setSubCategory(subCategories[0].value);
+      setSubCategory(subCategories[0].id);
     }
   }, [parentCategory]);
-
-  const filteredItems = useMemo(() => {
-  return items.filter(
-    (item) =>
-      item.mainCategory === parentCategory &&
-      (!subCategory || item.subCategory === subCategory)
-  );
-}, [items, parentCategory, subCategory]);
-
-const currentItems = useMemo(() => {
-  const start = (page - 1) * PAGE_SIZE;
-  return filteredItems.slice(start, start + PAGE_SIZE);
-}, [filteredItems, page]);
-
-  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
-  // const totalPages = data.result.items.totalPages; (api 연동시)
   
   useEffect(() => {
     setPage(1);
-  }, [subCategory]);
+  }, [subCategory, parentCategory, sort]);
+
+  if (isPending) {
+    return <div>로딩중...</div>;
+  }
+
+  if (isError) {
+    return <div>에러가 발생했습니다.</div>;
+  }
   
   return (
     <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
@@ -76,7 +93,7 @@ const currentItems = useMemo(() => {
         />
         <CountButton
           category={parentCategory}
-          count={235}
+          count={count}
           onClick={() => setCategoryOpen(true)}
         />
         <h2 className="text-h1-info">
@@ -100,14 +117,14 @@ const currentItems = useMemo(() => {
         />
       </div>
       
-      {currentItems.length === 0 ? (
+      {items.length === 0 ? (
         <div className="flex h-[200px] items-center justify-center text-background-500">
           조건에 맞는 정보가 없습니다.
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
-            {currentItems.map((item) => (
+            {items.map((item) => (
               <InfoItem
                 key={item.infoItemId}
                 {...item}
@@ -129,8 +146,10 @@ const currentItems = useMemo(() => {
         <LocationModal
           location={location}
           onClose={() => setLocationOpen(false)}
-          onComplete={(location) => {
-            setLocation(location);
+          onComplete={({ regionLevel1, regionLevel2 }) => {
+            setRegionLevel1(regionLevel1);
+            setRegionLevel2(regionLevel2);
+            setLocation(`${regionLevel1} ${regionLevel2}`);
             setLocationOpen(false);
           }}
         />
@@ -138,7 +157,7 @@ const currentItems = useMemo(() => {
       {categoryOpen && (
         <CategoryModal
           category={parentCategory}
-          count={filteredItems.length}
+          count={count}
           onClose={() => setCategoryOpen(false)}
           onSelect={(category) => {
             navigate(`/info?category=${category}`);

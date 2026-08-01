@@ -6,7 +6,7 @@ export type ParentCategory =
   | "EDUCATION";
 
 export interface InfoSubCategory {
-  id?: number;
+  id: number;
   value: string;
   label: string;
 }
@@ -19,7 +19,7 @@ export interface Category {
   sub_category_ko: string;
 }
 
-export interface InfoItemResponse {
+export interface InfoItem {
   infoItemId: number;
   name: string;
   mainCategory: ParentCategory;
@@ -31,28 +31,32 @@ export interface InfoItemResponse {
   sido: string;
   sigungu: string;
   phone: string;
-  homepageUrl: string | null;
+  homepageUrl: string;
   viewCount: number;
   scrapCount: number;
   reviewCount: number;
+  tags: string[];
 }
 
-export interface InfoPageResponse {
-  selectedMainCategory: ParentCategory | null;
-  selectedMainCategoryKo: string | null;
-  selectedSubCategoryId: number | null;
-  selectedSubCategory: string | null;
-  selectedSubCategoryKo: string | null;
-  items: {
-    content: InfoItemResponse[];
-    totalElements: number;
-    totalPages: number;
-    number: number;
-    size: number;
-    first: boolean;
-    last: boolean;
-    empty: boolean;
-  };
+export interface PageResponse<T> {
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  content: T[];
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
+export interface InfoListResponse {
+  selectedMainCategory: ParentCategory;
+  selectedMainCategoryKo: string;
+  selectedSubCategoryId: number;
+  selectedSubCategory: string;
+  selectedSubCategoryKo: string;
+  items: PageResponse<InfoItem>;
 }
 
 export interface InfoDetailResponse {
