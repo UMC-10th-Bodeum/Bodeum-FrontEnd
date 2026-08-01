@@ -11,7 +11,6 @@ import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
 import { useInfoListQuery } from "@/hooks/queries/useInfoListQuery";
-import { useInfoItemCounts } from "@/hooks/useHome";
 
 const PAGE_SIZE = 14;
 const sortOptions = [
@@ -25,7 +24,6 @@ export default function InfoPage() {
   const [searchParams] = useSearchParams();
   const [sort, setSort] = useState("VIEW");
   const navigate = useNavigate();
-  const { data: counts } = useInfoItemCounts();
   
   const [regionLevel1, setRegionLevel1] = useState("경기도");
   const [regionLevel2, setRegionLevel2] = useState("수원시");
@@ -160,7 +158,6 @@ export default function InfoPage() {
         <CategoryModal
           category={parentCategory}
           count={count}
-          counts={counts}
           onClose={() => setCategoryOpen(false)}
           onSelect={(category) => {
             navigate(`/info?category=${category}`);

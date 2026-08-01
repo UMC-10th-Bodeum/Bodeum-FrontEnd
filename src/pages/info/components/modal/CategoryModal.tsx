@@ -3,28 +3,30 @@ import CloseModalFrame from "@/components/CloseModalFrame";
 import CountButton from "../button/CountButton";
 import InfoCategoryCard from "@/components/InfoCategoryCard";
 import type { ParentCategory } from "@/types/info";
+import { useInfoItemCounts } from "@/hooks/useHome";
 
 interface CategoryModalProps {
   category: ParentCategory;
   count: number;
-  counts?: {
-    institution: number;
-    hospital: number;
-    welfare: number;
-    employment: number;
-    education: number;
-  };
   onClose: () => void;
   onSelect: (category: ParentCategory) => void;
 }
 
+const categoryTypes: ParentCategory[] = [
+  "INSTITUTION",
+  "HOSPITAL",
+  "WELFARE",
+  "EMPLOYMENT",
+  "EDUCATION",
+];
+
 export default function CategoryModal({
   category,
   count,
-  counts,
   onClose,
   onSelect,
 }: CategoryModalProps) {
+  const { data: counts } = useInfoItemCounts();
   const [selectedCategory, setSelectedCategory] =
     useState<ParentCategory | null>(null);
 
@@ -33,28 +35,13 @@ export default function CategoryModal({
     onSelect(selectedCategory);
   };
 
-  const categories = [
-    {
-      type: "INSTITUTION" as const,
-      count: counts?.institution ?? 0,
-    },
-    {
-      type: "HOSPITAL" as const,
-      count: counts?.hospital ?? 0,
-    },
-    {
-      type: "WELFARE" as const,
-      count: counts?.welfare ?? 0,
-    },
-    {
-      type: "EMPLOYMENT" as const,
-      count: counts?.employment ?? 0,
-    },
-    {
-      type: "EDUCATION" as const,
-      count: counts?.education ?? 0,
-    },
-  ];
+  const categoryCounts: Record<ParentCategory, number> = {
+    INSTITUTION: counts?.institution ?? 0,
+    HOSPITAL: counts?.hospital ?? 0,
+    WELFARE: counts?.welfare ?? 0,
+    EMPLOYMENT: counts?.employment ?? 0,
+    EDUCATION: counts?.education ?? 0,
+  };
 
   return (
     <CloseModalFrame
@@ -80,11 +67,11 @@ export default function CategoryModal({
         </span>
 
         <div className="grid grid-cols-3 gap-x-[40px] gap-y-[20px] pb-[110px]">
-          {categories.map(({ type, count }) => (
+          {categoryTypes.map((type) => (
             <InfoCategoryCard
               key={type}
               type={type}
-              count={count}
+              count={categoryCounts[type]}
               selected={selectedCategory === type}
               onClick={() => setSelectedCategory(type)}
             />
