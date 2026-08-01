@@ -10,7 +10,7 @@ import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
-import { useInfoListQuery } from "@/hooks/queries/useInfoListQuery";
+import { useInfoListQuery } from "@/hooks/queries/info/useInfoListQuery";
 
 const PAGE_SIZE = 14;
 const sortOptions = [

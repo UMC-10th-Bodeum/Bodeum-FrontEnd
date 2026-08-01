@@ -57,13 +57,10 @@ export interface InfoListResponse {
   selectedSubCategory: string;
   selectedSubCategoryKo: string;
   items: PageResponse<InfoItem>;
-}
-
-export interface InfoDetailResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: InfoDetail;
+}export interface BusinessHour {
+  dayOfWeek: string;
+  openTime: string;
+  closeTime: string;
 }
 
 export interface InfoDetail {
@@ -77,27 +74,14 @@ export interface InfoDetail {
   address: string;
   sido: string;
   sigungu: string;
-  phone: string | null;
-  homepageUrl: string | null;
+  phone: string;
+  homepageUrl: string;
   viewCount: number;
   scrapCount: number;
   reviewCount: number;
   isScrapped: boolean;
+  tags: string[];
   businessHours: BusinessHour[];
-  updatedAt: string;
-}
-
-export interface BusinessHour {
-  dayOfWeek:
-    | "월요일"
-    | "화요일"
-    | "수요일"
-    | "목요일"
-    | "금요일"
-    | "토요일"
-    | "일요일";
-  openTime: string | null;
-  closeTime: string | null;
 }
 
 // 리뷰

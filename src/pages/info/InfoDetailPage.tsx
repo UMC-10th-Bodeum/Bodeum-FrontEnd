@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
-import { infoDetailMockData, infoReviewMockData } from "@/mocks/infoDetail";
+import { infoReviewMockData } from "@/mocks/infoDetail";
 import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
@@ -11,12 +11,14 @@ import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
+import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const navigate = useNavigate();
-  const detail = infoDetailMockData.result;
+  const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
+
   const reviewData = infoReviewMockData.result;
 
   const infoCategory = category
@@ -51,12 +53,20 @@ export default function InfoDetailPage() {
       onClick: () => navigate(`/info?category=${category}`),
     },
     {
-      label: detail.name,
+      label: detail!.name,
     },
   ]);
 
   return () => setBreadcrumb([]);
-}, [category, detail.name, infoCategory, navigate, setBreadcrumb]);
+  }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
+  
+  if (isPending) {
+    return <div>로딩중...</div>;
+  }
+
+  if (isError || !detail) {
+    return <div>정보를 불러올 수 없습니다.</div>;
+  }
 
   return (
     <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
