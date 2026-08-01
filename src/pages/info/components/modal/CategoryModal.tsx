@@ -4,20 +4,16 @@ import CountButton from "../button/CountButton";
 import InfoCategoryCard from "@/components/InfoCategoryCard";
 import type { ParentCategory } from "@/types/info";
 
-const categories: {
-  type: ParentCategory;
-  count: number;
-}[] = [
-  { type: "INSTITUTION", count: 235 },
-  { type: "HOSPITAL", count: 235 },
-  { type: "WELFARE", count: 235 },
-  { type: "EMPLOYMENT", count: 235 },
-  { type: "EDUCATION", count: 235 },
-];
-
 interface CategoryModalProps {
   category: ParentCategory;
   count: number;
+  counts?: {
+    institution: number;
+    hospital: number;
+    welfare: number;
+    employment: number;
+    education: number;
+  };
   onClose: () => void;
   onSelect: (category: ParentCategory) => void;
 }
@@ -25,6 +21,7 @@ interface CategoryModalProps {
 export default function CategoryModal({
   category,
   count,
+  counts,
   onClose,
   onSelect,
 }: CategoryModalProps) {
@@ -35,6 +32,29 @@ export default function CategoryModal({
     if (!selectedCategory) return;
     onSelect(selectedCategory);
   };
+
+  const categories = [
+    {
+      type: "INSTITUTION" as const,
+      count: counts?.institution ?? 0,
+    },
+    {
+      type: "HOSPITAL" as const,
+      count: counts?.hospital ?? 0,
+    },
+    {
+      type: "WELFARE" as const,
+      count: counts?.welfare ?? 0,
+    },
+    {
+      type: "EMPLOYMENT" as const,
+      count: counts?.employment ?? 0,
+    },
+    {
+      type: "EDUCATION" as const,
+      count: counts?.education ?? 0,
+    },
+  ];
 
   return (
     <CloseModalFrame
