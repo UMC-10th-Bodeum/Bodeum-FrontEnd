@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
@@ -12,12 +12,15 @@ import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
+import { showToast } from "@/components/Toast";
+import { toggleInfoScrap } from "@/apis/info";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
   const navigate = useNavigate();
   const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
+  
 
   const { data: reviewData } = useInfoReviewListQuery(
     Number(id),
@@ -48,6 +51,25 @@ export default function InfoDetailPage() {
 
   return () => setBreadcrumb([]);
   }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
+
+  const [isScrapped, setIsScrapped] = useState<boolean>(detail?.isScrapped ?? false);
+  const [scrapCount, setScrapCount] = useState<number>(detail?.scrapCount ?? 0);
+
+  useEffect(() => {
+    setIsScrapped(detail?.isScrapped ?? false);
+    setScrapCount(detail?.scrapCount ?? 0);
+  }, [detail]);
+
+  const handleScrap = async () => {
+    try {
+      const result = await toggleInfoScrap(Number(id));
+
+      setIsScrapped(result.isScrapped);
+      setScrapCount(result.scrapCount);
+    } catch {
+      showToast("red", "스크랩에 실패했습니다.");
+    }
+  };
   
   if (isPending) {
     return <div>로딩중...</div>;
@@ -89,14 +111,14 @@ export default function InfoDetailPage() {
           subCategory={detail.subCategoryKo}
           homepageUrl={detail.homepageUrl ?? undefined}
           viewCount={detail.viewCount}
-          scrapCount={detail.scrapCount}
+          scrapCount={scrapCount}
           reviewCount={detail.reviewCount}
-          isScrapped={detail.isScrapped}
+          isScrapped={isScrapped}
           address={detail.address}
           sido={detail.sido}
           sigungu={detail.sigungu}
           phone={detail.phone}
-          onScrap={() => { }}
+          onScrap={handleScrap}
           onShare={() => { }}
         />
         <AIChatButton />

@@ -61,6 +61,7 @@ export default function SummaryCard({
   sido,
   sigungu,
   phone,
+  isScrapped,
 }: SummaryCardProps) {
   return (
     <div className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
@@ -80,7 +81,7 @@ export default function SummaryCard({
           <ViewStat count={viewCount} showLabel={true} />
           <ScrapStat
             count={scrapCount}
-            isActive={false}
+            isActive={isScrapped}
             onClick={() => { }}
           />
           <CommentStat count={reviewCount} showLabel={true} />

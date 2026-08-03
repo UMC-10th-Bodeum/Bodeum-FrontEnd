@@ -89,3 +89,12 @@ export const toggleReviewHelpful = async (
 
   return data.result;
 };
+
+// 정보 스크랩 토글
+export const toggleInfoScrap = async (infoItemId: number) => {
+  const { data } = await api.post(
+    `/api/v1/info-items/${infoItemId}/scrap`,
+  );
+
+  return data.result;
+};
