@@ -2,15 +2,15 @@ import PostTag from "@/components/PostTag";
 import Section from "./Section"
 import IntroIcon from "@/assets/icons/Paper.svg?react";
 
-// interface IntroSectionProps {
-//   // introduction: string;
-//   // tags: string[];
-// }
+interface IntroSectionProps {
+  // introduction: string;
+  tags: string[];
+}
 
-export default function IntroSection( //{
-//   // introduction,
-//   // tags,
-  // }: IntroSectionProps
+export default function IntroSection({
+// introduction,
+tags,
+}: IntroSectionProps
 ) {
   return (
     <Section
@@ -27,25 +27,13 @@ export default function IntroSection( //{
           전문 분야
         </h4>
         <div className="flex flex-wrap gap-[10px]">
-          <PostTag
-            type="ETC"
-            label="소아정신과"
-          />
-          <PostTag
-            type="ETC"
-            label="소아정신과"
-          />
-          <PostTag
-            type="ETC"
-            label="소아정신과"
-          />
-          {/* {tags.map((tag) => (
+          {tags.map((tag) => (
             <PostTag
               key={tag}
               type="ETC"
               label={tag}
             />
-          ))} */}
+          ))}
         </div>
       </div>
     </Section>

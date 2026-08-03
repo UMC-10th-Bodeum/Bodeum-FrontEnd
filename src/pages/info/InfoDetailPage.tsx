@@ -63,7 +63,7 @@ export default function InfoDetailPage() {
         <DetailHeader image={undefined} />
         <IntroSection
         // introduction={detail.introduction}
-        // tags={detail.tags}
+          tags={detail.tags}
         />
 
         <BusinessHoursSection hours={detail.businessHours} />
