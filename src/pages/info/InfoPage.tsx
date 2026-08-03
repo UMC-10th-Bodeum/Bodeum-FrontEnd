@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type { ParentCategory } from "@/types/info";
 import { infoSubCategoryMap } from "@/constants/infoCategory";
@@ -22,6 +22,10 @@ const sortOptions = [
 export default function InfoPage() {
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
+  const subCategoryParam = searchParams.get("subCategory");
+  const [subCategory, setSubCategory] = useState<number | null>(
+    subCategoryParam ? Number(subCategoryParam) : null,
+  );
   const [sort, setSort] = useState("VIEW");
   const navigate = useNavigate();
   
@@ -38,8 +42,7 @@ export default function InfoPage() {
   const parentCategory = (categoryParam && categoryParam in infoSubCategoryMap)
     ? (categoryParam as ParentCategory)
     : "INSTITUTION";
-  const [subCategory, setSubCategory] = useState<number | null>(null);
-
+  
   const sortValue =
   sort === "VIEW"
     ? "viewCount,desc"
@@ -61,16 +64,46 @@ export default function InfoPage() {
   const totalPages = data?.items.totalPages ?? 0;
   const count = data?.items.totalElements ?? 0;
 
+  const prevCategory = useRef(parentCategory);
+
   useEffect(() => {
-    const subCategories = infoSubCategoryMap[parentCategory];
-    if (subCategories && subCategories.length > 0) {
+    if (prevCategory.current !== parentCategory) {
+      const subCategories = infoSubCategoryMap[parentCategory];
       setSubCategory(subCategories[0].id);
+      prevCategory.current = parentCategory;
     }
   }, [parentCategory]);
   
   useEffect(() => {
     setPage(1);
   }, [subCategory, parentCategory, sort]);
+
+  const moveToSubCategory = (id: number | null) => {
+    setSubCategory(id);
+
+    const params = new URLSearchParams({
+      category: parentCategory,
+    });
+
+    if (id !== null) {
+      params.set("subCategory", String(id));
+    }
+
+    navigate(`/info?${params.toString()}`, {
+      replace: true,
+    });
+  };
+
+  const moveToCategory = (category: ParentCategory) => {
+    const params = new URLSearchParams({
+      category,
+    });
+
+    const defaultSubCategory = infoSubCategoryMap[category][0].id;
+    params.set("subCategory", String(defaultSubCategory));
+
+    navigate(`/info?${params.toString()}`);
+  };
 
   if (isPending) {
     return <div>로딩중...</div>;
@@ -105,7 +138,7 @@ export default function InfoPage() {
         <CategoryChips
           parentCategory={parentCategory}
           subCategory={subCategory}
-          onChange={setSubCategory}
+          onChange={moveToSubCategory}
         />
         <Select
           options={sortOptions}
@@ -160,7 +193,7 @@ export default function InfoPage() {
           count={count}
           onClose={() => setCategoryOpen(false)}
           onSelect={(category) => {
-            navigate(`/info?category=${category}`);
+            moveToCategory(category);
             setCategoryOpen(false);
           }}
         />
