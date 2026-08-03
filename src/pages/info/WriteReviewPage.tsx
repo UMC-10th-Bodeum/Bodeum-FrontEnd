@@ -14,6 +14,7 @@ import ButtonFill from "@/components/ButtonFill";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useCreateInfoReviewMutation } from "@/hooks/queries/info/useCreateInfoReviewMutation";
+import { showToast } from "@/components/Toast";
 
 export default function WriteReviewPage() {
   const { category, id } = useParams();
@@ -79,10 +80,11 @@ export default function WriteReviewPage() {
       },
       {
         onSuccess: () => {
+          showToast("green", "후기가 성공적으로 등록되었습니다!");
           navigate(-1);
         },
-        onError: (error) => {
-          console.error(error);
+        onError: () => {
+          showToast("red", "후기 등록에 실패했습니다.");
         },
       },
     );

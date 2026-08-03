@@ -201,7 +201,6 @@ export default function InfoPage() {
       {categoryOpen && (
         <CategoryModal
           category={parentCategory}
-          count={count}
           onClose={() => setCategoryOpen(false)}
           onSelect={(category) => {
             moveToCategory(category);

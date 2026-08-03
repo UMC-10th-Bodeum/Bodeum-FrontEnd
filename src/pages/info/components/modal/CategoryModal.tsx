@@ -7,7 +7,6 @@ import { useInfoItemCounts } from "@/hooks/useHome";
 
 interface CategoryModalProps {
   category: ParentCategory;
-  count: number;
   onClose: () => void;
   onSelect: (category: ParentCategory) => void;
 }
@@ -22,7 +21,6 @@ const categoryTypes: ParentCategory[] = [
 
 export default function CategoryModal({
   category,
-  count,
   onClose,
   onSelect,
 }: CategoryModalProps) {
@@ -56,10 +54,10 @@ export default function CategoryModal({
       <div className="flex flex-col">
         <div className="pb-[20px]">
           <CountButton
-          category={category}
-          count={count}
-          variant="display"
-        />
+            category={category}
+            count={categoryCounts[category]}
+            variant="display"
+          />
         </div>
         
         <span className="text-h3-onboard text-background-500 pb-[12px]">

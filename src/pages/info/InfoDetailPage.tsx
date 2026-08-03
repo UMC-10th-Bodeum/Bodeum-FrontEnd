@@ -13,10 +13,12 @@ import IntroSection from "./components/Detail/IntroSection";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
 import AsyncState from "@/components/AsyncState";
+import CategoryModal from "./components/modal/CategoryModal";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
+  const [categoryOpen, setCategoryOpen] = useState(false);
   const navigate = useNavigate();
   const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
   
@@ -37,7 +39,7 @@ export default function InfoDetailPage() {
     setBreadcrumb([
       {
         label: "정보",
-        onClick: () => { },
+        onClick: () => setCategoryOpen(true),
       },
       {
         label: infoCategory?.label ?? "",
@@ -110,6 +112,16 @@ export default function InfoDetailPage() {
         />
         <AIChatButton />
       </aside>
+      {categoryOpen && (
+        <CategoryModal
+          category={category as ParentCategory}
+          onClose={() => setCategoryOpen(false)}
+          onSelect={(selectedCategory) => {
+            navigate(`/info?category=${selectedCategory}`);
+            setCategoryOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
