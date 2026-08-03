@@ -3,13 +3,14 @@ import StarIcon from "@/assets/icons/Star.svg?react";
 import FeedbackButton from "@/components/FeedbackButton";
 
 interface Review {
-  reviewId: number;
+  infoReviewId: number;
+  userId: number;
+  userNickname: string;
   rating: number;
-  nickname: string;
-  createdAt: string;
   content: string;
+  imageUrls: string[];
   helpfulCount: number;
-  isHelpful: boolean;
+  createdAt: string;
 }
 
 interface Props {
@@ -31,7 +32,7 @@ export default function ReviewCard({ review }: Props) {
             </span>
 
             <span className="text-h6 text-background-600 mr-[8px]">
-              {review.nickname}
+              {review.userNickname}
             </span>
 
             <span className="text-body-sub text-background-500">
@@ -50,7 +51,7 @@ export default function ReviewCard({ review }: Props) {
 
         <FeedbackButton
           feedbackType="Good"
-          defaultSelected={review.isHelpful}
+          defaultSelected={false}
           defaultCount={review.helpfulCount}
           className="text-h6-list"
         />

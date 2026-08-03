@@ -7,13 +7,14 @@ import ButtonOutline from "@/components/ButtonOutline";
 import { useState } from "react";
 
 interface Review {
-  reviewId: number;
+  infoReviewId: number;
+  userId: number;
+  userNickname: string;
   rating: number;
-  nickname: string;
-  createdAt: string;
   content: string;
+  imageUrls: string[];
   helpfulCount: number;
-  isHelpful: boolean;
+  createdAt: string;
 }
 
 interface ReviewSectionProps {
@@ -60,7 +61,7 @@ export default function ReviewSection({
 
           <div className="my-[14px] flex flex-col">
             {visibleReviews.map((review) => (
-              <ReviewCard key={review.reviewId} review={review} />
+              <ReviewCard key={review.infoReviewId} review={review} />
             ))}
           </div>
             

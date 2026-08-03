@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
-import { infoReviewMockData } from "@/mocks/infoDetail";
 import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
@@ -12,6 +11,7 @@ import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
+import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -19,43 +19,32 @@ export default function InfoDetailPage() {
   const navigate = useNavigate();
   const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
 
-  const reviewData = infoReviewMockData.result;
+  const { data: reviewData } = useInfoReviewListQuery(
+    Number(id),
+    0,
+    10,
+  );
 
   const infoCategory = category
     ? infoCategoryMap[category as ParentCategory]
     : undefined;
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const data = await getInfoDetail(id!);
-
-  //     setBreadcrumb([
-  //       "정보",
-  //       infoCategoryMap[category as ParentCategory].label,
-  //       data.name,
-  //     ]);
-  //   }
-
-  //   fetchData();
-  // }, [category, id, setBreadcrumb]);
-
-  // 임시
   useEffect(() => {
-  if (!category) return;
+  if (!category || !detail) return;
 
-  setBreadcrumb([
-    {
-      label: "정보",
-      onClick: () => {},
-    },
-    {
-      label: infoCategory?.label ?? "",
-      onClick: () => navigate(`/info?category=${category}`),
-    },
-    {
-      label: detail!.name,
-    },
-  ]);
+    setBreadcrumb([
+      {
+        label: "정보",
+        onClick: () => { },
+      },
+      {
+        label: infoCategory?.label ?? "",
+        onClick: () => navigate(`/info?category=${category}`),
+      },
+      {
+        label: detail!.name,
+      },
+    ]);
 
   return () => setBreadcrumb([]);
   }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
@@ -73,8 +62,8 @@ export default function InfoDetailPage() {
       <main className="w-[680px]  space-y-[10px]">
         <DetailHeader image={undefined} />
         <IntroSection
-          // introduction={detail.introduction}
-          // tags={detail.tags}
+        // introduction={detail.introduction}
+        // tags={detail.tags}
         />
 
         <BusinessHoursSection hours={detail.businessHours} />
@@ -85,12 +74,10 @@ export default function InfoDetailPage() {
         />
 
         <ReviewSection
-          reviews={reviewData.reviews}
-          averageRating={reviewData.avgRating}
-          totalReviewCount={reviewData.totalCount}
-          onWriteReview={() =>
-            navigate(`/info/${category}/${id}/review/write`)
-          }
+          reviews={reviewData?.reviews.content ?? []}
+          totalReviewCount={reviewData?.totalElements ?? 0}
+          averageRating={reviewData?.averageRating ?? 0}
+          onWriteReview={() => navigate(`/info/${category}/${id}/review/write`)}
         />
       </main>
 

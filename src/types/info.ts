@@ -102,18 +102,14 @@ export interface InfoReview {
   createdAt: string;
 }
 
-export interface Review {
-  reviewId: number;
-  rating: number;
-  nickname: string;
-  createdAt: string;
-  content: string;
-  helpfulCount: number;
-  isHelpful: boolean;
+export interface GetInfoReviewsParams {
+  page?: number;
+  size?: number;
+  sort?: string[];
 }
 
-export interface InfoReviewResponse {
-  avgRating: number;
-  totalCount: number;
-  reviews: Review[];
+export interface InfoReviewListResult {
+  averageRating: number;
+  totalElements: number;
+  reviews: PageResponse<InfoReview>;
 }
