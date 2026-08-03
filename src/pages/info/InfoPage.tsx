@@ -12,6 +12,7 @@ import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
 import { useInfoListQuery } from "@/hooks/queries/info/useInfoListQuery";
 import { useMyProfileQuery } from "@/hooks/queries/useMyProfileQuery";
+import AsyncState from "@/components/AsyncState";
 
 const PAGE_SIZE = 14;
 const sortOptions = [
@@ -116,11 +117,11 @@ export default function InfoPage() {
   };
 
   if (isPending) {
-    return <div>로딩중...</div>;
+    return <AsyncState type="loading" />;
   }
 
   if (isError) {
-    return <div>에러가 발생했습니다.</div>;
+    return <AsyncState type="error" />;
   }
   
   return (

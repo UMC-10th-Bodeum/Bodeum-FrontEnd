@@ -12,6 +12,7 @@ import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
+import AsyncState from "@/components/AsyncState";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -59,11 +60,11 @@ export default function InfoDetailPage() {
   }, [detail]);
   
   if (isPending) {
-    return <div>로딩중...</div>;
+    return <AsyncState type="loading" />;
   }
 
   if (isError || !detail) {
-    return <div>정보를 불러올 수 없습니다.</div>;
+    return <AsyncState type="error" />;
   }
 
   return (
