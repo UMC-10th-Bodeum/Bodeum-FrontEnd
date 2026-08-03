@@ -12,8 +12,6 @@ import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
-import { showToast } from "@/components/Toast";
-import { toggleInfoScrap } from "@/apis/info";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
@@ -59,17 +57,6 @@ export default function InfoDetailPage() {
     setIsScrapped(detail?.isScrapped ?? false);
     setScrapCount(detail?.scrapCount ?? 0);
   }, [detail]);
-
-  const handleScrap = async () => {
-    try {
-      const result = await toggleInfoScrap(Number(id));
-
-      setIsScrapped(result.isScrapped);
-      setScrapCount(result.scrapCount);
-    } catch {
-      showToast("red", "스크랩에 실패했습니다.");
-    }
-  };
   
   if (isPending) {
     return <div>로딩중...</div>;
@@ -119,7 +106,6 @@ export default function InfoDetailPage() {
           sido={detail.sido}
           sigungu={detail.sigungu}
           phone={detail.phone}
-          onScrap={handleScrap}
         />
         <AIChatButton />
       </aside>

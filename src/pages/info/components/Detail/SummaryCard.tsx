@@ -10,8 +10,9 @@ import DateStat from "@/components/post-stat/DateStat";
 import PostTag from "@/components/PostTag";
 import ButtonOutline from "@/components/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
-import { getInfoShareUrl } from "@/apis/info";
+import { getInfoShareUrl, toggleInfoScrap } from "@/apis/info";
 import { showToast } from "@/components/Toast";
+import { useEffect, useState } from "react";
 
 interface SummaryCardProps {
   infoItemId: number;
@@ -27,7 +28,6 @@ interface SummaryCardProps {
   sido: string;
   sigungu: string;
   phone: string;
-  onScrap: () => void;
 }
 
 interface InfoRowProps {
@@ -58,13 +58,19 @@ export default function SummaryCard({
   viewCount,
   scrapCount,
   reviewCount,
-  onScrap,
   address,
   sido,
   sigungu,
   phone,
   isScrapped,
 }: SummaryCardProps) {
+  const [scrapCountState, setScrapCountState] = useState(scrapCount);
+  const [isScrappedState, setIsScrappedState] = useState(isScrapped);
+
+  useEffect(() => {
+    setScrapCountState(scrapCount);
+    setIsScrappedState(isScrapped);
+  }, [scrapCount, isScrapped]);
   const handleShare = async () => {
     try {
       const { shareUrl } = await getInfoShareUrl(infoItemId);
@@ -74,6 +80,24 @@ export default function SummaryCard({
       showToast("green", "공유 링크가 복사되었습니다.");
     } catch {
       showToast("red", "공유 링크를 가져오지 못했습니다.");
+    }
+  };
+
+  const handleScrap = async () => {
+    try {
+      const result = await toggleInfoScrap(infoItemId);
+
+      setIsScrappedState(result.isScrapped);
+      setScrapCountState(result.scrapCount);
+
+      showToast(
+        "green",
+        result.isScrapped
+          ? "스크랩되었습니다."
+          : "스크랩이 취소되었습니다.",
+      );
+    } catch {
+      showToast("red", "스크랩에 실패했습니다.");
     }
   };
 
@@ -94,8 +118,8 @@ export default function SummaryCard({
         <div className="flex gap-x-5 mb-[8px]">
           <ViewStat count={viewCount} showLabel={true} />
           <ScrapStat
-            count={scrapCount}
-            isActive={isScrapped}
+            count={scrapCountState}
+            isActive={isScrappedState}
             onClick={() => { }}
           />
           <CommentStat count={reviewCount} showLabel={true} />
@@ -121,7 +145,7 @@ export default function SummaryCard({
             label="스크랩"
             icon={ScrapIcon}
             iconPosition="left"
-            onClick={onScrap}
+            onClick={handleScrap}
           />
 
           <ButtonOutline
