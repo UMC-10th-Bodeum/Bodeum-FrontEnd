@@ -38,6 +38,10 @@ function getDistance(
 }
 
 export default function LocationSection({ infoItemId, address }: Props) {
+  if (!address) {
+    return null;
+  }
+  
   const { data: kakaoMap } = useKakaoMapUrlQuery(infoItemId);
 
   const [currentLocation, setCurrentLocation] = useState<{
