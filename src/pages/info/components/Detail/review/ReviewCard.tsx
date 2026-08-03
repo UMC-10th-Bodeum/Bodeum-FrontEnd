@@ -1,6 +1,7 @@
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import StarIcon from "@/assets/icons/Star.svg?react";
 import FeedbackButton from "@/components/FeedbackButton";
+import { formatDate } from "@/utils/time";
 
 interface Review {
   infoReviewId: number;
@@ -36,7 +37,7 @@ export default function ReviewCard({ review }: Props) {
             </span>
 
             <span className="text-body-sub text-background-500">
-              {review.createdAt}
+              {formatDate(review.createdAt)}
             </span>
           </div>
 

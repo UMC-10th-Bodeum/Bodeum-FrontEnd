@@ -34,7 +34,7 @@ export default function ReviewSection({
 }: ReviewSectionProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const visibleReviews = reviews.slice(0, visibleCount);
-  const remainCount = reviews.length - visibleCount;
+  const remainCount = Math.max(0, totalReviewCount - visibleCount);
 
   return (
     <Section
@@ -68,7 +68,7 @@ export default function ReviewSection({
           {remainCount > 0 && (
             <ButtonOutline
               onClick={() => setVisibleCount((prev) => prev + INITIAL_COUNT)}
-              label={`후기 ${remainCount}개 더보기`}
+              label={`후기 ${Math.min(INITIAL_COUNT, remainCount)}개 더보기`}
               size="L"
             />
           )}
