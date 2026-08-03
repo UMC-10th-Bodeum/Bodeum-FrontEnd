@@ -9,6 +9,10 @@ interface BusinessHoursSectionProps {
 export default function BusinessHoursSection({
   hours,
 }: BusinessHoursSectionProps) {
+  if (!hours || hours.length === 0) {
+    return null;
+  }
+  
   return (
     <Section
       title="운영 시간"

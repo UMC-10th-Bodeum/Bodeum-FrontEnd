@@ -1,5 +1,5 @@
 import type { InfoSearchResponse } from "@/types/search";
-import type { CreateInfoReviewRequest, GetInfoReviewsParams, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, PageResponse, ParentCategory } from "@/types/info";
+import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, ParentCategory } from "@/types/info";
 import api from "./axios";
 import type { ApiResponse } from "./apiTypes";
 

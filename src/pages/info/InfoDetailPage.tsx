@@ -92,6 +92,10 @@ export default function InfoDetailPage() {
           scrapCount={detail.scrapCount}
           reviewCount={detail.reviewCount}
           isScrapped={detail.isScrapped}
+          address={detail.address}
+          sido={detail.sido}
+          sigungu={detail.sigungu}
+          phone={detail.phone}
           onScrap={() => { }}
           onShare={() => { }}
         />

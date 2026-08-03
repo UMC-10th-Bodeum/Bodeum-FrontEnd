@@ -20,6 +20,10 @@ interface SummaryCardProps {
   scrapCount: number;
   reviewCount: number;
   isScrapped: boolean;
+  address: string;
+  sido: string;
+  sigungu: string;
+  phone: string;
   onScrap: () => void;
   onShare: () => void;
 }
@@ -53,6 +57,10 @@ export default function SummaryCard({
   reviewCount,
   onScrap,
   onShare,
+  address,
+  sido,
+  sigungu,
+  phone,
 }: SummaryCardProps) {
   return (
     <div className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
@@ -114,10 +122,10 @@ export default function SummaryCard({
             <Building />
             <h2>기본 정보</h2>
           </div>
-          <div className="overflow-hidden mt-[4px] mb-[12px]">
-            <InfoRow label="주소" value="서울특별시 광진구 능동로 120-1" />
-            <InfoRow label="지역" value="서울특별시 광진구" />
-            <InfoRow label="전화번호" value="1588-1533" />
+          <div className="mt-[4px] mb-[12px] overflow-hidden">
+            <InfoRow label="주소" value={address ?? "-"} />
+            <InfoRow label="지역" value={`${sido ?? ""} ${sigungu ?? ""}`.trim() || "-"} />
+            <InfoRow label="전화번호" value={phone ?? "-"} />
           </div>
         </div>
       </div>
