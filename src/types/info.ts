@@ -118,3 +118,8 @@ export interface InfoReviewListResult {
 export interface KakaoMapUrlResponse {
   kakaoMapUrl: string;
 }
+
+export interface ShareInfoResponse {
+  infoItemId: number;
+  shareUrl: string;
+}

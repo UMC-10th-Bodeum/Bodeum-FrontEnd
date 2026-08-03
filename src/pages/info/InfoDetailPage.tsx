@@ -106,6 +106,7 @@ export default function InfoDetailPage() {
 
       <aside className="top-5 h-fit w-[400px] space-y-4">
         <SummaryCard
+          infoItemId={detail.infoItemId}
           name={detail.name}
           mainCategory={detail.mainCategory}
           subCategory={detail.subCategoryKo}
@@ -119,7 +120,6 @@ export default function InfoDetailPage() {
           sigungu={detail.sigungu}
           phone={detail.phone}
           onScrap={handleScrap}
-          onShare={() => { }}
         />
         <AIChatButton />
       </aside>

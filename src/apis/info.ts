@@ -1,5 +1,5 @@
 import type { InfoSearchResponse } from "@/types/search";
-import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, KakaoMapUrlResponse, ParentCategory } from "@/types/info";
+import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, KakaoMapUrlResponse, ParentCategory, ShareInfoResponse } from "@/types/info";
 import api from "./axios";
 import type { ApiResponse } from "./apiTypes";
 
@@ -106,6 +106,15 @@ export const getKakaoMapUrl = async (infoItemId: number) => {
     {
       infoItemId,
     },
+  );
+
+  return data.result;
+};
+
+// 정보 공유 링크 조회
+export const getInfoShareUrl = async (infoItemId: number) => {
+  const { data } = await api.get<ApiResponse<ShareInfoResponse>>(
+    `/api/v1/info-items/${infoItemId}/share`,
   );
 
   return data.result;

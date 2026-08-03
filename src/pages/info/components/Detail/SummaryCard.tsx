@@ -10,8 +10,11 @@ import DateStat from "@/components/post-stat/DateStat";
 import PostTag from "@/components/PostTag";
 import ButtonOutline from "@/components/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
+import { getInfoShareUrl } from "@/apis/info";
+import { showToast } from "@/components/Toast";
 
 interface SummaryCardProps {
+  infoItemId: number;
   name: string;
   mainCategory: string;
   subCategory: string;
@@ -25,7 +28,6 @@ interface SummaryCardProps {
   sigungu: string;
   phone: string;
   onScrap: () => void;
-  onShare: () => void;
 }
 
 interface InfoRowProps {
@@ -48,6 +50,7 @@ function InfoRow({ label, value }: InfoRowProps) {
 }
 
 export default function SummaryCard({
+  infoItemId,
   name,
   mainCategory,
   subCategory,
@@ -56,13 +59,24 @@ export default function SummaryCard({
   scrapCount,
   reviewCount,
   onScrap,
-  onShare,
   address,
   sido,
   sigungu,
   phone,
   isScrapped,
 }: SummaryCardProps) {
+  const handleShare = async () => {
+    try {
+      const { shareUrl } = await getInfoShareUrl(infoItemId);
+
+      await navigator.clipboard.writeText(shareUrl);
+
+      showToast("green", "공유 링크가 복사되었습니다.");
+    } catch {
+      showToast("red", "공유 링크를 가져오지 못했습니다.");
+    }
+  };
+
   return (
     <div className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
       <div className="px-[25px] py-[24px]">
@@ -115,7 +129,7 @@ export default function SummaryCard({
             label="공유"
             icon={ShareIcon}
             iconPosition="left"
-            onClick={onShare}
+            onClick={handleShare}
           />
         </div>
         <div className="mt-[32px]">
