@@ -134,9 +134,12 @@ export default function SummaryCard({
             icon={GoIcon}
             iconPosition="right"
             onClick={() => {
-              if (homepageUrl) {
-                window.open(homepageUrl, "_blank");
+              if (!homepageUrl) {
+                showToast("yellow", "등록된 홈페이지가 없습니다.");
+                return;
               }
+
+              window.open(homepageUrl, "_blank");
             }}
           />
 
