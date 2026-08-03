@@ -11,6 +11,7 @@ import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
 import { useInfoListQuery } from "@/hooks/queries/info/useInfoListQuery";
+import { useMyProfileQuery } from "@/hooks/queries/useMyProfileQuery";
 
 const PAGE_SIZE = 14;
 const sortOptions = [
@@ -20,6 +21,7 @@ const sortOptions = [
 ];
 
 export default function InfoPage() {
+  const { data: profile } = useMyProfileQuery();
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const subCategoryParam = searchParams.get("subCategory");
@@ -29,11 +31,19 @@ export default function InfoPage() {
   const [sort, setSort] = useState("VIEW");
   const navigate = useNavigate();
   
-  const [regionLevel1, setRegionLevel1] = useState("경기도");
-  const [regionLevel2, setRegionLevel2] = useState("수원시");
-  const [location, setLocation] = useState(
-    `${regionLevel1} ${regionLevel2}`
-  );
+  const [regionLevel1, setRegionLevel1] = useState("");
+  const [regionLevel2, setRegionLevel2] = useState("");
+  const [location, setLocation] = useState("");
+
+  useEffect(() => {
+    if (!profile) return;
+
+    setRegionLevel1(profile.regionLevel1 ?? "");
+    setRegionLevel2(profile.regionLevel2 ?? "");
+    setLocation(
+      `${profile.regionLevel1 ?? ""} ${profile.regionLevel2 ?? ""}`.trim(),
+    );
+  }, [profile]);
   
   const [locationOpen, setLocationOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -117,7 +127,7 @@ export default function InfoPage() {
     <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
       
       <h2 className="text-h1-info -mb-[10px]">
-        NN님,
+        {profile?.nickname || "NN"}님,
       </h2>
       <div className="flex gap-[10px] items-center">
         <LocationButton
