@@ -74,6 +74,7 @@ export default function InfoDetailPage() {
         />
 
         <ReviewSection
+          infoItemId={detail.infoItemId}
           reviews={reviewData?.reviews.content ?? []}
           totalReviewCount={reviewData?.totalElements ?? 0}
           averageRating={reviewData?.averageRating ?? 0}

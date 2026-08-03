@@ -77,3 +77,15 @@ export const getInfoReviews = async (
 
   return data.result;
 };
+
+// 후기 도움돼요 토글
+export const toggleReviewHelpful = async (
+  infoItemId: number,
+  infoReviewId: number,
+) => {
+  const { data } = await api.post(
+    `/api/v1/info-items/${infoItemId}/reviews/${infoReviewId}/helpful`,
+  );
+
+  return data.result;
+};

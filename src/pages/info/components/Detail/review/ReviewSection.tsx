@@ -18,6 +18,7 @@ interface Review {
 }
 
 interface ReviewSectionProps {
+  infoItemId: number;
   reviews: Review[];
   totalReviewCount: number;
   averageRating: number;
@@ -31,6 +32,7 @@ export default function ReviewSection({
   totalReviewCount,
   averageRating,
   onWriteReview,
+  infoItemId
 }: ReviewSectionProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const visibleReviews = reviews.slice(0, visibleCount);
@@ -61,7 +63,11 @@ export default function ReviewSection({
 
           <div className="my-[14px] flex flex-col">
             {visibleReviews.map((review) => (
-              <ReviewCard key={review.infoReviewId} review={review} />
+              <ReviewCard
+                key={review.infoReviewId}
+                infoItemId={infoItemId}
+                review={review}
+              />
             ))}
           </div>
             
