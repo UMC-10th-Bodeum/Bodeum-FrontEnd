@@ -1,5 +1,5 @@
 import type { InfoSearchResponse } from "@/types/search";
-import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, ParentCategory } from "@/types/info";
+import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, KakaoMapUrlResponse, ParentCategory } from "@/types/info";
 import api from "./axios";
 import type { ApiResponse } from "./apiTypes";
 
@@ -94,6 +94,18 @@ export const toggleReviewHelpful = async (
 export const toggleInfoScrap = async (infoItemId: number) => {
   const { data } = await api.post(
     `/api/v1/info-items/${infoItemId}/scrap`,
+  );
+
+  return data.result;
+};
+
+// 카카오 지도 url 생성
+export const getKakaoMapUrl = async (infoItemId: number) => {
+  const { data } = await api.post<ApiResponse<KakaoMapUrlResponse>>(
+    "/api/v1/info-items/kakaomap-url",
+    {
+      infoItemId,
+    },
   );
 
   return data.result;

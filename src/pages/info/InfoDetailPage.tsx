@@ -91,8 +91,8 @@ export default function InfoDetailPage() {
         <BusinessHoursSection hours={detail.businessHours} />
 
         <LocationSection
+          infoItemId={detail.infoItemId}
           address={detail.address}
-          homepageUrl={detail.homepageUrl ?? undefined}
         />
 
         <ReviewSection

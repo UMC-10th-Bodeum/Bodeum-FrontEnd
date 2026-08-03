@@ -113,3 +113,8 @@ export interface InfoReviewListResult {
   totalElements: number;
   reviews: PageResponse<InfoReview>;
 }
+
+// 카카오지도
+export interface KakaoMapUrlResponse {
+  kakaoMapUrl: string;
+}
