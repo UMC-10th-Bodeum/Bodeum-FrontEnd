@@ -16,6 +16,7 @@ import CommunityDetailPage from "@/pages/community/CommunityDetailPage";
 import CommunityWritePage from "@/pages/community/CommunityWritePage";
 import AuthStateGate from "@/pages/auth/components/AuthStateGate";
 import AuthBrowserSessionGuard from "@/pages/auth/components/AuthBrowserSessionGuard";
+import ProtectedRoute from "@/pages/auth/components/ProtectedRoute";
 import MyPage from "@/pages/mypage/MyPage";
 import ProfileSettingsPage from "@/pages/mypage/ProfileSettingsPage";
 import MyPageProfileProvider from "@/pages/mypage/MyPageProfileProvider";
@@ -59,9 +60,9 @@ export const router = createBrowserRouter([
           {
             path: "/mypage",
             element: (
-              <MyPageProfileProvider>
+              <ProtectedRoute>
                 <Outlet />
-              </MyPageProfileProvider>
+              </ProtectedRoute>
             ),
             children: [
               {
@@ -70,7 +71,11 @@ export const router = createBrowserRouter([
               },
               {
                 path: "settings",
-                element: <ProfileSettingsPage />,
+                element: (
+                  <MyPageProfileProvider>
+                    <ProfileSettingsPage />
+                  </MyPageProfileProvider>
+                ),
               },
             ],
           },

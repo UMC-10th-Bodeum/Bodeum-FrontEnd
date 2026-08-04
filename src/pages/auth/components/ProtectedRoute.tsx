@@ -1,0 +1,40 @@
+import { useEffect, useState, type ReactNode } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+
+import {
+  AUTH_STATE_CHANGED_EVENT,
+  hasStoredAuthSession,
+} from "@/apis/authApi";
+
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
+
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(hasStoredAuthSession);
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsLoggedIn(hasStoredAuthSession());
+    };
+
+    window.addEventListener(AUTH_STATE_CHANGED_EVENT, syncAuthState);
+
+    return () => {
+      window.removeEventListener(AUTH_STATE_CHANGED_EVENT, syncAuthState);
+    };
+  }, []);
+
+  if (!isLoggedIn) {
+    return (
+      <Navigate
+        to="/auth"
+        replace
+        state={{ from: `${location.pathname}${location.search}` }}
+      />
+    );
+  }
+
+  return children;
+}
