@@ -9,9 +9,14 @@ import type { MyPageItem } from "../types";
 interface MyPageCardProps {
   item: MyPageItem;
   onDelete?: () => void;
+  deleteDisabled?: boolean;
 }
 
-export default function MyPageCard({ item, onDelete }: MyPageCardProps) {
+export default function MyPageCard({
+  item,
+  onDelete,
+  deleteDisabled = false,
+}: MyPageCardProps) {
   const isComment = item.type === "comment";
   const isScrap = item.type === "scrap";
   const content = isComment ? item.comment : item.title;
@@ -63,6 +68,7 @@ export default function MyPageCard({ item, onDelete }: MyPageCardProps) {
           icon={null}
           label="삭제"
           onClick={onDelete}
+          disabled={deleteDisabled}
           className="ml-[12px] h-[36px] w-[56px] shrink-0 justify-center !px-0 !py-0"
         />
       )}

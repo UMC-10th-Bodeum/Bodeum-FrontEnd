@@ -258,7 +258,10 @@ export default function MyPage() {
 
           <div className="col-start-1 row-start-2 flex flex-col gap-[8px]">
             {isActivityPending && (
-              <div className="flex h-[144px] items-center justify-center rounded-[10px] border border-background-250 bg-background-100 text-[13px] text-background-500">
+              <div
+                role="status"
+                className="flex h-[144px] items-center justify-center rounded-[10px] border border-background-250 bg-background-100 text-[13px] text-background-500"
+              >
                 {activeTab === "saved"
                   ? "저장한 정보를 불러오는 중입니다."
                   : activeTab === "posts"
@@ -268,7 +271,10 @@ export default function MyPage() {
             )}
 
             {activityError && (
-              <div className="flex h-[144px] flex-col items-center justify-center gap-[12px] rounded-[10px] border border-background-250 bg-background-100 text-[13px] text-background-500">
+              <div
+                role="alert"
+                className="flex h-[144px] flex-col items-center justify-center gap-[12px] rounded-[10px] border border-background-250 bg-background-100 text-[13px] text-background-500"
+              >
                 <p>
                   {getApiErrorMessage(
                     activityError,
@@ -302,6 +308,7 @@ export default function MyPage() {
               <MyPageCard
                 key={item.id}
                 item={item}
+                deleteDisabled={deletingScrapId !== null}
                 onDelete={
                   activeTab === "saved" && item.type === "scrap"
                     ? () => void deleteItem(item)
