@@ -24,11 +24,24 @@ export default function SideBar() {
   const navigate = useNavigate();
   const [brief, setBrief] = useState<UserBrief | null>(null);
   const logoutInFlight = useRef(false);
+  const briefRequestSequence = useRef(0);
 
   const loadBrief = useCallback(async () => {
+    const requestSequence = ++briefRequestSequence.current;
+
     try {
-      setBrief(await getUserBrief());
+      const nextBrief = await getUserBrief();
+
+      if (requestSequence !== briefRequestSequence.current) {
+        return;
+      }
+
+      setBrief(nextBrief);
     } catch (error) {
+      if (requestSequence !== briefRequestSequence.current) {
+        return;
+      }
+
       console.error("사이드바 사용자 정보를 불러오지 못했습니다.", error);
       setBrief({
         isLoggedIn: false,
@@ -52,6 +65,7 @@ export default function SideBar() {
     return () => {
       window.removeEventListener(AUTH_STATE_CHANGED_EVENT, loadBrief);
       window.removeEventListener(USER_PROFILE_CHANGED_EVENT, loadBrief);
+      briefRequestSequence.current += 1;
     };
   }, [loadBrief]);
 
