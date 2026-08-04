@@ -8,21 +8,28 @@ import type { MyPageItem } from "../types";
 
 interface MyPageCardProps {
   item: MyPageItem;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 export default function MyPageCard({ item, onDelete }: MyPageCardProps) {
   const isComment = item.type === "comment";
   const isScrap = item.type === "scrap";
   const content = isComment ? item.comment : item.title;
-  const meta = `커뮤니티 ${isComment ? "댓글" : "게시글"} · ${
-    isScrap ? "저장일" : "작성일"
-  } ${item.date}`;
+  const meta = isComment
+    ? ["커뮤니티 댓글", item.postTitle, `작성일 ${item.date}`]
+        .filter(Boolean)
+        .join(" · ")
+    : `${isScrap ? (item.sourceLabel ?? "저장 정보") : "커뮤니티 게시글"} · ${
+        isScrap ? "저장일" : "작성일"
+      } ${item.date}`;
+  const targetPath = isScrap && item.targetPath
+    ? item.targetPath
+    : `/community/${item.postId}`;
 
   return (
     <article className="relative flex w-[577px] items-center rounded-[10px] border border-background-250 bg-background-100 px-[17px] py-[15px] transition-[border-color,box-shadow] duration-300 ease-out hover:shadow-[1px_2px_15px_0px_#00000026] has-[a:active]:border-main-400">
       <Link
-        to={`/community/${item.postId}`}
+        to={targetPath}
         className="flex min-w-0 flex-1 items-center self-stretch before:pointer-events-none before:absolute before:inset-0 before:rounded-[10px] focus-visible:outline-none focus-visible:before:outline focus-visible:before:outline-2 focus-visible:before:outline-offset-2"
         aria-label={`${content} 상세 보기`}
       >
@@ -51,12 +58,14 @@ export default function MyPageCard({ item, onDelete }: MyPageCardProps) {
         )}
       </Link>
 
-      <DetailBackButton
-        icon={null}
-        label="삭제"
-        onClick={onDelete}
-        className="ml-[12px] h-[36px] w-[56px] shrink-0 justify-center !px-0 !py-0"
-      />
+      {onDelete && (
+        <DetailBackButton
+          icon={null}
+          label="삭제"
+          onClick={onDelete}
+          className="ml-[12px] h-[36px] w-[56px] shrink-0 justify-center !px-0 !py-0"
+        />
+      )}
     </article>
   );
 }

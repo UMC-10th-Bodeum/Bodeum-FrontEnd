@@ -1,14 +1,17 @@
 export type MyPageTabKey = "saved" | "posts" | "comments";
 
 interface MyPageItemBase {
-  id: number;
+  id: number | string;
   postId: number;
   date: string;
 }
 
 export interface MyPageScrapItem extends MyPageItemBase {
   type: "scrap";
+  scrapId: number;
   title: string;
+  targetPath?: string;
+  sourceLabel?: string;
   dDay?: string;
 }
 
@@ -20,6 +23,7 @@ export interface MyPagePostItem extends MyPageItemBase {
 export interface MyPageCommentItem extends MyPageItemBase {
   type: "comment";
   comment: string;
+  postTitle?: string;
 }
 
 export type MyPageItem =
@@ -30,11 +34,4 @@ export type MyPageItem =
 export interface MyPageTab {
   key: MyPageTabKey;
   label: string;
-}
-
-export interface ActivityPointStat {
-  id: "post" | "answer" | "helpful" | "accepted";
-  label: string;
-  pointsPerAction: number;
-  count: number;
 }
