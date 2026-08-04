@@ -13,7 +13,8 @@ export const initialProfileSettings: ProfileSettingsForm = {
 };
 
 const currentYear = new Date().getFullYear();
-const birthYearStart = 2008;
+const maxChildAge = 18;
+const birthYearStart = currentYear - maxChildAge;
 
 export const birthYearOptions = Array.from(
   { length: currentYear - birthYearStart + 1 },

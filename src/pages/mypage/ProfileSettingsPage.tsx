@@ -76,11 +76,11 @@ export default function ProfileSettingsPage() {
       const disabilityTypes = toApiDisabilityTypes(draftProfile.diagnoses);
       const currentDisabilityTypes = toApiDisabilityTypes(profile.diagnoses);
 
-      if (draftProfile.parentNickname !== profile.parentNickname) {
+      if (nickname && nickname !== profile.parentNickname.trim()) {
         request.nickname = nickname;
       }
 
-      if (draftProfile.childNickname !== profile.childNickname) {
+      if (childNickname && childNickname !== profile.childNickname.trim()) {
         request.childNickname = childNickname;
       }
 

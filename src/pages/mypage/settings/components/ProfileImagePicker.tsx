@@ -5,6 +5,7 @@ interface ProfileImagePickerProps {
   imageUrl: string | null;
   imageFile: File | null;
   isEditing: boolean;
+  disabled?: boolean;
   onChange: (file: File) => void;
 }
 
@@ -15,6 +16,7 @@ export default function ProfileImagePicker({
   imageUrl,
   imageFile,
   isEditing,
+  disabled = false,
   onChange,
 }: ProfileImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,11 +66,11 @@ export default function ProfileImagePicker({
     <div className="relative h-[90px] w-[90px] shrink-0">
       <button
         type="button"
-        disabled={!isEditing}
+        disabled={!isEditing || disabled}
         onClick={() => inputRef.current?.click()}
         aria-label={isEditing ? "프로필 이미지 변경" : "보듬 부모님 프로필"}
         className={`relative block h-full w-full overflow-hidden rounded-full ${
-          isEditing ? "cursor-pointer" : "cursor-default"
+          isEditing && !disabled ? "cursor-pointer" : "cursor-default"
         }`}
       >
         {displayedImageUrl ? (
@@ -86,6 +88,7 @@ export default function ProfileImagePicker({
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        disabled={!isEditing || disabled}
         hidden
         onChange={handleFileChange}
       />

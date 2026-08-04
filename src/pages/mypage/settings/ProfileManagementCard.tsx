@@ -90,12 +90,17 @@ export default function ProfileManagementCard({
     : null;
   const profileLabels = [guardianTypeLabel, badgeName].filter(Boolean).join(" · ");
 
-  const hasCompleteBirth = Boolean(form.birthYear) === Boolean(form.birthMonth);
+  const parentNickname = form.parentNickname.trim();
+  const childNickname = form.childNickname.trim();
+  const hasCompleteBirth = Boolean(form.birthYear && form.birthMonth);
   const canApply =
-    form.parentNickname.trim().length <= 20 &&
-    form.childNickname.trim().length <= 20 &&
+    parentNickname.length > 0 &&
+    parentNickname.length <= 20 &&
+    childNickname.length > 0 &&
+    childNickname.length <= 20 &&
     hasCompleteBirth &&
-    (!form.birthYear || isValidBirthDate(form.birthYear, form.birthMonth));
+    isValidBirthDate(form.birthYear, form.birthMonth) &&
+    form.diagnoses.length > 0;
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -132,6 +137,7 @@ export default function ProfileManagementCard({
           imageUrl={form.profileImageUrl}
           imageFile={form.profileImageFile}
           isEditing={isEditing}
+          disabled={isApplying}
           onChange={(profileImageFile) => updateField("profileImageFile", profileImageFile)}
         />
         <div className="ml-[20px]">
@@ -175,7 +181,7 @@ export default function ProfileManagementCard({
         <Input
           id="parent-nickname"
           value={form.parentNickname}
-          disabled={!isEditing}
+          disabled={!isEditing || isApplying}
           onChange={(event) =>
             updateField("parentNickname", event.target.value.slice(0, 20))
           }
@@ -194,7 +200,7 @@ export default function ProfileManagementCard({
               label: sidoDisplayNameByRegion[option.value] ?? option.label,
             }))}
             value={form.region}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("region")}
             onChange={(region) => {
               onChange({
@@ -210,7 +216,7 @@ export default function ProfileManagementCard({
             ariaLabel="시/군/구 선택"
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("district")}
             onChange={(district) => updateField("district", district)}
             className="w-full"
@@ -232,7 +238,7 @@ export default function ProfileManagementCard({
         <Input
           id="child-nickname"
           value={form.childNickname}
-          disabled={!isEditing}
+          disabled={!isEditing || isApplying}
           onChange={(event) =>
             updateField("childNickname", event.target.value.slice(0, 20))
           }
@@ -248,7 +254,7 @@ export default function ProfileManagementCard({
             ariaLabel="출생 연도"
             options={birthYearOptions}
             value={form.birthYear}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthYear")}
             onChange={(birthYear) => updateField("birthYear", birthYear)}
             placeholder="년도"
@@ -259,7 +265,7 @@ export default function ProfileManagementCard({
             ariaLabel="출생 월"
             options={birthMonthOptions}
             value={form.birthMonth}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthMonth")}
             onChange={(birthMonth) => updateField("birthMonth", birthMonth)}
             placeholder="월"
@@ -278,7 +284,7 @@ export default function ProfileManagementCard({
               key={diagnosis}
               label={label}
               selected={form.diagnoses.includes(diagnosis)}
-              disabled={!isEditing}
+              disabled={!isEditing || isApplying}
               onClick={() => toggleDiagnosis(diagnosis)}
               className="h-[40px] px-[18px] py-2"
             />
