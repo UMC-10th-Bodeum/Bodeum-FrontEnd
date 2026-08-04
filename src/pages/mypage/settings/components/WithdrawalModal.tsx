@@ -52,14 +52,14 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
         throw new Error("회원 탈퇴 처리 결과를 확인할 수 없습니다.");
       }
 
-      clearAuthTokens();
       clearAuthProgress();
       clearAgreementBrowserSession();
       clearOnboardingBrowserSession();
       queryClient.clear();
       onConfirm();
+      navigate("/", { replace: true, flushSync: true });
+      clearAuthTokens();
       showToast("green", "회원 탈퇴가 완료되었습니다.");
-      navigate("/", { replace: true });
     } catch (error) {
       setIsSubmitting(false);
       showToast(
