@@ -22,6 +22,11 @@ function getChildAge(birth: string | null | undefined) {
   const today = new Date();
   const year = Number(birthYear);
   const month = Number(birthMonth);
+
+  if (!Number.isFinite(year)) {
+    return null;
+  }
+
   const hasBirthdayPassed = !month || today.getMonth() + 1 >= month;
 
   return Math.max(0, today.getFullYear() - year - (hasBirthdayPassed ? 0 : 1));
