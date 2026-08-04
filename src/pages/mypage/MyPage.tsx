@@ -112,7 +112,7 @@ export default function MyPage() {
     return (
       <div
         role="status"
-        className="flex min-h-full items-center justify-center bg-background-200 text-h3-onboard text-background-500"
+        className="flex min-h-[calc(100vh-60px)] items-center justify-center bg-background-200 text-h3-onboard text-background-500"
       >
         마이페이지 정보를 불러오는 중입니다.
       </div>
@@ -123,7 +123,7 @@ export default function MyPage() {
     return (
       <div
         role="alert"
-        className="flex min-h-full flex-col items-center justify-center gap-[16px] bg-background-200 text-h3-onboard text-background-500"
+        className="flex min-h-[calc(100vh-60px)] flex-col items-center justify-center gap-[16px] bg-background-200 text-h3-onboard text-background-500"
       >
         <p>
           {getApiErrorMessage(
@@ -243,7 +243,7 @@ export default function MyPage() {
     : (activityPageData?.totalPages ?? 0);
 
   return (
-    <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
+    <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto w-[896px]">
         <ProfileSummaryCard
           dashboard={dashboard}
