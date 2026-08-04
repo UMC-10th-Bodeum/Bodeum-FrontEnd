@@ -13,13 +13,17 @@ export const initialProfileSettings: ProfileSettingsForm = {
 };
 
 const currentYear = new Date().getFullYear();
+const birthYearStart = 2008;
 
-export const birthYearOptions = Array.from({ length: 27 }, (_, index) => {
-  const year = String(currentYear - index);
-  return { label: `${year}년`, value: year };
-});
+export const birthYearOptions = Array.from(
+  { length: currentYear - birthYearStart + 1 },
+  (_, index) => {
+    const year = birthYearStart + index;
+    return { label: `${year}년`, value: `${year}` };
+  },
+);
 
 export const birthMonthOptions = Array.from({ length: 12 }, (_, index) => {
-  const month = String(index + 1);
-  return { label: `${month}월`, value: month };
+  const month = index + 1;
+  return { label: `${month}월`, value: `${month}` };
 });

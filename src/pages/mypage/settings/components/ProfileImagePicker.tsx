@@ -40,13 +40,18 @@ export default function ProfileImagePicker({
       return;
     }
 
+    if (file.size === 0) {
+      window.alert("업로드할 이미지 파일이 비어 있습니다.");
+      return;
+    }
+
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      window.alert("JPG, PNG, WEBP 이미지만 선택할 수 있습니다.");
+      window.alert("지원하지 않는 이미지 형식입니다.");
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      window.alert("5MB 이하의 이미지만 선택할 수 있습니다.");
+      window.alert("업로드 가능한 파일 크기를 초과했습니다.");
       return;
     }
 

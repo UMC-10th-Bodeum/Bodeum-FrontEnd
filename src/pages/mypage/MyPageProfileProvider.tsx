@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getApiErrorMessage } from "@/apis/apiError";
+import { getMyProfile, USER_PROFILE_QUERY_KEY } from "@/apis/userApi";
 import { MyPageProfileContext } from "./myPageProfileContext";
-import { initialProfileSettings } from "./settings/data";
+import { toProfileSettings } from "./profileSettingsMapper";
 import type { ProfileSettingsForm } from "./settings/types";
 
 const cloneProfile = (profile: ProfileSettingsForm): ProfileSettingsForm => ({
@@ -9,14 +12,64 @@ const cloneProfile = (profile: ProfileSettingsForm): ProfileSettingsForm => ({
 });
 
 export default function MyPageProfileProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState(() => cloneProfile(initialProfileSettings));
+  const [savedProfile, setSavedProfile] = useState<ProfileSettingsForm | null>(null);
+  const profileQuery = useQuery({
+    queryKey: USER_PROFILE_QUERY_KEY,
+    queryFn: getMyProfile,
+    retry: false,
+  });
 
   const saveProfile = (nextProfile: ProfileSettingsForm) => {
-    setProfile(cloneProfile(nextProfile));
+    setSavedProfile(cloneProfile(nextProfile));
   };
 
+  if (profileQuery.isPending) {
+    return (
+      <div
+        role="status"
+        className="flex min-h-full items-center justify-center bg-background-200 text-h3-onboard text-background-500"
+      >
+        프로필 정보를 불러오는 중입니다.
+      </div>
+    );
+  }
+
+  if (profileQuery.isError) {
+    return (
+      <div
+        role="alert"
+        className="flex min-h-full flex-col items-center justify-center gap-[16px] bg-background-200 text-h3-onboard text-background-500"
+      >
+        <p>
+          {getApiErrorMessage(
+            profileQuery.error,
+            "프로필을 불러오지 못했습니다.",
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={() => void profileQuery.refetch()}
+          className="cursor-pointer rounded-[10px] bg-main-400 px-[16px] py-[10px] text-background-100"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  const profile = savedProfile ?? toProfileSettings(profileQuery.data);
+
   return (
-    <MyPageProfileContext.Provider value={{ profile, saveProfile }}>
+    <MyPageProfileContext.Provider
+      value={{
+        profile,
+        level: profileQuery.data.level,
+        joinedAt: profileQuery.data.joinedAt,
+        guardianType: profileQuery.data.guardianType,
+        badgeName: profileQuery.data.badgeName,
+        saveProfile,
+      }}
+    >
       {children}
     </MyPageProfileContext.Provider>
   );

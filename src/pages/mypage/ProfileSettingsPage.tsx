@@ -1,20 +1,53 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getApiErrorDetailMessage } from "@/apis/apiError";
+import { findRegionId, getRegions } from "@/apis/onboardingApi";
+import {
+  getMyProfile,
+  notifyUserProfileChanged,
+  updateMyProfile,
+  updateProfileImage,
+  USER_DASHBOARD_QUERY_KEY,
+  USER_PROFILE_QUERY_KEY,
+  type UpdateMyProfileRequest,
+} from "@/apis/userApi";
 import DetailBackButton from "@/components/DetailBackButton";
+import { showToast } from "@/components/Toast";
 import AccountManagementCard from "./settings/AccountManagementCard";
 import ProfileManagementCard from "./settings/ProfileManagementCard";
 import WithdrawalModal from "./settings/components/WithdrawalModal";
 import type { ProfileSettingsForm } from "./settings/types";
 import { useMyPageProfile } from "./myPageProfileContext";
+import {
+  toApiDisabilityTypes,
+  toProfileSettings,
+} from "./profileSettingsMapper";
 
 const cloneProfileSettings = (profile: ProfileSettingsForm): ProfileSettingsForm => ({
   ...profile,
   diagnoses: [...profile.diagnoses],
 });
 
+function getChildBirth(profile: ProfileSettingsForm) {
+  if (!profile.birthYear || !profile.birthMonth) {
+    return "";
+  }
+
+  return `${profile.birthYear}-${profile.birthMonth.padStart(2, "0")}`;
+}
+
+function haveSameValues(left: string[], right: string[]) {
+  return left.length === right.length
+    && [...left].sort().every((value, index) => value === [...right].sort()[index]);
+}
+
 export default function ProfileSettingsPage() {
-  const { profile, saveProfile } = useMyPageProfile();
+  const queryClient = useQueryClient();
+  const { profile, joinedAt, guardianType, badgeName, saveProfile } =
+    useMyPageProfile();
   const [draftProfile, setDraftProfile] = useState(() => cloneProfileSettings(profile));
   const [isEditing, setIsEditing] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
   const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
 
   const startEditing = () => {
@@ -27,9 +60,159 @@ export default function ProfileSettingsPage() {
     setIsEditing(false);
   };
 
-  const applyEditing = () => {
-    saveProfile(draftProfile);
-    setIsEditing(false);
+  const applyEditing = async () => {
+    if (isApplying) {
+      return;
+    }
+
+    setIsApplying(true);
+
+    try {
+      const request: UpdateMyProfileRequest = {};
+      const nickname = draftProfile.parentNickname.trim();
+      const childNickname = draftProfile.childNickname.trim();
+      const childBirth = getChildBirth(draftProfile);
+      const currentChildBirth = getChildBirth(profile);
+      const disabilityTypes = toApiDisabilityTypes(draftProfile.diagnoses);
+      const currentDisabilityTypes = toApiDisabilityTypes(profile.diagnoses);
+
+      if (draftProfile.parentNickname !== profile.parentNickname) {
+        request.nickname = nickname;
+      }
+
+      if (draftProfile.childNickname !== profile.childNickname) {
+        request.childNickname = childNickname;
+      }
+
+      if (childBirth && childBirth !== currentChildBirth) {
+        request.childBirth = childBirth;
+      }
+
+      if (!haveSameValues(disabilityTypes, currentDisabilityTypes)) {
+        request.disabilityTypes = disabilityTypes;
+      }
+
+      if (
+        draftProfile.region !== profile.region
+        || draftProfile.district !== profile.district
+      ) {
+        const regions = await getRegions();
+        const regionId = findRegionId(
+          regions,
+          draftProfile.region,
+          draftProfile.district,
+        );
+
+        if (regionId === undefined) {
+          throw new Error("선택한 지역을 찾을 수 없습니다.");
+        }
+
+        request.regionId = regionId;
+      }
+
+      const hasProfileChanges = Object.keys(request).length > 0;
+
+      if (hasProfileChanges) {
+        await updateMyProfile(request);
+      }
+
+      let uploadedProfile: Awaited<ReturnType<typeof updateProfileImage>> | null = null;
+
+      if (draftProfile.profileImageFile) {
+        try {
+          uploadedProfile = await updateProfileImage(
+            draftProfile.profileImageFile,
+          );
+        } catch (error) {
+          if (!hasProfileChanges) {
+            throw error;
+          }
+
+          await queryClient.invalidateQueries({
+            queryKey: USER_DASHBOARD_QUERY_KEY,
+          });
+
+          let savedTextProfile: ProfileSettingsForm;
+
+          try {
+            const refreshedProfile = await queryClient.fetchQuery({
+              queryKey: USER_PROFILE_QUERY_KEY,
+              queryFn: getMyProfile,
+            });
+            savedTextProfile = toProfileSettings(refreshedProfile);
+          } catch {
+            savedTextProfile = {
+              ...cloneProfileSettings(draftProfile),
+              profileImageUrl: profile.profileImageUrl,
+              profileImageFile: null,
+            };
+            void queryClient.invalidateQueries({
+              queryKey: USER_PROFILE_QUERY_KEY,
+            });
+          }
+
+          saveProfile(savedTextProfile);
+          setDraftProfile({
+            ...cloneProfileSettings(savedTextProfile),
+            profileImageFile: draftProfile.profileImageFile,
+          });
+          notifyUserProfileChanged();
+          showToast(
+            "yellow",
+            "프로필 정보는 저장되었지만 이미지 업로드에 실패했습니다. 저장을 다시 시도해 주세요.",
+          );
+          return;
+        }
+      }
+
+      if (uploadedProfile) {
+        queryClient.setQueryData(USER_PROFILE_QUERY_KEY, uploadedProfile);
+      }
+
+      if (hasProfileChanges || uploadedProfile) {
+        await queryClient.invalidateQueries({
+          queryKey: USER_DASHBOARD_QUERY_KEY,
+        });
+      }
+
+      let refreshedProfile = uploadedProfile;
+
+      if (!refreshedProfile && hasProfileChanges) {
+        try {
+          refreshedProfile = await queryClient.fetchQuery({
+            queryKey: USER_PROFILE_QUERY_KEY,
+            queryFn: getMyProfile,
+          });
+        } catch {
+          showToast(
+            "yellow",
+            "프로필은 저장되었지만 최신 정보를 불러오지 못했습니다. 새로고침해 주세요.",
+          );
+          return;
+        }
+      }
+
+      const nextProfile = refreshedProfile
+        ? toProfileSettings(refreshedProfile)
+        : cloneProfileSettings(profile);
+
+      saveProfile(nextProfile);
+      setDraftProfile(cloneProfileSettings(nextProfile));
+      setIsEditing(false);
+
+      if (hasProfileChanges || uploadedProfile) {
+        notifyUserProfileChanged();
+      }
+
+      showToast("green", "프로필이 저장되었습니다.");
+    } catch (error) {
+      showToast(
+        "red",
+        getApiErrorDetailMessage(error, "프로필을 저장하지 못했습니다."),
+      );
+    } finally {
+      setIsApplying(false);
+    }
   };
 
   return (
@@ -39,11 +222,15 @@ export default function ProfileSettingsPage() {
       <div className="mx-auto mt-[18px] flex w-[634px] flex-col gap-[20px]">
         <ProfileManagementCard
           form={isEditing ? draftProfile : profile}
+          joinedAt={joinedAt}
+          guardianType={guardianType}
+          badgeName={badgeName}
           isEditing={isEditing}
           onChange={setDraftProfile}
           onStartEdit={startEditing}
           onCancel={cancelEditing}
           onApply={applyEditing}
+          isApplying={isApplying}
         />
         <AccountManagementCard onWithdraw={() => setIsWithdrawalModalOpen(true)} />
       </div>

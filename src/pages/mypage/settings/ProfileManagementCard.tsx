@@ -17,16 +17,31 @@ import ProfileSelect from "./components/ProfileSelect";
 
 interface ProfileManagementCardProps {
   form: ProfileSettingsForm;
+  joinedAt: string;
+  guardianType: string | null;
+  badgeName: string;
   isEditing: boolean;
   onChange: (form: ProfileSettingsForm) => void;
   onStartEdit: () => void;
   onCancel: () => void;
   onApply: () => void;
+  isApplying?: boolean;
 }
 
 const diagnosisEntries = Object.entries(diagnosisMap) as Array<
   [DiagnosisType, (typeof diagnosisMap)[DiagnosisType]]
 >;
+
+const guardianTypeLabels: Record<string, string> = {
+  PARENT: "부모",
+  GRANDPARENT: "조부모",
+  SIBLING: "형제·자매",
+  ETC: "기타",
+};
+
+function formatJoinedAt(joinedAt: string) {
+  return joinedAt.slice(0, 10).replaceAll("-", ".");
+}
 
 type ProfileSelectField = "region" | "district" | "birthYear" | "birthMonth";
 type ProfileSelectValues = Pick<ProfileSettingsForm, ProfileSelectField>;
@@ -59,19 +74,28 @@ function isValidBirthDate(birthYear: string, birthMonth: string) {
 
 export default function ProfileManagementCard({
   form,
+  joinedAt,
+  guardianType,
+  badgeName,
   isEditing,
   onChange,
   onStartEdit,
   onCancel,
   onApply,
+  isApplying = false,
 }: ProfileManagementCardProps) {
   const initialSelectValuesRef = useRef<ProfileSelectValues | null>(null);
+  const guardianTypeLabel = guardianType
+    ? (guardianTypeLabels[guardianType] ?? guardianType)
+    : null;
+  const profileLabels = [guardianTypeLabel, badgeName].filter(Boolean).join(" · ");
 
+  const hasCompleteBirth = Boolean(form.birthYear) === Boolean(form.birthMonth);
   const canApply =
-    form.parentNickname.trim().length > 0 &&
-    form.childNickname.trim().length > 0 &&
-    isValidBirthDate(form.birthYear, form.birthMonth) &&
-    form.diagnoses.length > 0;
+    form.parentNickname.trim().length <= 20 &&
+    form.childNickname.trim().length <= 20 &&
+    hasCompleteBirth &&
+    (!form.birthYear || isValidBirthDate(form.birthYear, form.birthMonth));
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -108,14 +132,13 @@ export default function ProfileManagementCard({
           imageUrl={form.profileImageUrl}
           imageFile={form.profileImageFile}
           isEditing={isEditing}
-          onChange={(profileImageFile) =>
-            updateField("profileImageFile", profileImageFile)
-          }
+          onChange={(profileImageFile) => updateField("profileImageFile", profileImageFile)}
         />
         <div className="ml-[20px]">
           <h2 className="text-h2-list text-background-600">{form.parentNickname}</h2>
           <p className="mt-[4px] text-h4-list text-background-500">
-            가입일 2026.01.15 · 효율형 부모
+            가입일 {formatJoinedAt(joinedAt)}
+            {profileLabels && ` · ${profileLabels}`}
           </p>
         </div>
         {isEditing ? (
@@ -123,11 +146,12 @@ export default function ProfileManagementCard({
             <ButtonOutline
               label="취소하기"
               onClick={onCancel}
+              disabled={isApplying}
               className="h-[44px] w-[91px] !text-h2-onboard"
             />
             <ButtonFill
               label="적용하기"
-              disabled={!canApply}
+              disabled={!canApply || isApplying}
               onClick={onApply}
               className="h-[44px] w-[91px] !text-h2-onboard"
             />
@@ -152,8 +176,10 @@ export default function ProfileManagementCard({
           id="parent-nickname"
           value={form.parentNickname}
           disabled={!isEditing}
-          onChange={(event) => updateField("parentNickname", event.target.value)}
-          className="h-[48px] !border !border-background-300"
+          onChange={(event) =>
+            updateField("parentNickname", event.target.value.slice(0, 20))
+          }
+          className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
 
@@ -207,8 +233,10 @@ export default function ProfileManagementCard({
           id="child-nickname"
           value={form.childNickname}
           disabled={!isEditing}
-          onChange={(event) => updateField("childNickname", event.target.value)}
-          className="h-[48px] !border !border-background-300"
+          onChange={(event) =>
+            updateField("childNickname", event.target.value.slice(0, 20))
+          }
+          className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
 

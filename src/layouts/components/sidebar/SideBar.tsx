@@ -5,7 +5,11 @@ import {
   logoutCurrentUser,
 } from "@/apis/authApi";
 import { getApiErrorMessage } from "@/apis/apiError";
-import { getUserBrief, type UserBrief } from "@/apis/userApi";
+import {
+  getUserBrief,
+  USER_PROFILE_CHANGED_EVENT,
+  type UserBrief,
+} from "@/apis/userApi";
 import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
 import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
@@ -43,9 +47,11 @@ export default function SideBar() {
   useEffect(() => {
     void loadBrief();
     window.addEventListener(AUTH_STATE_CHANGED_EVENT, loadBrief);
+    window.addEventListener(USER_PROFILE_CHANGED_EVENT, loadBrief);
 
     return () => {
       window.removeEventListener(AUTH_STATE_CHANGED_EVENT, loadBrief);
+      window.removeEventListener(USER_PROFILE_CHANGED_EVENT, loadBrief);
     };
   }, [loadBrief]);
 

@@ -3,6 +3,10 @@ import type { ProfileSettingsForm } from "./settings/types";
 
 export interface MyPageProfileContextValue {
   profile: ProfileSettingsForm;
+  level: number | null;
+  joinedAt: string;
+  guardianType: string | null;
+  badgeName: string;
   saveProfile: (profile: ProfileSettingsForm) => void;
 }
 
