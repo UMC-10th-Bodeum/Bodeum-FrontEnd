@@ -52,7 +52,16 @@ if (!baseUrl) {
 }
 
 export function getSocialLoginUrl(provider: SocialProvider) {
-  return `${baseUrl.replace(/\/+$/, "")}/api/v1/auth/login/${provider}`;
+  const loginUrl = new URL(
+    `${baseUrl.replace(/\/+$/, "")}/api/v1/auth/login/${provider}`,
+  );
+
+  loginUrl.searchParams.set(
+    "frontCallbackUrl",
+    `${window.location.origin}/auth/callback`,
+  );
+
+  return loginUrl.toString();
 }
 
 export function startSocialLogin(provider: SocialProvider) {
