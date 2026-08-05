@@ -10,8 +10,9 @@ import {
   sidoDisplayNameByRegion,
 } from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
-import { birthMonthOptions, birthYearOptions } from "./data";
-import type { ProfileSettingsForm } from "./types";
+import { birthMonthOptions, birthYearOptions } from "./birthDateOptions";
+import type { ProfileSettingsForm } from "@/types/mypage";
+import { formatDateWithDots } from "@/utils/time";
 import ProfileImagePicker from "./components/ProfileImagePicker";
 import ProfileSelect from "./components/ProfileSelect";
 
@@ -38,10 +39,6 @@ const guardianTypeLabels: Record<string, string> = {
   SIBLING: "형제·자매",
   ETC: "기타",
 };
-
-function formatJoinedAt(joinedAt: string) {
-  return joinedAt.slice(0, 10).replaceAll("-", ".");
-}
 
 type ProfileSelectField = "region" | "district" | "birthYear" | "birthMonth";
 type ProfileSelectValues = Pick<ProfileSettingsForm, ProfileSelectField>;
@@ -141,9 +138,9 @@ export default function ProfileManagementCard({
           onChange={(profileImageFile) => updateField("profileImageFile", profileImageFile)}
         />
         <div className="ml-[20px]">
-          <h2 className="text-h2-list text-background-600">{form.parentNickname}</h2>
+          <h2 className="min-h-[24px] text-h2-list text-background-600">{form.parentNickname}</h2>
           <p className="mt-[4px] text-h4-list text-background-500">
-            가입일 {formatJoinedAt(joinedAt)}
+            가입일 {formatDateWithDots(joinedAt)}
             {profileLabels && ` · ${profileLabels}`}
           </p>
         </div>
@@ -182,9 +179,7 @@ export default function ProfileManagementCard({
           id="parent-nickname"
           value={form.parentNickname}
           disabled={!isEditing || isApplying}
-          onChange={(event) =>
-            updateField("parentNickname", event.target.value.slice(0, 20))
-          }
+          onChange={(event) => updateField("parentNickname", event.target.value.slice(0, 20))}
           className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
@@ -239,9 +234,7 @@ export default function ProfileManagementCard({
           id="child-nickname"
           value={form.childNickname}
           disabled={!isEditing || isApplying}
-          onChange={(event) =>
-            updateField("childNickname", event.target.value.slice(0, 20))
-          }
+          onChange={(event) => updateField("childNickname", event.target.value.slice(0, 20))}
           className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
