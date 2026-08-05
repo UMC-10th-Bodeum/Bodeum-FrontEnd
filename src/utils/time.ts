@@ -1,6 +1,19 @@
 // YYYY-MM-DD 또는 ISO 날짜 문자열 → YYYY.MM.DD
 export function formatDateWithDots(dateString: string): string {
-  return dateString.slice(0, 10).replaceAll("-", ".");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString.replaceAll("-", ".");
+  }
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return "날짜 정보 없음";
+  }
+
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0"),
+  ].join(".");
 }
 
 // 0시간 전
