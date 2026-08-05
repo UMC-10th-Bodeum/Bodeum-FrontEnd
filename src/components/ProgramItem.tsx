@@ -7,17 +7,16 @@ import InfoItemNewsIcon from "@/assets/icons/InfoItem-news.svg?react";
 
 const noop = () => {};
 
-const programCategoryInfo = {
-  label: "프로그램",
+const newsCategoryStyle = {
   bgColor: "bg-background-200",
   textColor: "text-background-600",
-  pressedBorderColor: "peer-active:border-main-400",
 } as const;
 
 interface ProgramItemProps {
   name: string;
-  address: string;
-  services: string[];
+  address: string | null;
+  services: Array<string | null> | null;
+  categoryLabel: string;
   chipText?: string;
   chipVariant?: ChipVariant;
   viewCount: number;
@@ -31,6 +30,7 @@ export default function ProgramItem({
   name,
   address,
   services,
+  categoryLabel,
   chipText,
   chipVariant,
   viewCount,
@@ -39,6 +39,8 @@ export default function ProgramItem({
   onClick,
   onScrapClick,
 }: ProgramItemProps) {
+  const serviceText = services?.filter(Boolean).join(", ") || "-";
+
   return (
     <BaseInfoCard
       pressedBorderColor="peer-active:border-main-400"
@@ -52,16 +54,16 @@ export default function ProgramItem({
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-[4px]">
             <span
-              className={`shrink-0 rounded-[10px] ${programCategoryInfo.bgColor} px-2 py-[5px] text-h5-list leading-none ${programCategoryInfo.textColor}`}
+              className={`shrink-0 rounded-[10px] ${newsCategoryStyle.bgColor} px-2 py-[5px] text-h5-list leading-none ${newsCategoryStyle.textColor}`}
             >
-              {programCategoryInfo.label}
+              {categoryLabel}
             </span>
             <h3 className="truncate text-h2-list text-background-600">{name}</h3>
           </div>
 
-          <p className="mt-1 truncate text-h6-list text-background-600">{address}</p>
+          <p className="mt-1 truncate text-h6-list text-background-600">{address || "-"}</p>
 
-          <p className="mt-0.5 truncate text-body-sub text-background-500">{services}</p>
+          <p className="mt-0.5 truncate text-body-sub text-background-500">{serviceText}</p>
         </div>
       }
       right={

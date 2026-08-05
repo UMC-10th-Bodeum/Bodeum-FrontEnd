@@ -29,8 +29,11 @@ export const myPageRegionsQueryOptions = queryOptions({
   retry: false,
 });
 
-export const useMyProfile = () => {
-  return useQuery(myProfileQueryOptions);
+export const useMyProfile = (enabled = true) => {
+  return useQuery({
+    ...myProfileQueryOptions,
+    enabled,
+  });
 };
 
 export const useMyDashboard = () => {

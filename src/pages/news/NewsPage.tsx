@@ -1,41 +1,47 @@
-import { useState } from "react";
 import Pagination from "@/components/pagination/Pagination";
 import RecommendedNewsTopSection from "./components/RecommendedNewsTopSection";
-import NewsTabs, { type NewsTabValue } from "./components/NewsTabs";
-import NewsToolbar from "./components/NewsToolbar";
+import NewsTabs from "./components/NewsTabs";
+import NewsToolbar, { ALL_CATEGORIES_VALUE } from "./components/NewsToolbar";
 import NewsListSection from "./components/NewsListSection";
 import RegionOnboardingBox from "./components/RegionOnboardingBox";
-import { formatRegionDisplayLabel } from "@/constants/regions";
-import { newsListItems } from "./data/newsMockData";
+import { useNews, useNewsSearch } from "@/hooks/useNews";
+import type { NewsListParams } from "@/types/news";
+import { useNewsFilters } from "./useNewsFilters";
+
+const PAGE_SIZE = 14;
 
 export default function NewsPage() {
-  const [selectedTab, setSelectedTab] = useState<NewsTabValue>("activity");
-  const [keyword, setKeyword] = useState("");
-  // const [searchKeyword, setSearchKeyword] = useState(""); api 연동시 사용
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
-  const [sort, setSort] = useState("");
-  const [category, setCategory] = useState("");
-  const [page, setPage] = useState(1);
-  const selectedNewsType =
-    selectedTab === "activity" ? "ACTIVITY" : "LOCAL";
-  const filteredNewsListItems = newsListItems.filter(
-    (item) => item.newsType === selectedNewsType,
+  const filters = useNewsFilters();
+  const { region } = filters;
+
+  const listParams: NewsListParams = {
+    page: filters.page - 1,
+    size: PAGE_SIZE,
+    sort: filters.sort || "VIEW",
+    newsType: filters.newsType,
+    regionId: region.regionId,
+    regionLevel1:
+      region.regionId === undefined && !region.isAllRegionsSelected
+        ? region.regionLevel1
+        : undefined,
+    regionLevel2:
+      region.regionId === undefined && !region.isAllRegionsSelected
+        ? region.regionLevel2
+        : undefined,
+    category:
+      filters.category === "" || filters.category === ALL_CATEGORIES_VALUE
+        ? undefined
+        : filters.category,
+    status: filters.status,
+  };
+
+  const hasSearchKeyword = filters.searchKeyword.length > 0;
+  const newsQuery = useNews(listParams, !hasSearchKeyword && !region.isRegionInitializing);
+  const newsSearchQuery = useNewsSearch(
+    { ...listParams, keyword: filters.searchKeyword },
+    hasSearchKeyword && !region.isRegionInitializing,
   );
-
-  const openRegionOnboarding = () => {
-    setShowRegionOnboarding(true);
-  };
-
-  const completeRegionOnboarding = (region: string) => {
-    setSelectedRegion(formatRegionDisplayLabel(region));
-    setShowRegionOnboarding(false);
-  };
-
-  const handleSearch = (keyword: string) => {
-    console.log(keyword);
-    setPage(1);
-  };
+  const { data, isPending, isError } = hasSearchKeyword ? newsSearchQuery : newsQuery;
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
@@ -45,36 +51,35 @@ export default function NewsPage() {
         </div>
 
         <div className="flex flex-col gap-[16px]">
-          <NewsTabs
-            value={selectedTab}
-            onChange={(value) => {
-              setSelectedTab(value);
-              setCategory("");
-              setPage(1);
-            }}
-          />
+          <NewsTabs value={filters.tab} onChange={filters.selectTab} />
           <NewsToolbar
-            tab={selectedTab}
-            keyword={keyword}
-            onSearch={handleSearch}
-            onKeywordChange={setKeyword}
-            selectedRegion={selectedRegion}
-            onSelectedRegionClick={openRegionOnboarding}
-            sort={sort}
-            onSortChange={setSort}
-            category={category}
-            onCategoryChange={setCategory}
+            tab={filters.tab}
+            keyword={filters.keyword}
+            onSearch={filters.search}
+            onKeywordChange={filters.onKeywordChange}
+            selectedRegion={region.selectedRegion}
+            onSelectedRegionClick={region.openRegionOnboarding}
+            sort={filters.sort}
+            onSortChange={filters.setSort}
+            category={filters.category}
+            onCategoryChange={filters.setCategory}
           />
-          <NewsListSection items={filteredNewsListItems} />
-          <nav aria-label="소식 페이지네이션" className="p-2">
-            <Pagination currentPage={page} totalPages={120} onChange={setPage} />
-          </nav>
+          <NewsListSection items={data?.items ?? []} isLoading={isPending} isError={isError} />
+          {(data?.totalPages ?? 0) > 0 && (
+            <nav aria-label="소식 페이지네이션" className="p-2">
+              <Pagination
+                currentPage={filters.page}
+                totalPages={data?.totalPages ?? 1}
+                onChange={filters.setPage}
+              />
+            </nav>
+          )}
         </div>
       </div>
-      {showRegionOnboarding && (
+      {region.showRegionOnboarding && (
         <RegionOnboardingBox
-          onClose={() => setShowRegionOnboarding(false)}
-          onComplete={completeRegionOnboarding}
+          onClose={region.closeRegionOnboarding}
+          onComplete={region.completeRegionOnboarding}
         />
       )}
     </main>

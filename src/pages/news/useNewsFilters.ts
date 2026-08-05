@@ -1,0 +1,153 @@
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { type NewsCategoryFilter } from "./components/NewsToolbar";
+import type { NewsTabValue } from "./components/NewsTabs";
+import type { NewsSort, NewsStatus, NewsType } from "@/types/news";
+import { hasStoredAuthSession } from "@/apis/authApi";
+import {
+  newsTypeByTab,
+  getInitialTab,
+  getQuerySort,
+  getQueryCategory,
+  getQueryStatus,
+  parseInitialRegion,
+} from "./newsQueryParams";
+import { useRegionFilter } from "./useRegionFilter";
+
+export function useNewsFilters() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { regionLevel1: initialRegionLevel1, regionLevel2: initialRegionLevel2 } =
+    parseInitialRegion(searchParams);
+  const initialKeyword = searchParams.get("keyword")?.trim() ?? "";
+  const hasAuthSession = hasStoredAuthSession();
+
+  const [selectedTab, setSelectedTab] = useState<NewsTabValue>(() =>
+    getInitialTab(searchParams.get("newsType")),
+  );
+  const [keyword, setKeyword] = useState(initialKeyword);
+  const [searchKeyword, setSearchKeyword] = useState(initialKeyword);
+  const [sort, setSort] = useState<NewsSort | "">(() => getQuerySort(searchParams.get("sort")));
+  const [category, setCategory] = useState<NewsCategoryFilter>(() =>
+    getQueryCategory(searchParams.get("category")),
+  );
+  const [status] = useState<NewsStatus | undefined>(() =>
+    getQueryStatus(searchParams.get("status")),
+  );
+  const [page, setPage] = useState(1);
+
+  const updateNewsSearchParams = ({
+    nextNewsType = newsTypeByTab[selectedTab],
+    nextRegionLevel1,
+    nextRegionLevel2,
+    nextSort = sort,
+    nextCategory,
+    nextKeyword = searchKeyword,
+    nextStatus = status,
+  }: {
+    nextNewsType?: NewsType;
+    nextRegionLevel1?: string | null;
+    nextRegionLevel2?: string | null;
+    nextSort?: NewsSort | "";
+    nextCategory?: NewsCategoryFilter | null;
+    nextKeyword?: string;
+    nextStatus?: NewsStatus;
+  }) => {
+    const params = new URLSearchParams();
+    params.set("newsType", nextNewsType);
+
+    const resolvedRegionLevel1 =
+      nextRegionLevel1 === undefined ? region.regionLevel1 : (nextRegionLevel1 ?? undefined);
+    const resolvedRegionLevel2 =
+      nextRegionLevel2 === undefined ? region.regionLevel2 : (nextRegionLevel2 ?? undefined);
+    const resolvedCategory = nextCategory === undefined ? category : (nextCategory ?? undefined);
+
+    if (resolvedRegionLevel1) {
+      params.set("regionLevel1", resolvedRegionLevel1);
+    }
+    if (resolvedRegionLevel2) {
+      params.set("regionLevel2", resolvedRegionLevel2);
+    }
+    if (nextSort) {
+      params.set("sort", nextSort);
+    }
+    if (nextStatus) {
+      params.set("status", nextStatus);
+    }
+    if (resolvedCategory) {
+      params.set("category", resolvedCategory);
+    }
+    if (nextKeyword) {
+      params.set("keyword", nextKeyword);
+    }
+
+    setSearchParams(params);
+  };
+
+  const region = useRegionFilter({
+    initialRegionLevel1,
+    initialRegionLevel2,
+    hasAuthSession,
+    onCommit: ({ regionLevel1, regionLevel2 }) => {
+      setPage(1);
+      updateNewsSearchParams({ nextRegionLevel1: regionLevel1, nextRegionLevel2: regionLevel2 });
+    },
+  });
+
+  const selectTab = (value: NewsTabValue) => {
+    setSelectedTab(value);
+    setCategory("");
+    setPage(1);
+    updateNewsSearchParams({
+      nextNewsType: newsTypeByTab[value],
+      nextCategory: null,
+    });
+  };
+
+  const changeSort = (value: NewsSort) => {
+    setSort(value);
+    setPage(1);
+    updateNewsSearchParams({ nextSort: value });
+  };
+
+  const changeCategory = (value: NewsCategoryFilter) => {
+    setCategory(value);
+    setPage(1);
+    updateNewsSearchParams({ nextCategory: value || null });
+  };
+
+  const search = (nextKeyword: string) => {
+    const normalizedKeyword = nextKeyword.trim();
+    setKeyword(normalizedKeyword);
+    setSearchKeyword(normalizedKeyword);
+    setPage(1);
+    updateNewsSearchParams({ nextKeyword: normalizedKeyword });
+  };
+
+  const onKeywordChange = (value: string) => {
+    setKeyword(value);
+    if (!value.trim()) {
+      setSearchKeyword("");
+      setPage(1);
+      updateNewsSearchParams({ nextKeyword: "" });
+    }
+  };
+
+  return {
+    tab: selectedTab,
+    selectTab,
+    newsType: newsTypeByTab[selectedTab],
+    keyword,
+    searchKeyword,
+    search,
+    onKeywordChange,
+    sort,
+    setSort: changeSort,
+    category,
+    setCategory: changeCategory,
+    status,
+    page,
+    setPage,
+    region,
+  };
+}

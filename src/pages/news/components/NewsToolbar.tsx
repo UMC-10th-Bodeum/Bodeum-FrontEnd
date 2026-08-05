@@ -3,7 +3,13 @@ import ChevronLeft from "@/assets/icons/ChevronLeft.svg?react";
 import Input from "@/components/Input";
 import { Select, type SelectOption } from "@/components/Select";
 import type { NewsTabValue } from "./NewsTabs";
-import { searchSuggestionMockData } from "@/mocks/search";
+import type { NewsCategory, NewsSort } from "@/types/news";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useNewsSearchSuggestions } from "@/hooks/useNews";
+import { ALL_REGIONS_LABEL } from "./RegionOnboardingBox";
+
+export const ALL_CATEGORIES_VALUE = "ALL";
+export type NewsCategoryFilter = NewsCategory | typeof ALL_CATEGORIES_VALUE | "";
 
 interface NewsToolbarProps {
   tab: NewsTabValue;
@@ -11,31 +17,30 @@ interface NewsToolbarProps {
   onKeywordChange: (value: string) => void;
   selectedRegion: string;
   onSelectedRegionClick: () => void;
-  sort: string;
-  onSortChange: (value: string) => void;
-  category: string;
-  onCategoryChange: (value: string) => void;
+  sort: NewsSort | "";
+  onSortChange: (value: NewsSort) => void;
+  category: NewsCategoryFilter;
+  onCategoryChange: (value: NewsCategoryFilter) => void;
   onSearch: (keyword: string) => void;
 }
 
 const sortOptions = [
-  { label: "조회순", value: "views" },
-  { label: "저장순", value: "saves" },
-  { label: "후기순", value: "reviews" },
+  { label: "조회순", value: "VIEW" },
+  { label: "저장순", value: "SCRAP" },
 ];
 
 const categoryOptionsByTab: Record<NewsTabValue, SelectOption[]> = {
   activity: [
-    { label: "카테고리", value: "all" },
-    { label: "모집 · 참여", value: "recruit-participation" },
-    { label: "교육 · 세미나", value: "education-seminar" },
-    { label: "혜택 · 복지서비스", value: "benefit-welfare-service" },
-    { label: "기관 공지 · 뉴스", value: "institution-notice-news" },
+    { label: "전체", value: ALL_CATEGORIES_VALUE },
+    { label: "모집 · 참여", value: "RECRUITMENT_PARTICIPATION" },
+    { label: "교육 · 세미나", value: "EDUCATION_SEMINAR" },
+    { label: "혜택 · 복지서비스", value: "BENEFIT_WELFARE_SERVICE" },
+    { label: "기관 공지 · 뉴스", value: "INSTITUTION_NOTICE_NEWS" },
   ],
   region: [
-    { label: "카테고리", value: "all" },
-    { label: "소식", value: "news" },
-    { label: "정책", value: "policy" },
+    { label: "전체", value: ALL_CATEGORIES_VALUE },
+    { label: "소식", value: "LOCAL_NEWS" },
+    { label: "정책", value: "LOCAL_POLICY" },
   ],
 };
 
@@ -52,18 +57,15 @@ export default function NewsToolbar({
   onSearch,
 }: NewsToolbarProps) {
   const categoryOptions = categoryOptionsByTab[tab];
-  const selectedRegionLabel = selectedRegion || "전체 지역";
+  const selectedRegionLabel = selectedRegion || ALL_REGIONS_LABEL;
   const selectedRegionButtonStateClass = selectedRegion
     ? "border-main-400 text-background-600"
     : "border-background-250 text-background-500";
-  
-  const suggestions =
-    keyword.trim().length >= 2
-      ? searchSuggestionMockData.result.suggestions.filter((item) =>
-        item.text.includes(keyword)
-      )
-      : [];
-  
+
+  const normalizedKeyword = keyword.trim();
+  const debouncedKeyword = useDebouncedValue(normalizedKeyword, 300);
+  const { data: suggestions = [] } = useNewsSearchSuggestions(debouncedKeyword);
+
   return (
     <div className="flex flex-wrap items-center gap-[12px]">
       <Input
@@ -74,6 +76,7 @@ export default function NewsToolbar({
         suggestions={suggestions}
         onSuggestionClick={(text) => {
           onKeywordChange(text);
+          onSearch(text);
         }}
         onEnter={onSearch}
         placeholder="소식을 검색해보세요"
@@ -95,7 +98,7 @@ export default function NewsToolbar({
       <Select
         options={sortOptions}
         value={sort}
-        onChange={onSortChange}
+        onChange={(value) => onSortChange(value as NewsSort)}
         placeholder="조회순"
         ariaLabel="정렬 선택"
         className="w-[120px]"
@@ -103,7 +106,7 @@ export default function NewsToolbar({
       <Select
         options={categoryOptions}
         value={category}
-        onChange={onCategoryChange}
+        onChange={(value) => onCategoryChange(value as NewsCategoryFilter)}
         placeholder="카테고리"
         ariaLabel="카테고리 선택"
         className="w-[120px]"
