@@ -14,8 +14,12 @@ export function createChildBirthYearOptions() {
   });
 }
 
-export function createChildBirthMonthOptions() {
-  return Array.from({ length: 12 }, (_, index) => {
+export function createChildBirthMonthOptions(birthYear = "") {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const lastMonth = birthYear === `${currentYear}` ? today.getMonth() + 1 : 12;
+
+  return Array.from({ length: lastMonth }, (_, index) => {
     const month = index + 1;
 
     return {

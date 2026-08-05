@@ -10,7 +10,10 @@ import {
   sidoDisplayNameByRegion,
 } from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
-import { birthMonthOptions, birthYearOptions } from "./birthDateOptions";
+import {
+  createChildBirthMonthOptions,
+  birthYearOptions,
+} from "./birthDateOptions";
 import type { ProfileSettingsForm } from "@/types/mypage";
 import { formatDateWithDots } from "@/utils/time";
 import ProfileImagePicker from "./components/ProfileImagePicker";
@@ -50,25 +53,6 @@ const getProfileSelectValues = (form: ProfileSettingsForm): ProfileSelectValues 
   birthMonth: form.birthMonth,
 });
 
-function isValidBirthDate(birthYear: string, birthMonth: string) {
-  if (!birthYear || !birthMonth) {
-    return false;
-  }
-
-  const year = Number(birthYear);
-  const month = Number(birthMonth);
-
-  if (!Number.isInteger(year) || year <= 0 || !Number.isInteger(month) || month < 1 || month > 12) {
-    return false;
-  }
-
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
-
-  return year < currentYear || (year === currentYear && month <= currentMonth);
-}
-
 export default function ProfileManagementCard({
   form,
   joinedAt,
@@ -96,8 +80,8 @@ export default function ProfileManagementCard({
     childNickname.length > 0 &&
     childNickname.length <= 20 &&
     hasCompleteBirth &&
-    isValidBirthDate(form.birthYear, form.birthMonth) &&
     form.diagnoses.length > 0;
+  const birthMonthOptions = createChildBirthMonthOptions(form.birthYear);
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -111,6 +95,18 @@ export default function ProfileManagementCard({
       : [...form.diagnoses, diagnosis];
 
     updateField("diagnoses", diagnoses);
+  };
+
+  const updateBirthYear = (birthYear: string) => {
+    const canKeepBirthMonth = createChildBirthMonthOptions(birthYear).some(
+      ({ value }) => value === form.birthMonth,
+    );
+
+    onChange({
+      ...form,
+      birthYear,
+      birthMonth: canKeepBirthMonth ? form.birthMonth : "",
+    });
   };
 
   const startEditing = () => {
@@ -249,7 +245,7 @@ export default function ProfileManagementCard({
             value={form.birthYear}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthYear")}
-            onChange={(birthYear) => updateField("birthYear", birthYear)}
+            onChange={updateBirthYear}
             placeholder="년도"
             className="w-full"
           />
