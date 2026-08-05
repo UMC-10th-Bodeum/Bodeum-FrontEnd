@@ -1,16 +1,13 @@
 import type { NewsStatus } from "@/types/news";
 
-type NewsStatusVariant = "default" | "dday" | "recruit";
+export type NewsStatusVariant = "default" | "dday" | "recruit";
 
-interface NewsStatusPresentation {
+export interface NewsStatusPresentation {
   label: string;
   variant: NewsStatusVariant;
 }
 
-const statusPresentation: Record<
-  NewsStatus | "NONE",
-  NewsStatusPresentation
-> = {
+const statusPresentation: Record<NewsStatus | "NONE", NewsStatusPresentation> = {
   RECRUITING: { label: "모집 중", variant: "recruit" },
   CLOSED: { label: "마감", variant: "default" },
   ALWAYS_OPEN: { label: "상시 모집", variant: "recruit" },
