@@ -1,5 +1,5 @@
-import { myPageTabs } from "../data/myPageData";
-import type { MyPageTabKey } from "../types";
+import { myPageTabs } from "../myPageTabConfig";
+import type { MyPageTabKey } from "@/types/mypage";
 
 interface MyPageTabsProps {
   activeTab: MyPageTabKey;
