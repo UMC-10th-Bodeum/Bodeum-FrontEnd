@@ -1,3 +1,8 @@
+// YYYY-MM-DD 또는 ISO 날짜 문자열 → YYYY.MM.DD
+export function formatDateWithDots(dateString: string): string {
+  return dateString.slice(0, 10).replaceAll("-", ".");
+}
+
 // 0시간 전
 export function getRelativeTime(dateString: string): string {
   const now = new Date();

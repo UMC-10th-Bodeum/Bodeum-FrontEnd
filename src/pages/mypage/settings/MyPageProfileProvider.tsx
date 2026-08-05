@@ -1,26 +1,16 @@
 import { useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { getApiErrorMessage } from "@/apis/apiError";
-import { getMyProfile, USER_PROFILE_QUERY_KEY } from "@/apis/userApi";
+import { useMyProfile } from "@/hooks/useMyPage";
 import { MyPageProfileContext } from "./myPageProfileContext";
-import { toProfileSettings } from "./profileSettingsMapper";
-import type { ProfileSettingsForm } from "./settings/types";
-
-const cloneProfile = (profile: ProfileSettingsForm): ProfileSettingsForm => ({
-  ...profile,
-  diagnoses: [...profile.diagnoses],
-});
+import { cloneProfileSettings, toProfileSettings } from "./profileSettingsMapper";
+import type { ProfileSettingsForm } from "@/types/mypage";
 
 export default function MyPageProfileProvider({ children }: { children: ReactNode }) {
   const [savedProfile, setSavedProfile] = useState<ProfileSettingsForm | null>(null);
-  const profileQuery = useQuery({
-    queryKey: USER_PROFILE_QUERY_KEY,
-    queryFn: getMyProfile,
-    retry: false,
-  });
+  const profileQuery = useMyProfile();
 
   const saveProfile = (nextProfile: ProfileSettingsForm) => {
-    setSavedProfile(cloneProfile(nextProfile));
+    setSavedProfile(cloneProfileSettings(nextProfile));
   };
 
   if (profileQuery.isPending) {
@@ -40,12 +30,7 @@ export default function MyPageProfileProvider({ children }: { children: ReactNod
         role="alert"
         className="flex min-h-full flex-col items-center justify-center gap-[16px] bg-background-200 text-h3-onboard text-background-500"
       >
-        <p>
-          {getApiErrorMessage(
-            profileQuery.error,
-            "프로필을 불러오지 못했습니다.",
-          )}
-        </p>
+        <p>{getApiErrorMessage(profileQuery.error, "프로필을 불러오지 못했습니다.")}</p>
         <button
           type="button"
           onClick={() => void profileQuery.refetch()}

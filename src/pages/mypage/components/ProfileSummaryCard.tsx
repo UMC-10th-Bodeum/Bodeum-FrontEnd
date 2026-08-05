@@ -1,10 +1,10 @@
-import type { UserDashboard } from "@/apis/userApi";
+import type { UserDashboard } from "@/types/mypage";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import SettingIcon from "@/assets/icons/Setting.svg?react";
 import ButtonOutline from "@/components/ButtonOutline";
 import { sidoDisplayNameByRegion } from "@/constants/regions";
-import { myPageTabs } from "../data/myPageData";
-import type { MyPageTabKey } from "../types";
+import { myPageTabs } from "../myPageTabConfig";
+import type { MyPageTabKey } from "@/types/mypage";
 
 interface ProfileSummaryCardProps {
   dashboard: UserDashboard;
@@ -41,9 +41,8 @@ export default function ProfileSummaryCard({
     dashboard.childProfile?.disabilityTypes.map(({ label }) => label).join(", ") ||
     "집중 케어 미등록";
   const childAge = getChildAge(dashboard.childProfile?.birth);
-  const district = dashboard.regionLevel2 !== dashboard.regionLevel1
-    ? dashboard.regionLevel2
-    : null;
+  const district =
+    dashboard.regionLevel2 !== dashboard.regionLevel1 ? dashboard.regionLevel2 : null;
   const region = [
     dashboard.regionLevel1
       ? (sidoDisplayNameByRegion[dashboard.regionLevel1] ?? dashboard.regionLevel1)
@@ -64,17 +63,14 @@ export default function ProfileSummaryCard({
             className="h-[90px] w-[90px] shrink-0 rounded-full object-cover"
           />
         ) : (
-          <ProfileIcon
-            className="h-[90px] w-[90px] shrink-0"
-            aria-label="보듬 부모님 프로필"
-          />
+          <ProfileIcon className="h-[90px] w-[90px] shrink-0" aria-label="보듬 부모님 프로필" />
         )}
 
         <div className="ml-[19px]">
           <h1 className="text-h1-onboard">{displayNickname}</h1>
           <p className="mt-[19px] text-h3-onboard">
-            LEVEL {dashboard.level} · {diagnosisLabel} · {childAge === null ? "연령 미등록" : `${childAge}세 아이`}{" "}
-            · {region || "지역 미등록"}
+            LEVEL {dashboard.level} · {diagnosisLabel} ·{" "}
+            {childAge === null ? "연령 미등록" : `${childAge}세 아이`} · {region || "지역 미등록"}
           </p>
         </div>
 

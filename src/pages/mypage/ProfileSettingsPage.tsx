@@ -1,32 +1,28 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getApiErrorDetailMessage } from "@/apis/apiError";
-import { findRegionId, getRegions } from "@/apis/onboardingApi";
+import { findRegionId } from "@/apis/onboardingApi";
+import { notifyUserProfileChanged } from "@/apis/userApi";
 import {
-  getMyProfile,
-  notifyUserProfileChanged,
-  updateMyProfile,
-  updateProfileImage,
+  myPageRegionsQueryOptions,
+  myProfileQueryOptions,
   USER_DASHBOARD_QUERY_KEY,
   USER_PROFILE_QUERY_KEY,
-  type UpdateMyProfileRequest,
-} from "@/apis/userApi";
+  useUpdateMyProfile,
+  useUpdateProfileImage,
+} from "@/hooks/useMyPage";
+import type { ProfileSettingsForm, UpdateMyProfileRequest } from "@/types/mypage";
 import DetailBackButton from "@/components/DetailBackButton";
 import { showToast } from "@/components/Toast";
 import AccountManagementCard from "./settings/AccountManagementCard";
 import ProfileManagementCard from "./settings/ProfileManagementCard";
 import WithdrawalModal from "./settings/components/WithdrawalModal";
-import type { ProfileSettingsForm } from "./settings/types";
-import { useMyPageProfile } from "./myPageProfileContext";
+import { useMyPageProfile } from "./settings/myPageProfileContext";
 import {
+  cloneProfileSettings,
   toApiDisabilityTypes,
   toProfileSettings,
-} from "./profileSettingsMapper";
-
-const cloneProfileSettings = (profile: ProfileSettingsForm): ProfileSettingsForm => ({
-  ...profile,
-  diagnoses: [...profile.diagnoses],
-});
+} from "./settings/profileSettingsMapper";
 
 function getChildBirth(profile: ProfileSettingsForm) {
   if (!profile.birthYear || !profile.birthMonth) {
@@ -37,14 +33,17 @@ function getChildBirth(profile: ProfileSettingsForm) {
 }
 
 function haveSameValues(left: string[], right: string[]) {
-  return left.length === right.length
-    && [...left].sort().every((value, index) => value === [...right].sort()[index]);
+  return (
+    left.length === right.length &&
+    [...left].sort().every((value, index) => value === [...right].sort()[index])
+  );
 }
 
 export default function ProfileSettingsPage() {
   const queryClient = useQueryClient();
-  const { profile, joinedAt, guardianType, badgeName, saveProfile } =
-    useMyPageProfile();
+  const { mutateAsync: updateProfile } = useUpdateMyProfile();
+  const { mutateAsync: uploadProfileImage } = useUpdateProfileImage();
+  const { profile, joinedAt, guardianType, badgeName, saveProfile } = useMyPageProfile();
   const [draftProfile, setDraftProfile] = useState(() => cloneProfileSettings(profile));
   const [isEditing, setIsEditing] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
@@ -92,16 +91,9 @@ export default function ProfileSettingsPage() {
         request.disabilityTypes = disabilityTypes;
       }
 
-      if (
-        draftProfile.region !== profile.region
-        || draftProfile.district !== profile.district
-      ) {
-        const regions = await getRegions();
-        const regionId = findRegionId(
-          regions,
-          draftProfile.region,
-          draftProfile.district,
-        );
+      if (draftProfile.region !== profile.region || draftProfile.district !== profile.district) {
+        const regions = await queryClient.fetchQuery(myPageRegionsQueryOptions);
+        const regionId = findRegionId(regions, draftProfile.region, draftProfile.district);
 
         if (regionId === undefined) {
           throw new Error("선택한 지역을 찾을 수 없습니다.");
@@ -113,16 +105,14 @@ export default function ProfileSettingsPage() {
       const hasProfileChanges = Object.keys(request).length > 0;
 
       if (hasProfileChanges) {
-        await updateMyProfile(request);
+        await updateProfile(request);
       }
 
-      let uploadedProfile: Awaited<ReturnType<typeof updateProfileImage>> | null = null;
+      let uploadedProfile: Awaited<ReturnType<typeof uploadProfileImage>> | null = null;
 
       if (draftProfile.profileImageFile) {
         try {
-          uploadedProfile = await updateProfileImage(
-            draftProfile.profileImageFile,
-          );
+          uploadedProfile = await uploadProfileImage(draftProfile.profileImageFile);
         } catch (error) {
           if (!hasProfileChanges) {
             throw error;
@@ -135,10 +125,7 @@ export default function ProfileSettingsPage() {
           let savedTextProfile: ProfileSettingsForm;
 
           try {
-            const refreshedProfile = await queryClient.fetchQuery({
-              queryKey: USER_PROFILE_QUERY_KEY,
-              queryFn: getMyProfile,
-            });
+            const refreshedProfile = await queryClient.fetchQuery(myProfileQueryOptions);
             savedTextProfile = toProfileSettings(refreshedProfile);
           } catch {
             savedTextProfile = {
@@ -179,10 +166,7 @@ export default function ProfileSettingsPage() {
 
       if (!refreshedProfile && hasProfileChanges) {
         try {
-          refreshedProfile = await queryClient.fetchQuery({
-            queryKey: USER_PROFILE_QUERY_KEY,
-            queryFn: getMyProfile,
-          });
+          refreshedProfile = await queryClient.fetchQuery(myProfileQueryOptions);
         } catch {
           showToast(
             "yellow",
@@ -206,10 +190,7 @@ export default function ProfileSettingsPage() {
 
       showToast("green", "프로필이 저장되었습니다.");
     } catch (error) {
-      showToast(
-        "red",
-        getApiErrorDetailMessage(error, "프로필을 저장하지 못했습니다."),
-      );
+      showToast("red", getApiErrorDetailMessage(error, "프로필을 저장하지 못했습니다."));
     } finally {
       setIsApplying(false);
     }

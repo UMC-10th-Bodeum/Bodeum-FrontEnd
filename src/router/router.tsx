@@ -19,7 +19,7 @@ import AuthBrowserSessionGuard from "@/pages/auth/components/AuthBrowserSessionG
 import ProtectedRoute from "@/pages/auth/components/ProtectedRoute";
 import MyPage from "@/pages/mypage/MyPage";
 import ProfileSettingsPage from "@/pages/mypage/ProfileSettingsPage";
-import MyPageProfileProvider from "@/pages/mypage/MyPageProfileProvider";
+import MyPageProfileProvider from "@/pages/mypage/settings/MyPageProfileProvider";
 
 export const router = createBrowserRouter([
   {

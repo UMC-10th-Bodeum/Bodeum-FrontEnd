@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getApiErrorDetailMessage } from "@/apis/apiError";
 import { clearAuthTokens } from "@/apis/authApi";
-import { deleteMyAccount } from "@/apis/userApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
+import { useDeleteMyAccount } from "@/hooks/useMyPage";
 import { showToast } from "@/components/Toast";
 import { clearAgreementBrowserSession } from "@/pages/auth/agreementBrowserSession";
 import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
@@ -18,7 +18,8 @@ interface WithdrawalModalProps {
 export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutateAsync: withdraw, isPending: isSubmitting } =
+    useDeleteMyAccount();
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -43,10 +44,8 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      const result = await deleteMyAccount();
+      const result = await withdraw();
 
       if (!result.success) {
         throw new Error("회원 탈퇴 처리 결과를 확인할 수 없습니다.");
@@ -61,7 +60,6 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
       clearAuthTokens();
       showToast("green", "회원 탈퇴가 완료되었습니다.");
     } catch (error) {
-      setIsSubmitting(false);
       showToast(
         "red",
         getApiErrorDetailMessage(error, "회원 탈퇴에 실패했습니다."),

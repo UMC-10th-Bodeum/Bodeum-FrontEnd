@@ -4,7 +4,7 @@ import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import Chip from "@/components/Chips";
 import DetailBackButton from "@/components/DetailBackButton";
 import { Link } from "react-router-dom";
-import type { MyPageItem } from "../types";
+import type { MyPageItem } from "@/types/mypage";
 
 interface MyPageCardProps {
   item: MyPageItem;

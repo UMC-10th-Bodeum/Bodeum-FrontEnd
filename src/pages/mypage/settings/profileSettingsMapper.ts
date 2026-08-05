@@ -1,10 +1,6 @@
-import type {
-  DisabilityType,
-  UserDashboard,
-  UserProfile,
-} from "@/apis/userApi";
+import type { ProfileSettingsForm, UserDashboard } from "@/types/mypage";
+import type { DisabilityType, UserProfile } from "@/types/user";
 import type { DiagnosisType } from "@/types/diagnosis";
-import type { ProfileSettingsForm } from "./settings/types";
 
 type ProfileSettingsSource = Pick<
   UserProfile | UserDashboard,
@@ -35,6 +31,15 @@ const apiCodeByDiagnosis: Record<DiagnosisType, DisabilityType> = {
   LANGUAGE_DISORDER: "LANGUAGE_DISORDER",
   ETC: "ETC",
 };
+
+export function cloneProfileSettings(
+  profile: ProfileSettingsForm,
+): ProfileSettingsForm {
+  return {
+    ...profile,
+    diagnoses: [...profile.diagnoses],
+  };
+}
 
 export function toApiDisabilityTypes(diagnoses: DiagnosisType[]) {
   return diagnoses.map((diagnosis) => apiCodeByDiagnosis[diagnosis]);

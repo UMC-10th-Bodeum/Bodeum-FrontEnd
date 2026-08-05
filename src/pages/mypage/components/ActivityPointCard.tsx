@@ -1,6 +1,6 @@
 import BadgeIcon from "@/assets/icons/Badge.svg?react";
 import BadgeHelpIcon from "@/assets/icons/BadgeHelp.svg?react";
-import type { UserPointActivity } from "@/apis/userApi";
+import type { UserPointActivity } from "@/types/mypage";
 
 interface ActivityPointCardProps {
   totalPoint: number;

@@ -1,6 +1,4 @@
-import type {
-  MyPageTab,
-} from "../types";
+import type { MyPageTab } from "@/types/mypage";
 
 export const myPageTabs: MyPageTab[] = [
   { key: "saved", label: "저장한 정보" },

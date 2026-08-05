@@ -8,8 +8,8 @@ import { getApiErrorMessage } from "@/apis/apiError";
 import {
   getUserBrief,
   USER_PROFILE_CHANGED_EVENT,
-  type UserBrief,
 } from "@/apis/userApi";
+import type { UserBrief } from "@/types/user";
 import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
 import { clearAuthProgress } from "@/pages/auth/authProgressStorage";

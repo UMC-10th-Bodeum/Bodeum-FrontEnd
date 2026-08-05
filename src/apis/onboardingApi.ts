@@ -1,6 +1,7 @@
 import api from "./axios";
 import type { ApiResponse, NextStep } from "./apiTypes";
-import { getMyProfile, type UserProfile } from "./userApi";
+import { getMyProfile } from "./userApi";
+import type { UserProfile } from "@/types/user";
 
 type DisabilityType =
   | "AUTISM"

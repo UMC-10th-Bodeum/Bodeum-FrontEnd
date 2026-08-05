@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { getApiErrorMessage } from "@/apis/apiError";
 import {
-  deleteMyScrap,
-  getMyComments,
-  getMyDashboard,
-  getMyPoints,
-  getMyPosts,
-  getMyScraps,
   USER_DASHBOARD_QUERY_KEY,
   USER_SCRAPS_QUERY_KEY,
-} from "@/apis/userApi";
+  useDeleteMyScrap,
+  useMyComments,
+  useMyDashboard,
+  useMyPoints,
+  useMyPosts,
+  useMyScraps,
+} from "@/hooks/useMyPage";
+import { formatDateWithDots } from "@/utils/time";
 import Pagination from "@/components/pagination/Pagination";
 import { showToast } from "@/components/Toast";
 import { useNavigate } from "react-router-dom";
@@ -20,50 +21,36 @@ import BadgeHelpModal from "./components/BadgeHelpModal";
 import MyPageCard from "./components/MyPageCard";
 import MyPageTabs from "./components/MyPageTabs";
 import ProfileSummaryCard from "./components/ProfileSummaryCard";
-import type { MyPageScrapItem, MyPageTabKey } from "./types";
+import type { MyPageScrapItem, MyPageTabKey } from "@/types/mypage";
 
 type BadgeModalType = "grade" | "help" | null;
 const MY_ACTIVITY_PAGE_SIZE = 6;
 
-function formatPostDate(createdAt: string) {
-  return createdAt.slice(0, 10).replaceAll("-", ".");
-}
-
 export default function MyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const dashboardQuery = useQuery({
-    queryKey: USER_DASHBOARD_QUERY_KEY,
-    queryFn: getMyDashboard,
-    retry: false,
-  });
-  const pointsQuery = useQuery({
-    queryKey: ["user", "points"],
-    queryFn: getMyPoints,
-    retry: false,
-  });
+  const { mutateAsync: deleteScrap } = useDeleteMyScrap();
+  const dashboardQuery = useMyDashboard();
+  const pointsQuery = useMyPoints();
   const [activeTab, setActiveTab] = useState<MyPageTabKey>("saved");
   const [scrapsPage, setScrapsPage] = useState(0);
-  const scrapsQuery = useQuery({
-    queryKey: [...USER_SCRAPS_QUERY_KEY, scrapsPage, MY_ACTIVITY_PAGE_SIZE],
-    queryFn: () => getMyScraps(scrapsPage, MY_ACTIVITY_PAGE_SIZE),
-    enabled: activeTab === "saved",
-    retry: false,
-  });
+  const scrapsQuery = useMyScraps(
+    scrapsPage,
+    MY_ACTIVITY_PAGE_SIZE,
+    activeTab === "saved",
+  );
   const [postsPage, setPostsPage] = useState(0);
-  const postsQuery = useQuery({
-    queryKey: ["user", "posts", postsPage, MY_ACTIVITY_PAGE_SIZE],
-    queryFn: () => getMyPosts(postsPage, MY_ACTIVITY_PAGE_SIZE),
-    enabled: activeTab === "posts",
-    retry: false,
-  });
+  const postsQuery = useMyPosts(
+    postsPage,
+    MY_ACTIVITY_PAGE_SIZE,
+    activeTab === "posts",
+  );
   const [commentsPage, setCommentsPage] = useState(0);
-  const commentsQuery = useQuery({
-    queryKey: ["user", "comments", commentsPage, MY_ACTIVITY_PAGE_SIZE],
-    queryFn: () => getMyComments(commentsPage, MY_ACTIVITY_PAGE_SIZE),
-    enabled: activeTab === "comments",
-    retry: false,
-  });
+  const commentsQuery = useMyComments(
+    commentsPage,
+    MY_ACTIVITY_PAGE_SIZE,
+    activeTab === "comments",
+  );
   const [hiddenScrapIds, setHiddenScrapIds] = useState<Set<number | string>>(
     () => new Set(),
   );
@@ -80,7 +67,7 @@ export default function MyPage() {
     setDeletingScrapId(item.id);
 
     try {
-      await deleteMyScrap(item.scrapId);
+      await deleteScrap(item.scrapId);
       setHiddenScrapIds((current) => new Set(current).add(item.id));
 
       const currentPageItemCount = scrapsQuery.data
@@ -159,7 +146,7 @@ export default function MyPage() {
             title: scrap.name,
             targetPath: `/info/${scrap.mainCategory}/${scrap.infoItemId}`,
             sourceLabel: scrap.mainCategoryKo || "정보",
-            date: formatPostDate(scrap.scrappedAt),
+            date: formatDateWithDots(scrap.scrappedAt),
           },
           scrappedAt: scrap.scrappedAt,
         })),
@@ -172,7 +159,7 @@ export default function MyPage() {
             title: scrap.title,
             targetPath: `/news/${scrap.newsId}`,
             sourceLabel: "소식",
-            date: formatPostDate(scrap.scrappedAt),
+            date: formatDateWithDots(scrap.scrappedAt),
           },
           scrappedAt: scrap.scrappedAt,
         })),
@@ -185,7 +172,7 @@ export default function MyPage() {
             title: scrap.title,
             targetPath: `/community/${scrap.postId}`,
             sourceLabel: "커뮤니티 게시글",
-            date: formatPostDate(scrap.scrappedAt),
+            date: formatDateWithDots(scrap.scrappedAt),
           },
           scrappedAt: scrap.scrappedAt,
         })),
@@ -202,7 +189,7 @@ export default function MyPage() {
         postId: post.postId,
         type: "post" as const,
         title: post.title,
-        date: formatPostDate(post.createdAt),
+        date: formatDateWithDots(post.createdAt),
       }))
     : activeTab === "comments"
       ? (commentsQuery.data?.comments ?? []).map((comment) => ({
@@ -211,7 +198,7 @@ export default function MyPage() {
           type: "comment" as const,
           comment: comment.content,
           postTitle: comment.postTitle,
-          date: formatPostDate(comment.createdAt),
+          date: formatDateWithDots(comment.createdAt),
         }))
       : [];
   const isActivityPending = activeTab === "saved"
