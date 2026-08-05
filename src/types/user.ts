@@ -17,13 +17,13 @@ export type UserBrief = {
 
 export type UserProfile = {
   userId: number;
-  nickname: string | null;
+  nickname: string;
   email: string | null;
   provider: string;
   profileImageUrl: string | null;
   point: number;
   level: number;
-  badgeName: string | null;
+  badgeName: string;
   levelDescription: string | null;
   childProfile: {
     nickname: string | null;
@@ -41,3 +41,25 @@ export type UserProfile = {
   joinedAt: string;
   updatedAt: string;
 };
+
+export type DisabilityType =
+  | "AUTISM"
+  | "INTELLECTUAL_DISABILITY"
+  | "CEREBRAL_PALSY"
+  | "ADHD"
+  | "DEVELOPMENTAL_DELAY"
+  | "LANGUAGE_DISORDER"
+  | "ETC";
+
+export type InterestCategory =
+  | "WELFARE_SUBSIDY"
+  | "HOSPITAL_HEALTH"
+  | "PARENTING_COMMUNICATION"
+  | "GROWTH_EDUCATION";
+
+export type GuardianType = "PARENT" | "GRANDPARENT" | "SIBLING" | "ETC";
+
+export type CommunityRoleType =
+  | "INFO_SEEKER"
+  | "EXPERIENCE_SHARER"
+  | "WISDOM_HELPER";

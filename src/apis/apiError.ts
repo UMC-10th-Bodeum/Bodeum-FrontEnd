@@ -13,6 +13,21 @@ export function getApiErrorMessage(error: unknown, fallbackMessage: string) {
   return fallbackMessage;
 }
 
+export function getApiErrorDetailMessage(
+  error: unknown,
+  fallbackMessage: string,
+) {
+  if (axios.isAxiosError<ApiErrorBody>(error)) {
+    const result = error.response?.data?.result;
+
+    if (typeof result === "string" && result.trim()) {
+      return result;
+    }
+  }
+
+  return getApiErrorMessage(error, fallbackMessage);
+}
+
 export function isUnauthorizedError(error: unknown) {
   return axios.isAxiosError(error) && error.response?.status === 401;
 }

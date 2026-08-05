@@ -2,6 +2,7 @@ import ExportIcon from "@/assets/icons/Export.svg?react";
 import Logo from "@/assets/icons/Logo_kr.svg?react";
 import { AUTH_STATE_CHANGED_EVENT } from "@/apis/authApi";
 import { getApiErrorMessage } from "@/apis/apiError";
+import { USER_PROFILE_CHANGED_EVENT } from "@/apis/userApi";
 import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
 import { useLogoutMutation } from "@/hooks/useAuthMutations";
@@ -46,9 +47,11 @@ export default function SideBar() {
     };
 
     window.addEventListener(AUTH_STATE_CHANGED_EVENT, refreshBrief);
+    window.addEventListener(USER_PROFILE_CHANGED_EVENT, refreshBrief);
 
     return () => {
       window.removeEventListener(AUTH_STATE_CHANGED_EVENT, refreshBrief);
+      window.removeEventListener(USER_PROFILE_CHANGED_EVENT, refreshBrief);
     };
   }, [refetch]);
 

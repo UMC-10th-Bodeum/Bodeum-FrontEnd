@@ -13,6 +13,7 @@ interface DetailBackButtonProps {
   selected?: boolean;
   selectedClassName?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 function DetailBackButton({
@@ -23,6 +24,7 @@ function DetailBackButton({
   selected,
   selectedClassName,
   className,
+  disabled = false,
 }: DetailBackButtonProps) {
   const navigate = useNavigate();
 
@@ -39,8 +41,9 @@ function DetailBackButton({
     <button
       type="button"
       onClick={handleClick}
+      disabled={disabled}
       aria-pressed={selected}
-      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] ${
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none ${
         selected && selectedClassName
           ? selectedClassName
           : tone === "danger"

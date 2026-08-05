@@ -11,6 +11,7 @@ export type ApiResponse<T> = {
 
 export type ApiErrorBody = {
   message?: string;
+  result?: unknown;
 };
 
 export interface RetryRequestConfig extends InternalAxiosRequestConfig {
