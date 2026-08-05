@@ -44,8 +44,10 @@ export default function NewsDetailHeader({
       />
       <div className="px-[16px] py-[24px]">
         <div className="mb-[12px] flex items-center gap-[10px]">
-          <Chip>{news.categoryLabel}</Chip>
-          <Chip variant={status.variant}>{status.label}</Chip>
+          <Chip className="!h-[24px]">{news.categoryLabel}</Chip>
+          <Chip variant={status.variant} className="!h-[23.5px]">
+            {status.label}
+          </Chip>
         </div>
 
         <h1 className="text-h1-onboard text-background-600">{news.title}</h1>
