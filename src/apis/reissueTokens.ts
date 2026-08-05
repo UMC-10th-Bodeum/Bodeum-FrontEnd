@@ -1,24 +1,10 @@
 import { clearAuthTokens, storeAuthTokens } from "./authStorage";
 import refreshApi from "./refreshApi";
-
-interface RefreshResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: {
-    tokenType: string;
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiresAt: string;
-    refreshTokenExpiresAt: string;
-  };
-}
-
-type ReissuedTokens = RefreshResponse["result"];
-type ReissueAttempt = {
-  sourceRefreshToken: string | null;
-  tokens: ReissuedTokens | null;
-};
+import type {
+  RefreshResponse,
+  ReissueAttempt,
+  ReissuedTokens,
+} from "@/types/auth";
 
 let reissuePromise: Promise<ReissuedTokens | null> | null = null;
 

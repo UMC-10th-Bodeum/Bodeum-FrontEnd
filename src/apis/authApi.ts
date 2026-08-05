@@ -1,7 +1,15 @@
 import api from "./axios";
 import { clearAuthTokens } from "./authStorage";
-import type { ApiResponse, NextStep } from "./apiTypes";
 import refreshApi from "./refreshApi";
+import type { ApiResponse } from "@/types/api";
+import type {
+  AgreementFormValues,
+  AgreementRequest,
+  AgreementResponse,
+  AuthLoginResult,
+  LogoutCurrentUserOptions,
+  SocialProvider,
+} from "@/types/auth";
 
 export {
   AUTH_STATE_CHANGED_EVENT,
@@ -9,41 +17,6 @@ export {
   hasStoredAuthSession,
   storeAuthTokens,
 } from "./authStorage";
-
-export type SocialProvider = "naver" | "kakao";
-
-export type AgreementFormValues = {
-  terms: boolean;
-  privacy: boolean;
-  ai: boolean;
-};
-
-type AgreementRequest = {
-  serviceTermsAgreed: boolean;
-  privacyPolicyAgreed: boolean;
-  aiTermsAgreed: boolean;
-};
-
-type AgreementResponse = AgreementRequest & {
-  aiTermsAgreedAt: string | null;
-  agreedAt: string;
-  nextStep: NextStep;
-};
-
-export type AuthLoginResult = {
-  userId: number;
-  provider: SocialProvider;
-  nickname: string;
-  tokenType: string;
-  accessToken: string;
-  refreshToken: string;
-  accessTokenExpiresAt: string;
-  refreshTokenExpiresAt: string;
-  isNewUser: boolean;
-  agreementCompleted: boolean;
-  onboardingCompleted: boolean;
-  nextStep: NextStep;
-};
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -90,10 +63,6 @@ export async function submitAgreements(values: AgreementFormValues) {
 
   return data.result;
 }
-
-type LogoutCurrentUserOptions = {
-  clearImmediately?: boolean;
-};
 
 export async function logoutCurrentUser(
   options: LogoutCurrentUserOptions = {},

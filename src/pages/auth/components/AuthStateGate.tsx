@@ -1,11 +1,11 @@
-import axios from "axios";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import { hasStoredAuthSession } from "@/apis/authApi";
-import { getOnboardingStatus } from "@/apis/onboardingApi";
 import { showToast } from "@/components/Toast";
+import { onboardingStatusQueryOptions } from "@/hooks/useOnboarding";
 
 import {
   consumeLoginToast,
@@ -25,10 +25,6 @@ type AuthStateGateProps = {
   children: ReactNode;
 };
 
-function isUnauthorizedError(error: unknown) {
-  return axios.isAxiosError(error) && error.response?.status === 401;
-}
-
 function showPendingLoginToast() {
   const pendingToast = consumeLoginToast();
 
@@ -46,6 +42,7 @@ function showPendingLoginToast() {
 
 export default function AuthStateGate({ children }: AuthStateGateProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isChecking, setIsChecking] = useState(hasStoredAuthSession);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
@@ -121,7 +118,9 @@ export default function AuthStateGate({ children }: AuthStateGateProps) {
           return;
         }
 
-        const status = await getOnboardingStatus();
+        const status = await queryClient.fetchQuery(
+          onboardingStatusQueryOptions(),
+        );
 
         if (cancelled) {
           return;
@@ -173,7 +172,7 @@ export default function AuthStateGate({ children }: AuthStateGateProps) {
     return () => {
       cancelled = true;
     };
-  }, [navigate, retry]);
+  }, [navigate, queryClient, retry]);
 
   if (isChecking) {
     return (

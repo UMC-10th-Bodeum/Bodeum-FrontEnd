@@ -1,4 +1,4 @@
-import type { NextStep } from "@/apis/apiTypes";
+import type { NextStep } from "@/types/api";
 
 export type AuthFlow = "login" | "agreement" | "onboarding";
 

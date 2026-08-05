@@ -1,4 +1,4 @@
-import type { NextStep } from "@/apis/apiTypes";
+import type { NextStep } from "@/types/api";
 
 const AUTH_NEXT_STEP_KEY = "bodeum:auth-next-step";
 const LOGIN_TOAST_KEY = "bodeum:pending-login-toast";

@@ -4,10 +4,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { getApiErrorMessage } from "@/apis/apiError";
 import {
   clearAuthTokens,
-  exchangeSocialLoginCode,
   storeAuthTokens,
 } from "@/apis/authApi";
 import { showToast } from "@/components/Toast";
+import { useExchangeSocialLoginMutation } from "@/hooks/useAuthMutations";
 import { startAiChatLoginSession } from "@/utils/aiChatSession";
 
 import {
@@ -33,6 +33,8 @@ const callbackErrorMessages: Record<string, string> = {
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
+  const { mutateAsync: exchangeSocialLogin } =
+    useExchangeSocialLoginMutation();
   const [searchParams] = useSearchParams();
   const handled = useRef(false);
 
@@ -65,7 +67,7 @@ export default function AuthCallbackPage() {
 
     window.history.replaceState(window.history.state, "", "/auth/callback");
 
-    void exchangeSocialLoginCode(code)
+    void exchangeSocialLogin(code)
       .then((result) => {
         storeAuthTokens(result);
         startAiChatLoginSession(result.userId, result.accessToken);
@@ -103,7 +105,7 @@ export default function AuthCallbackPage() {
           ),
         );
       });
-  }, [navigate, searchParams]);
+  }, [exchangeSocialLogin, navigate, searchParams]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-main-150 px-[20px] py-[40px]">
