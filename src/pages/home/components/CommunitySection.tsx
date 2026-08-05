@@ -1,7 +1,7 @@
 import CommunityCard from "@/components/CommunityCard";
 import MainButton from "@/components/MainButton";
-import PostSection from "./PostSection";
-import PostListItem from "./PostListItem";
+import PostSection from "@/components/PostSection";
+import PostListItem from "@/components/PostListItem";
 import { useNavigate } from "react-router-dom";
 import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
 
