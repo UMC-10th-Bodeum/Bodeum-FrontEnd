@@ -3,7 +3,6 @@ export type NewsSort = "VIEW" | "SCRAP";
 export type NewsCategory =
   | "LOCAL_NEWS"
   | "LOCAL_POLICY"
-  | "VOUCHER_SUBSIDY"
   | "RECRUITMENT_PARTICIPATION"
   | "EDUCATION_SEMINAR"
   | "BENEFIT_WELFARE_SERVICE"
