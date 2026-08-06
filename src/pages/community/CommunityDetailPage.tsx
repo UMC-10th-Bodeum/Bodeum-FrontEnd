@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ButtonOutline from "@/components/ButtonOutline";
 import {
   communityCategoryMap,
-  communityCategorySlugMap,
+  communityCategoryCodeMap,
   getCommunityCategoryByCode,
 } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
@@ -27,19 +27,12 @@ export default function CommunityDetailPage() {
   const { setBreadcrumb } = useBreadcrumb();
   const parsedPostId = id && /^\d+$/.test(id) ? Number(id) : undefined;
   const postId =
-    parsedPostId !== undefined &&
-    Number.isSafeInteger(parsedPostId) &&
-    parsedPostId > 0
+    parsedPostId !== undefined && Number.isSafeInteger(parsedPostId) && parsedPostId > 0
       ? parsedPostId
       : undefined;
-  const { data: post, isPending, isError, refetch } =
-    useCommunityPost(postId);
-  const category = post
-    ? getCommunityCategoryByCode(post.boardType)
-    : undefined;
-  const categoryLabel = category
-    ? communityCategoryMap[category]
-    : "커뮤니티";
+  const { data: post, isPending, isError, refetch } = useCommunityPost(postId);
+  const category = post ? getCommunityCategoryByCode(post.boardType) : undefined;
+  const categoryLabel = category ? communityCategoryMap[category] : "커뮤니티";
 
   useEffect(() => {
     setBreadcrumb([{ label: "커뮤니티" }, { label: categoryLabel }]);
@@ -63,9 +56,7 @@ export default function CommunityDetailPage() {
     return (
       <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
         <div className="mx-auto flex w-[680px] flex-col items-center gap-3 rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
-          <h1 className="text-h2-list text-background-600">
-            게시글을 불러오지 못했습니다.
-          </h1>
+          <h1 className="text-h2-list text-background-600">게시글을 불러오지 못했습니다.</h1>
           <button
             type="button"
             onClick={() => refetch()}
@@ -81,21 +72,12 @@ export default function CommunityDetailPage() {
   return (
     <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto flex w-[1176px] flex-col gap-[18px]">
-        <CommunityPostDetailCard
-          key={post.postId}
-          post={post}
-          category={category}
-        >
-          <CommunityCommentsSection
-            key={post.postId}
-            postId={post.postId}
-          />
+        <CommunityPostDetailCard key={post.postId} post={post} category={category}>
+          <CommunityCommentsSection key={post.postId} postId={post.postId} />
         </CommunityPostDetailCard>
 
         <section className="flex flex-col gap-[14px] rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[20px]">
-          <p className="text-h2-list text-background-600">
-            {categoryLabel} 게시판의 다른 글
-          </p>
+          <p className="text-h2-list text-background-600">{categoryLabel} 게시판의 다른 글</p>
           <div className="space-y-[8px]">
             {relatedPosts.map((item) => (
               <CommunityRelatedPostCard
@@ -108,9 +90,7 @@ export default function CommunityDetailPage() {
           <ButtonOutline
             label="더보기"
             onClick={() =>
-              navigate(
-                `/community?category=${communityCategorySlugMap[category]}`,
-              )
+              navigate(`/community?categoryCode=${communityCategoryCodeMap[category]}`)
             }
             className="h-[40px] w-full"
           />
@@ -124,9 +104,7 @@ function NotFoundState() {
   return (
     <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto flex w-[680px] flex-col items-center rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
-        <h1 className="text-h2-list text-background-600">
-          게시글을 찾을 수 없습니다.
-        </h1>
+        <h1 className="text-h2-list text-background-600">게시글을 찾을 수 없습니다.</h1>
         <p className="mt-[8px] text-h5 text-background-500">
           삭제되었거나 존재하지 않는 게시글입니다.
         </p>

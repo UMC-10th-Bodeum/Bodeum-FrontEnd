@@ -8,8 +8,8 @@ import {
   communityCategoryEntries,
   communityCategoryCodeMap,
   communityCategoryMap,
-  communityCategorySlugMap,
-  getCommunityCategoryBySlug,
+  getCommunityCategoryByCode,
+  isCommunityCategoryCode,
   type CommunityCategory,
 } from "@/constants/communityCategory";
 import { useCommunityPosts, useDeleteCommunityPost } from "@/hooks/useCommunity";
@@ -86,8 +86,10 @@ function toDetailPost(post: CommunityPostListItem) {
 export default function CommunityPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const categoryParam = searchParams.get("category");
-  const category: CommunityCategory | "ALL" = getCommunityCategoryBySlug(categoryParam) ?? "ALL";
+  const categoryCodeParam = searchParams.get("categoryCode");
+  const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
+    ? getCommunityCategoryByCode(categoryCodeParam)
+    : "ALL";
   const [inputKeyword, setInputKeyword] = useState("");
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState<CommunityPostSort>("view");
@@ -99,26 +101,27 @@ export default function CommunityPage() {
     keyword,
     categoryCode: category === "ALL" ? undefined : communityCategoryCodeMap[category],
   });
-  const visiblePosts =
-    data?.content.filter(
-      (post) => category === "ALL" || post.boardType === communityCategoryCodeMap[category],
-    ) ?? [];
+  const visiblePosts = data?.content ?? [];
+
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [selectedToDelete, setSelectedToDelete] = useState<number | null>(null);
   const { mutateAsync: deletePost } = useDeleteCommunityPost();
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
-    setSearchParams((currentParams) => {
-      const nextParams = new URLSearchParams(currentParams);
+    setSearchParams(
+      (currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
 
-      if (value === "ALL") {
-        nextParams.delete("category");
-      } else {
-        nextParams.set("category", communityCategorySlugMap[value]);
-      }
+        if (value === "ALL") {
+          nextParams.delete("categoryCode");
+        } else {
+          nextParams.set("categoryCode", communityCategoryCodeMap[value]);
+        }
 
-      return nextParams;
-    });
+        return nextParams;
+      },
+      { replace: true },
+    );
     setPage(1);
   };
 
@@ -138,10 +141,8 @@ export default function CommunityPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen overflow-x-hidden bg-background-100">
-        <div className="w-full py-16 text-center text-background-500">
-          게시글을 불러오는 중입니다.
-        </div>
+      <div className="min-h-screen flex items-center justify-center overflow-x-hidden bg-background-100">
+        <div className="text-center text-background-500">게시글을 불러오는 중입니다.</div>
       </div>
     );
   }
@@ -194,9 +195,11 @@ export default function CommunityPage() {
           </div>
 
           {isPending ? (
-            <div className="py-16 text-center text-background-500">게시글을 불러오는 중입니다.</div>
+            <div className="flex items-center justify-center py-16 text-center text-background-500">
+              게시글을 불러오는 중입니다.
+            </div>
           ) : isError ? (
-            <div className="flex flex-col items-center gap-3 py-16 text-background-500">
+            <div className="min-h-[320px] flex flex-col items-center justify-center gap-3 text-background-500">
               <p>게시글을 불러오지 못했습니다.</p>
               <button
                 type="button"
