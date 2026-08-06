@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getApiErrorDetailMessage } from "@/apis/apiError";
-import { findRegionId } from "@/apis/onboardingApi";
 import { notifyUserProfileChanged } from "@/apis/userApi";
 import {
   myPageRegionsQueryOptions,
@@ -12,6 +11,7 @@ import {
   useUpdateProfileImage,
 } from "@/hooks/useMyPage";
 import type { ProfileSettingsForm, UpdateMyProfileRequest } from "@/types/mypage";
+import { findRegionId } from "@/utils/onboarding";
 import DetailBackButton from "@/components/DetailBackButton";
 import { showToast } from "@/components/Toast";
 import AccountManagementCard from "./settings/AccountManagementCard";

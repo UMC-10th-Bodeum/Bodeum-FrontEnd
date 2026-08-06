@@ -1,9 +1,6 @@
-import axios, { type InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 import reissueTokens from "./reissueTokens";
-
-interface RetryRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
+import type { RetryRequestConfig } from "@/types/api";
 
 function replaceLogoutRefreshToken(
   request: RetryRequestConfig,

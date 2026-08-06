@@ -1,9 +1,5 @@
 import axios from "axios";
-
-type ApiErrorBody = {
-  message?: string;
-  result?: unknown;
-};
+import type { ApiErrorBody } from "@/types/api";
 
 export function getApiErrorMessage(error: unknown, fallbackMessage: string) {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
@@ -17,7 +13,10 @@ export function getApiErrorMessage(error: unknown, fallbackMessage: string) {
   return fallbackMessage;
 }
 
-export function getApiErrorDetailMessage(error: unknown, fallbackMessage: string) {
+export function getApiErrorDetailMessage(
+  error: unknown,
+  fallbackMessage: string,
+) {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
     const result = error.response?.data?.result;
 
@@ -27,4 +26,17 @@ export function getApiErrorDetailMessage(error: unknown, fallbackMessage: string
   }
 
   return getApiErrorMessage(error, fallbackMessage);
+}
+
+export function isUnauthorizedError(error: unknown) {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
+export function isRetryableError(error: unknown) {
+  if (!axios.isAxiosError(error)) {
+    return false;
+  }
+
+  const status = error.response?.status;
+  return status === undefined || status >= 500;
 }

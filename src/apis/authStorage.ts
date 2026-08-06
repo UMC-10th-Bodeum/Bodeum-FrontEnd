@@ -1,12 +1,7 @@
 import { resetAiChatSession } from "@/utils/aiChatSession";
+import type { AuthTokens } from "@/types/auth";
 
 export const AUTH_STATE_CHANGED_EVENT = "bodeum:auth-state-changed";
-
-export type AuthTokens = {
-  tokenType: string;
-  accessToken: string;
-  refreshToken: string;
-};
 
 function notifyAuthStateChanged() {
   window.dispatchEvent(new Event(AUTH_STATE_CHANGED_EVENT));

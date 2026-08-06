@@ -1,32 +1,36 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useNavigate,
   useNavigationType,
   useSearchParams,
 } from "react-router-dom";
-import axios from "axios";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import {
+  getApiErrorMessage,
+  isRetryableError,
+  isUnauthorizedError,
+} from "@/apis/apiError";
 import {
   hasStoredAuthSession,
   startSocialLogin,
-  submitAgreements,
-  type AgreementFormValues,
-  type SocialProvider,
 } from "@/apis/authApi";
-import {
-  createEmptyOnboardingDraft,
-  getOnboardingResume,
-  getOnboardingStatus,
-  quitOnboarding,
-  registerChildProfile,
-  registerGuardianProfile,
-  registerInterestRegion,
-  skipOnboarding,
-} from "@/apis/onboardingApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
+import { useSubmitAgreementsMutation } from "@/hooks/useAuthMutations";
+import {
+  onboardingResumeQueryOptions,
+  onboardingStatusQueryOptions,
+  useQuitOnboardingMutation,
+  useRegisterChildProfileMutation,
+  useRegisterGuardianProfileMutation,
+  useRegisterInterestRegionMutation,
+  useSkipOnboardingMutation,
+} from "@/hooks/useOnboarding";
+import type { AgreementFormValues, SocialProvider } from "@/types/auth";
+import { wait } from "@/utils/async";
+import { createEmptyOnboardingDraft } from "@/utils/onboarding";
 
 import AuthAgreementCard from "./components/AuthAgreementCard";
 import AuthLoadErrorState from "./components/AuthLoadErrorState";
@@ -105,25 +109,6 @@ function createAuthHistoryState(guard: AuthHistoryGuard) {
   };
 }
 
-function wait(delay: number) {
-  return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, delay);
-  });
-}
-
-function isUnauthorizedError(error: unknown) {
-  return axios.isAxiosError(error) && error.response?.status === 401;
-}
-
-function isRetryableError(error: unknown) {
-  if (!axios.isAxiosError(error)) {
-    return false;
-  }
-
-  const status = error.response?.status;
-  return status === undefined || status >= 500;
-}
-
 async function requestWithRetry<T>(request: () => Promise<T>) {
   let lastError: unknown;
 
@@ -151,6 +136,17 @@ async function requestWithRetry<T>(request: () => Promise<T>) {
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { mutateAsync: submitAgreementsRequest } =
+    useSubmitAgreementsMutation();
+  const { mutateAsync: registerChildProfileRequest } =
+    useRegisterChildProfileMutation();
+  const { mutateAsync: registerInterestRegionRequest } =
+    useRegisterInterestRegionMutation();
+  const { mutateAsync: registerGuardianProfileRequest } =
+    useRegisterGuardianProfileMutation();
+  const { mutateAsync: skipOnboardingRequest } = useSkipOnboardingMutation();
+  const { mutateAsync: quitOnboardingRequest } = useQuitOnboardingMutation();
   const navigationType = useNavigationType();
   const navigationTypeRef = useRef(navigationType);
   navigationTypeRef.current = navigationType;
@@ -232,7 +228,9 @@ export default function AuthPage() {
         const storedNextStep = getStoredAuthNextStep();
 
         if (isProfileOnboardingRequested) {
-          const status = await requestWithRetry(getOnboardingStatus);
+          const status = await requestWithRetry(() =>
+            queryClient.fetchQuery(onboardingStatusQueryOptions()),
+          );
 
           if (cancelled) {
             return;
@@ -264,7 +262,9 @@ export default function AuthPage() {
           }
 
           const resume = await requestWithRetry(() =>
-            getOnboardingResume({ allowResolved: true, status }),
+            queryClient.fetchQuery(
+              onboardingResumeQueryOptions({ allowResolved: true, status }),
+            ),
           );
 
           if (cancelled) {
@@ -349,7 +349,7 @@ export default function AuthPage() {
           }
 
           const resume = await requestWithRetry(() =>
-            getOnboardingResume(),
+            queryClient.fetchQuery(onboardingResumeQueryOptions()),
           );
 
           if (cancelled) {
@@ -369,7 +369,9 @@ export default function AuthPage() {
           return;
         }
 
-        const status = await requestWithRetry(getOnboardingStatus);
+        const status = await requestWithRetry(() =>
+          queryClient.fetchQuery(onboardingStatusQueryOptions()),
+        );
 
         if (cancelled) {
           return;
@@ -431,6 +433,7 @@ export default function AuthPage() {
     isProfileOnboardingRequested,
     navigate,
     onboardingLoadRetry,
+    queryClient,
     requestedFlow,
     setSearchParams,
     showAgreementBackBlockedToast,
@@ -645,7 +648,7 @@ export default function AuthPage() {
 
   const handleAgreementSubmit = (agreements: AgreementFormValues) => {
     void runRequest(async () => {
-      const result = await submitAgreements(agreements);
+      const result = await submitAgreementsRequest(agreements);
       storeAuthNextStep(result.nextStep);
       clearAgreementBrowserSession();
 
@@ -665,7 +668,7 @@ export default function AuthPage() {
   const moveNextOnboardingStep = () => {
     void runRequest(async () => {
       if (onboardingStep === 1) {
-        const result = await registerChildProfile(onboardingForm);
+        const result = await registerChildProfileRequest(onboardingForm);
 
         if (result.nextStep === "HOME") {
           await completeOnboarding();
@@ -677,7 +680,7 @@ export default function AuthPage() {
       }
 
       if (onboardingStep === 2) {
-        const result = await registerInterestRegion(onboardingForm);
+        const result = await registerInterestRegionRequest(onboardingForm);
 
         if (result.nextStep === "HOME") {
           await completeOnboarding();
@@ -688,7 +691,7 @@ export default function AuthPage() {
         return;
       }
 
-      const result = await registerGuardianProfile(onboardingForm);
+      const result = await registerGuardianProfileRequest(onboardingForm);
 
       if (result.nextStep !== "HOME") {
         throw new Error("온보딩 완료 상태를 확인하지 못했습니다.");
@@ -712,7 +715,7 @@ export default function AuthPage() {
     }
 
     void runRequest(async () => {
-      const result = await quitOnboarding();
+      const result = await quitOnboardingRequest();
 
       if (result.nextStep !== "HOME") {
         throw new Error("온보딩 중단 상태를 확인하지 못했습니다.");
@@ -732,7 +735,7 @@ export default function AuthPage() {
     }
 
     void runRequest(async () => {
-      const result = await skipOnboarding();
+      const result = await skipOnboardingRequest();
 
       if (result.nextStep !== "HOME") {
         throw new Error("온보딩 건너뛰기 상태를 확인하지 못했습니다.");
@@ -802,7 +805,7 @@ export default function AuthPage() {
       requestInFlight.current = true;
       setIsSubmitting(true);
 
-      void skipOnboarding()
+      void skipOnboardingRequest()
         .then(async (result) => {
           if (result.nextStep !== "HOME") {
             throw new Error("온보딩 건너뛰기 상태를 확인하지 못했습니다.");
@@ -838,6 +841,7 @@ export default function AuthPage() {
     completeOnboarding,
     flow,
     isProfileOnboarding,
+    skipOnboardingRequest,
     shouldProtectAuthHistory,
     showAgreementBackBlockedToast,
     waitForBrowserBackToSettle,

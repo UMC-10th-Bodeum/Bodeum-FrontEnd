@@ -1,4 +1,4 @@
-import type { ApiResponse } from "./apiTypes";
+import type { ApiResponse } from "@/types/api";
 
 export function getSuccessfulResult<T>(response: ApiResponse<T>) {
   if (!response.isSuccess) {

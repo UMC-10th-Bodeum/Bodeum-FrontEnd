@@ -11,7 +11,7 @@ import type {
 } from "@/types/mypage";
 import type { UserProfile } from "@/types/user";
 import { getSuccessfulResult } from "./apiResponse";
-import type { ApiResponse } from "./apiTypes";
+import type { ApiResponse } from "@/types/api";
 import api from "./axios";
 
 export async function updateMyProfile(request: UpdateMyProfileRequest) {

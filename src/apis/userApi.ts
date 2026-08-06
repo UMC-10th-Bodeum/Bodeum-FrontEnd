@@ -1,7 +1,7 @@
 import api from "./axios";
-import type { ApiResponse } from "./apiTypes";
 import { getSuccessfulResult } from "./apiResponse";
 import reissueTokens from "./reissueTokens";
+import type { ApiResponse } from "@/types/api";
 import type { UserBrief, UserProfile } from "@/types/user";
 
 export const USER_PROFILE_CHANGED_EVENT = "bodeum:user-profile-changed";
