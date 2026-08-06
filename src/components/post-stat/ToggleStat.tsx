@@ -9,6 +9,7 @@ interface ToggleStatProps {
     filledIcon: ReactNode;
     pressedIcon?: ReactNode;
     ariaLabel: string;
+    disabled?: boolean;
 }
 
 const TOGGLE_STAT_COLOR_CLASS_NAME = {
@@ -32,6 +33,7 @@ function ToggleStat({
     filledIcon,
     pressedIcon,
     ariaLabel,
+    disabled = false,
 }: ToggleStatProps) {
     const [isPressed, setIsPressed] = useState(false);
     const icon = isPressed && pressedIcon ? pressedIcon : isActive ? filledIcon : outlineIcon;
@@ -48,11 +50,12 @@ function ToggleStat({
             onClick={onClick}
             aria-label={ariaLabel}
             aria-pressed={isActive}
+            disabled={disabled}
             onPointerDown={() => setIsPressed(true)}
             onPointerUp={() => setIsPressed(false)}
             onPointerLeave={() => setIsPressed(false)}
             onPointerCancel={() => setIsPressed(false)}
-            className={`inline-flex h-5 items-center gap-1 cursor-pointer ${colorClassName}`}
+            className={`inline-flex h-5 items-center gap-1 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${colorClassName}`}
         >
             <span className="pointer-events-none inline-flex shrink-0 items-center">{icon}</span>
             <span className="inline-flex translate-y-[-0.5px] items-center text-h4-list leading-none">

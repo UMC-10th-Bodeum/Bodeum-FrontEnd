@@ -7,9 +7,10 @@ interface HeartStatProps {
     count: number;
     isActive?: boolean;
     onClick: () => void;
+    disabled?: boolean;
 }
 
-function HeartStat({ count, isActive = false, onClick }: HeartStatProps) {
+function HeartStat({ count, isActive = false, onClick, disabled = false }: HeartStatProps) {
     return (
         <ToggleStat
             type="heart"
@@ -17,6 +18,7 @@ function HeartStat({ count, isActive = false, onClick }: HeartStatProps) {
             isActive={isActive}
             count={count}
             onClick={onClick}
+            disabled={disabled}
             outlineIcon={<HeartDisabledIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
             filledIcon={<HeartIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
             pressedIcon={<HeartPressedIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
