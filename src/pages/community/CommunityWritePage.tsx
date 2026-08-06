@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
 
+import { getApiErrorMessage } from "@/apis/apiError";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
+import { communityCategoryCodeMap } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
+import { useCreateCommunityPost } from "@/hooks/useCommunity";
 import type { CommunityPostPayload } from "@/types/community";
 
 import CommunityWriteForm from "./components/write/CommunityWriteForm";
@@ -13,10 +16,10 @@ export default function CommunityWritePage() {
   const { setBreadcrumb } = useBreadcrumb();
   const allowNavigationRef = useRef(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const { mutate: createPost, isPending: isCreatingPost } = useCreateCommunityPost();
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      !allowNavigationRef.current &&
-      currentLocation.pathname !== nextLocation.pathname,
+      !allowNavigationRef.current && currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {
@@ -35,16 +38,31 @@ export default function CommunityWritePage() {
   }, [blocker.state]);
 
   const publishPost = (payload: CommunityPostPayload) => {
-    allowNavigationRef.current = true;
-    showToast("green", "게시물이 성공적으로 등록 됐습니다!");
-    navigate("/community", {
-      state: {
-        publishedPost: {
-          ...payload,
-          id: Date.now(),
-        },
+    if (payload.images.length > 0) {
+      showToast("red", "이미지를 등록하려면 커뮤니티 이미지 업로드 API가 필요합니다.");
+      return;
+    }
+
+    createPost(
+      {
+        boardType: communityCategoryCodeMap[payload.category],
+        anonymityType:
+          payload.authorVisibility === "ANONYMOUS" ? "FULLY_ANONYMOUS" : "PROFILE_TAG_VISIBLE",
+        title: payload.title,
+        content: payload.content,
+        disabilityTypes: [],
+        imageUrls: [],
       },
-    });
+      {
+        onSuccess: () => {
+          allowNavigationRef.current = true;
+          showToast("green", "게시물이 성공적으로 등록됐습니다!");
+          navigate("/community");
+        },
+        onError: (error) =>
+          showToast("red", getApiErrorMessage(error, "게시물을 등록하지 못했습니다.")),
+      },
+    );
   };
 
   const continueWriting = () => {
@@ -69,6 +87,7 @@ export default function CommunityWritePage() {
       <CommunityWriteForm
         onCancel={() => setShowCancelModal(true)}
         onSubmit={publishPost}
+        isSubmitting={isCreatingPost}
       />
 
       {showCancelModal && (

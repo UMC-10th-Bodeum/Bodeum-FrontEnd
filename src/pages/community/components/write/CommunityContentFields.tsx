@@ -5,19 +5,15 @@ const MAX_CONTENT_LENGTH = 2000;
 type CommunityContentFieldsProps = {
   title: string;
   content: string;
-  hashtags: string;
   onTitleChange: (value: string) => void;
   onContentChange: (value: string) => void;
-  onHashtagsChange: (value: string) => void;
 };
 
 export default function CommunityContentFields({
   title,
   content,
-  hashtags,
   onTitleChange,
   onContentChange,
-  onHashtagsChange,
 }: CommunityContentFieldsProps) {
   return (
     <>
@@ -57,20 +53,6 @@ export default function CommunityContentFields({
           </span>
         </div>
       </fieldset>
-
-      <label
-        htmlFor="community-hashtags"
-        className="mt-[16px] block text-h3-onboard text-background-500"
-      >
-        해시태그
-      </label>
-      <Input
-        id="community-hashtags"
-        value={hashtags}
-        onChange={(event) => onHashtagsChange(event.target.value)}
-        placeholder="해시태그를 입력해 주세요 (Ex. #발달인지, #5세 남아, #병원정보)"
-        className="mt-[12px] h-[48px] w-full"
-      />
     </>
   );
 }
