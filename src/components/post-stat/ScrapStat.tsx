@@ -17,7 +17,13 @@ function ScrapStat({ count, isActive = false, onClick }: ScrapStatProps) {
   );
 
   if (!onClick) {
-    return <StatItem icon={icon} value={count} />;
+    return (
+      <StatItem
+        icon={icon}
+        value={count}
+        ariaLabel={isActive ? `스크랩됨 ${count}개` : `스크랩 수 ${count}개`}
+      />
+    );
   }
 
   return (
