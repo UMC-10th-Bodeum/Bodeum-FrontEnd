@@ -5,8 +5,6 @@ import BaseInfoCard from "./BaseInfoCard";
 
 import InfoItemNewsIcon from "@/assets/icons/InfoItem-news.svg?react";
 
-const noop = () => {};
-
 const newsCategoryStyle = {
   bgColor: "bg-background-200",
   textColor: "text-background-600",
@@ -77,7 +75,7 @@ export default function ProgramItem({
           <div className="flex h-5 w-full items-center justify-center gap-2">
             <ViewStat count={viewCount} />
             <span className="relative z-20 inline-flex h-5 items-center">
-              <ScrapStat count={scrapCount} isActive={isScrapped} onClick={onScrapClick ?? noop} />
+              <ScrapStat count={scrapCount} isActive={isScrapped} onClick={onScrapClick} />
             </span>
           </div>
         </div>
