@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { getApiErrorMessage } from "@/apis/apiError";
 import PostTag from "@/components/PostTag";
+import DetailBackButton from "@/components/DetailBackButton";
+import { showToast } from "@/components/Toast";
 import CommentStat from "@/components/post-stat/CommentStat";
 import HeartStat from "@/components/post-stat/HeartStat";
 import ViewStat from "@/components/post-stat/ViewStat";
-import { communityCategoryMap, type CommunityCategory } from "@/constants/communityCategory";
+import { useToggleCommunityPostLike } from "@/hooks/useCommunity";
 
 interface CommunityPostCardProps {
   id: number;
-  category: CommunityCategory;
+  categoryLabel: string;
   title: string;
   content: string;
   likes: number;
@@ -15,20 +17,27 @@ interface CommunityPostCardProps {
   views: number;
   imageCount: number;
   createdAt: string;
+  initialIsLiked?: boolean;
   onClick?: () => void;
+  onDelete?: () => void;
+  disabled?: boolean;
 }
 
 export default function CommunityPostCard({
-  category,
+  id,
+  categoryLabel,
   title,
   content,
   likes,
   comments,
   views,
   createdAt,
+  initialIsLiked = false,
   onClick,
+  onDelete,
+  disabled = false,
 }: CommunityPostCardProps) {
-  const [liked, setLiked] = useState(false);
+  const { mutate: toggleLike, isPending: isLikePending } = useToggleCommunityPostLike(id);
 
   return (
     <article
@@ -49,18 +58,38 @@ export default function CommunityPostCard({
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-2">
-          <PostTag type="ETC" label={communityCategoryMap[category]} />
+          <PostTag type="ETC" label={categoryLabel} />
           <div className="flex gap-[14px]">
             <HeartStat
-              count={likes + (liked ? 1 : 0)}
-              isActive={liked}
-              onClick={() => setLiked((prev) => !prev)}
+              count={likes}
+              isActive={initialIsLiked}
+              disabled={isLikePending}
+              onClick={() =>
+                toggleLike(initialIsLiked, {
+                  onError: (error) =>
+                    showToast("red", getApiErrorMessage(error, "공감 상태를 변경하지 못했습니다.")),
+                })
+              }
             />
             <CommentStat count={comments} />
             <ViewStat count={views} />
           </div>
         </div>
-        <span className="shrink-0 text-body-sub text-background-400">{createdAt}</span>
+        <div className="flex items-center gap-2">
+          <span className="shrink-0 text-body-sub text-background-400">{createdAt}</span>
+          {onDelete && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <DetailBackButton
+                icon={null}
+                label="삭제"
+                tone="danger"
+                onClick={() => onDelete()}
+                disabled={disabled}
+                className="ml-2 h-[28px] w-[56px] shrink-0 justify-center !px-0 !py-0"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <p className="mt-[8px] line-clamp-1 text-h5-list text-background-600">{title}</p>
