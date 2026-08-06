@@ -39,20 +39,22 @@ export default function RelatedNewsSection({
           같은 지역에서 모집 중인 소식이 없습니다.
         </p>
       )}
-      {items.map((item) => (
-        <PostListItem
-          key={item.newsId}
-          region={item.region}
-          title={item.title}
-          rightSlot={
-            <span className="inline-flex items-center gap-[8px]">
-              <ViewStat count={item.viewCount} />
-              <ScrapStat count={item.scrapCount} />
-            </span>
-          }
-          onClick={() => navigate(`/news/${item.newsId}`)}
-        />
-      ))}
+      {!isPending &&
+        !isError &&
+        items.map((item) => (
+          <PostListItem
+            key={item.newsId}
+            region={item.region}
+            title={item.title}
+            rightSlot={
+              <span className="inline-flex items-center gap-[8px]">
+                <ViewStat count={item.viewCount} />
+                <ScrapStat count={item.scrapCount} />
+              </span>
+            }
+            onClick={() => navigate(`/news/${item.newsId}`)}
+          />
+        ))}
     </PostSection>
   );
 }
