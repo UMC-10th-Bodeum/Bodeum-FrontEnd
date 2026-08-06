@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { type NewsCategoryFilter } from "./components/NewsToolbar";
 import type { NewsTabValue } from "./components/NewsTabs";
@@ -31,7 +31,7 @@ export function useNewsFilters() {
   const [category, setCategory] = useState<NewsCategoryFilter>(() =>
     getQueryCategory(searchParams.get("category")),
   );
-  const [status] = useState<NewsStatus | undefined>(() =>
+  const [status, setStatus] = useState<NewsStatus | undefined>(() =>
     getQueryStatus(searchParams.get("status")),
   );
   const [page, setPage] = useState(1);
@@ -132,6 +132,22 @@ export function useNewsFilters() {
       updateNewsSearchParams({ nextKeyword: "" });
     }
   };
+
+  useEffect(() => {
+    const nextTab = getInitialTab(searchParams.get("newsType"));
+    const nextSort = getQuerySort(searchParams.get("sort"));
+    const nextCategory = getQueryCategory(searchParams.get("category"));
+    const nextStatus = getQueryStatus(searchParams.get("status"));
+    const nextKeyword = searchParams.get("keyword")?.trim() ?? "";
+
+    setSelectedTab(nextTab);
+    setSort(nextSort);
+    setCategory(nextCategory);
+    setStatus(nextStatus);
+    setKeyword(nextKeyword);
+    setSearchKeyword(nextKeyword);
+    setPage(1);
+  }, [searchParams]);
 
   return {
     tab: selectedTab,

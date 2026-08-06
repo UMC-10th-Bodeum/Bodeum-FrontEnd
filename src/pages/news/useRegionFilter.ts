@@ -31,11 +31,13 @@ export function useRegionFilter({
   const [regionLevel2, setRegionLevel2] = useState(initialRegionLevel2);
   const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
 
+  const [hasAppliedProfileDefault, setHasAppliedProfileDefault] = useState(false);
+
   useEffect(() => {
     const profile = profileQuery.data;
     const sido = profile?.regionLevel1?.trim();
 
-    if (regionLevel1 || !profile || !sido) {
+    if (hasAppliedProfileDefault || regionLevel1 || !profile || !sido) {
       return;
     }
 
@@ -47,7 +49,55 @@ export function useRegionFilter({
     setRegionId(profile.regionId ?? undefined);
     setRegionLevel1(sido);
     setRegionLevel2(district || undefined);
-  }, [regionLevel1, profileQuery.data]);
+    setHasAppliedProfileDefault(true);
+  }, [regionLevel1, profileQuery.data, hasAppliedProfileDefault]);
+
+  useEffect(() => {
+    if (initialRegionLevel1 === regionLevel1 && initialRegionLevel2 === regionLevel2) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function syncFromUrl() {
+      if (initialRegionLevel1 === ALL_REGIONS_VALUE) {
+        setSelectedRegion(ALL_REGIONS_LABEL);
+        setRegionId(undefined);
+        setRegionLevel1(ALL_REGIONS_VALUE);
+        setRegionLevel2(undefined);
+        return;
+      }
+
+      if (!initialRegionLevel1) {
+        setSelectedRegion("");
+        setRegionId(undefined);
+        setRegionLevel1(undefined);
+        setRegionLevel2(undefined);
+        return;
+      }
+
+      const region = [initialRegionLevel1, initialRegionLevel2].filter(Boolean).join(" ");
+      setSelectedRegion(formatRegionDisplayLabel(region));
+      setRegionLevel1(initialRegionLevel1);
+      setRegionLevel2(initialRegionLevel2);
+
+      try {
+        const nextRegionId = findRegionId(
+          await getRegions(),
+          initialRegionLevel1,
+          initialRegionLevel2 ?? "",
+        );
+        if (!cancelled) setRegionId(nextRegionId);
+      } catch {
+        if (!cancelled) setRegionId(undefined);
+      }
+    }
+
+    syncFromUrl();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialRegionLevel1, initialRegionLevel2]);
 
   const completeRegionOnboarding = async ({
     sido,
