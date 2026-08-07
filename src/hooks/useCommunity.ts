@@ -98,16 +98,27 @@ function removeCommentAndCount(
 ): { comments: CommunityComment[]; removedCount: number } {
   let removed = 0;
 
+  function countCommentTree(comment: CommunityComment): number {
+    return (
+      1 +
+      (comment.replies?.reduce((count, reply) => count + countCommentTree(reply), 0) ?? 0)
+    );
+  }
+
   function walk(list: CommunityComment[]): CommunityComment[] {
-    return list
-      .map((c) => ({ ...c, replies: c.replies ? walk(c.replies) : c.replies }))
-      .filter((c) => {
-        if (c.commentId === targetId) {
-          removed += 1 + (Array.isArray(c.replies) ? c.replies.length : 0);
-          return false;
-        }
-        return true;
-      });
+    return list.flatMap((comment) => {
+      if (comment.commentId === targetId) {
+        removed += countCommentTree(comment);
+        return [];
+      }
+
+      return [
+        {
+          ...comment,
+          replies: comment.replies ? walk(comment.replies) : comment.replies,
+        },
+      ];
+    });
   }
 
   return { comments: walk(comments), removedCount: removed };
@@ -316,48 +327,56 @@ export function useDeleteCommunityComment(postId: number) {
   return useMutation<unknown, unknown, number>({
     mutationFn: (commentId: number) => deleteCommunityComment(commentId),
     onSuccess: (_res, commentId) => {
-      queryClient.setQueryData<CommunityCommentsResult>(
-        communityPostKeys.comments(postId),
-        (currentComments) => {
-          if (!currentComments) return currentComments;
+      const commentsKey = communityPostKeys.comments(postId);
+      const currentComments = queryClient.getQueryData<CommunityCommentsResult>(commentsKey);
+      const result = currentComments
+        ? removeCommentAndCount(currentComments.comments, commentId)
+        : undefined;
 
-          const { comments: newComments, removedCount } = removeCommentAndCount(
-            currentComments.comments,
-            commentId,
-          );
+      if (!currentComments || !result?.removedCount) {
+        void queryClient.invalidateQueries({ queryKey: communityPostKeys.detail(postId) });
+        void queryClient.invalidateQueries({
+          predicate: ({ queryKey }) =>
+            queryKey[0] === communityPostKeys.all[0] &&
+            queryKey.length === 2 &&
+            typeof queryKey[1] === "object",
+        });
+        return;
+      }
 
-          queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), (post) =>
-            post ? { ...post, commentCount: Math.max(0, post.commentCount - removedCount) } : post,
-          );
+      queryClient.setQueryData<CommunityCommentsResult>(commentsKey, {
+        ...currentComments,
+        totalCount: Math.max(0, currentComments.totalCount - result.removedCount),
+        comments: result.comments,
+      });
 
-          if (removedCount > 0) {
-            queryClient.setQueriesData<CommunityPostPage>(
-              {
-                predicate: ({ queryKey }) =>
-                  queryKey[0] === communityPostKeys.all[0] &&
-                  queryKey.length === 2 &&
-                  typeof queryKey[1] === "object",
-              },
-              (currentPage) =>
-                currentPage
-                  ? {
-                      ...currentPage,
-                      content: currentPage.content.map((p) =>
-                        p.postId === postId
-                          ? { ...p, commentCount: Math.max(0, p.commentCount - removedCount) }
-                          : p,
-                      ),
-                    }
-                  : currentPage,
-            );
-          }
+      queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), (post) =>
+        post
+          ? { ...post, commentCount: Math.max(0, post.commentCount - result.removedCount) }
+          : post,
+      );
 
-          return {
-            ...currentComments,
-            totalCount: Math.max(0, currentComments.totalCount - removedCount),
-            comments: newComments,
-          };
+      queryClient.setQueriesData<CommunityPostPage>(
+        {
+          predicate: ({ queryKey }) =>
+            queryKey[0] === communityPostKeys.all[0] &&
+            queryKey.length === 2 &&
+            typeof queryKey[1] === "object",
         },
+        (currentPage) =>
+          currentPage
+            ? {
+                ...currentPage,
+                content: currentPage.content.map((post) =>
+                  post.postId === postId
+                    ? {
+                        ...post,
+                        commentCount: Math.max(0, post.commentCount - result.removedCount),
+                      }
+                    : post,
+                ),
+              }
+            : currentPage,
       );
     },
   });

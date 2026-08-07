@@ -39,7 +39,10 @@ function normalizeCommunityComments(result: CommunityCommentsResult): CommunityC
     }
 
     const parentComment = commentsById.get(comment.parentCommentId);
-    if (!parentComment) return;
+    if (!parentComment) {
+      rootComments.push(comment);
+      return;
+    }
 
     const alreadyIncluded = parentComment.replies?.some(
       (reply) => reply.commentId === comment.commentId,
@@ -166,9 +169,7 @@ export const uploadCommunityPostImage = async (file: File) => {
   const form = new FormData();
   form.append("image", file);
 
-  const { data } = await api.post<ApiResponse<string>>("/api/v1/community/posts/images", form, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.post<ApiResponse<string>>("/api/v1/community/posts/images", form);
 
   return data.result;
 };
