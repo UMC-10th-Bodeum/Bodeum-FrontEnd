@@ -1,4 +1,4 @@
-import type { ApiResponse } from "./apiTypes";
+import type { ApiResponse } from "@/types/api";
 import api from "./axios";
 import type {
   CommunityComment,
