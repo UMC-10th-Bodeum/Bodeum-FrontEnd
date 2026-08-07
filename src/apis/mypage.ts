@@ -93,11 +93,6 @@ export async function updateProfileImage(image: File) {
   const { data } = await api.post<ApiResponse<UserProfile>>(
     "/api/v1/users/me/profile-image",
     formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    },
   );
 
   return getSuccessfulResult(data);
