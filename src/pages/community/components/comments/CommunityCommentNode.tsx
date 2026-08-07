@@ -52,6 +52,7 @@ export default function CommunityCommentNode({
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const { mutate: updateComment, isPending: isUpdating } = useUpdateCommunityComment(postId);
   const isRoot = depth === 0;
+  const isReplyFormOpen = !isEditing && replyTargetId === comment.commentId;
   const authorName = comment.authorNickname || "익명";
 
   useEffect(() => {
@@ -109,14 +110,14 @@ export default function CommunityCommentNode({
     <div
       className={
         isRoot
-          ? "flex gap-[26.5px] border-b border-background-250 pb-[20px]"
-          : "relative ml-[18px] border-b border-background-250 py-[20px] pl-[48.5px] before:absolute before:left-0 before:top-[28px] before:h-[24px] before:w-[24px] before:border-b before:border-l before:border-background-300"
+          ? `flex gap-[28px] pb-[20px] ${isReplyFormOpen ? "" : "border-b border-background-250"}`
+          : `relative ml-[20px] py-[20px] pl-[48px] before:absolute before:left-0 before:top-[28px] before:h-[24px] before:w-[24px] before:border-b before:border-l before:border-background-300 ${isReplyFormOpen ? "" : "after:absolute after:bottom-0 after:left-[-20px] after:right-0 after:border-b after:border-background-250"}`
       }
     >
       {isRoot && <ProfileIcon className="h-[40px] w-[40px] shrink-0" />}
 
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-center justify-between">
+        <div className="flex min-w-0 items-start justify-between">
           <div className="flex min-w-0 items-center gap-[8px]">
             {!isRoot && <ProfileIcon className="h-[24px] w-[24px] shrink-0" />}
             <p className="truncate text-h6 text-background-600">{authorName}</p>
@@ -134,7 +135,7 @@ export default function CommunityCommentNode({
                 aria-haspopup="menu"
                 aria-expanded={isMenuOpen}
                 onClick={() => setIsMenuOpen((current) => !current)}
-                className="flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
+                className="flex h-[26px] w-[26px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
               >
                 <span aria-hidden="true" className="text-[20px] leading-none">
                   ⋮
@@ -199,10 +200,10 @@ export default function CommunityCommentNode({
           </div>
         ) : (
           <>
-            <p className="mt-[8px] text-h3-onboard text-background-600">{comment.content}</p>
-            <div
-              className={`${isRoot ? "mt-[10px]" : "mt-[16px]"} flex items-center gap-[24px] text-body-sub text-background-500`}
-            >
+            <p className={`${isRoot ? "" : "mt-[8px]"} text-h3-onboard text-background-600`}>
+              {comment.content}
+            </p>
+            <div className="mt-[16px] flex items-center gap-[24px] text-body-sub text-background-500">
               {!canAdopt && (
                 <HeartStat
                   count={comment.likeCount}
@@ -232,7 +233,7 @@ export default function CommunityCommentNode({
                   event.stopPropagation();
                   onSelectReplyTarget(comment);
                 }}
-                className="cursor-pointer"
+                className="inline-flex h-5 cursor-pointer items-center justify-center leading-none"
               >
                 답글 달기
               </button>
@@ -243,7 +244,7 @@ export default function CommunityCommentNode({
     </div>
   );
 
-  const replyForm = !isEditing && replyTargetId === comment.commentId && (
+  const replyForm = isReplyFormOpen && (
     <CommunityReplyForm
       targetAuthor={authorName}
       isSubmitting={isReplyPending}
