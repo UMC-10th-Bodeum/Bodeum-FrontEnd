@@ -1,5 +1,14 @@
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { getApiErrorDetailMessage } from "@/apis/apiError";
+import { clearAuthTokens } from "@/apis/authApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
+import { useDeleteMyAccount } from "@/hooks/useMyPage";
+import { showToast } from "@/components/Toast";
+import { clearAgreementBrowserSession } from "@/pages/auth/agreementBrowserSession";
+import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
+import { clearOnboardingBrowserSession } from "@/pages/auth/onboardingBrowserSession";
 
 interface WithdrawalModalProps {
   onClose: () => void;
@@ -7,11 +16,16 @@ interface WithdrawalModalProps {
 }
 
 export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalProps) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { mutateAsync: withdraw, isPending: isSubmitting } =
+    useDeleteMyAccount();
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !isSubmitting) {
         onClose();
       }
     };
@@ -23,12 +37,44 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, [isSubmitting, onClose]);
+
+  const handleConfirm = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    try {
+      const result = await withdraw();
+
+      if (!result.success) {
+        throw new Error("회원 탈퇴 처리 결과를 확인할 수 없습니다.");
+      }
+
+      clearAuthProgress();
+      clearAgreementBrowserSession();
+      clearOnboardingBrowserSession();
+      queryClient.clear();
+      onConfirm();
+      navigate("/", { replace: true, flushSync: true });
+      clearAuthTokens();
+      showToast("green", "회원 탈퇴가 완료되었습니다.");
+    } catch (error) {
+      showToast(
+        "red",
+        getApiErrorDetailMessage(error, "회원 탈퇴에 실패했습니다."),
+      );
+    }
+  };
 
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[40px] py-[44px]"
-      onMouseDown={onClose}
+      onMouseDown={() => {
+        if (!isSubmitting) {
+          onClose();
+        }
+      }}
     >
       <div onMouseDown={(event) => event.stopPropagation()}>
         <OnboardCancelBox
@@ -39,7 +85,9 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
           rightButtonColor="sub-red"
           className="!z-[70] !w-[581px]"
           onLeftButtonClick={onClose}
-          onRightButtonClick={onConfirm}
+          onRightButtonClick={() => void handleConfirm()}
+          leftButtonDisabled={isSubmitting}
+          rightButtonDisabled={isSubmitting}
         />
       </div>
     </div>

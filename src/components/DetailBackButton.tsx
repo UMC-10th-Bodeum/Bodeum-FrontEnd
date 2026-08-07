@@ -41,9 +41,9 @@ function DetailBackButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-pressed={selected}
       disabled={disabled}
-      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] disabled:cursor-not-allowed disabled:opacity-50 ${
+      aria-pressed={selected}
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-[10px] border px-4 py-2 text-h4-list hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)] disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none ${
         selected && selectedClassName
           ? selectedClassName
           : tone === "danger"
@@ -51,12 +51,7 @@ function DetailBackButton({
             : "border-background-300 bg-background-100 text-background-500 active:border-background-600 active:text-background-600"
       } ${className ?? ""}`}
     >
-      {Icon && (
-        <Icon
-          aria-hidden="true"
-          className="bodeum-icon-color relative top-[1px] h-4 w-4"
-        />
-      )}
+      {Icon && <Icon aria-hidden="true" className="bodeum-icon-color relative top-[1px] h-4 w-4" />}
       {label}
     </button>
   );
