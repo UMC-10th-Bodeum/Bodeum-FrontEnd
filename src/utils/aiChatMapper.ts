@@ -35,6 +35,7 @@ export function mapApiMessage(
     id: message.aiMessageId,
     serverId: message.aiMessageId,
     role: "bot",
+    answerStatus: message.answerStatus,
     text: message.content,
     resources: message.sources
       .map(mapSourceToResource)
@@ -96,5 +97,11 @@ export function collectFeedbackByMessage(messages: AiMessage[]) {
       return feedbackByMessage;
     },
     {},
+  );
+}
+
+export function shouldShowAiMessageFeedback(message: BotMessage) {
+  return (
+    message.serverId !== undefined && message.answerStatus !== "GREETING"
   );
 }
