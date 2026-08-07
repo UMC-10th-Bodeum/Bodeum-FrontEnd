@@ -1,0 +1,257 @@
+import { useState } from "react";
+
+import { getApiErrorMessage } from "@/apis/apiError";
+import ProfileIcon from "@/assets/icons/Profile.svg?react";
+import ButtonFill from "@/components/ButtonFill";
+import ButtonOutline from "@/components/ButtonOutline";
+import HeartStat from "@/components/post-stat/HeartStat";
+import { showToast } from "@/components/Toast";
+import { useUpdateCommunityComment } from "@/hooks/useCommunity";
+import type { CommunityComment } from "@/types/community";
+import { getRelativeTime } from "@/utils/time";
+
+import CommunityReplyForm from "./CommunityReplyForm";
+
+export interface CommunityCommentNodeProps {
+  postId: number;
+  comment: CommunityComment;
+  depth?: number;
+  canAdopt?: boolean;
+  replyTargetId: number | null;
+  onSelectReplyTarget: (comment: CommunityComment) => void;
+  onCancelReply: () => void;
+  onSubmitReply: (parentCommentId: number, content: string) => void;
+  isReplyPending: boolean;
+  onLike: (commentId: number, isCurrentlyLiked: boolean) => void;
+  likingCommentId?: number;
+  onAdopt?: (commentId: number, isAccepted: boolean) => void;
+  isAdoptPending?: boolean;
+  onDelete?: (commentId: number) => void;
+}
+
+export default function CommunityCommentNode({
+  postId,
+  comment,
+  depth = 0,
+  canAdopt = false,
+  replyTargetId,
+  onSelectReplyTarget,
+  onCancelReply,
+  onSubmitReply,
+  isReplyPending,
+  onLike,
+  likingCommentId,
+  onAdopt,
+  isAdoptPending = false,
+  onDelete,
+}: CommunityCommentNodeProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(comment.content);
+  const { mutate: updateComment, isPending: isUpdating } = useUpdateCommunityComment(postId);
+  const isRoot = depth === 0;
+  const authorName = comment.authorNickname || "익명";
+
+  const startEditing = () => {
+    setIsMenuOpen(false);
+    setEditedContent(comment.content);
+    setIsEditing(true);
+    onCancelReply();
+  };
+
+  const applyEdit = () => {
+    const content = editedContent.trim();
+    if (!content || isUpdating) return;
+
+    updateComment(
+      { commentId: comment.commentId, content },
+      {
+        onSuccess: () => {
+          setEditedContent(content);
+          setIsEditing(false);
+          showToast("green", "댓글이 수정되었습니다.");
+        },
+        onError: (error) =>
+          showToast("red", getApiErrorMessage(error, "댓글을 수정하지 못했습니다.")),
+      },
+    );
+  };
+
+  const nodeContent = (
+    <div
+      className={
+        isRoot
+          ? "flex gap-[26.5px] border-b border-background-250 pb-[20px]"
+          : "relative ml-[18px] border-b border-background-250 py-[20px] pl-[48.5px] before:absolute before:left-0 before:top-[28px] before:h-[24px] before:w-[24px] before:border-b before:border-l before:border-background-300"
+      }
+    >
+      {isRoot && <ProfileIcon className="h-[40px] w-[40px] shrink-0" />}
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center justify-between">
+          <div className="flex min-w-0 items-center gap-[8px]">
+            {!isRoot && <ProfileIcon className="h-[24px] w-[24px] shrink-0" />}
+            <p className="truncate text-h6 text-background-600">{authorName}</p>
+            <time className="shrink-0 text-body-sub text-background-500">
+              {getRelativeTime(comment.createdAt)}
+            </time>
+          </div>
+
+          {comment.isMine && (
+            <div className="relative">
+              <button
+                type="button"
+                aria-label={`${isRoot ? "댓글" : "답글"} 메뉴 열기`}
+                aria-expanded={isMenuOpen}
+                onClick={() => setIsMenuOpen((current) => !current)}
+                className="flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
+              >
+                <span aria-hidden="true" className="text-[20px] leading-none">
+                  ⋮
+                </span>
+              </button>
+
+              {isMenuOpen && (
+                <div
+                  role="menu"
+                  aria-label={`${isRoot ? "댓글" : "답글"} 메뉴`}
+                  className="absolute right-0 top-[32px] z-20 min-w-[140px] overflow-hidden rounded-[10px] border border-background-300 bg-background-100 py-1 shadow-md"
+                >
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={startEditing}
+                    className="block w-full px-4 py-2 text-left text-body-sub text-background-600 hover:bg-background-200 focus:bg-background-200"
+                  >
+                    수정
+                  </button>
+                  <button
+                    role="menuitem"
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onDelete?.(comment.commentId);
+                    }}
+                    className="block w-full px-4 py-2 text-left text-body-sub text-sub-red hover:bg-background-200 focus:bg-background-200"
+                  >
+                    삭제
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {isEditing ? (
+          <div className="mt-3 pr-[14px]">
+            <textarea
+              value={editedContent}
+              maxLength={1000}
+              onChange={(event) => setEditedContent(event.target.value)}
+              className="min-h-[96px] w-full resize-none rounded-[8px] border border-background-300 bg-background-100 px-[16px] py-[12px] text-body text-background-600 outline-none focus:border-primary-500"
+            />
+            <div className="mt-[12px] flex justify-end gap-2">
+              <ButtonOutline
+                label="취소"
+                className="!h-[25px] !text-h6"
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditedContent(comment.content);
+                }}
+              />
+              <ButtonFill
+                label="적용"
+                className="!min-h-[25px] h-[26px] !text-h6"
+                onClick={applyEdit}
+                disabled={isUpdating || !editedContent.trim()}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-[8px] text-h3-onboard text-background-600">{comment.content}</p>
+            <div
+              className={`${isRoot ? "mt-[10px]" : "mt-[16px]"} flex items-center gap-[24px] text-body-sub text-background-500`}
+            >
+              {canAdopt ? (
+                <HeartStat
+                  count={comment.likeCount}
+                  isActive={comment.isAccepted}
+                  disabled={isAdoptPending}
+                  onClick={(event) => {
+                    event?.stopPropagation();
+                    onAdopt?.(comment.commentId, comment.isAccepted);
+                  }}
+                  label="채택"
+                />
+              ) : (
+                <HeartStat
+                  count={comment.likeCount}
+                  isActive={comment.isLiked}
+                  disabled={likingCommentId === comment.commentId}
+                  onClick={(event) => {
+                    event?.stopPropagation();
+                    onLike(comment.commentId, comment.isLiked);
+                  }}
+                />
+              )}
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSelectReplyTarget(comment);
+                }}
+                className="cursor-pointer"
+              >
+                답글 달기
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const replyForm = !isEditing && replyTargetId === comment.commentId && (
+    <CommunityReplyForm
+      targetAuthor={authorName}
+      isSubmitting={isReplyPending}
+      onCancel={onCancelReply}
+      onSubmit={(content) => onSubmitReply(comment.commentId, content)}
+    />
+  );
+
+  const replies = comment.replies?.map((reply) => (
+    <CommunityCommentNode
+      key={reply.commentId}
+      postId={postId}
+      comment={reply}
+      depth={depth + 1}
+      canAdopt={canAdopt}
+      replyTargetId={replyTargetId}
+      onSelectReplyTarget={onSelectReplyTarget}
+      onCancelReply={onCancelReply}
+      onSubmitReply={onSubmitReply}
+      isReplyPending={isReplyPending}
+      onLike={onLike}
+      likingCommentId={likingCommentId}
+      onAdopt={onAdopt}
+      isAdoptPending={isAdoptPending}
+      onDelete={onDelete}
+    />
+  ));
+
+  return isRoot ? (
+    <li className="pt-[20px]">
+      {nodeContent}
+      {replyForm}
+      {replies}
+    </li>
+  ) : (
+    <div>
+      {nodeContent}
+      {replyForm}
+      {replies}
+    </div>
+  );
+}
