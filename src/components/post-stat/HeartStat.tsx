@@ -8,15 +8,17 @@ interface HeartStatProps {
     isActive?: boolean;
     onClick: () => void;
     disabled?: boolean;
+    label?: string;
 }
 
-function HeartStat({ count, isActive = false, onClick, disabled = false }: HeartStatProps) {
+function HeartStat({ count, isActive = false, onClick, disabled = false, label }: HeartStatProps) {
     return (
         <ToggleStat
             type="heart"
             ariaLabel={isActive ? "좋아요 취소" : "좋아요"}
             isActive={isActive}
             count={count}
+            label={label}
             onClick={onClick}
             disabled={disabled}
             outlineIcon={<HeartDisabledIcon className="h-[14px] w-[14px]" aria-hidden="true" />}
