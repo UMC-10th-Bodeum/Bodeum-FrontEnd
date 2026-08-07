@@ -58,10 +58,7 @@ export default function CommunityCommentNode({
     if (!isMenuOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (
-        event.target instanceof Node &&
-        !menuContainerRef.current?.contains(event.target)
-      ) {
+      if (event.target instanceof Node && !menuContainerRef.current?.contains(event.target)) {
         setIsMenuOpen(false);
       }
     };
@@ -206,15 +203,17 @@ export default function CommunityCommentNode({
             <div
               className={`${isRoot ? "mt-[10px]" : "mt-[16px]"} flex items-center gap-[24px] text-body-sub text-background-500`}
             >
-              <HeartStat
-                count={comment.likeCount}
-                isActive={comment.isLiked}
-                disabled={likingCommentId === comment.commentId}
-                onClick={(event) => {
-                  event?.stopPropagation();
-                  onLike(comment.commentId, comment.isLiked);
-                }}
-              />
+              {!canAdopt && (
+                <HeartStat
+                  count={comment.likeCount}
+                  isActive={comment.isLiked}
+                  disabled={likingCommentId === comment.commentId}
+                  onClick={(event) => {
+                    event?.stopPropagation();
+                    onLike(comment.commentId, comment.isLiked);
+                  }}
+                />
+              )}
               {canAdopt && (
                 <HeartStat
                   isActive={comment.isAccepted}
