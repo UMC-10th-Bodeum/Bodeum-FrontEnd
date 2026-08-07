@@ -37,7 +37,7 @@ export default function CommunityContentFields({
             maxLength={MAX_CONTENT_LENGTH}
             placeholder="내용을 입력해 주세요* (최대 2000자)"
             aria-label="게시글 내용"
-            className="h-[158px] w-full resize-none rounded-[10px] border border-background-300 bg-background-200 px-[20px] py-[12px] text-h2-onboard text-background-600 outline-none placeholder:text-background-500 focus:border-main-400"
+            className="h-[158px] w-full resize-none rounded-[10px] bg-background-200 px-[20px] py-[12px] text-h2-onboard text-background-600 outline-none placeholder:text-background-400 hover:bg-background-100 focus:bg-background-100 focus:border-main-400 transition-colors duration-150"
           />
           {!content && (
             <p className="pointer-events-none absolute left-[20px] right-[20px] top-[40px] whitespace-normal break-words text-h2-onboard text-background-400">

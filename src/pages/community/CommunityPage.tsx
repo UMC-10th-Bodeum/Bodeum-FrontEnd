@@ -92,12 +92,12 @@ export default function CommunityPage() {
     : "ALL";
   const [inputKeyword, setInputKeyword] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [sort, setSort] = useState<CommunityPostSort>("view");
+  const [sort, setSort] = useState<CommunityPostSort | "">("");
   const [page, setPage] = useState(1);
   const { data, isPending, isError, refetch } = useCommunityPosts({
     page: page - 1,
     size: 14,
-    sort,
+    sort: sort || "view",
     keyword,
     categoryCode: category === "ALL" ? undefined : communityCategoryCodeMap[category],
   });
@@ -188,6 +188,7 @@ export default function CommunityPage() {
                 setSort(value as CommunityPostSort);
                 setPage(1);
               }}
+              placeholder="조회순"
               variant="S"
               ariaLabel="게시글 정렬"
               className="w-[120px]"
