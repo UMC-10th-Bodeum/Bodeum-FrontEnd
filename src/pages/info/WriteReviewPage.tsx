@@ -15,6 +15,7 @@ import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useCreateInfoReviewMutation } from "@/hooks/queries/info/useCreateInfoReviewMutation";
 import { showToast } from "@/components/Toast";
+import { uploadReviewImage } from "@/apis/info";
 
 export default function WriteReviewPage() {
   const { category, id } = useParams();
@@ -33,18 +34,10 @@ export default function WriteReviewPage() {
   const [content, setContent] = useState("");
   const [images, setImages] = useState<File[]>([]);
 
-  if (isPending) {
-    return <div>로딩중...</div>;
-  }
-
-  if (isError || !detail) {
-    return <div>정보를 불러올 수 없습니다.</div>;
-  }
-
   const isValid = rating > 0 && content.trim().length > 0;
 
   useEffect(() => {
-    if (!category) return;
+    if (!category || !detail) return;
 
     setBreadcrumb([
       {
@@ -64,31 +57,48 @@ export default function WriteReviewPage() {
     ]);
 
     return () => setBreadcrumb([]);
-  }, [category]);
+  }, [category, detail, id, infoCategory, navigate, setBreadcrumb]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!id) return;
 
-    mutate(
-      {
-        infoItemId: Number(id),
-        body: {
-          rating,
-          content,
-          imageUrls: [], // 이미지 업로드 API 붙으면 URL 넣기
+    try {
+      const imageUrls = await Promise.all(
+        images.map((image) => uploadReviewImage(image)),
+      );
+
+      mutate(
+        {
+          infoItemId: Number(id),
+          body: {
+            rating,
+            content,
+            imageUrls,
+          },
         },
-      },
-      {
-        onSuccess: () => {
-          showToast("green", "후기가 성공적으로 등록되었습니다!");
-          navigate(-1);
+        {
+          onSuccess: () => {
+            showToast("green", "후기가 성공적으로 등록 되었습니다!");
+            navigate(-1);
+          },
+          onError: () => {
+            showToast("red", "후기 등록에 실패했습니다.");
+          },
         },
-        onError: () => {
-          showToast("red", "후기 등록에 실패했습니다.");
-        },
-      },
-    );
+      );
+    } catch (error) {
+      console.error(error);
+      showToast("red", "이미지 업로드에 실패했습니다.");
+    }
   };
+
+  if (isPending) {
+    return <div>로딩중...</div>;
+  }
+
+  if (isError || !detail) {
+    return <div>정보를 불러올 수 없습니다.</div>;
+  }
 
   return (
     <div className="mx-auto flex max-w-[1240px] justify-center py-[20px]">

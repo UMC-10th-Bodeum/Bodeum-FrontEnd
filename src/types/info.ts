@@ -99,6 +99,7 @@ export interface InfoReview {
   content: string;
   imageUrls: string[];
   helpfulCount: number;
+  isHelpful: boolean;
   createdAt: string;
 }
 

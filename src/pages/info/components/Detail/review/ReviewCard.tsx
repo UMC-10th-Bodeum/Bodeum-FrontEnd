@@ -4,7 +4,8 @@ import StarIcon from "@/assets/icons/Star.svg?react";
 import FeedbackButton from "@/components/FeedbackButton";
 import { showToast } from "@/components/Toast";
 import { formatDate } from "@/utils/time";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface Review {
   infoReviewId: number;
@@ -13,6 +14,7 @@ interface Review {
   rating: number;
   content: string;
   imageUrls: string[];
+  isHelpful: boolean;
   helpfulCount: number;
   createdAt: string;
 }
@@ -23,8 +25,13 @@ interface Props {
 }
 
 export default function ReviewCard({ infoItemId, review }: Props) {
-  const [isHelpful, setIsHelpful] = useState(false);
+  const [isHelpful, setIsHelpful] = useState(review.isHelpful);
   const [helpfulCount, setHelpfulCount] = useState(review.helpfulCount);
+
+  useEffect(() => {
+    setIsHelpful(review.isHelpful);
+    setHelpfulCount(review.helpfulCount);
+  }, [review.isHelpful, review.helpfulCount]);
 
   const handleHelpful = async () => {
     try {
@@ -35,8 +42,15 @@ export default function ReviewCard({ infoItemId, review }: Props) {
 
       setIsHelpful(result.isHelpful);
       setHelpfulCount(result.helpfulCount);
-    } catch {
-      showToast("red", "도움돼요 등록에 실패했습니다.");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        showToast(
+          "red",
+          error.response?.data?.message ?? "도움돼요 등록에 실패했습니다."
+        );
+      } else {
+        showToast("red", "도움돼요 등록에 실패했습니다.");
+      }
     }
   };
 
@@ -73,8 +87,8 @@ export default function ReviewCard({ infoItemId, review }: Props) {
 
         <FeedbackButton
           feedbackType="Good"
-          defaultSelected={isHelpful}
-          defaultCount={helpfulCount}
+          selected={isHelpful}
+          count={helpfulCount}
           className="text-h6-list"
           onClick={handleHelpful}
         />

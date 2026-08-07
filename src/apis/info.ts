@@ -1,7 +1,11 @@
 import type { InfoSearchResponse } from "@/types/search";
 import type { CreateInfoReviewRequest, InfoDetail, InfoListResponse, InfoReview, InfoReviewListResult, KakaoMapUrlResponse, ParentCategory, ShareInfoResponse } from "@/types/info";
 import api from "./axios";
-import type { ApiResponse } from "./apiTypes";
+import type { ApiResponse } from "@/types/api";
+
+interface UploadReviewImageResult {
+  imageUrl: string;
+}
 
 interface GetInfoListParams {
   category?: ParentCategory;
@@ -118,4 +122,19 @@ export const getInfoShareUrl = async (infoItemId: number) => {
   );
 
   return data.result;
+};
+
+// 정보 후기 이미지 업로드
+export const uploadReviewImage = async (image: File) => {
+  console.log(image);
+  console.log(image instanceof File);
+  
+  const formData = new FormData();
+  formData.append("image", image);
+
+  const { data } = await api.post<
+    ApiResponse<UploadReviewImageResult>
+  >("/api/v1/info/reviews/images", formData);
+
+  return data.result.imageUrl;
 };

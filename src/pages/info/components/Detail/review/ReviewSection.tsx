@@ -13,6 +13,7 @@ interface Review {
   rating: number;
   content: string;
   imageUrls: string[];
+  isHelpful: boolean;
   helpfulCount: number;
   createdAt: string;
 }
