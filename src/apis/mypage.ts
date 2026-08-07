@@ -86,6 +86,26 @@ export async function deleteMyScrap(scrapId: number) {
   }
 }
 
+export async function deleteMyPost(postId: number) {
+  const { data } = await api.delete<ApiResponse<unknown> | undefined>(
+    `/api/v1/community/posts/${postId}`,
+  );
+
+  if (data) {
+    getSuccessfulResult(data);
+  }
+}
+
+export async function deleteMyComment(commentId: number) {
+  const { data } = await api.delete<ApiResponse<unknown> | undefined>(
+    `/api/v1/community/comments/${commentId}`,
+  );
+
+  if (data) {
+    getSuccessfulResult(data);
+  }
+}
+
 export async function updateProfileImage(image: File) {
   const formData = new FormData();
   formData.append("image", image);

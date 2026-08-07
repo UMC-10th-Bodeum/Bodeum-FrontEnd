@@ -176,11 +176,13 @@ export interface MyPageScrapItem extends MyPageItemBase {
 }
 
 export interface MyPagePostItem extends MyPageItemBase {
+  id: number;
   type: "post";
   title: string;
 }
 
 export interface MyPageCommentItem extends MyPageItemBase {
+  id: number;
   type: "comment";
   comment: string;
   postTitle?: string;
