@@ -4,7 +4,7 @@ import type { MouseEvent } from "react";
 interface ToggleStatProps {
   type: "heart" | "scrap";
   isActive: boolean;
-  count: number;
+  count?: number;
   onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
   outlineIcon: ReactNode;
   filledIcon: ReactNode;
@@ -62,7 +62,7 @@ function ToggleStat({
     >
       <span className="pointer-events-none inline-flex shrink-0 items-center">{icon}</span>
       <span className="inline-flex translate-y-[-0.5px] items-center text-h4-list leading-none">
-        {label ?? count.toLocaleString()}
+        {label ?? count?.toLocaleString()}
       </span>
     </button>
   );

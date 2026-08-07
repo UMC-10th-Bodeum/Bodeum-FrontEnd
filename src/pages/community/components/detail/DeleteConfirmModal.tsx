@@ -26,7 +26,10 @@ export default function DeleteConfirmModal({
 }: DeleteConfirmModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onCancelRef = useRef(onCancel);
-  onCancelRef.current = onCancel;
+
+  useEffect(() => {
+    onCancelRef.current = onCancel;
+  }, [onCancel]);
 
   useEffect(() => {
     if (!open) return;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { getApiErrorMessage } from "@/apis/apiError";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
@@ -48,9 +48,40 @@ export default function CommunityCommentNode({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
+  const menuContainerRef = useRef<HTMLDivElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const { mutate: updateComment, isPending: isUpdating } = useUpdateCommunityComment(postId);
   const isRoot = depth === 0;
   const authorName = comment.authorNickname || "익명";
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !menuContainerRef.current?.contains(event.target)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+
+      event.preventDefault();
+      setIsMenuOpen(false);
+      menuTriggerRef.current?.focus();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   const startEditing = () => {
     setIsMenuOpen(false);
@@ -98,10 +129,12 @@ export default function CommunityCommentNode({
           </div>
 
           {comment.isMine && (
-            <div className="relative">
+            <div ref={menuContainerRef} className="relative">
               <button
+                ref={menuTriggerRef}
                 type="button"
                 aria-label={`${isRoot ? "댓글" : "답글"} 메뉴 열기`}
+                aria-haspopup="menu"
                 aria-expanded={isMenuOpen}
                 onClick={() => setIsMenuOpen((current) => !current)}
                 className="flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
@@ -173,9 +206,17 @@ export default function CommunityCommentNode({
             <div
               className={`${isRoot ? "mt-[10px]" : "mt-[16px]"} flex items-center gap-[24px] text-body-sub text-background-500`}
             >
-              {canAdopt ? (
+              <HeartStat
+                count={comment.likeCount}
+                isActive={comment.isLiked}
+                disabled={likingCommentId === comment.commentId}
+                onClick={(event) => {
+                  event?.stopPropagation();
+                  onLike(comment.commentId, comment.isLiked);
+                }}
+              />
+              {canAdopt && (
                 <HeartStat
-                  count={comment.likeCount}
                   isActive={comment.isAccepted}
                   disabled={isAdoptPending}
                   onClick={(event) => {
@@ -183,16 +224,7 @@ export default function CommunityCommentNode({
                     onAdopt?.(comment.commentId, comment.isAccepted);
                   }}
                   label="채택"
-                />
-              ) : (
-                <HeartStat
-                  count={comment.likeCount}
-                  isActive={comment.isLiked}
-                  disabled={likingCommentId === comment.commentId}
-                  onClick={(event) => {
-                    event?.stopPropagation();
-                    onLike(comment.commentId, comment.isLiked);
-                  }}
+                  ariaLabel={comment.isAccepted ? "댓글 채택 취소" : "댓글 채택"}
                 />
               )}
               <button

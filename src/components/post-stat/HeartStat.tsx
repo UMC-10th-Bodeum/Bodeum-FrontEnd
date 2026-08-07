@@ -4,18 +4,26 @@ import HeartPressedIcon from "@/assets/icons/HeartPressed.svg?react";
 import ToggleStat from "./ToggleStat";
 
 interface HeartStatProps {
-    count: number;
+    count?: number;
     isActive?: boolean;
     onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void;
     disabled?: boolean;
     label?: string;
+    ariaLabel?: string;
 }
 
-function HeartStat({ count, isActive = false, onClick, disabled = false, label }: HeartStatProps) {
+function HeartStat({
+    count,
+    isActive = false,
+    onClick,
+    disabled = false,
+    label,
+    ariaLabel,
+}: HeartStatProps) {
     return (
         <ToggleStat
             type="heart"
-            ariaLabel={isActive ? "좋아요 취소" : "좋아요"}
+            ariaLabel={ariaLabel ?? (isActive ? "좋아요 취소" : "좋아요")}
             isActive={isActive}
             count={count}
             label={label}
