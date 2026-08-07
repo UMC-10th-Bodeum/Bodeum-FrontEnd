@@ -2,7 +2,8 @@ import { useMyProfile } from "@/hooks/useMyPage";
 import { useEffect, useState } from "react";
 import { ALL_REGIONS_LABEL, ALL_REGIONS_VALUE } from "./components/RegionOnboardingBox";
 import { formatRegionDisplayLabel } from "@/constants/regions";
-import { findRegionId, getRegions } from "@/apis/onboardingApi";
+import { getRegions } from "@/apis/onboardingApi";
+import { findRegionId } from "@/utils/onboarding";
 
 type RegionCommit = {
   regionLevel1: string | null;
@@ -97,7 +98,7 @@ export function useRegionFilter({
     return () => {
       cancelled = true;
     };
-  }, [initialRegionLevel1, initialRegionLevel2]);
+  }, [initialRegionLevel1, initialRegionLevel2, regionLevel1, regionLevel2]);
 
   const completeRegionOnboarding = async ({
     sido,
