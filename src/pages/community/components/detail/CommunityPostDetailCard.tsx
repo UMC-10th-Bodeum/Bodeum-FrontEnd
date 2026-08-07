@@ -18,7 +18,7 @@ import { useUpdateCommunityPost } from "@/hooks/useCommunity";
 import { useState } from "react";
 import ButtonOutline from "@/components/ButtonOutline";
 import ButtonFill from "@/components/ButtonFill";
-import DeleteConfirmModal from "@/pages/community/components/detail/DeleteConfirmModal";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
 import ShareButton from "@/components/ShareButton";
 import { diagnosisMap } from "@/constants/diagnosis";
@@ -77,10 +77,13 @@ export default function CommunityPostDetailCard({
     });
   };
 
-  const nameLineItems = [
-    `${post.authorNickname ?? "알 수 없는 사용자"}님`,
-    ...post.disabilityTypes.map((type) => diagnosisMap[type].label),
-  ];
+  const isFullyAnonymous = post.anonymityType === "FULLY_ANONYMOUS";
+  const nameLineItems = isFullyAnonymous
+    ? ["익명"]
+    : [
+        `${post.authorNickname ?? "알 수 없는 사용자"}님`,
+        ...post.disabilityTypes.map((type) => diagnosisMap[type].label),
+      ];
 
   return (
     <article className="min-h-[574px] rounded-[18px] border border-background-250 bg-background-100 px-[40px] py-[20px]">
@@ -215,6 +218,8 @@ export default function CommunityPostDetailCard({
 
               <DeleteConfirmModal
                 open={showDeleteModal}
+                title="게시글을 삭제하시겠어요?"
+                description="삭제가 완료되면 고객님의 게시글이 즉시 삭제되며, 이는 복구할 수 없습니다."
                 onCancel={() => setShowDeleteModal(false)}
                 onConfirm={() =>
                   deletePost(post.postId, {
