@@ -24,10 +24,6 @@ export default function NewsPage() {
       region.regionId === undefined && !region.isAllRegionsSelected
         ? region.regionLevel1
         : undefined,
-    regionLevel2:
-      region.regionId === undefined && !region.isAllRegionsSelected
-        ? region.regionLevel2
-        : undefined,
     category:
       filters.category === "" || filters.category === ALL_CATEGORIES_VALUE
         ? undefined

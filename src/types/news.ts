@@ -19,7 +19,6 @@ export interface NewsListParams {
   newsType?: NewsType;
   regionId?: number;
   regionLevel1?: string;
-  regionLevel2?: string;
   category?: NewsCategory;
   status?: NewsStatus;
 }
