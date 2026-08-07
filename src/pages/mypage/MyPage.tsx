@@ -19,6 +19,7 @@ import {
 import { formatDateWithDots } from "@/utils/time";
 import Pagination from "@/components/pagination/Pagination";
 import { showToast } from "@/components/Toast";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { useNavigate } from "react-router-dom";
 import ActivityPointCard from "./components/ActivityPointCard";
 import BadgeGradeModal from "./components/BadgeGradeModal";
@@ -73,7 +74,9 @@ export default function MyPage() {
   const [hiddenPostIds, setHiddenPostIds] = useState<Set<number>>(() => new Set());
   const [hiddenCommentIds, setHiddenCommentIds] = useState<Set<number>>(() => new Set());
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const [postToDelete, setPostToDelete] = useState<MyPagePostItem | null>(null);
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+  const [commentToDelete, setCommentToDelete] = useState<MyPageCommentItem | null>(null);
   const [badgeModal, setBadgeModal] = useState<BadgeModalType>(null);
 
   const deleteItem = async (item: MyPageScrapItem) => {
@@ -136,6 +139,7 @@ export default function MyPage() {
         queryClient.invalidateQueries({ queryKey: USER_DASHBOARD_QUERY_KEY }),
       ]);
       showToast("green", "게시글을 삭제했습니다.");
+      setPostToDelete(null);
     } catch (error) {
       showToast("red", getApiErrorMessage(error, "게시글을 삭제하지 못했습니다."));
     } finally {
@@ -160,6 +164,7 @@ export default function MyPage() {
         queryClient.invalidateQueries({ queryKey: USER_DASHBOARD_QUERY_KEY }),
       ]);
       showToast("green", "댓글을 삭제했습니다.");
+      setCommentToDelete(null);
     } catch (error) {
       showToast("red", getApiErrorMessage(error, "댓글을 삭제하지 못했습니다."));
     } finally {
@@ -379,8 +384,8 @@ export default function MyPage() {
                   item.type === "scrap"
                     ? () => void deleteItem(item)
                     : item.type === "post"
-                      ? () => void deletePostItem(item)
-                      : () => void deleteCommentItem(item)
+                      ? () => setPostToDelete(item)
+                      : () => setCommentToDelete(item)
                 }
               />
             ))}
@@ -434,6 +439,30 @@ export default function MyPage() {
 
       {badgeModal === "grade" && <BadgeGradeModal onClose={() => setBadgeModal(null)} />}
       {badgeModal === "help" && <BadgeHelpModal onClose={() => setBadgeModal(null)} />}
+      <DeleteConfirmModal
+        open={postToDelete !== null}
+        title="게시글을 삭제하시겠어요?"
+        description="삭제가 완료되면 고객님의 게시글이 즉시 삭제되며, 이는 복구할 수 없습니다."
+        onCancel={() => setPostToDelete(null)}
+        onConfirm={() => {
+          if (postToDelete) {
+            void deletePostItem(postToDelete);
+          }
+        }}
+        loading={deletingPostId !== null}
+      />
+      <DeleteConfirmModal
+        open={commentToDelete !== null}
+        title="댓글을 삭제하시겠어요?"
+        description="삭제가 완료되면 고객님의 댓글이 즉시 삭제되며, 이는 복구할 수 없습니다."
+        onCancel={() => setCommentToDelete(null)}
+        onConfirm={() => {
+          if (commentToDelete) {
+            void deleteCommentItem(commentToDelete);
+          }
+        }}
+        loading={deletingCommentId !== null}
+      />
     </div>
   );
 }

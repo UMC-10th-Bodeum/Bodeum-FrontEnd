@@ -13,15 +13,23 @@ const focusableElementSelector = [
 
 interface DeleteConfirmModalProps {
   open: boolean;
+  title: string;
+  description: string;
   onCancel: () => void;
   onConfirm: () => void;
+  cancelText?: string;
+  confirmText?: string;
   loading?: boolean;
 }
 
 export default function DeleteConfirmModal({
   open,
+  title,
+  description,
   onCancel,
   onConfirm,
+  cancelText = "취소",
+  confirmText = "삭제하기",
   loading = false,
 }: DeleteConfirmModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,10 +105,10 @@ export default function DeleteConfirmModal({
       className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]"
     >
       <OnboardCancelBox
-        title="게시글을 삭제하시겠어요?"
-        description="삭제가 완료되면 고객님의 게시글이 즉시 삭제되며, 이는 복구할 수 없습니다."
-        leftButtonText="취소"
-        rightButtonText="삭제하기"
+        title={title}
+        description={description}
+        leftButtonText={cancelText}
+        rightButtonText={confirmText}
         className="z-[70]!"
         rightButtonColor="sub-red"
         onLeftButtonClick={onCancel}
