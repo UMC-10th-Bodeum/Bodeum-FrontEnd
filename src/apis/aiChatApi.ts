@@ -46,6 +46,14 @@ export async function getAiChatRoom() {
   return data.result;
 }
 
+export async function createAiChatRoom() {
+  const { data } = await api.post<ApiResponse<AiChatRoom>>(
+    "/api/v1/ai/chat-room",
+  );
+
+  return data.result;
+}
+
 export async function confirmAiChatGuide() {
   const { data } = await api.patch<ApiResponse<AiGuideConfirmation>>(
     "/api/v1/ai/chat-room/guide-confirmation",
@@ -54,8 +62,8 @@ export async function confirmAiChatGuide() {
   return data.result;
 }
 
-export async function getAiChatStarter() {
-  const { data } = await api.get<ApiResponse<AiChatStarter>>(
+export async function createAiChatStarter() {
+  const { data } = await api.post<ApiResponse<AiChatStarter>>(
     "/api/v1/ai/chat-room/starter",
   );
 

@@ -3,10 +3,11 @@ import { infiniteQueryOptions, queryOptions, useMutation } from "@tanstack/react
 import {
   agreeToAiTerms,
   confirmAiChatGuide,
+  createAiChatRoom,
+  createAiChatStarter,
   createAiFeedback,
   createAiMessage,
   getAiChatRoom,
-  getAiChatStarter,
   getAiMessageHistory,
   getAiTermsAgreement,
   getTodayAiMessages,
@@ -36,14 +37,6 @@ export function aiChatRoomQueryOptions() {
   return queryOptions({
     queryKey: queryKeys.aiChat.room,
     queryFn: getAiChatRoom,
-    ...sharedQueryPolicy,
-  });
-}
-
-export function aiChatStarterQueryOptions() {
-  return queryOptions({
-    queryKey: queryKeys.aiChat.starter,
-    queryFn: getAiChatStarter,
     ...sharedQueryPolicy,
   });
 }
@@ -84,6 +77,20 @@ export function useAgreeToAiTermsMutation() {
 export function useConfirmAiChatGuideMutation() {
   return useMutation({
     mutationFn: confirmAiChatGuide,
+    retry: false,
+  });
+}
+
+export function useCreateAiChatRoomMutation() {
+  return useMutation({
+    mutationFn: createAiChatRoom,
+    retry: false,
+  });
+}
+
+export function useCreateAiChatStarterMutation() {
+  return useMutation({
+    mutationFn: createAiChatStarter,
     retry: false,
   });
 }
