@@ -12,24 +12,16 @@ interface MyPageCardProps {
   deleteDisabled?: boolean;
 }
 
-export default function MyPageCard({
-  item,
-  onDelete,
-  deleteDisabled = false,
-}: MyPageCardProps) {
+export default function MyPageCard({ item, onDelete, deleteDisabled = false }: MyPageCardProps) {
   const isComment = item.type === "comment";
   const isScrap = item.type === "scrap";
   const content = isComment ? item.comment : item.title;
   const meta = isComment
-    ? ["커뮤니티 댓글", item.postTitle, `작성일 ${item.date}`]
-        .filter(Boolean)
-        .join(" · ")
+    ? ["커뮤니티 댓글", `작성일 ${item.date}`].filter(Boolean).join(" · ")
     : `${isScrap ? (item.sourceLabel ?? "저장 정보") : "커뮤니티 게시글"} · ${
         isScrap ? "저장일" : "작성일"
       } ${item.date}`;
-  const targetPath = isScrap && item.targetPath
-    ? item.targetPath
-    : `/community/${item.postId}`;
+  const targetPath = isScrap && item.targetPath ? item.targetPath : `/community/${item.postId}`;
 
   return (
     <article className="relative flex w-[577px] items-center rounded-[10px] border border-background-250 bg-background-100 px-[17px] py-[15px] transition-[border-color,box-shadow] duration-300 ease-out hover:shadow-[1px_2px_15px_0px_#00000026] has-[a:active]:border-main-400">
