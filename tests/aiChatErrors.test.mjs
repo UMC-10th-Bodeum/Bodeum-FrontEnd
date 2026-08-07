@@ -3,6 +3,8 @@ import test from "node:test";
 
 import {
   getAiChatErrorCode,
+  isAiChatRoomConflictError,
+  isAiChatRoomNotFoundError,
   isAiChatTransportUncertainError,
   isAiTermsNotAgreedError,
 } from "../src/pages/AIchat/aiChatErrors.ts";
@@ -54,4 +56,31 @@ test("응답 없는 timeout·network 오류만 전송 결과 불명으로 판별
     false,
   );
   assert.equal(isAiChatTransportUncertainError(new Error("render error")), false);
+});
+
+test("채팅방 조회·생성 분기는 HTTP 상태와 오류 코드가 모두 일치해야 한다", () => {
+  assert.equal(
+    isAiChatRoomNotFoundError({
+      response: { status: 404, data: { code: "AI404_1" } },
+    }),
+    true,
+  );
+  assert.equal(
+    isAiChatRoomNotFoundError({
+      response: { status: 500, data: { code: "AI404_1" } },
+    }),
+    false,
+  );
+  assert.equal(
+    isAiChatRoomConflictError({
+      response: { status: 409, data: { code: "AI409_1" } },
+    }),
+    true,
+  );
+  assert.equal(
+    isAiChatRoomConflictError({
+      response: { status: 404, data: { code: "AI409_1" } },
+    }),
+    false,
+  );
 });

@@ -51,12 +51,7 @@ function DetailBackButton({
             : "border-background-300 bg-background-100 text-background-500 active:border-background-600 active:text-background-600"
       } ${className ?? ""}`}
     >
-      {Icon && (
-        <Icon
-          aria-hidden="true"
-          className="bodeum-icon-color relative top-[1px] h-4 w-4"
-        />
-      )}
+      {Icon && <Icon aria-hidden="true" className="bodeum-icon-color relative top-[1px] h-4 w-4" />}
       {label}
     </button>
   );

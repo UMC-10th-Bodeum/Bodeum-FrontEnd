@@ -120,6 +120,7 @@ export type BotMessage = {
   id: number;
   serverId?: number;
   role: "bot";
+  answerStatus?: AiAnswerStatus | null;
   text: string;
   resources?: AiCurationResource[];
   warning?: string | null;

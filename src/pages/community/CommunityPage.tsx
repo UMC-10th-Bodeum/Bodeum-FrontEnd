@@ -1,23 +1,22 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import CategoryButton from "@/components/CategoryButton";
 import Input from "@/components/Input";
 import Pagination from "@/components/pagination/Pagination";
 import { Select } from "@/components/Select";
-import CommunitySection from "./components/CommunitySection";
-import CommunityPostCard from "./components/CommunityPostCard";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
-  communityCategoryMap,
   communityCategoryEntries,
-  isCommunityCategory,
+  communityCategoryCodeMap,
+  communityCategoryMap,
+  getCommunityCategoryByCode,
+  isCommunityCategoryCode,
   type CommunityCategory,
 } from "@/constants/communityCategory";
-import type { CommunityPostPayload } from "@/types/community";
-
-type CommunityPageLocationState = {
-  publishedPost?: CommunityPostPayload & { id: number };
-};
+import { useCommunityPosts } from "@/hooks/useCommunity";
 import { searchSuggestionMockData } from "@/mocks/search";
+import type { CommunityPostSort } from "@/types/community";
+import CommunityPostCard from "./components/CommunityPostCard";
+import CommunitySection from "./components/CommunitySection";
 
 const categories: Array<{
   value: CommunityCategory | "ALL";
@@ -28,90 +27,95 @@ const categories: Array<{
 ];
 
 const sortOptions = [
-  { label: "조회순", value: "views" },
-  { label: "공감순", value: "likes" },
-  { label: "댓글순", value: "comments" },
+  { label: "조회순", value: "view" },
+  { label: "스크랩순", value: "scrap" },
+  { label: "댓글순", value: "comment" },
 ];
 
-type SortKey = "views" | "likes" | "comments";
+function getCommunityCategory(boardType: string): CommunityCategory {
+  if (boardType.includes("GROWTH") || boardType.includes("THERAPY")) {
+    return "GROWTH_RECORD";
+  }
+  if (boardType.includes("LOCAL") || boardType.includes("NEIGHBOR")) {
+    return "LOCAL_NEWS";
+  }
+  if (boardType.includes("REVIEW") || boardType.includes("CENTER")) {
+    return "CENTER_REVIEW";
+  }
+  if (boardType.includes("QUESTION") || boardType.includes("INFORMATION")) {
+    return "QUESTION";
+  }
+  return "FREE";
+}
 
-const repeatedPosts = Array.from({ length: 14 }, (_, index) => {
-  const [category] = communityCategoryEntries[index % communityCategoryEntries.length];
+function formatCreatedAt(createdAt: string) {
+  const date = new Date(createdAt);
 
-  return {
-    id: index + 1,
-    category,
-    title: "ABA 치료 6개월째, 드디어 눈맞춤이 됐어요 😭",
-    content:
-      "처음엔 정말 막막했는데 여기 선배 부모님들 덕분에 ABA 치료사와 연결하고 꾸준히 했더니 드디어 반응이 생겼습니다.",
-    likes: 142,
-    comments: 38,
-    views: 1204,
-    imageCount: 3,
-    createdAt: "2026-07-31T03:53:05.460Z",
-  };
-});
+  if (Number.isNaN(date.getTime())) {
+    return createdAt;
+  }
+
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
 
 export default function CommunityPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const publishedPost = (location.state as CommunityPageLocationState | null)?.publishedPost;
-  const categoryParam = searchParams.get("category");
-  const [keyword, setKeyword] = useState("");
-  const category: CommunityCategory | "ALL" = isCommunityCategory(categoryParam)
-    ? categoryParam
+  const categoryCodeParam = searchParams.get("categoryCode");
+  const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
+    ? getCommunityCategoryByCode(categoryCodeParam)
     : "ALL";
-  const [sort, setSort] = useState<SortKey | "">("");
+  const [inputKeyword, setInputKeyword] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [sort, setSort] = useState<CommunityPostSort | "">("");
   const [page, setPage] = useState(1);
-
-  const posts = useMemo(() => {
-    const availablePosts = publishedPost
-      ? [
-          {
-            ...publishedPost,
-            likes: 0,
-            comments: 0,
-            views: 0,
-            imageCount: publishedPost.images.length,
-            createdAt: "방금 전",
-          },
-          ...repeatedPosts,
-        ]
-      : repeatedPosts;
-    const filteredPosts = availablePosts.filter(
-      (post) =>
-        post.title.includes(keyword) ||
-        post.content.includes(keyword) ||
-        communityCategoryMap[post.category].includes(keyword),
-    );
-    const activeSort: SortKey = sort || "views";
-
-    return [...filteredPosts].sort((a, b) => b[activeSort] - a[activeSort]);
-  }, [keyword, publishedPost, sort]);
+  const { data, isPending, isError, refetch } = useCommunityPosts({
+    page: page - 1,
+    size: 14,
+    sort: sort || "view",
+    keyword,
+    categoryCode: category === "ALL" ? undefined : communityCategoryCodeMap[category],
+  });
+  const visiblePosts = data?.content ?? [];
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
-    if (value === "ALL") {
-      setSearchParams({});
-    } else {
-      setSearchParams({ category: value });
-    }
+    setSearchParams(
+      (currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+
+        if (value === "ALL") {
+          nextParams.delete("categoryCode");
+        } else {
+          nextParams.set("categoryCode", communityCategoryCodeMap[value]);
+        }
+
+        return nextParams;
+      },
+      { replace: true },
+    );
+    setPage(1);
   };
 
-  const handleSearch = (keyword: string) => {
-    setKeyword(keyword);
+  const handleSearch = (nextKeyword: string) => {
+    const normalizedKeyword = nextKeyword.trim();
+    setInputKeyword(nextKeyword);
+    setKeyword(normalizedKeyword.length >= 2 ? normalizedKeyword : "");
     setPage(1);
   };
 
   const suggestions =
-    keyword.trim().length >= 2
+    inputKeyword.trim().length >= 2
       ? searchSuggestionMockData.result.suggestions.filter((item) =>
-        item.text.includes(keyword)
-      )
+          item.text.includes(inputKeyword),
+        )
       : [];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background-100">
+    <div className="min-h-[calc(100vh-60px)] bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
         <CommunitySection />
 
@@ -132,20 +136,25 @@ export default function CommunityPage() {
             <Input
               search
               searchType="community"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              value={inputKeyword}
+              onChange={(event) => {
+                const nextKeyword = event.target.value;
+                setInputKeyword(nextKeyword);
+                if (!nextKeyword.trim()) handleSearch("");
+              }}
               onEnter={handleSearch}
               suggestions={suggestions}
-              onSuggestionClick={(text) => {
-                handleSearch(text);
-              }}
+              onSuggestionClick={handleSearch}
               placeholder="게시글을 검색해보세요"
-              className="w-[640px] h-[44px]"
+              className="h-[44px] w-[640px]"
             />
             <Select
               options={sortOptions}
               value={sort}
-              onChange={(value) => setSort(value as SortKey)}
+              onChange={(value) => {
+                setSort(value as CommunityPostSort);
+                setPage(1);
+              }}
               placeholder="조회순"
               variant="S"
               ariaLabel="게시글 정렬"
@@ -153,35 +162,56 @@ export default function CommunityPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
-            {posts.map((post) => (
-              <CommunityPostCard
-                key={post.id}
-                {...post}
-                onClick={() =>
-                  navigate(`/community/${post.id}`, {
-                    state: {
-                      category: category === "ALL" ? post.category : category,
-                      post: {
-                        ...post,
-                        diagnosis: "AUTISM",
-                        author:
-                          "authorVisibility" in post && post.authorVisibility === "ANONYMOUS"
-                            ? "익명 부모님"
-                            : "NN님 · Level1 · 자폐스펙트럼 · N세 아이",
-                      },
-                    },
-                  })
-                }
-              />
-            ))}
-          </div>
+          {isPending ? (
+            <div className="flex items-center justify-center py-16 text-center text-background-500">
+              게시글을 불러오는 중입니다.
+            </div>
+          ) : isError ? (
+            <div className="min-h-[320px] flex flex-col items-center justify-center gap-3 text-background-500">
+              <p>게시글을 불러오지 못했습니다.</p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="rounded-lg border border-background-300 px-4 py-2"
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : visiblePosts.length === 0 ? (
+            <div className="py-16 text-center text-background-500">검색 결과가 없습니다.</div>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
+              {visiblePosts.map((post) => {
+                const postCategory = getCommunityCategory(post.boardType);
+
+                return (
+                  <CommunityPostCard
+                    key={post.postId}
+                    id={post.postId}
+                    categoryLabel={communityCategoryMap[postCategory]}
+                    title={post.title}
+                    content={post.content}
+                    likes={post.likeCount}
+                    comments={post.commentCount}
+                    views={post.viewCount}
+                    imageCount={post.thumbnailUrl ? 1 : 0}
+                    initialIsLiked={post.isLiked}
+                    createdAt={formatCreatedAt(post.createdAt)}
+                    onClick={() => navigate(`/community/${post.postId}`)}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="py-2 mt-[5px]">
-          <Pagination currentPage={page} totalPages={120} onChange={setPage} />
-        </div>
+        {data && data.totalPages > 1 && (
+          <div className="mt-[5px] py-2">
+            <Pagination currentPage={page} totalPages={data.totalPages} onChange={setPage} />
+          </div>
+        )}
       </div>
+
     </div>
   );
 }

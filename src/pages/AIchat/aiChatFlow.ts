@@ -1,3 +1,10 @@
+import type { AiChatRoom } from "@/types/aiChat";
+
+import {
+  isAiChatRoomConflictError,
+  isAiChatRoomNotFoundError,
+} from "./aiChatErrors.ts";
+
 export type AiChatEntryModal =
   | "login-required"
   | "consent-required"
@@ -72,4 +79,25 @@ export function shouldShowPreviousHistoryButton({
     !historyLoading &&
     (hasPreviousMessages || hasHiddenTodayMessages)
   );
+}
+
+type AiChatRoomRequest = () => Promise<AiChatRoom>;
+
+export async function resolveAiChatRoom(
+  getRoom: AiChatRoomRequest,
+  createRoom: AiChatRoomRequest,
+) {
+  try {
+    return await getRoom();
+  } catch (error: unknown) {
+    if (!isAiChatRoomNotFoundError(error)) throw error;
+  }
+
+  try {
+    return await createRoom();
+  } catch (error: unknown) {
+    if (!isAiChatRoomConflictError(error)) throw error;
+  }
+
+  return getRoom();
 }

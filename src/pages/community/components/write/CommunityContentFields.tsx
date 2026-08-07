@@ -5,19 +5,15 @@ const MAX_CONTENT_LENGTH = 2000;
 type CommunityContentFieldsProps = {
   title: string;
   content: string;
-  hashtags: string;
   onTitleChange: (value: string) => void;
   onContentChange: (value: string) => void;
-  onHashtagsChange: (value: string) => void;
 };
 
 export default function CommunityContentFields({
   title,
   content,
-  hashtags,
   onTitleChange,
   onContentChange,
-  onHashtagsChange,
 }: CommunityContentFieldsProps) {
   return (
     <>
@@ -41,7 +37,7 @@ export default function CommunityContentFields({
             maxLength={MAX_CONTENT_LENGTH}
             placeholder="내용을 입력해 주세요* (최대 2000자)"
             aria-label="게시글 내용"
-            className="h-[158px] w-full resize-none rounded-[10px] border border-background-300 bg-background-200 px-[20px] py-[12px] text-h2-onboard text-background-600 outline-none placeholder:text-background-500 focus:border-main-400"
+            className="h-[158px] w-full resize-none rounded-[10px] border border-transparent bg-background-200 px-[20px] py-[12px] text-h2-onboard text-background-600 outline-none transition-colors duration-150 placeholder:text-background-400 focus:border-main-400 focus:bg-background-100"
           />
           {!content && (
             <p className="pointer-events-none absolute left-[20px] right-[20px] top-[40px] whitespace-normal break-words text-h2-onboard text-background-400">
@@ -57,20 +53,6 @@ export default function CommunityContentFields({
           </span>
         </div>
       </fieldset>
-
-      <label
-        htmlFor="community-hashtags"
-        className="mt-[16px] block text-h3-onboard text-background-500"
-      >
-        해시태그
-      </label>
-      <Input
-        id="community-hashtags"
-        value={hashtags}
-        onChange={(event) => onHashtagsChange(event.target.value)}
-        placeholder="해시태그를 입력해 주세요 (Ex. #발달인지, #5세 남아, #병원정보)"
-        className="mt-[12px] h-[48px] w-full"
-      />
     </>
   );
 }

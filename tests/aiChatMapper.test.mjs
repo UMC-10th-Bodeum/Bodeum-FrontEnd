@@ -6,6 +6,7 @@ import {
   deduplicateMessages,
   mapApiMessage,
   mapCurrentSessionMessages,
+  shouldShowAiMessageFeedback,
 } from "../src/utils/aiChatMapper.ts";
 
 function createMessage(overrides = {}) {
@@ -42,6 +43,7 @@ test("API 메시지를 기존 화면 메시지 형식으로 변환한다", () =>
       id: 1,
       serverId: 1,
       role: "bot",
+      answerStatus: "ANSWERED",
       text: "답변",
       resources: [
         { title: "지원 정보", url: "https://example.com/info" },
@@ -69,6 +71,9 @@ test("서버 인사말이 없을 때만 로컬 starter를 앞에 추가한다", 
 
   assert.equal(persisted.length, 2);
   assert.deepEqual(persisted[0].suggestions, ["질문"]);
+  assert.equal(persisted[0].answerStatus, "GREETING");
+  assert.equal(shouldShowAiMessageFeedback(persisted[0]), false);
+  assert.equal(shouldShowAiMessageFeedback(persisted[1]), true);
 });
 
 test("메시지 중복 제거·시간 정렬·피드백 수집 규칙을 유지한다", () => {

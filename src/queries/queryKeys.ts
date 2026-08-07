@@ -14,7 +14,6 @@ export const queryKeys = {
     all: ["aiChat"] as const,
     terms: ["aiChat", "terms"] as const,
     room: ["aiChat", "room"] as const,
-    starter: ["aiChat", "starter"] as const,
     todayMessages: ["aiChat", "messages", "today"] as const,
     history: ["aiChat", "messages", "history"] as const,
   },

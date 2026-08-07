@@ -23,16 +23,18 @@ import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
 import {
   aiChatRoomQueryOptions,
-  aiChatStarterQueryOptions,
   aiMessageHistoryInfiniteQueryOptions,
   aiTermsQueryOptions,
   todayAiMessagesInfiniteQueryOptions,
   useAgreeToAiTermsMutation,
   useConfirmAiChatGuideMutation,
+  useCreateAiChatRoomMutation,
+  useCreateAiChatStarterMutation,
   useCreateAiFeedbackMutation,
   useCreateAiMessageMutation,
 } from "@/hooks/useAiChat";
 import { userBriefQueryOptions } from "@/hooks/useUser";
+import { queryKeys } from "@/queries/queryKeys";
 import type {
   AiFeedbackReason,
   AiFeedbackType,
@@ -48,6 +50,7 @@ import {
   deduplicateMessages,
   mapApiMessage,
   mapCurrentSessionMessages,
+  shouldShowAiMessageFeedback,
 } from "@/utils/aiChatMapper";
 import { wait } from "@/utils/async";
 import {
@@ -71,6 +74,7 @@ import {
 } from "./components";
 import {
   partitionMessagesByLoginSession,
+  resolveAiChatRoom,
   resolveAiChatEntryModal,
   shouldShowPreviousHistoryButton,
 } from "./aiChatFlow";
@@ -177,6 +181,10 @@ export default function AIChatPage() {
     useAgreeToAiTermsMutation();
   const { mutateAsync: confirmAiChatGuideRequest } =
     useConfirmAiChatGuideMutation();
+  const { mutateAsync: createAiChatRoomRequest } =
+    useCreateAiChatRoomMutation();
+  const { mutateAsync: createAiChatStarterRequest } =
+    useCreateAiChatStarterMutation();
   const { mutateAsync: createAiMessageRequest } =
     useCreateAiMessageMutation();
   const { mutateAsync: createAiFeedbackRequest } =
@@ -314,10 +322,14 @@ export default function AIChatPage() {
         return;
       }
 
-      const [room, starter] = await Promise.all([
-        queryClient.fetchQuery(aiChatRoomQueryOptions()),
-        queryClient.fetchQuery(aiChatStarterQueryOptions()),
-      ]);
+      const room = await resolveAiChatRoom(
+        () => queryClient.fetchQuery(aiChatRoomQueryOptions()),
+        createAiChatRoomRequest,
+      );
+      if (requestId !== initializeRequestRef.current) return;
+      queryClient.setQueryData(queryKeys.aiChat.room, room);
+
+      const starter = await createAiChatStarterRequest();
       if (requestId !== initializeRequestRef.current) return;
 
       const historyRevealed = hasRevealedAiChatHistory();
@@ -388,7 +400,13 @@ export default function AIChatPage() {
         ),
       );
     }
-  }, [enterConsentRequiredState, queryClient, resetAiChatUiState]);
+  }, [
+    createAiChatRoomRequest,
+    createAiChatStarterRequest,
+    enterConsentRequiredState,
+    queryClient,
+    resetAiChatUiState,
+  ]);
 
   useEffect(() => {
     void initializeAiChat();
@@ -848,7 +866,7 @@ export default function AIChatPage() {
         resources={message.resources}
         warning={message.warning}
         suggestions={message.suggestions}
-        showFeedback={hasServerId}
+        showFeedback={shouldShowAiMessageFeedback(message)}
         selectedFeedback={selectedFeedback}
         onSuggestionClick={(suggestion) => void handleSend(suggestion)}
         onGoodFeedback={
