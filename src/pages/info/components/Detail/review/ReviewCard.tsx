@@ -75,10 +75,6 @@ export default function ReviewCard({ infoItemId, review }: Props) {
               {formatDate(review.createdAt)}
             </span>
           </div>
-
-          <button className="text-body-sub text-background-500">
-            신고
-          </button>
         </div>
 
         <p className="my-[7px] whitespace-pre-wrap text-h6-list text-background-600">
