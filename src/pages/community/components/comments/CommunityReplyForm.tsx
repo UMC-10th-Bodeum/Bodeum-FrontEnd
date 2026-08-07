@@ -3,12 +3,14 @@ import MainButton from "@/components/MainButton";
 
 interface CommunityReplyFormProps {
   targetAuthor: string;
+  isSubmitting: boolean;
   onCancel: () => void;
   onSubmit: (content: string) => void;
 }
 
 export default function CommunityReplyForm({
   targetAuthor,
+  isSubmitting,
   onCancel,
   onSubmit,
 }: CommunityReplyFormProps) {
@@ -24,12 +26,10 @@ export default function CommunityReplyForm({
     if (!value) return;
 
     onSubmit(value);
-    setReply("");
-    onCancel();
   };
 
   return (
-    <div className="relative border-y border-background-250 bg-background-200 py-[20px] pr-[80px] pl-[85px]">
+    <div className="relative border-b border-background-250 bg-background-200 py-[20px] pr-[80px] pl-[85px]">
       <span
         aria-hidden="true"
         className="absolute top-[20px] left-[17px] flex h-[40px] w-[40px] items-center justify-center"
@@ -38,15 +38,21 @@ export default function CommunityReplyForm({
       </span>
       <textarea
         value={reply}
+        maxLength={1000}
+        disabled={isSubmitting}
         onChange={(event) => setReply(event.target.value)}
         placeholder={`${targetAuthor}에게 답글 쓰기`}
-        className="h-[100px] w-full resize-none rounded-[9px] border border-background-300 bg-background-100 px-[16px] py-[14px] text-h6-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400"
+        className="h-[100px] w-full resize-none rounded-[9px] border border-background-300 bg-background-100 px-[16px] py-[14px] text-h6-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 disabled:cursor-not-allowed disabled:opacity-50"
       />
       <div className="mt-[10px] flex justify-end gap-[8px]">
-        <MainButton size="S" stroke onClick={cancelReply}>
+        <MainButton size="S" stroke disabled={isSubmitting} onClick={cancelReply}>
           취소
         </MainButton>
-        <MainButton size="S" disabled={!reply.trim()} onClick={submitReply}>
+        <MainButton
+          size="S"
+          disabled={!reply.trim() || isSubmitting}
+          onClick={submitReply}
+        >
           작성
         </MainButton>
       </div>

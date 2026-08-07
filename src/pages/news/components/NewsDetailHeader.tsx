@@ -8,7 +8,7 @@ import ViewStat from "@/components/post-stat/ViewStat";
 import ArrowUpRightIcon from "@/assets/icons/arrow-up-right.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import GalleryMainImage from "@/assets/icons/gallery-main.svg";
-import ShareButton from "@/pages/news/components/ShareButton";
+import ShareButton from "@/components/ShareButton";
 import type { NewsDetail } from "@/types/news";
 import type { NewsStatusPresentation } from "@/utils/newsStatus";
 

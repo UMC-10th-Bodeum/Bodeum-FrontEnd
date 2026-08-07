@@ -4,9 +4,10 @@ import ButtonOutline from "@/components/ButtonOutline";
 
 interface ShareButtonProps {
   url: string;
+  className?: string;
 }
 
-export default function ShareButton({ url }: ShareButtonProps) {
+export default function ShareButton({ url, className }: ShareButtonProps) {
   const handleShare = async () => {
     try {
       if (!navigator.clipboard?.writeText) {
@@ -27,6 +28,7 @@ export default function ShareButton({ url }: ShareButtonProps) {
       icon={ShareIcon}
       iconPosition="left"
       onClick={() => void handleShare()}
+      className={className}
     />
   );
 }

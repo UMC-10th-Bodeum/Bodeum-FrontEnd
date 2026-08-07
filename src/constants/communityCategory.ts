@@ -8,15 +8,39 @@ export const communityCategoryMap = {
 
 export type CommunityCategory = keyof typeof communityCategoryMap;
 
-export const communityCategoryEntries = Object.entries(
-  communityCategoryMap,
-) as Array<[CommunityCategory, string]>;
+export type CommunityCategoryCode =
+  | "FREE_COMMUNICATION"
+  | "TREATMENT_GROWTH_RECORD"
+  | "NEIGHBORHOOD_NEWS"
+  | "INSTITUTION_CENTER_REVIEW"
+  | "INFORMATION_QUESTION";
 
-export function isCommunityCategory(
-  value: string | null,
-): value is CommunityCategory {
-  return (
-    value !== null &&
-    Object.prototype.hasOwnProperty.call(communityCategoryMap, value)
+export const communityCategoryCodeMap: Record<CommunityCategory, CommunityCategoryCode> = {
+  FREE: "FREE_COMMUNICATION",
+  GROWTH_RECORD: "TREATMENT_GROWTH_RECORD",
+  LOCAL_NEWS: "NEIGHBORHOOD_NEWS",
+  CENTER_REVIEW: "INSTITUTION_CENTER_REVIEW",
+  QUESTION: "INFORMATION_QUESTION",
+};
+
+const communityCategoryCodeSet = new Set<string>(Object.values(communityCategoryCodeMap));
+
+export function isCommunityCategoryCode(value: string | null): value is CommunityCategoryCode {
+  return value !== null && communityCategoryCodeSet.has(value);
+}
+
+export function getCommunityCategoryByCode(code: CommunityCategoryCode): CommunityCategory {
+  const entry = Object.entries(communityCategoryCodeMap).find(
+    ([, categoryCode]) => categoryCode === code,
   );
+
+  return entry?.[0] as CommunityCategory;
+}
+
+export const communityCategoryEntries = Object.entries(communityCategoryMap) as Array<
+  [CommunityCategory, string]
+>;
+
+export function isCommunityCategory(value: string | null): value is CommunityCategory {
+  return value !== null && Object.prototype.hasOwnProperty.call(communityCategoryMap, value);
 }

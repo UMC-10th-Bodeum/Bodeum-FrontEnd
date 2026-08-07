@@ -98,7 +98,7 @@ export function useRegionFilter({
     return () => {
       cancelled = true;
     };
-  }, [initialRegionLevel1, initialRegionLevel2]);
+  }, [initialRegionLevel1, initialRegionLevel2, regionLevel1, regionLevel2]);
 
   const completeRegionOnboarding = async ({
     sido,

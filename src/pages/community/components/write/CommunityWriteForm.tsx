@@ -15,6 +15,7 @@ import SelectableChipGroup from "./SelectableChipGroup";
 type CommunityWriteFormProps = {
   onCancel: () => void;
   onSubmit: (payload: CommunityPostPayload) => void;
+  isSubmitting?: boolean;
 };
 
 const categoryOptions = communityCategoryEntries.map(([value, label]) => ({
@@ -33,12 +34,12 @@ const authorVisibilityOptions: Array<{
 export default function CommunityWriteForm({
   onCancel,
   onSubmit,
+  isSubmitting = false,
 }: CommunityWriteFormProps) {
   const [category, setCategory] = useState<CommunityCategory | null>(null);
   const [authorVisibility, setAuthorVisibility] = useState<CommunityAuthorVisibility | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [hashtags, setHashtags] = useState("");
   const [images, setImages] = useState<File[]>([]);
 
   const isSubmittable =
@@ -48,14 +49,13 @@ export default function CommunityWriteForm({
 
   const submitPost = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSubmittable || category === null) return;
+    if (!isSubmittable || category === null || isSubmitting) return;
 
     onSubmit({
       category,
       authorVisibility: authorVisibility ?? "PROFILE",
       title: title.trim(),
       content: content.trim(),
-      hashtags: hashtags.trim(),
       images,
     });
   };
@@ -83,10 +83,8 @@ export default function CommunityWriteForm({
         <CommunityContentFields
           title={title}
           content={content}
-          hashtags={hashtags}
           onTitleChange={setTitle}
           onContentChange={setContent}
-          onHashtagsChange={setHashtags}
         />
         <CommunityImageField images={images} onChange={setImages} />
       </div>
@@ -100,8 +98,8 @@ export default function CommunityWriteForm({
         />
         <ButtonFill
           type="submit"
-          label="게시하기"
-          disabled={!isSubmittable}
+          label={isSubmitting ? "게시 중..." : "게시하기"}
+          disabled={!isSubmittable || isSubmitting}
           className="!h-[44px] !w-[200px]"
         />
       </div>
