@@ -15,7 +15,10 @@ import {
   useToggleCommunityPostScrap,
   useDeleteCommunityPost,
 } from "@/hooks/useCommunity";
+import { useUpdateCommunityPost } from "@/hooks/useCommunity";
 import { useState } from "react";
+import ButtonOutline from "@/components/ButtonOutline";
+import ButtonFill from "@/components/ButtonFill";
 import DeleteConfirmModal from "@/pages/community/components/detail/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
 
@@ -30,13 +33,51 @@ export default function CommunityPostDetailCard({
   category,
   children,
 }: CommunityPostDetailCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(post.title);
+  const [editedContent, setEditedContent] = useState(post.content);
+  const [appliedTitle, setAppliedTitle] = useState(post.title);
+  const [appliedContent, setAppliedContent] = useState(post.content);
   const { mutate: toggleLike, isPending: isLikePending } = useToggleCommunityPostLike(post.postId);
   const { mutate: toggleScrap, isPending: isScrapPending } = useToggleCommunityPostScrap(
     post.postId,
   );
   const navigate = useNavigate();
   const { mutate: deletePost, isPending: isDeleting } = useDeleteCommunityPost(post.postId);
+  const { mutate: updatePost, isPending: isUpdating } = useUpdateCommunityPost(post.postId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const startEditing = () => {
+    setEditedTitle(appliedTitle);
+    setEditedContent(appliedContent);
+    setIsEditing(true);
+  };
+
+  const onCancel = () => {
+    setIsEditing(false);
+  };
+
+  const onApply = () => {
+    const payload = {
+      boardType: post.boardType,
+      anonymityType: post.anonymityType,
+      title: editedTitle.trim() || appliedTitle,
+      content: editedContent,
+      disabilityTypes: post.disabilityTypes,
+      hashtags: post.hashtags,
+      imageUrls: post.imageUrls,
+    };
+
+    updatePost(payload, {
+      onSuccess: (updated) => {
+        setAppliedTitle(updated.title ?? payload.title);
+        setAppliedContent(updated.content ?? payload.content);
+        setIsEditing(false);
+        showToast("green", "게시글이 수정되었습니다.");
+      },
+      onError: (error) => showToast("red", getApiErrorMessage(error, "게시글을 수정하지 못했습니다.")),
+    });
+  };
 
   return (
     <article className="min-h-[574px] rounded-[18px] border border-background-250 bg-background-100 px-[40px] py-[20px]">
@@ -55,10 +96,27 @@ export default function CommunityPostDetailCard({
       </header>
 
       <div className="pb-[20px] pt-[12px]">
-        <h1 className="text-h1-onboard text-background-600">{post.title}</h1>
-        <p className="mt-[12px] whitespace-pre-wrap text-h3-onboard text-background-600">
-          {post.content}
-        </p>
+        {isEditing ? (
+          <>
+            <input
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="w-full rounded-[6px] border border-background-200 px-3 py-2 text-h1-onboard"
+            />
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              className="mt-[12px] w-full min-h-[120px] rounded-[6px] border border-background-200 p-3 text-h3-onboard"
+            />
+          </>
+        ) : (
+          <>
+            <h1 className="text-h1-onboard text-background-600">{appliedTitle}</h1>
+            <p className="mt-[12px] whitespace-pre-wrap text-h3-onboard text-background-600">
+              {appliedContent}
+            </p>
+          </>
+        )}
 
         {post.imageUrls.length > 0 && (
           <div className="mt-5 grid grid-cols-2 gap-3">
@@ -124,6 +182,28 @@ export default function CommunityPostDetailCard({
         <div className="flex items-center gap-2">
           {post.isMine && (
             <>
+              {isEditing ? (
+                <div className="ml-auto flex gap-[8px]">
+                  <ButtonOutline
+                    label="취소하기"
+                    onClick={onCancel}
+                    className="h-[44px] w-[91px] !text-h2-onboard"
+                  />
+                  <ButtonFill
+                    label="적용하기"
+                    disabled={editedTitle.trim().length === 0 || isUpdating}
+                    onClick={onApply}
+                    className="h-[44px] w-[91px] !text-h2-onboard"
+                  />
+                </div>
+              ) : (
+                <ButtonOutline
+                  label="프로필 편집"
+                  onClick={startEditing}
+                  className="ml-auto h-[44px] w-[110px] !text-h2-onboard"
+                />
+              )}
+
               <DetailBackButton
                 icon={null}
                 label="삭제"

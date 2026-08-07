@@ -38,31 +38,44 @@ export default function CommunityWritePage() {
   }, [blocker.state]);
 
   const publishPost = (payload: CommunityPostPayload) => {
-    if (payload.images.length > 0) {
-      showToast("red", "이미지를 등록하려면 커뮤니티 이미지 업로드 API가 필요합니다.");
-      return;
-    }
+    void (async () => {
+      try {
+        const imageUrls: string[] = [];
 
-    createPost(
-      {
-        boardType: communityCategoryCodeMap[payload.category],
-        anonymityType:
-          payload.authorVisibility === "ANONYMOUS" ? "FULLY_ANONYMOUS" : "PROFILE_TAG_VISIBLE",
-        title: payload.title,
-        content: payload.content,
-        disabilityTypes: [],
-        imageUrls: [],
-      },
-      {
-        onSuccess: () => {
-          allowNavigationRef.current = true;
-          showToast("green", "게시물이 성공적으로 등록됐습니다!");
-          navigate("/community");
-        },
-        onError: (error) =>
-          showToast("red", getApiErrorMessage(error, "게시물을 등록하지 못했습니다.")),
-      },
-    );
+        if (payload.images.length > 0) {
+          const uploads = await Promise.all(
+            payload.images.map((file) =>
+              import("@/apis/community").then((m) => m.uploadCommunityPostImage(file)),
+            ),
+          );
+
+          imageUrls.push(...uploads.filter(Boolean));
+        }
+
+        createPost(
+          {
+            boardType: communityCategoryCodeMap[payload.category],
+            anonymityType:
+              payload.authorVisibility === "ANONYMOUS" ? "FULLY_ANONYMOUS" : "PROFILE_TAG_VISIBLE",
+            title: payload.title,
+            content: payload.content,
+            disabilityTypes: [],
+            imageUrls,
+          },
+          {
+            onSuccess: () => {
+              allowNavigationRef.current = true;
+              showToast("green", "게시물이 성공적으로 등록됐습니다!");
+              navigate("/community");
+            },
+            onError: (error) =>
+              showToast("red", getApiErrorMessage(error, "게시물을 등록하지 못했습니다.")),
+          },
+        );
+      } catch (error) {
+        showToast("red", getApiErrorMessage(error, "이미지 업로드 중 오류가 발생했습니다."));
+      }
+    })();
   };
 
   const continueWriting = () => {

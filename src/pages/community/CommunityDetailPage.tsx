@@ -73,7 +73,11 @@ export default function CommunityDetailPage() {
     <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto flex w-[1176px] flex-col gap-[18px]">
         <CommunityPostDetailCard key={post.postId} post={post} category={category}>
-          <CommunityCommentsSection key={post.postId} postId={post.postId} />
+          <CommunityCommentsSection
+            key={post.postId}
+            postId={post.postId}
+            isPostAuthor={post.isMine}
+          />
         </CommunityPostDetailCard>
 
         <section className="flex flex-col gap-[14px] rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[20px]">

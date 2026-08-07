@@ -9,15 +9,21 @@ import {
   useCreateCommunityComment,
   useCreateCommunityReply,
   useToggleCommunityCommentLike,
+  useToggleCommunityCommentAdoption,
+  useDeleteCommunityComment,
 } from "@/hooks/useCommunity";
 import CommentEmptyState from "./CommentEmptyState";
 import CommunityCommentItem from "./CommunityCommentItem";
 
 interface CommunityCommentsSectionProps {
   postId: number;
+  isPostAuthor?: boolean;
 }
 
-export default function CommunityCommentsSection({ postId }: CommunityCommentsSectionProps) {
+export default function CommunityCommentsSection({
+  postId,
+  isPostAuthor,
+}: CommunityCommentsSectionProps) {
   const [comment, setComment] = useState("");
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
   const { data, isPending, isError, refetch } = useCommunityComments(postId);
@@ -28,6 +34,9 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
     isPending: isLikePending,
     variables: likingComment,
   } = useToggleCommunityCommentLike(postId);
+  const { mutate: toggleCommentAdoption, isPending: isAdoptPending } =
+    useToggleCommunityCommentAdoption(postId);
+    const { mutate: deleteComment } = useDeleteCommunityComment(postId);
   const comments = data?.comments ?? [];
 
   const showCreateError = (error: unknown) => {
@@ -120,7 +129,9 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
           {comments.map((item) => (
             <CommunityCommentItem
               key={item.commentId}
+              postId={postId}
               comment={item}
+              isPostAuthor={isPostAuthor ?? false}
               replyTargetId={replyTargetId}
               onSelectReplyTarget={(targetComment) =>
                 setReplyTargetId((current) =>
@@ -132,6 +143,13 @@ export default function CommunityCommentsSection({ postId }: CommunityCommentsSe
               isReplyPending={isReplyPending}
               onLike={likeComment}
               likingCommentId={isLikePending ? likingComment?.commentId : undefined}
+              onAdopt={(commentId) => toggleCommentAdoption(commentId)}
+              isAdoptPending={isAdoptPending}
+              onDelete={(commentId: number) =>
+                deleteComment(commentId, {
+                  onError: (error: unknown) => showToast("red", getApiErrorMessage(error, "댓글을 삭제하지 못했습니다.")),
+                })
+              }
             />
           ))}
         </ul>

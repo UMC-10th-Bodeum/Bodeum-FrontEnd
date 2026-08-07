@@ -3,6 +3,9 @@ import {
   createCommunityComment,
   createCommunityCommentLike,
   createCommunityReply,
+  toggleCommunityCommentAdoption,
+  updateCommunityComment,
+  deleteCommunityComment,
   createCommunityPost,
   createCommunityPostScrap,
   createCommunityPostLike,
@@ -13,6 +16,7 @@ import {
   getCommunityPost,
   getCommunityPosts,
   deleteCommunityPost,
+  updateCommunityPost,
 } from "@/apis/community";
 import type {
   CommunityComment,
@@ -86,6 +90,27 @@ function incrementCommunityPostCommentCount(
           }
         : currentPage,
   );
+}
+
+function removeCommentAndCount(
+  comments: CommunityComment[],
+  targetId: number,
+): { comments: CommunityComment[]; removedCount: number } {
+  let removed = 0;
+
+  function walk(list: CommunityComment[]): CommunityComment[] {
+    return list
+      .map((c) => ({ ...c, replies: c.replies ? walk(c.replies) : c.replies }))
+      .filter((c) => {
+        if (c.commentId === targetId) {
+          removed += 1 + (Array.isArray(c.replies) ? c.replies.length : 0);
+          return false;
+        }
+        return true;
+      });
+  }
+
+  return { comments: walk(comments), removedCount: removed };
 }
 
 export const communityPostKeys = {
@@ -230,6 +255,145 @@ export function useToggleCommunityCommentLike(postId: number) {
   });
 }
 
+export function useToggleCommunityCommentAdoption(postId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation<CommunityComment, unknown, number>({
+    mutationFn: (commentId: number) => toggleCommunityCommentAdoption(commentId),
+    onSuccess: (updatedComment) => {
+      queryClient.setQueryData<CommunityCommentsResult>(
+        communityPostKeys.comments(postId),
+        (currentComments) =>
+          currentComments
+            ? {
+                ...currentComments,
+                comments: currentComments.comments.map((comment) => {
+                  if (comment.commentId === updatedComment.commentId)
+                    return { ...comment, ...updatedComment };
+
+                  return {
+                    ...comment,
+                    replies: comment.replies
+                      ? comment.replies.map((r) =>
+                          r.commentId === updatedComment.commentId
+                            ? { ...r, ...updatedComment }
+                            : r,
+                        )
+                      : comment.replies,
+                  };
+                }),
+              }
+            : currentComments,
+      );
+    },
+  });
+}
+
+function replaceCommentInTree(
+  comment: CommunityComment,
+  updatedComment: CommunityComment,
+): CommunityComment {
+  // 현재 댓글이 수정된 댓글이면 서버 응답으로 갱신
+  if (comment.commentId === updatedComment.commentId) {
+    return {
+      ...comment,
+      ...updatedComment,
+
+      // 수정 API 응답에 replies가 없을 때 기존 답글이 사라지는 것 방지
+      replies: updatedComment.replies ?? comment.replies,
+    };
+  }
+
+  // 현재 댓글이 아니면 하위 답글에서 계속 찾음
+  return {
+    ...comment,
+    replies: comment.replies?.map((reply) => replaceCommentInTree(reply, updatedComment)),
+  };
+}
+
+export function useUpdateCommunityComment(postId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation<CommunityComment, unknown, { commentId: number; content: string }>({
+    mutationFn: ({ commentId, content }) => updateCommunityComment(commentId, { content }),
+
+    onSuccess: (updatedComment) => {
+      queryClient.setQueryData<CommunityCommentsResult>(
+        communityPostKeys.comments(postId),
+        (currentComments) => {
+          if (!currentComments) {
+            return currentComments;
+          }
+
+          return {
+            ...currentComments,
+
+            // 최상위 댓글부터 재귀적으로 수정 댓글을 탐색
+            comments: currentComments.comments.map((comment) =>
+              replaceCommentInTree(comment, updatedComment),
+            ),
+          };
+        },
+      );
+    },
+  });
+}
+
+export function useDeleteCommunityComment(postId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, unknown, number>({
+    mutationFn: (commentId: number) => deleteCommunityComment(commentId),
+    onSuccess: (_res, commentId) => {
+      queryClient.setQueryData<CommunityCommentsResult>(
+        communityPostKeys.comments(postId),
+        (currentComments) => {
+          if (!currentComments) return currentComments;
+
+          const { comments: newComments, removedCount } = removeCommentAndCount(
+            currentComments.comments,
+            commentId,
+          );
+
+          // update post detail commentCount
+          queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), (post) =>
+            post ? { ...post, commentCount: Math.max(0, post.commentCount - removedCount) } : post,
+          );
+
+          // update list pages
+          if (removedCount > 0) {
+            queryClient.setQueriesData<CommunityPostPage>(
+              {
+                predicate: ({ queryKey }) =>
+                  queryKey[0] === communityPostKeys.all[0] &&
+                  queryKey.length === 2 &&
+                  typeof queryKey[1] === "object",
+              },
+              (currentPage) =>
+                currentPage
+                  ? {
+                      ...currentPage,
+                      content: currentPage.content.map((p) =>
+                        p.postId === postId
+                          ? { ...p, commentCount: Math.max(0, p.commentCount - removedCount) }
+                          : p,
+                      ),
+                    }
+                  : currentPage,
+            );
+          }
+
+          return {
+            ...currentComments,
+            totalCount: Math.max(0, currentComments.totalCount - removedCount),
+            comments: newComments,
+          };
+        },
+      );
+    },
+  });
+}
+
 export function useToggleCommunityPostScrap(postId: number) {
   const queryClient = useQueryClient();
 
@@ -313,6 +477,22 @@ export function useDeleteCommunityPost(postId?: number) {
       if (typeof deletedId === "number") {
         queryClient.removeQueries({ queryKey: communityPostKeys.detail(deletedId) });
       }
+    },
+  });
+}
+
+export function useUpdateCommunityPost(postId: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof updateCommunityPost>[1]) =>
+      updateCommunityPost(postId, payload),
+    onSuccess: (updated: CommunityPostDetail) => {
+      queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), updated);
+
+      void queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => queryKey[0] === communityPostKeys.all[0],
+      });
     },
   });
 }
