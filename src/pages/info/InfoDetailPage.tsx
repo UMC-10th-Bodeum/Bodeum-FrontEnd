@@ -20,7 +20,6 @@ export default function InfoDetailPage() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const navigate = useNavigate();
   const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
-  
 
   const { data: reviewData } = useInfoReviewListQuery(
     Number(id),
@@ -33,7 +32,7 @@ export default function InfoDetailPage() {
     : undefined;
 
   useEffect(() => {
-  if (!category || !detail) return;
+    if (!category || !detail) return;
 
     setBreadcrumb([
       {
@@ -49,7 +48,7 @@ export default function InfoDetailPage() {
       },
     ]);
 
-  return () => setBreadcrumb([]);
+    return () => setBreadcrumb([]);
   }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
 
   const [isScrapped, setIsScrapped] = useState<boolean>(detail?.isScrapped ?? false);
@@ -87,7 +86,7 @@ export default function InfoDetailPage() {
           phone={detail.phone}
         />
         <IntroSection
-        // introduction={detail.introduction}
+          introduction={detail.introduction}
           tags={detail.tags}
         />
         <AIChatButton />

@@ -66,6 +66,7 @@ export interface InfoListResponse {
 export interface InfoDetail {
   infoItemId: number;
   name: string;
+  introduction: string;
   mainCategory: ParentCategory;
   mainCategoryKo: string;
   subCategoryId: number;
