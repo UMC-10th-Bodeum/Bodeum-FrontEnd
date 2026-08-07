@@ -61,6 +61,7 @@ export default function DeleteConfirmModal({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
+        if (loading) return;
         onCancelRef.current();
         return;
       }
@@ -95,7 +96,7 @@ export default function DeleteConfirmModal({
       document.body.style.overflow = previousBodyOverflow;
       previouslyFocusedElement?.focus();
     };
-  }, [open]);
+  }, [open, loading]);
 
   if (!open) return null;
 
@@ -111,9 +112,11 @@ export default function DeleteConfirmModal({
         rightButtonText={confirmText}
         className="z-[70]!"
         rightButtonColor="sub-red"
-        onLeftButtonClick={onCancel}
+        onLeftButtonClick={() => {
+          if (!loading) onCancel();
+        }}
         onRightButtonClick={onConfirm}
-        leftButtonDisabled={false}
+        leftButtonDisabled={loading}
         rightButtonDisabled={loading}
       />
     </div>
