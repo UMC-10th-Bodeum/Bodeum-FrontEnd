@@ -8,6 +8,7 @@ import {
   USER_SCRAPS_QUERY_KEY,
   useDeleteMyComment,
   useDeleteMyPost,
+  useDeleteMyPostScrap,
   useDeleteMyScrap,
   useMyComments,
   useMyDashboard,
@@ -39,6 +40,7 @@ export default function MyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutateAsync: deleteScrap } = useDeleteMyScrap();
+  const { mutateAsync: deletePostScrap } = useDeleteMyPostScrap();
   const { mutateAsync: deletePost } = useDeleteMyPost();
   const { mutateAsync: deleteComment } = useDeleteMyComment();
   const dashboardQuery = useMyDashboard();
@@ -82,7 +84,14 @@ export default function MyPage() {
     setDeletingScrapId(item.id);
 
     try {
-      await deleteScrap(item.scrapId);
+      if (item.scrapType === "POST") {
+        await deletePostScrap(item.postId);
+      } else {
+        await deleteScrap({
+          scrapId: item.scrapId,
+          scrapType: item.scrapType,
+        });
+      }
       setHiddenScrapIds((current) => new Set(current).add(item.id));
 
       const currentPageItemCount = scrapsQuery.data
@@ -206,6 +215,7 @@ export default function MyPage() {
             postId: scrap.infoItemId,
             type: "scrap" as const,
             scrapId: scrap.scrapId,
+            scrapType: "INFO" as const,
             title: scrap.name,
             targetPath: `/info/${scrap.mainCategory}/${scrap.infoItemId}`,
             sourceLabel: scrap.mainCategoryKo || "정보",
@@ -219,6 +229,7 @@ export default function MyPage() {
             postId: scrap.newsId,
             type: "scrap" as const,
             scrapId: scrap.scrapId,
+            scrapType: "NEWS" as const,
             title: scrap.title,
             targetPath: `/news/${scrap.newsId}`,
             sourceLabel: "소식",
@@ -232,6 +243,7 @@ export default function MyPage() {
             postId: scrap.postId,
             type: "scrap" as const,
             scrapId: scrap.scrapId,
+            scrapType: "POST" as const,
             title: scrap.title,
             targetPath: `/community/${scrap.postId}`,
             sourceLabel: "커뮤니티 게시글",

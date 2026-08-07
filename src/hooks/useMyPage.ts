@@ -3,6 +3,7 @@ import {
   deleteMyAccount,
   deleteMyComment,
   deleteMyPost,
+  deleteMyPostScrap,
   deleteMyScrap,
   getMyComments,
   getMyDashboard,
@@ -110,6 +111,12 @@ export const useUpdateProfileImage = () => {
 export const useDeleteMyScrap = () => {
   return useMutation({
     mutationFn: deleteMyScrap,
+  });
+};
+
+export const useDeleteMyPostScrap = () => {
+  return useMutation({
+    mutationFn: deleteMyPostScrap,
   });
 };
 

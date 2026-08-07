@@ -169,6 +169,7 @@ interface MyPageItemBase {
 export interface MyPageScrapItem extends MyPageItemBase {
   type: "scrap";
   scrapId: number;
+  scrapType: ScrapType;
   title: string;
   targetPath?: string;
   sourceLabel?: string;

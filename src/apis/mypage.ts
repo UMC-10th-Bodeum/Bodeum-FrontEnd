@@ -76,9 +76,26 @@ export async function getMyScraps(
   return getSuccessfulResult(data);
 }
 
-export async function deleteMyScrap(scrapId: number) {
+export async function deleteMyScrap({
+  scrapId,
+  scrapType,
+}: {
+  scrapId: number;
+  scrapType: Exclude<ScrapType, "POST">;
+}) {
   const { data } = await api.delete<ApiResponse<unknown> | undefined>(
     `/api/v1/users/me/scraps/${scrapId}`,
+    { params: { scrapType } },
+  );
+
+  if (data) {
+    getSuccessfulResult(data);
+  }
+}
+
+export async function deleteMyPostScrap(postId: number) {
+  const { data } = await api.delete<ApiResponse<unknown> | undefined>(
+    `/api/v1/community/posts/${postId}/scraps`,
   );
 
   if (data) {
@@ -88,7 +105,7 @@ export async function deleteMyScrap(scrapId: number) {
 
 export async function deleteMyPost(postId: number) {
   const { data } = await api.delete<ApiResponse<unknown> | undefined>(
-    `/api/v1/community/posts/${postId}`,
+    `/api/v1/users/me/posts/${postId}`,
   );
 
   if (data) {
