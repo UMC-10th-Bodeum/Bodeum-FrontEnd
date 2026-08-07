@@ -8,7 +8,7 @@ export default function AIChatButton() {
     <button
       type="button"
       onClick={() => navigate("/aichat")}
-      className="flex h-[80px] w-[400px] items-center justify-start gap-[10px] rounded-[8px] bg-main-200 px-[30px] py-2 text-left cursor-pointer hover:shadow-md transition-shadow"
+      className="flex h-[80px] w-full items-center justify-start gap-[10px] rounded-[8px] bg-main-200 px-[30px] py-2 text-left cursor-pointer hover:shadow-md transition-shadow"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center">
         <AIMsgIcon className="h-8 w-8" aria-hidden="true" />

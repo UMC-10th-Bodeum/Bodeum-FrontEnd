@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
-import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 import LocationSection from "./components/Detail/LocationSection";
@@ -70,31 +69,8 @@ export default function InfoDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
-      <main className="w-[680px]  space-y-[10px]">
-        <DetailHeader image={undefined} />
-        <IntroSection
-        // introduction={detail.introduction}
-          tags={detail.tags}
-        />
-
-        <BusinessHoursSection hours={detail.businessHours} />
-
-        <LocationSection
-          infoItemId={detail.infoItemId}
-          address={detail.address}
-        />
-
-        <ReviewSection
-          infoItemId={detail.infoItemId}
-          reviews={reviewData?.reviews.content ?? []}
-          totalReviewCount={reviewData?.totalElements ?? 0}
-          averageRating={reviewData?.averageRating ?? 0}
-          onWriteReview={() => navigate(`/info/${category}/${id}/review/write`)}
-        />
-      </main>
-
-      <aside className="top-5 h-fit w-[400px] space-y-4">
+    <div className="flex justify-center gap-6 px-8 py-5">
+      <main className="w-[680px] space-y-[10px]">
         <SummaryCard
           infoItemId={detail.infoItemId}
           name={detail.name}
@@ -110,8 +86,26 @@ export default function InfoDetailPage() {
           sigungu={detail.sigungu}
           phone={detail.phone}
         />
+        <IntroSection
+        // introduction={detail.introduction}
+          tags={detail.tags}
+        />
         <AIChatButton />
-      </aside>
+        <BusinessHoursSection hours={detail.businessHours} />
+
+        <LocationSection
+          infoItemId={detail.infoItemId}
+          address={detail.address}
+        />
+
+        <ReviewSection
+          infoItemId={detail.infoItemId}
+          reviews={reviewData?.reviews.content ?? []}
+          totalReviewCount={reviewData?.totalElements ?? 0}
+          averageRating={reviewData?.averageRating ?? 0}
+          onWriteReview={() => navigate(`/info/${category}/${id}/review/write`)}
+        />
+      </main>
       {categoryOpen && (
         <CategoryModal
           category={category as ParentCategory}
