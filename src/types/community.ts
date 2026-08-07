@@ -1,8 +1,5 @@
 import type { DiagnosisType } from "./diagnosis";
-import type {
-  CommunityCategory,
-  CommunityCategoryCode,
-} from "@/constants/communityCategory";
+import type { CommunityCategory, CommunityCategoryCode } from "@/constants/communityCategory";
 
 export type CommunityAuthorVisibility = "PROFILE" | "ANONYMOUS";
 
@@ -144,14 +141,12 @@ export interface CommunityPostPage {
   empty: boolean;
 }
 
-export type CommunityAnonymityType =
-  | "PROFILE_TAG_VISIBLE"
-  | "FULLY_ANONYMOUS";
+export type CommunityAnonymityType = "PROFILE_TAG_VISIBLE" | "FULLY_ANONYMOUS";
 
 export interface CommunityPostDetail {
   postId: number;
   authorId: number;
-  authorNickname: string;
+  authorNickname: string | null;
   isMine: boolean;
   boardType: CommunityCategoryCode;
   anonymityType: CommunityAnonymityType;

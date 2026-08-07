@@ -21,6 +21,7 @@ import ButtonFill from "@/components/ButtonFill";
 import DeleteConfirmModal from "@/pages/community/components/detail/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
 import ShareButton from "@/components/ShareButton";
+import { diagnosisMap } from "@/constants/diagnosis";
 
 interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
@@ -80,12 +81,24 @@ export default function CommunityPostDetailCard({
     });
   };
 
+  const nameLineItems = [
+    `${post.authorNickname ?? "알 수 없는 사용자"}님`,
+    ...post.disabilityTypes.map((type) => diagnosisMap[type].label),
+  ];
+
   return (
     <article className="min-h-[574px] rounded-[18px] border border-background-250 bg-background-100 px-[40px] py-[20px]">
       <header className="flex items-center justify-between border-b border-background-250 pb-[20px]">
         <div className="flex min-w-0 items-center gap-[12px] [&>span:first-child]:!h-[20px]">
           <PostTag type="ETC" label={communityCategoryMap[category]} />
-          <span className="truncate text-body-sub text-background-500">{post.authorNickname}</span>
+          <div className="flex min-w-0 items-center gap-[2px] truncate text-body-sub text-background-500">
+            {nameLineItems.map((item, index) => (
+              <span key={index} className="flex items-center gap-[2px]">
+                {index > 0 && <span aria-hidden="true">·</span>}
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
         <time className="shrink-0 text-body-sub text-background-400">
           {new Intl.DateTimeFormat("ko-KR", {
@@ -128,22 +141,6 @@ export default function CommunityPostDetailCard({
                 alt={`${post.title} 첨부 이미지 ${index + 1}`}
                 className="max-h-[360px] w-full rounded-[10px] object-cover"
               />
-            ))}
-          </div>
-        )}
-
-        {(post.disabilityTypes.length > 0 || post.hashtags.length > 0) && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {post.disabilityTypes.map((type) => (
-              <PostTag key={type} type={type} />
-            ))}
-            {post.hashtags.map((hashtag) => (
-              <span
-                key={hashtag}
-                className="rounded-full bg-background-200 px-3 py-1 text-body-label text-background-500"
-              >
-                #{hashtag}
-              </span>
             ))}
           </div>
         )}
