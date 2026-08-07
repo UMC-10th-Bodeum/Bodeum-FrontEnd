@@ -36,6 +36,8 @@ interface InfoRowProps {
 }
 
 function InfoRow({ label, value }: InfoRowProps) {
+  if (!value) return null;
+
   return (
     <div className="flex items-center border-b border-background-250">
       <div className="w-[60px] shrink-0 bg-background-50 py-[10px] text-h6-list text-background-500">
@@ -165,9 +167,12 @@ export default function SummaryCard({
             <h2>기본 정보</h2>
           </div>
           <div className="mt-[4px] mb-[12px] overflow-hidden">
-            <InfoRow label="주소" value={address ?? "-"} />
-            <InfoRow label="지역" value={`${sido ?? ""} ${sigungu ?? ""}`.trim() || "-"} />
-            <InfoRow label="전화번호" value={phone ?? "-"} />
+            <InfoRow label="주소" value={address} />
+            <InfoRow
+              label="지역"
+              value={`${sido ?? ""} ${sigungu ?? ""}`.trim()}
+            />
+            <InfoRow label="전화번호" value={phone} />
           </div>
         </div>
       </div>
