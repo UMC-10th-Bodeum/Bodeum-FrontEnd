@@ -1,6 +1,5 @@
 import { getApiErrorMessage } from "@/apis/apiError";
 import PostTag from "@/components/PostTag";
-import DetailBackButton from "@/components/DetailBackButton";
 import { showToast } from "@/components/Toast";
 import CommentStat from "@/components/post-stat/CommentStat";
 import HeartStat from "@/components/post-stat/HeartStat";
@@ -19,8 +18,6 @@ interface CommunityPostCardProps {
   createdAt: string;
   initialIsLiked?: boolean;
   onClick?: () => void;
-  onDelete?: () => void;
-  disabled?: boolean;
 }
 
 export default function CommunityPostCard({
@@ -34,8 +31,6 @@ export default function CommunityPostCard({
   createdAt,
   initialIsLiked = false,
   onClick,
-  onDelete,
-  disabled = false,
 }: CommunityPostCardProps) {
   const { mutate: toggleLike, isPending: isLikePending } = useToggleCommunityPostLike(id);
 
@@ -75,21 +70,7 @@ export default function CommunityPostCard({
             <ViewStat count={views} />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="shrink-0 text-body-sub text-background-400">{createdAt}</span>
-          {onDelete && (
-            <div onClick={(e) => e.stopPropagation()}>
-              <DetailBackButton
-                icon={null}
-                label="삭제"
-                tone="danger"
-                onClick={() => onDelete()}
-                disabled={disabled}
-                className="ml-2 h-[28px] w-[56px] shrink-0 justify-center !px-0 !py-0"
-              />
-            </div>
-          )}
-        </div>
+        <span className="shrink-0 text-body-sub text-background-400">{createdAt}</span>
       </div>
 
       <p className="mt-[8px] line-clamp-1 text-h5-list text-background-600">{title}</p>

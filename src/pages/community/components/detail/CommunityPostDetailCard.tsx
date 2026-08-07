@@ -37,8 +37,6 @@ export default function CommunityPostDetailCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(post.title);
   const [editedContent, setEditedContent] = useState(post.content);
-  const [appliedTitle, setAppliedTitle] = useState(post.title);
-  const [appliedContent, setAppliedContent] = useState(post.content);
   const { mutate: toggleLike, isPending: isLikePending } = useToggleCommunityPostLike(post.postId);
   const { mutate: toggleScrap, isPending: isScrapPending } = useToggleCommunityPostScrap(
     post.postId,
@@ -49,8 +47,8 @@ export default function CommunityPostDetailCard({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const startEditing = () => {
-    setEditedTitle(appliedTitle);
-    setEditedContent(appliedContent);
+    setEditedTitle(post.title);
+    setEditedContent(post.content);
     setIsEditing(true);
   };
 
@@ -62,7 +60,7 @@ export default function CommunityPostDetailCard({
     const payload = {
       boardType: post.boardType,
       anonymityType: post.anonymityType,
-      title: editedTitle.trim() || appliedTitle,
+      title: editedTitle.trim() || post.title,
       content: editedContent,
       disabilityTypes: post.disabilityTypes,
       hashtags: post.hashtags,
@@ -70,9 +68,7 @@ export default function CommunityPostDetailCard({
     };
 
     updatePost(payload, {
-      onSuccess: (updated) => {
-        setAppliedTitle(updated.title ?? payload.title);
-        setAppliedContent(updated.content ?? payload.content);
+      onSuccess: () => {
         setIsEditing(false);
         showToast("green", "게시글이 수정되었습니다.");
       },
@@ -125,9 +121,9 @@ export default function CommunityPostDetailCard({
           </>
         ) : (
           <>
-            <h1 className="text-h1-onboard text-background-600">{appliedTitle}</h1>
+            <h1 className="text-h1-onboard text-background-600">{post.title}</h1>
             <p className="mt-[12px] whitespace-pre-wrap text-h3-onboard text-background-600">
-              {appliedContent}
+              {post.content}
             </p>
           </>
         )}

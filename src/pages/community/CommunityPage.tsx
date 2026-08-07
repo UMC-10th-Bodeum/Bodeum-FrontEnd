@@ -12,12 +12,9 @@ import {
   isCommunityCategoryCode,
   type CommunityCategory,
 } from "@/constants/communityCategory";
-import { useCommunityPosts, useDeleteCommunityPost } from "@/hooks/useCommunity";
-import DeleteConfirmModal from "@/pages/community/components/detail/DeleteConfirmModal";
-import { getApiErrorMessage } from "@/apis/apiError";
-import { showToast } from "@/components/Toast";
+import { useCommunityPosts } from "@/hooks/useCommunity";
 import { searchSuggestionMockData } from "@/mocks/search";
-import type { CommunityPostListItem, CommunityPostSort } from "@/types/community";
+import type { CommunityPostSort } from "@/types/community";
 import CommunityPostCard from "./components/CommunityPostCard";
 import CommunitySection from "./components/CommunitySection";
 
@@ -65,24 +62,6 @@ function formatCreatedAt(createdAt: string) {
   }).format(date);
 }
 
-function toDetailPost(post: CommunityPostListItem) {
-  const category = getCommunityCategory(post.boardType);
-
-  return {
-    id: post.postId,
-    category,
-    diagnosis: "AUTISM" as const,
-    author: post.author.nickname,
-    createdAt: post.createdAt,
-    title: post.title,
-    content: post.content,
-    likes: post.likeCount,
-    comments: post.commentCount,
-    views: post.viewCount,
-    imageCount: post.thumbnailUrl ? 1 : 0,
-  };
-}
-
 export default function CommunityPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -102,10 +81,6 @@ export default function CommunityPage() {
     categoryCode: category === "ALL" ? undefined : communityCategoryCodeMap[category],
   });
   const visiblePosts = data?.content ?? [];
-
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [selectedToDelete, setSelectedToDelete] = useState<number | null>(null);
-  const { mutateAsync: deletePost } = useDeleteCommunityPost();
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
     setSearchParams(
@@ -138,14 +113,6 @@ export default function CommunityPage() {
           item.text.includes(inputKeyword),
         )
       : [];
-
-  if (isPending) {
-    return (
-      <div className="flex min-h-[calc(100vh-60px)] items-center justify-center bg-background-100">
-        <div className="text-center text-background-500">게시글을 불러오는 중입니다.</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-background-100">
@@ -230,14 +197,7 @@ export default function CommunityPage() {
                     imageCount={post.thumbnailUrl ? 1 : 0}
                     initialIsLiked={post.isLiked}
                     createdAt={formatCreatedAt(post.createdAt)}
-                    onClick={() =>
-                      navigate(`/community/${post.postId}`, {
-                        state: {
-                          category: postCategory,
-                          post: toDetailPost(post),
-                        },
-                      })
-                    }
+                    onClick={() => navigate(`/community/${post.postId}`)}
                   />
                 );
               })}
@@ -252,25 +212,6 @@ export default function CommunityPage() {
         )}
       </div>
 
-      <DeleteConfirmModal
-        open={selectedToDelete !== null}
-        onCancel={() => setSelectedToDelete(null)}
-        onConfirm={async () => {
-          if (selectedToDelete === null) return;
-          try {
-            setDeletingId(selectedToDelete);
-            await deletePost(selectedToDelete);
-            showToast("green", "게시물이 성공적으로 삭제되었습니다.");
-            void refetch();
-          } catch (error) {
-            showToast("red", getApiErrorMessage(error, "게시물을 삭제하지 못했습니다."));
-          } finally {
-            setDeletingId(null);
-            setSelectedToDelete(null);
-          }
-        }}
-        loading={deletingId !== null}
-      />
     </div>
   );
 }
