@@ -23,15 +23,15 @@ export default function MainLayout() {
 
   return (
     <BreadcrumbProvider>
-      <div className="flex h-screen">
+      <div className="fixed inset-0 flex overflow-hidden">
         <SideBar />
 
-        <div className="flex flex-1 flex-col overflow-x-auto">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           {header === "back" ? <BackTopBar /> : <SearchTopBar />}
 
           <main
             ref={mainRef}
-            className="flex-1 overflow-auto"
+            className="min-h-0 flex-1 overflow-auto"
           >
             <div className="min-w-[1227px]">
               <Outlet />

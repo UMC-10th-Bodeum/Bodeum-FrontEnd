@@ -46,7 +46,7 @@ export default function CommunityDetailPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-full bg-background-200 px-[32px] py-[80px] text-center text-background-500">
+      <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[80px] text-center text-background-500">
         게시글을 불러오는 중입니다.
       </div>
     );
@@ -54,7 +54,7 @@ export default function CommunityDetailPage() {
 
   if (isError || !post || !category) {
     return (
-      <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
+      <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
         <div className="mx-auto flex w-[680px] flex-col items-center gap-3 rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
           <h1 className="text-h2-list text-background-600">게시글을 불러오지 못했습니다.</h1>
           <button
@@ -70,8 +70,8 @@ export default function CommunityDetailPage() {
   }
 
   return (
-    <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
-      <div className="mx-auto flex w-[1176px] flex-col gap-[18px]">
+    <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
+      <div className="mx-auto flex w-full flex-col gap-[18px]">
         <CommunityPostDetailCard key={post.postId} post={post} category={category}>
           <CommunityCommentsSection
             key={post.postId}
@@ -106,7 +106,7 @@ export default function CommunityDetailPage() {
 
 function NotFoundState() {
   return (
-    <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
+    <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto flex w-[680px] flex-col items-center rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
         <h1 className="text-h2-list text-background-600">게시글을 찾을 수 없습니다.</h1>
         <p className="mt-[8px] text-h5 text-background-500">

@@ -141,14 +141,14 @@ export default function CommunityPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center overflow-x-hidden bg-background-100">
+      <div className="flex min-h-[calc(100vh-60px)] items-center justify-center bg-background-100">
         <div className="text-center text-background-500">게시글을 불러오는 중입니다.</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background-100">
+    <div className="min-h-[calc(100vh-60px)] bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
         <CommunitySection />
 
