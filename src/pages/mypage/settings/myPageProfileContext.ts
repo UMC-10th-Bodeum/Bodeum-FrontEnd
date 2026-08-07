@@ -1,8 +1,12 @@
 import { createContext, useContext } from "react";
-import type { ProfileSettingsForm } from "./settings/types";
+import type { ProfileSettingsForm } from "@/types/mypage";
 
 export interface MyPageProfileContextValue {
   profile: ProfileSettingsForm;
+  level: number | null;
+  joinedAt: string;
+  guardianType: string | null;
+  badgeName: string;
   saveProfile: (profile: ProfileSettingsForm) => void;
 }
 

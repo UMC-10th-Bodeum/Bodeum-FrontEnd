@@ -1,8 +1,10 @@
+import type { ReactNode } from "react";
+
 import RightIcon from "@/assets/icons/ChevronRight.svg?react";
 
 interface PostSectionProps {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   onMoreClick?: () => void;
 }
 
@@ -18,7 +20,8 @@ export default function PostSection({
 
         <button
           onClick={onMoreClick}
-          className="text-h6-list text-background-500 flex items-center gap-[4.66px] cursor-pointer">
+          className="text-h6-list text-background-500 flex items-center gap-[4.66px] cursor-pointer"
+        >
           더보기
           <RightIcon className="text-background-500" />
         </button>

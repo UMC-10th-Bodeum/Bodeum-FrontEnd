@@ -3,24 +3,13 @@ import { useId, type ReactNode } from "react";
 import Input from "@/components/Input";
 import OnboardBoxFrame from "@/components/OnboardBoxFrame";
 import { Select, type SelectOption } from "@/components/Select";
+import type { OnboardingDraft } from "@/types/onboarding";
 
 import SelectableChip from "./SelectableChip";
 
 export type OnboardingStep = 1 | 2 | 3;
 
-export type OnboardingFormState = {
-  childName: string;
-  birthYear: string;
-  birthMonth: string;
-  careAreas: string[];
-  childKeywords: string;
-  interests: string[];
-  sido: string;
-  district: string;
-  guardianNickname: string;
-  guardianType: string;
-  guardianRole: string;
-};
+export type OnboardingFormState = OnboardingDraft;
 
 type OnboardingStepCardProps = {
   step: OnboardingStep;

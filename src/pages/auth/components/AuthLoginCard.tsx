@@ -1,7 +1,7 @@
 import Logo from "@/assets/icons/Logo_kr.svg?react";
 import KakaoIcon from "@/assets/icons/KakaoIcon.svg?react";
 import NaverIcon from "@/assets/icons/NaverIcon.svg?react";
-import type { SocialProvider } from "@/apis/authApi";
+import type { SocialProvider } from "@/types/auth";
 import { legalLinks } from "@/constants/legalLinks";
 
 type AuthLoginCardProps = {

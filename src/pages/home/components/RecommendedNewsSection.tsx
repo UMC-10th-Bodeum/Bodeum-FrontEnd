@@ -1,6 +1,6 @@
 import NewsCard from "./NewsCard";
-import PostSection from "./PostSection";
-import PostListItem from "./PostListItem";
+import PostSection from "@/components/PostSection";
+import PostListItem from "@/components/PostListItem";
 import { useHomeNewsPreview, useRecommendedNews } from "@/hooks/useHome";
 import { useNavigate } from "react-router-dom";
 

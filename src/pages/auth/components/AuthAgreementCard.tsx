@@ -3,7 +3,7 @@ import { useId, useState } from "react";
 import CheckboxBlankIcon from "@/assets/icons/CheckboxBlank.svg?react";
 import CheckboxOutlineIcon from "@/assets/icons/CheckboxOutline.svg?react";
 import OnboardBoxFrame from "@/components/OnboardBoxFrame";
-import type { AgreementFormValues } from "@/apis/authApi";
+import type { AgreementFormValues } from "@/types/auth";
 import { legalLinks } from "@/constants/legalLinks";
 
 type AuthAgreementCardProps = {

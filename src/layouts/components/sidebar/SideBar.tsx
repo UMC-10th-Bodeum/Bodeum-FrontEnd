@@ -1,53 +1,59 @@
 import ExportIcon from "@/assets/icons/Export.svg?react";
 import Logo from "@/assets/icons/Logo_kr.svg?react";
-import {
-  AUTH_STATE_CHANGED_EVENT,
-  logoutCurrentUser,
-} from "@/apis/authApi";
+import { AUTH_STATE_CHANGED_EVENT } from "@/apis/authApi";
 import { getApiErrorMessage } from "@/apis/apiError";
-import { getUserBrief, type UserBrief } from "@/apis/userApi";
+import { USER_PROFILE_CHANGED_EVENT } from "@/apis/userApi";
 import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
+import { useLogoutMutation } from "@/hooks/useAuthMutations";
+import { useUserBrief } from "@/hooks/useUser";
 import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
 import { clearAgreementBrowserSession } from "@/pages/auth/agreementBrowserSession";
 import { clearOnboardingBrowserSession } from "@/pages/auth/onboardingBrowserSession";
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { UserBrief } from "@/types/user";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import SideNav from "./SideNav";
 import UserSection from "./UserSection";
 
+const guestBrief: UserBrief = {
+  isLoggedIn: false,
+  onboardingCompleted: false,
+  nickname: null,
+  profileImageUrl: null,
+  level: null,
+  badgeName: null,
+  childDisabilityTypes: [],
+  childAge: null,
+  region: null,
+};
+
 export default function SideBar() {
   const navigate = useNavigate();
-  const [brief, setBrief] = useState<UserBrief | null>(null);
+  const { mutateAsync: logoutRequest } = useLogoutMutation();
+  const { data, error, isError, refetch } = useUserBrief();
+  const brief = isError ? guestBrief : (data ?? null);
   const logoutInFlight = useRef(false);
 
-  const loadBrief = useCallback(async () => {
-    try {
-      setBrief(await getUserBrief());
-    } catch (error) {
+  useEffect(() => {
+    if (error) {
       console.error("사이드바 사용자 정보를 불러오지 못했습니다.", error);
-      setBrief({
-        isLoggedIn: false,
-        onboardingCompleted: false,
-        nickname: null,
-        profileImageUrl: null,
-        level: null,
-        badgeName: null,
-        childDisabilityTypes: [],
-        childAge: null,
-        region: null,
-      });
     }
-  }, []);
+  }, [error]);
 
   useEffect(() => {
-    void loadBrief();
-    window.addEventListener(AUTH_STATE_CHANGED_EVENT, loadBrief);
+    const refreshBrief = () => {
+      void refetch();
+    };
+
+    window.addEventListener(AUTH_STATE_CHANGED_EVENT, refreshBrief);
+    window.addEventListener(USER_PROFILE_CHANGED_EVENT, refreshBrief);
 
     return () => {
-      window.removeEventListener(AUTH_STATE_CHANGED_EVENT, loadBrief);
+      window.removeEventListener(AUTH_STATE_CHANGED_EVENT, refreshBrief);
+      window.removeEventListener(USER_PROFILE_CHANGED_EVENT, refreshBrief);
     };
-  }, [loadBrief]);
+  }, [refetch]);
 
   const handleLogout = async () => {
     if (logoutInFlight.current) {
@@ -57,7 +63,7 @@ export default function SideBar() {
     logoutInFlight.current = true;
 
     try {
-      await logoutCurrentUser();
+      await logoutRequest({});
       showToast("green", "로그아웃되었습니다.");
     } catch (error) {
       showToast(

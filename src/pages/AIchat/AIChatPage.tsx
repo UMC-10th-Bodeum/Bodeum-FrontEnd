@@ -6,36 +6,50 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import {
-  agreeToAiTerms,
-  confirmAiChatGuide,
-  createAiFeedback,
-  createAiMessage,
-  getAiChatRoom,
-  getAiChatStarter,
-  getAiMessageHistory,
-  getAiTermsAgreement,
-  getTodayAiMessages,
-  type AiChatStarter,
-  type AiFeedbackReason,
-  type AiFeedbackType,
-  type AiHistoryDateGroup,
-  type AiMessage,
-  type AiMessageCursor,
-  type AiMessageSource,
-} from "@/apis/aiChatApi";
 import { getApiErrorMessage } from "@/apis/apiError";
 import {
   AUTH_STATE_CHANGED_EVENT,
   clearAuthTokens,
   hasStoredAuthSession,
 } from "@/apis/authApi";
-import { getUserBrief } from "@/apis/userApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
+import {
+  aiChatRoomQueryOptions,
+  aiChatStarterQueryOptions,
+  aiMessageHistoryInfiniteQueryOptions,
+  aiTermsQueryOptions,
+  todayAiMessagesInfiniteQueryOptions,
+  useAgreeToAiTermsMutation,
+  useConfirmAiChatGuideMutation,
+  useCreateAiFeedbackMutation,
+  useCreateAiMessageMutation,
+} from "@/hooks/useAiChat";
+import { userBriefQueryOptions } from "@/hooks/useUser";
+import type {
+  AiFeedbackReason,
+  AiFeedbackType,
+  AiHistoryDateGroup,
+  AiMessage,
+  ChatMessage,
+  HistorySection,
+  LoadingMessage,
+  UserMessage,
+} from "@/types/aiChat";
+import {
+  collectFeedbackByMessage,
+  deduplicateMessages,
+  mapApiMessage,
+  mapCurrentSessionMessages,
+} from "@/utils/aiChatMapper";
+import { wait } from "@/utils/async";
 import {
   ensureAiChatLoginSession,
   getAiChatSessionStarter,
@@ -45,6 +59,7 @@ import {
   resetAiChatSession,
   storeAiChatSessionStarter,
 } from "@/utils/aiChatSession";
+import { formatChatDate, getTodayDateTime } from "@/utils/date";
 
 import {
   AiCheckbox,
@@ -52,7 +67,6 @@ import {
   AiMessageBot,
   AiMessageBubble,
   DateDivider,
-  type AiCurationResource,
   type AiInputVariant,
 } from "./components";
 import {
@@ -96,35 +110,6 @@ type AccessState =
 
 type AuthResolution = "checking" | "guest" | "authenticated";
 
-type UserMessage = {
-  id: number;
-  role: "user";
-  text: string;
-};
-
-type BotMessage = {
-  id: number;
-  serverId?: number;
-  role: "bot";
-  text: string;
-  resources?: AiCurationResource[];
-  warning?: string | null;
-  suggestions?: string[];
-};
-
-type LoadingMessage = {
-  id: number;
-  role: "loading";
-};
-
-type ChatMessage = UserMessage | BotMessage | LoadingMessage;
-
-type HistorySection = {
-  date: string;
-  dateTime: string;
-  messages: ChatMessage[];
-};
-
 function CenteredModal({ children }: { children: ReactNode }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
@@ -141,153 +126,33 @@ function UserMessageRow({ text }: { text: string }) {
   );
 }
 
-function formatChatDate(date: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    weekday: "long",
-  }).format(new Date(`${date}T00:00:00`));
-}
-
-function getTodayDateTime() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
-function wait(milliseconds: number) {
-  return new Promise<void>((resolve) => {
-    window.setTimeout(resolve, milliseconds);
+async function getAllTodayMessages(queryClient: QueryClient) {
+  const data = await queryClient.fetchInfiniteQuery({
+    ...todayAiMessagesInfiniteQueryOptions(),
+    pages: MAX_PAGINATION_REQUESTS,
   });
-}
 
-function mapSourceToResource(
-  source: AiMessageSource | undefined,
-): AiCurationResource | null {
-  if (!source) return null;
-
-  return {
-    title: source.sourceTitle,
-    url: source.sourceUrl,
-  };
-}
-
-function mapApiMessage(
-  message: AiMessage,
-  suggestions?: string[],
-): ChatMessage {
-  if (message.senderType === "USER") {
-    return {
-      id: message.aiMessageId,
-      role: "user",
-      text: message.content,
-    };
-  }
-
-  return {
-    id: message.aiMessageId,
-    serverId: message.aiMessageId,
-    role: "bot",
-    text: message.content,
-    resources: message.sources
-      .map(mapSourceToResource)
-      .filter((resource): resource is AiCurationResource => resource !== null),
-    warning: message.warning?.message ?? null,
-    suggestions,
-  };
-}
-
-function mapStarterMessage(starter: AiChatStarter): BotMessage {
-  return {
-    id: 0,
-    role: "bot",
-    text: starter.greeting,
-    resources: [],
-    suggestions: starter.suggestedQuestions,
-  };
-}
-
-function deduplicateMessages(messages: AiMessage[]) {
-  return Array.from(
-    new Map(messages.map((message) => [message.aiMessageId, message])).values(),
-  ).sort(
-    (left, right) =>
-      new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime(),
+  return deduplicateMessages(
+    data.pages.flatMap((page) => page.messages),
   );
 }
 
-function mapCurrentSessionMessages(
-  messages: AiMessage[],
-  starter: AiChatStarter,
-) {
-  const hasPersistedGreeting = messages.some(
-    (message) =>
-      message.senderType === "AI" && message.answerStatus === "GREETING",
-  );
-
-  const mappedMessages = messages.map((message) =>
-    mapApiMessage(
-      message,
-      message.senderType === "AI" && message.answerStatus === "GREETING"
-        ? starter.suggestedQuestions
-        : undefined,
-    ),
-  );
-
-  return hasPersistedGreeting
-    ? mappedMessages
-    : [mapStarterMessage(starter), ...mappedMessages];
-}
-
-function collectFeedbackByMessage(messages: AiMessage[]) {
-  return messages.reduce<Record<number, AiFeedbackType>>(
-    (feedbackByMessage, message) => {
-      if (message.feedback) {
-        feedbackByMessage[message.aiMessageId] = message.feedback.feedbackType;
-      }
-
-      return feedbackByMessage;
-    },
-    {},
-  );
-}
-
-async function getAllTodayMessages() {
-  let cursor: AiMessageCursor | undefined;
-  let messages: AiMessage[] = [];
-
-  for (let requestCount = 0; requestCount < MAX_PAGINATION_REQUESTS; requestCount += 1) {
-    const page = await getTodayAiMessages(cursor);
-    messages = [...page.messages, ...messages];
-
-    if (!page.hasNext || !page.nextCursor) break;
-    cursor = page.nextCursor;
-  }
-
-  return deduplicateMessages(messages);
-}
-
-async function getRetainedHistorySections() {
-  let cursor: AiMessageCursor | undefined;
+async function getRetainedHistorySections(queryClient: QueryClient) {
   const groups = new Map<string, AiMessage[]>();
 
-  for (let requestCount = 0; requestCount < MAX_PAGINATION_REQUESTS; requestCount += 1) {
-    const page = await getAiMessageHistory(cursor);
+  const data = await queryClient.fetchInfiniteQuery({
+    ...aiMessageHistoryInfiniteQueryOptions(),
+    pages: MAX_PAGINATION_REQUESTS,
+  });
 
+  data.pages.forEach((page) => {
     page.messages.forEach((group: AiHistoryDateGroup) => {
       groups.set(group.date, [
         ...(groups.get(group.date) ?? []),
         ...group.items,
       ]);
     });
-
-    if (!page.hasNext || !page.nextCursor) break;
-    cursor = page.nextCursor;
-  }
+  });
 
   const feedbackByMessage = collectFeedbackByMessage(
     Array.from(groups.values()).flat(),
@@ -307,6 +172,15 @@ async function getRetainedHistorySections() {
 
 export default function AIChatPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { mutateAsync: agreeToAiTermsRequest } =
+    useAgreeToAiTermsMutation();
+  const { mutateAsync: confirmAiChatGuideRequest } =
+    useConfirmAiChatGuideMutation();
+  const { mutateAsync: createAiMessageRequest } =
+    useCreateAiMessageMutation();
+  const { mutateAsync: createAiFeedbackRequest } =
+    useCreateAiFeedbackMutation();
   const messagesRef = useRef<HTMLDivElement>(null);
   const latestHistorySectionRef = useRef<HTMLDivElement>(null);
   const latestHiddenTodayMessageRef = useRef<HTMLDivElement>(null);
@@ -414,7 +288,7 @@ export default function AIChatPage() {
     setIsGuideOpen(false);
 
     try {
-      const user = await getUserBrief();
+      const user = await queryClient.fetchQuery(userBriefQueryOptions());
       if (requestId !== initializeRequestRef.current) return;
 
       if (!user.isLoggedIn) {
@@ -432,7 +306,7 @@ export default function AIChatPage() {
         window.localStorage.getItem("accessToken"),
       );
 
-      const terms = await getAiTermsAgreement();
+      const terms = await queryClient.fetchQuery(aiTermsQueryOptions());
       if (requestId !== initializeRequestRef.current) return;
 
       if (!terms.aiTermsAgreed) {
@@ -441,8 +315,8 @@ export default function AIChatPage() {
       }
 
       const [room, starter] = await Promise.all([
-        getAiChatRoom(),
-        getAiChatStarter(),
+        queryClient.fetchQuery(aiChatRoomQueryOptions()),
+        queryClient.fetchQuery(aiChatStarterQueryOptions()),
       ]);
       if (requestId !== initializeRequestRef.current) return;
 
@@ -451,9 +325,9 @@ export default function AIChatPage() {
       storeAiChatSessionStarter(sessionStarter);
 
       const [todayMessages, retainedHistoryResult] = await Promise.all([
-        getAllTodayMessages(),
+        getAllTodayMessages(queryClient),
         historyRevealed && room.hasPreviousMessages
-          ? getRetainedHistorySections()
+          ? getRetainedHistorySections(queryClient)
           : Promise.resolve({
               sections: [] as HistorySection[],
               feedbackByMessage: {} as Record<number, AiFeedbackType>,
@@ -514,7 +388,7 @@ export default function AIChatPage() {
         ),
       );
     }
-  }, [enterConsentRequiredState, resetAiChatUiState]);
+  }, [enterConsentRequiredState, queryClient, resetAiChatUiState]);
 
   useEffect(() => {
     void initializeAiChat();
@@ -668,7 +542,7 @@ export default function AIChatPage() {
     setMessages((current) => [...current, userMessage, loadingMessage]);
 
     try {
-      const answer = await createAiMessage(text);
+      const answer = await createAiMessageRequest(text);
       if (!isCurrentSession(sessionGeneration)) return;
 
       setMessages((current) => [
@@ -699,7 +573,7 @@ export default function AIChatPage() {
         if (!isCurrentSession(sessionGeneration)) return;
 
         try {
-          const latestTodayMessages = await getAllTodayMessages();
+          const latestTodayMessages = await getAllTodayMessages(queryClient);
           if (!isCurrentSession(sessionGeneration)) return;
 
           const persistedUserIndex = latestTodayMessages.findIndex(
@@ -844,7 +718,7 @@ export default function AIChatPage() {
 
     try {
       const retainedHistoryResult = hasPreviousMessages
-        ? await getRetainedHistorySections()
+        ? await getRetainedHistorySections(queryClient)
         : {
             sections: [] as HistorySection[],
             feedbackByMessage: {} as Record<number, AiFeedbackType>,
@@ -904,7 +778,10 @@ export default function AIChatPage() {
     }));
 
     try {
-      await createAiFeedback(messageId, { feedbackType: "HELPFUL" });
+      await createAiFeedbackRequest({
+        aiMessageId: messageId,
+        request: { feedbackType: "HELPFUL" },
+      });
       if (!isCurrentSession(sessionGeneration)) return;
 
       showToast("green", "소중한 의견 감사합니다!");
@@ -994,7 +871,7 @@ export default function AIChatPage() {
     const sessionGeneration = sessionGenerationRef.current;
     setIsConsentSubmitting(true);
     try {
-      await agreeToAiTerms();
+      await agreeToAiTermsRequest();
       if (!isCurrentSession(sessionGeneration)) return;
 
       await initializeAiChat();
@@ -1021,7 +898,7 @@ export default function AIChatPage() {
     const sessionGeneration = sessionGenerationRef.current;
     setIsGuideSubmitting(true);
     try {
-      await confirmAiChatGuide();
+      await confirmAiChatGuideRequest();
       if (!isCurrentSession(sessionGeneration)) return;
 
       setIsGuideOpen(false);
@@ -1067,9 +944,12 @@ export default function AIChatPage() {
     const sessionGeneration = sessionGenerationRef.current;
     setIsFeedbackSubmitting(true);
     try {
-      await createAiFeedback(feedbackMessageId, {
-        feedbackType: "INCORRECT",
-        reasons: selectedFeedbackReasons,
+      await createAiFeedbackRequest({
+        aiMessageId: feedbackMessageId,
+        request: {
+          feedbackType: "INCORRECT",
+          reasons: selectedFeedbackReasons,
+        },
       });
       if (!isCurrentSession(sessionGeneration)) return;
 

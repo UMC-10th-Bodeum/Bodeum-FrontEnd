@@ -1,13 +1,11 @@
 import AiLoading from "@/assets/icons/AILoading.png";
+import type { AiCurationResource } from "@/types/aiChat";
 
 import AiMarkdown from "./AiMarkdown";
 
 export type AiMessageBubbleVariant = "ai" | "user" | "loading";
 
-export type AiCurationResource = {
-  title: string;
-  url?: string;
-};
+export type { AiCurationResource } from "@/types/aiChat";
 
 type AiMessageBubbleProps = {
   variant?: AiMessageBubbleVariant;

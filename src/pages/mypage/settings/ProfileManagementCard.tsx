@@ -10,23 +10,38 @@ import {
   sidoDisplayNameByRegion,
 } from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
-import { birthMonthOptions, birthYearOptions } from "./data";
-import type { ProfileSettingsForm } from "./types";
+import {
+  createChildBirthMonthOptions,
+  birthYearOptions,
+} from "./birthDateOptions";
+import type { ProfileSettingsForm } from "@/types/mypage";
+import { formatDateWithDots } from "@/utils/time";
 import ProfileImagePicker from "./components/ProfileImagePicker";
 import ProfileSelect from "./components/ProfileSelect";
 
 interface ProfileManagementCardProps {
   form: ProfileSettingsForm;
+  joinedAt: string;
+  guardianType: string | null;
+  badgeName: string;
   isEditing: boolean;
   onChange: (form: ProfileSettingsForm) => void;
   onStartEdit: () => void;
   onCancel: () => void;
   onApply: () => void;
+  isApplying?: boolean;
 }
 
 const diagnosisEntries = Object.entries(diagnosisMap) as Array<
   [DiagnosisType, (typeof diagnosisMap)[DiagnosisType]]
 >;
+
+const guardianTypeLabels: Record<string, string> = {
+  PARENT: "부모",
+  GRANDPARENT: "조부모",
+  SIBLING: "형제·자매",
+  ETC: "기타",
+};
 
 type ProfileSelectField = "region" | "district" | "birthYear" | "birthMonth";
 type ProfileSelectValues = Pick<ProfileSettingsForm, ProfileSelectField>;
@@ -38,40 +53,35 @@ const getProfileSelectValues = (form: ProfileSettingsForm): ProfileSelectValues 
   birthMonth: form.birthMonth,
 });
 
-function isValidBirthDate(birthYear: string, birthMonth: string) {
-  if (!birthYear || !birthMonth) {
-    return false;
-  }
-
-  const year = Number(birthYear);
-  const month = Number(birthMonth);
-
-  if (!Number.isInteger(year) || year <= 0 || !Number.isInteger(month) || month < 1 || month > 12) {
-    return false;
-  }
-
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth() + 1;
-
-  return year < currentYear || (year === currentYear && month <= currentMonth);
-}
-
 export default function ProfileManagementCard({
   form,
+  joinedAt,
+  guardianType,
+  badgeName,
   isEditing,
   onChange,
   onStartEdit,
   onCancel,
   onApply,
+  isApplying = false,
 }: ProfileManagementCardProps) {
   const initialSelectValuesRef = useRef<ProfileSelectValues | null>(null);
+  const guardianTypeLabel = guardianType
+    ? (guardianTypeLabels[guardianType] ?? guardianType)
+    : null;
+  const profileLabels = [guardianTypeLabel, badgeName].filter(Boolean).join(" · ");
 
+  const parentNickname = form.parentNickname.trim();
+  const childNickname = form.childNickname.trim();
+  const hasCompleteBirth = Boolean(form.birthYear && form.birthMonth);
   const canApply =
-    form.parentNickname.trim().length > 0 &&
-    form.childNickname.trim().length > 0 &&
-    isValidBirthDate(form.birthYear, form.birthMonth) &&
+    parentNickname.length > 0 &&
+    parentNickname.length <= 20 &&
+    childNickname.length > 0 &&
+    childNickname.length <= 20 &&
+    hasCompleteBirth &&
     form.diagnoses.length > 0;
+  const birthMonthOptions = createChildBirthMonthOptions(form.birthYear);
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -85,6 +95,18 @@ export default function ProfileManagementCard({
       : [...form.diagnoses, diagnosis];
 
     updateField("diagnoses", diagnoses);
+  };
+
+  const updateBirthYear = (birthYear: string) => {
+    const canKeepBirthMonth = createChildBirthMonthOptions(birthYear).some(
+      ({ value }) => value === form.birthMonth,
+    );
+
+    onChange({
+      ...form,
+      birthYear,
+      birthMonth: canKeepBirthMonth ? form.birthMonth : "",
+    });
   };
 
   const startEditing = () => {
@@ -108,14 +130,14 @@ export default function ProfileManagementCard({
           imageUrl={form.profileImageUrl}
           imageFile={form.profileImageFile}
           isEditing={isEditing}
-          onChange={(profileImageFile) =>
-            updateField("profileImageFile", profileImageFile)
-          }
+          disabled={isApplying}
+          onChange={(profileImageFile) => updateField("profileImageFile", profileImageFile)}
         />
         <div className="ml-[20px]">
-          <h2 className="text-h2-list text-background-600">{form.parentNickname}</h2>
+          <h2 className="min-h-[24px] text-h2-list text-background-600">{form.parentNickname}</h2>
           <p className="mt-[4px] text-h4-list text-background-500">
-            가입일 2026.01.15 · 효율형 부모
+            가입일 {formatDateWithDots(joinedAt)}
+            {profileLabels && ` · ${profileLabels}`}
           </p>
         </div>
         {isEditing ? (
@@ -123,11 +145,12 @@ export default function ProfileManagementCard({
             <ButtonOutline
               label="취소하기"
               onClick={onCancel}
+              disabled={isApplying}
               className="h-[44px] w-[91px] !text-h2-onboard"
             />
             <ButtonFill
               label="적용하기"
-              disabled={!canApply}
+              disabled={!canApply || isApplying}
               onClick={onApply}
               className="h-[44px] w-[91px] !text-h2-onboard"
             />
@@ -151,9 +174,9 @@ export default function ProfileManagementCard({
         <Input
           id="parent-nickname"
           value={form.parentNickname}
-          disabled={!isEditing}
-          onChange={(event) => updateField("parentNickname", event.target.value)}
-          className="h-[48px] !border !border-background-300"
+          disabled={!isEditing || isApplying}
+          onChange={(event) => updateField("parentNickname", event.target.value.slice(0, 20))}
+          className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
 
@@ -168,7 +191,7 @@ export default function ProfileManagementCard({
               label: sidoDisplayNameByRegion[option.value] ?? option.label,
             }))}
             value={form.region}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("region")}
             onChange={(region) => {
               onChange({
@@ -184,7 +207,7 @@ export default function ProfileManagementCard({
             ariaLabel="시/군/구 선택"
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("district")}
             onChange={(district) => updateField("district", district)}
             className="w-full"
@@ -206,9 +229,9 @@ export default function ProfileManagementCard({
         <Input
           id="child-nickname"
           value={form.childNickname}
-          disabled={!isEditing}
-          onChange={(event) => updateField("childNickname", event.target.value)}
-          className="h-[48px] !border !border-background-300"
+          disabled={!isEditing || isApplying}
+          onChange={(event) => updateField("childNickname", event.target.value.slice(0, 20))}
+          className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
 
@@ -220,9 +243,9 @@ export default function ProfileManagementCard({
             ariaLabel="출생 연도"
             options={birthYearOptions}
             value={form.birthYear}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthYear")}
-            onChange={(birthYear) => updateField("birthYear", birthYear)}
+            onChange={updateBirthYear}
             placeholder="년도"
             className="w-full"
           />
@@ -231,7 +254,7 @@ export default function ProfileManagementCard({
             ariaLabel="출생 월"
             options={birthMonthOptions}
             value={form.birthMonth}
-            disabled={!isEditing}
+            disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthMonth")}
             onChange={(birthMonth) => updateField("birthMonth", birthMonth)}
             placeholder="월"
@@ -250,7 +273,7 @@ export default function ProfileManagementCard({
               key={diagnosis}
               label={label}
               selected={form.diagnoses.includes(diagnosis)}
-              disabled={!isEditing}
+              disabled={!isEditing || isApplying}
               onClick={() => toggleDiagnosis(diagnosis)}
               className="h-[40px] px-[18px] py-2"
             />
