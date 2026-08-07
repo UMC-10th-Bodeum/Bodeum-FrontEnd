@@ -126,9 +126,6 @@ export const getInfoShareUrl = async (infoItemId: number) => {
 
 // 정보 후기 이미지 업로드
 export const uploadReviewImage = async (image: File) => {
-  console.log(image);
-  console.log(image instanceof File);
-  
   const formData = new FormData();
   formData.append("image", image);
 
