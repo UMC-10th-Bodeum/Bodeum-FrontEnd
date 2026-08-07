@@ -14,7 +14,7 @@ import { useUpdateCommunityComment } from "@/hooks/useCommunity";
 interface CommunityCommentItemProps {
   postId: number;
   comment: CommunityComment;
-  isPostAuthor?: boolean;
+  canAdopt?: boolean;
   replyTargetId: number | null;
   onSelectReplyTarget: (comment: CommunityComment) => void;
   onCancelReply: () => void;
@@ -22,7 +22,7 @@ interface CommunityCommentItemProps {
   isReplyPending: boolean;
   onLike: (commentId: number, isCurrentlyLiked: boolean) => void;
   likingCommentId?: number;
-  onAdopt?: (commentId: number) => void;
+  onAdopt?: (commentId: number, isAccepted: boolean) => void;
   isAdoptPending?: boolean;
   onDelete?: (commentId: number) => void;
 }
@@ -30,7 +30,7 @@ interface CommunityCommentItemProps {
 export default function CommunityCommentItem({
   postId,
   comment,
-  isPostAuthor,
+  canAdopt = false,
   replyTargetId,
   onSelectReplyTarget,
   onCancelReply,
@@ -39,7 +39,7 @@ export default function CommunityCommentItem({
   onLike,
   likingCommentId,
   onAdopt,
-  isAdoptPending,
+  isAdoptPending = false,
   onDelete,
 }: CommunityCommentItemProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -120,16 +120,17 @@ export default function CommunityCommentItem({
           </div>
 
           {isEditing ? (
-            <div className="mt-3">
+            <div className="mt-3 pr-[14px]">
               <textarea
                 value={editedContent}
                 maxLength={1000}
                 onChange={(e) => setEditedContent(e.target.value)}
-                className="w-full min-h-[80px] rounded-[8px] border border-background-300 bg-background-100 p-3 text-body text-background-600"
+                className="min-h-[96px] w-full resize-none rounded-[8px] border border-background-300 bg-background-100 px-[16px] py-[12px] text-body text-background-600 outline-none focus:border-primary-500"
               />
-              <div className="mt-2 flex gap-2">
+              <div className="mt-[12px] flex justify-end gap-2">
                 <ButtonOutline
                   label="취소"
+                  className="!h-[25px] !text-h6"
                   onClick={() => {
                     setIsEditing(false);
                     setEditedContent(comment.content);
@@ -137,6 +138,7 @@ export default function CommunityCommentItem({
                 />
                 <ButtonFill
                   label="적용"
+                  className="!min-h-[25px] h-[26px] !text-h6"
                   onClick={applyEdit}
                   disabled={isUpdating || !editedContent.trim()}
                 />
@@ -146,12 +148,15 @@ export default function CommunityCommentItem({
             <>
               <p className="mt-[8px] text-h3-onboard text-background-600">{comment.content}</p>
               <div className="mt-[10px] flex items-center gap-[24px] text-body-sub text-background-500">
-                {isPostAuthor ? (
+                {canAdopt ? (
                   <HeartStat
                     count={comment.likeCount}
                     isActive={comment.isAccepted}
                     disabled={isAdoptPending}
-                    onClick={() => onAdopt && onAdopt(comment.commentId)}
+                    onClick={(e) => {
+                      e?.stopPropagation();
+                      onAdopt?.(comment.commentId, comment.isAccepted);
+                    }}
                     label="채택"
                   />
                 ) : (
@@ -159,12 +164,18 @@ export default function CommunityCommentItem({
                     count={comment.likeCount}
                     isActive={comment.isLiked}
                     disabled={likingCommentId === comment.commentId}
-                    onClick={() => onLike(comment.commentId, comment.isLiked)}
+                    onClick={(e) => {
+                      e?.stopPropagation();
+                      onLike(comment.commentId, comment.isLiked);
+                    }}
                   />
                 )}
                 <button
                   type="button"
-                  onClick={() => onSelectReplyTarget(comment)}
+                  onClick={(e) => {
+                    e?.stopPropagation();
+                    onSelectReplyTarget(comment);
+                  }}
                   className="cursor-pointer"
                 >
                   답글 달기
@@ -197,6 +208,9 @@ export default function CommunityCommentItem({
           onLike={onLike}
           likingCommentId={likingCommentId}
           onDelete={onDelete}
+          canAdopt={canAdopt}
+          onAdopt={onAdopt}
+          isAdoptPending={isAdoptPending}
         />
       ))}
     </li>

@@ -1,10 +1,11 @@
 import { useState, type ReactNode } from "react";
+import type { MouseEvent } from "react";
 
 interface ToggleStatProps {
   type: "heart" | "scrap";
   isActive: boolean;
   count: number;
-  onClick: () => void;
+  onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
   outlineIcon: ReactNode;
   filledIcon: ReactNode;
   pressedIcon?: ReactNode;

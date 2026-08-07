@@ -76,7 +76,7 @@ export default function CommunityDetailPage() {
           <CommunityCommentsSection
             key={post.postId}
             postId={post.postId}
-            isPostAuthor={post.isMine}
+            canAdopt={post.isMine && post.boardType === "INFORMATION_QUESTION"}
           />
         </CommunityPostDetailCard>
 

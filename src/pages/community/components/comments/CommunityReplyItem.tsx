@@ -20,8 +20,10 @@ interface CommunityReplyItemProps {
   isReplyPending: boolean;
   onLike: (commentId: number, isCurrentlyLiked: boolean) => void;
   likingCommentId?: number;
-
   onDelete?: (commentId: number) => void;
+  canAdopt?: boolean;
+  onAdopt?: (commentId: number, isAccepted: boolean) => void;
+  isAdoptPending: boolean;
 }
 
 export default function CommunityReplyItem({
@@ -34,8 +36,10 @@ export default function CommunityReplyItem({
   isReplyPending,
   onLike,
   likingCommentId,
-
   onDelete,
+  canAdopt = false,
+  onAdopt,
+  isAdoptPending,
 }: CommunityReplyItemProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -71,29 +75,33 @@ export default function CommunityReplyItem({
                 </button>
 
                 {isMenuOpen && (
-                  <div className="absolute right-0 top-[32px] z-20 min-w-[80px] overflow-hidden rounded-[8px] border border-background-300 bg-background-100 py-[4px] shadow-md">
+                  <div
+                    role="menu"
+                    aria-label="대댓글 메뉴"
+                    className="absolute right-0 top-[32px] z-20 min-w-[140px] overflow-hidden rounded-[10px] border border-background-300 bg-background-100 py-1 shadow-md"
+                  >
                     <button
+                      role="menuitem"
                       type="button"
                       onClick={() => {
                         setIsMenuOpen(false);
-
-                        setEditedContent(reply.content);
                         setIsEditing(true);
 
                         onCancelReply();
                       }}
-                      className="block w-full cursor-pointer px-[16px] py-[8px] text-left text-body-sub hover:bg-background-200"
+                      className="block w-full px-4 py-2 text-left text-body-sub text-background-600 hover:bg-background-200 focus:bg-background-200"
                     >
                       수정
                     </button>
 
                     <button
+                      role="menuitem"
                       type="button"
                       onClick={() => {
                         setIsMenuOpen(false);
-                        if (onDelete) return onDelete(reply.commentId);
+                        if (onDelete) onDelete(reply.commentId);
                       }}
-                      className="block w-full cursor-pointer px-[16px] py-[8px] text-left text-body-sub text-sub-red hover:bg-background-200"
+                      className="block w-full px-4 py-2 text-left text-body-sub text-sub-red hover:bg-background-200 focus:bg-background-200"
                     >
                       삭제
                     </button>
@@ -104,16 +112,17 @@ export default function CommunityReplyItem({
           </div>
           <div>
             {isEditing ? (
-              <div className="mt-3">
+              <div className="mt-3 pr-[14px]">
                 <textarea
                   value={editedContent}
                   maxLength={1000}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  className="w-full min-h-[80px] rounded-[8px] border border-background-300 bg-background-100 p-3 text-body text-background-600"
+                  className="min-h-[96px] w-full resize-none rounded-[8px] border border-background-300 bg-background-100 px-[16px] py-[12px] text-body text-background-600 outline-none focus:border-primary-500"
                 />
-                <div className="mt-2 flex gap-2">
+                <div className="mt-[12px] flex justify-end gap-2">
                   <ButtonOutline
                     label="취소"
+                    className="!h-[25px] !text-h6"
                     onClick={() => {
                       setIsEditing(false);
                       setEditedContent(reply.content);
@@ -121,6 +130,7 @@ export default function CommunityReplyItem({
                   />
                   <ButtonFill
                     label="적용"
+                    className="!min-h-[25px] h-[26px] !text-h6"
                     onClick={() => {
                       const content = editedContent.trim();
                       if (!content || isUpdating) return;
@@ -147,14 +157,28 @@ export default function CommunityReplyItem({
               </div>
             ) : (
               <>
-                <p className="mt-[8px] text-h6-list text-h3-onboard">{reply.content}</p>
+                <p className="mt-[8px] text-h3-onboard">{reply.content}</p>
                 <div className="mt-[16px] flex items-center gap-[24px] text-body-sub text-background-500">
-                  <HeartStat
-                    count={reply.likeCount}
-                    isActive={reply.isLiked}
-                    disabled={likingCommentId === reply.commentId}
-                    onClick={() => onLike(reply.commentId, reply.isLiked)}
-                  />
+                  {canAdopt ? (
+                    <HeartStat
+                      count={reply.likeCount}
+                      isActive={reply.isAccepted}
+                      disabled={isAdoptPending}
+                      onClick={(e) => {
+                        e?.stopPropagation();
+                        onAdopt?.(reply.commentId, reply.isAccepted);
+                      }}
+                      label="채택"
+                    />
+                  ) : (
+                    <HeartStat
+                      count={reply.likeCount}
+                      isActive={reply.isLiked}
+                      disabled={likingCommentId === reply.commentId}
+                      onClick={() => onLike(reply.commentId, reply.isLiked)}
+                    />
+                  )}
+
                   <button
                     type="button"
                     onClick={() => onSelectReplyTarget(reply)}
@@ -191,6 +215,9 @@ export default function CommunityReplyItem({
           onLike={onLike}
           likingCommentId={likingCommentId}
           onDelete={onDelete}
+          canAdopt={canAdopt}
+          onAdopt={onAdopt}
+          isAdoptPending={isAdoptPending}
         />
       ))}
     </div>

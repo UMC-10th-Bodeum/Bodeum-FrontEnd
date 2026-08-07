@@ -258,57 +258,34 @@ export function useToggleCommunityCommentLike(postId: number) {
 export function useToggleCommunityCommentAdoption(postId: number) {
   const queryClient = useQueryClient();
 
-  return useMutation<CommunityComment, unknown, number>({
+  return useMutation({
     mutationFn: (commentId: number) => toggleCommunityCommentAdoption(commentId),
-    onSuccess: (updatedComment) => {
-      queryClient.setQueryData<CommunityCommentsResult>(
-        communityPostKeys.comments(postId),
-        (currentComments) =>
-          currentComments
-            ? {
-                ...currentComments,
-                comments: currentComments.comments.map((comment) => {
-                  if (comment.commentId === updatedComment.commentId)
-                    return { ...comment, ...updatedComment };
 
-                  return {
-                    ...comment,
-                    replies: comment.replies
-                      ? comment.replies.map((r) =>
-                          r.commentId === updatedComment.commentId
-                            ? { ...r, ...updatedComment }
-                            : r,
-                        )
-                      : comment.replies,
-                  };
-                }),
-              }
-            : currentComments,
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: communityPostKeys.comments(postId),
+      });
     },
   });
 }
 
-function replaceCommentInTree(
-  comment: CommunityComment,
+function updateCommentInTree(
+  comments: CommunityComment[],
   updatedComment: CommunityComment,
-): CommunityComment {
-  // 현재 댓글이 수정된 댓글이면 서버 응답으로 갱신
-  if (comment.commentId === updatedComment.commentId) {
+): CommunityComment[] {
+  return comments.map((comment) => {
+    if (comment.commentId === updatedComment.commentId) {
+      return {
+        ...comment,
+        content: updatedComment.content,
+      };
+    }
+
     return {
       ...comment,
-      ...updatedComment,
-
-      // 수정 API 응답에 replies가 없을 때 기존 답글이 사라지는 것 방지
-      replies: updatedComment.replies ?? comment.replies,
+      replies: comment.replies ? updateCommentInTree(comment.replies, updatedComment) : [],
     };
-  }
-
-  // 현재 댓글이 아니면 하위 답글에서 계속 찾음
-  return {
-    ...comment,
-    replies: comment.replies?.map((reply) => replaceCommentInTree(reply, updatedComment)),
-  };
+  });
 }
 
 export function useUpdateCommunityComment(postId: number) {
@@ -321,17 +298,11 @@ export function useUpdateCommunityComment(postId: number) {
       queryClient.setQueryData<CommunityCommentsResult>(
         communityPostKeys.comments(postId),
         (currentComments) => {
-          if (!currentComments) {
-            return currentComments;
-          }
+          if (!currentComments) return currentComments;
 
           return {
             ...currentComments,
-
-            // 최상위 댓글부터 재귀적으로 수정 댓글을 탐색
-            comments: currentComments.comments.map((comment) =>
-              replaceCommentInTree(comment, updatedComment),
-            ),
+            comments: updateCommentInTree(currentComments.comments, updatedComment),
           };
         },
       );
@@ -355,12 +326,10 @@ export function useDeleteCommunityComment(postId: number) {
             commentId,
           );
 
-          // update post detail commentCount
           queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), (post) =>
             post ? { ...post, commentCount: Math.max(0, post.commentCount - removedCount) } : post,
           );
 
-          // update list pages
           if (removedCount > 0) {
             queryClient.setQueriesData<CommunityPostPage>(
               {

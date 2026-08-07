@@ -3,7 +3,6 @@ import HeartIcon from "@/assets/icons/Heart.svg?react";
 import HeartDisabledIcon from "@/assets/icons/HeartDisabled.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
-import ShareIcon from "@/assets/icons/Share.svg?react";
 import { getApiErrorMessage } from "@/apis/apiError";
 import DetailBackButton from "@/components/DetailBackButton";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +20,7 @@ import ButtonOutline from "@/components/ButtonOutline";
 import ButtonFill from "@/components/ButtonFill";
 import DeleteConfirmModal from "@/pages/community/components/detail/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
+import ShareButton from "@/components/ShareButton";
 
 interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
@@ -75,7 +75,8 @@ export default function CommunityPostDetailCard({
         setIsEditing(false);
         showToast("green", "게시글이 수정되었습니다.");
       },
-      onError: (error) => showToast("red", getApiErrorMessage(error, "게시글을 수정하지 못했습니다.")),
+      onError: (error) =>
+        showToast("red", getApiErrorMessage(error, "게시글을 수정하지 못했습니다.")),
     });
   };
 
@@ -153,6 +154,7 @@ export default function CommunityPostDetailCard({
           <DetailBackButton
             icon={post.isLiked ? HeartIcon : HeartDisabledIcon}
             label={`공감 ${post.likeCount}`}
+            className="h-[36px]"
             selected={post.isLiked}
             selectedClassName="border-sub-red text-sub-red"
             disabled={isLikePending}
@@ -165,7 +167,8 @@ export default function CommunityPostDetailCard({
           />
           <DetailBackButton
             icon={post.isScrapped ? ScrapPressedIcon : ScrapIcon}
-            label={`스크랩 ${post.scrapCount}`}
+            label="스크랩"
+            className="h-[36px]"
             selected={post.isScrapped}
             selectedClassName="border-sub-yellow text-sub-yellow"
             disabled={isScrapPending}
@@ -176,7 +179,11 @@ export default function CommunityPostDetailCard({
               })
             }
           />
-          <DetailBackButton icon={ShareIcon} label="공유" onClick={() => {}} />
+
+          <ShareButton
+            url={window.location.href}
+            className="!border-background-300 !text-background-500 !h-[36px]"
+          />
         </div>
 
         <div className="flex items-center gap-2">
@@ -187,20 +194,20 @@ export default function CommunityPostDetailCard({
                   <ButtonOutline
                     label="취소하기"
                     onClick={onCancel}
-                    className="h-[44px] w-[91px] !text-h2-onboard"
+                    className="w-[88px] !h-[36px]"
                   />
                   <ButtonFill
                     label="적용하기"
                     disabled={editedTitle.trim().length === 0 || isUpdating}
                     onClick={onApply}
-                    className="h-[44px] w-[91px] !text-h2-onboard"
+                    className="w-[88px] !min-h-[36px] h-[36px]"
                   />
                 </div>
               ) : (
                 <ButtonOutline
-                  label="프로필 편집"
+                  label="수정"
                   onClick={startEditing}
-                  className="ml-auto h-[44px] w-[110px] !text-h2-onboard"
+                  className="ml-auto !h-[36px] px-[20px] !py-[8px]"
                 />
               )}
 
@@ -210,6 +217,7 @@ export default function CommunityPostDetailCard({
                 tone="danger"
                 disabled={isDeleting}
                 onClick={() => setShowDeleteModal(true)}
+                className="h-[36px] px-[20px] py-[8px]"
               />
 
               <DeleteConfirmModal

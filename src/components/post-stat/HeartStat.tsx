@@ -6,7 +6,7 @@ import ToggleStat from "./ToggleStat";
 interface HeartStatProps {
     count: number;
     isActive?: boolean;
-    onClick: () => void;
+    onClick: (e?: React.MouseEvent<HTMLButtonElement>) => void;
     disabled?: boolean;
     label?: string;
 }

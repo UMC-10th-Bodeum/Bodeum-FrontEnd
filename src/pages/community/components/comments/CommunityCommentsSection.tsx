@@ -17,12 +17,12 @@ import CommunityCommentItem from "./CommunityCommentItem";
 
 interface CommunityCommentsSectionProps {
   postId: number;
-  isPostAuthor?: boolean;
+  canAdopt?: boolean;
 }
 
 export default function CommunityCommentsSection({
   postId,
-  isPostAuthor,
+  canAdopt = false,
 }: CommunityCommentsSectionProps) {
   const [comment, setComment] = useState("");
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
@@ -36,7 +36,7 @@ export default function CommunityCommentsSection({
   } = useToggleCommunityCommentLike(postId);
   const { mutate: toggleCommentAdoption, isPending: isAdoptPending } =
     useToggleCommunityCommentAdoption(postId);
-    const { mutate: deleteComment } = useDeleteCommunityComment(postId);
+  const { mutate: deleteComment } = useDeleteCommunityComment(postId);
   const comments = data?.comments ?? [];
 
   const showCreateError = (error: unknown) => {
@@ -131,7 +131,7 @@ export default function CommunityCommentsSection({
               key={item.commentId}
               postId={postId}
               comment={item}
-              isPostAuthor={isPostAuthor ?? false}
+              canAdopt={canAdopt}
               replyTargetId={replyTargetId}
               onSelectReplyTarget={(targetComment) =>
                 setReplyTargetId((current) =>
@@ -143,11 +143,23 @@ export default function CommunityCommentsSection({
               isReplyPending={isReplyPending}
               onLike={likeComment}
               likingCommentId={isLikePending ? likingComment?.commentId : undefined}
-              onAdopt={(commentId) => toggleCommentAdoption(commentId)}
+              onAdopt={(commentId, isAccepted) =>
+                toggleCommentAdoption(commentId, {
+                  onSuccess: () => {
+                    showToast(
+                      "green",
+                      isAccepted ? "댓글 채택이 취소되었습니다." : "댓글이 채택되었습니다.",
+                    );
+                  },
+                  onError: (error) =>
+                    showToast("red", getApiErrorMessage(error, "댓글을 채택하지 못했습니다.")),
+                })
+              }
               isAdoptPending={isAdoptPending}
               onDelete={(commentId: number) =>
                 deleteComment(commentId, {
-                  onError: (error: unknown) => showToast("red", getApiErrorMessage(error, "댓글을 삭제하지 못했습니다.")),
+                  onError: (error: unknown) =>
+                    showToast("red", getApiErrorMessage(error, "댓글을 삭제하지 못했습니다.")),
                 })
               }
             />
