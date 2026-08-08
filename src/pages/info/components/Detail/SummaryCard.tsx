@@ -141,7 +141,7 @@ export default function SummaryCard({
                 return;
               }
 
-              window.open(homepageUrl, "_blank");
+              window.open(homepageUrl, "_blank", "noopener,noreferrer");
             }}
           />
 
