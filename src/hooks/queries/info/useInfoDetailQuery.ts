@@ -5,6 +5,6 @@ export const useInfoDetailQuery = (infoItemId: number) => {
   return useQuery({
     queryKey: ["info-detail", infoItemId],
     queryFn: () => getInfoDetail(infoItemId),
-    enabled: !!infoItemId,
+    enabled: Number.isInteger(infoItemId) && infoItemId > 0,
   });
 };

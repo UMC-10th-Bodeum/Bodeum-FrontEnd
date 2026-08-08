@@ -9,5 +9,6 @@ export const useInfoReviewListQuery = (
   return useQuery({
     queryKey: ["info-reviews", infoItemId, page, size],
     queryFn: () => getInfoReviews(infoItemId, page, size),
+    enabled: Number.isInteger(infoItemId) && infoItemId > 0,
   });
 };
