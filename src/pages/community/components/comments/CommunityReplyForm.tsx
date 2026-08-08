@@ -29,7 +29,7 @@ export default function CommunityReplyForm({
   };
 
   return (
-    <div className="relative border-b border-background-250 bg-background-200 py-[20px] pr-[80px] pl-[85px]">
+    <div className="relative border-y border-background-250 bg-background-200 py-[20px] px-[80px]">
       <span
         aria-hidden="true"
         className="absolute top-[20px] left-[17px] flex h-[40px] w-[40px] items-center justify-center"
@@ -48,11 +48,7 @@ export default function CommunityReplyForm({
         <MainButton size="S" stroke disabled={isSubmitting} onClick={cancelReply}>
           취소
         </MainButton>
-        <MainButton
-          size="S"
-          disabled={!reply.trim() || isSubmitting}
-          onClick={submitReply}
-        >
+        <MainButton size="S" disabled={!reply.trim() || isSubmitting} onClick={submitReply}>
           작성
         </MainButton>
       </div>

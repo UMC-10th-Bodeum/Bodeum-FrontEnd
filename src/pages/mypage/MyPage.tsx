@@ -3,7 +3,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getApiErrorMessage } from "@/apis/apiError";
 import {
   USER_DASHBOARD_QUERY_KEY,
+  USER_COMMENTS_QUERY_KEY,
+  USER_POSTS_QUERY_KEY,
   USER_SCRAPS_QUERY_KEY,
+  useDeleteMyComment,
+  useDeleteMyPost,
+  useDeleteMyPostScrap,
   useDeleteMyScrap,
   useMyComments,
   useMyDashboard,
@@ -14,6 +19,7 @@ import {
 import { formatDateWithDots } from "@/utils/time";
 import Pagination from "@/components/pagination/Pagination";
 import { showToast } from "@/components/Toast";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { useNavigate } from "react-router-dom";
 import ActivityPointCard from "./components/ActivityPointCard";
 import BadgeGradeModal from "./components/BadgeGradeModal";
@@ -21,7 +27,12 @@ import BadgeHelpModal from "./components/BadgeHelpModal";
 import MyPageCard from "./components/MyPageCard";
 import MyPageTabs from "./components/MyPageTabs";
 import ProfileSummaryCard from "./components/ProfileSummaryCard";
-import type { MyPageScrapItem, MyPageTabKey } from "@/types/mypage";
+import type {
+  MyPageCommentItem,
+  MyPagePostItem,
+  MyPageScrapItem,
+  MyPageTabKey,
+} from "@/types/mypage";
 
 type BadgeModalType = "grade" | "help" | null;
 const MY_ACTIVITY_PAGE_SIZE = 6;
@@ -30,6 +41,9 @@ export default function MyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutateAsync: deleteScrap } = useDeleteMyScrap();
+  const { mutateAsync: deletePostScrap } = useDeleteMyPostScrap();
+  const { mutateAsync: deletePost } = useDeleteMyPost();
+  const { mutateAsync: deleteComment } = useDeleteMyComment();
   const dashboardQuery = useMyDashboard();
   const pointsQuery = useMyPoints();
   const [activeTab, setActiveTab] = useState<MyPageTabKey>("saved");
@@ -57,6 +71,12 @@ export default function MyPage() {
   const [deletingScrapId, setDeletingScrapId] = useState<number | string | null>(
     null,
   );
+  const [hiddenPostIds, setHiddenPostIds] = useState<Set<number>>(() => new Set());
+  const [hiddenCommentIds, setHiddenCommentIds] = useState<Set<number>>(() => new Set());
+  const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const [postToDelete, setPostToDelete] = useState<MyPagePostItem | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+  const [commentToDelete, setCommentToDelete] = useState<MyPageCommentItem | null>(null);
   const [badgeModal, setBadgeModal] = useState<BadgeModalType>(null);
 
   const deleteItem = async (item: MyPageScrapItem) => {
@@ -67,7 +87,14 @@ export default function MyPage() {
     setDeletingScrapId(item.id);
 
     try {
-      await deleteScrap(item.scrapId);
+      if (item.scrapType === "POST") {
+        await deletePostScrap(item.postId);
+      } else {
+        await deleteScrap({
+          scrapId: item.scrapId,
+          scrapType: item.scrapType,
+        });
+      }
       setHiddenScrapIds((current) => new Set(current).add(item.id));
 
       const currentPageItemCount = scrapsQuery.data
@@ -92,6 +119,56 @@ export default function MyPage() {
       );
     } finally {
       setDeletingScrapId(null);
+    }
+  };
+
+  const deletePostItem = async (item: MyPagePostItem) => {
+    if (deletingPostId !== null) return;
+
+    setDeletingPostId(item.id);
+    try {
+      await deletePost(item.postId);
+      setHiddenPostIds((current) => new Set(current).add(item.postId));
+
+      if (postsPage > 0 && postsQuery.data?.posts.length === 1) {
+        setPostsPage((current) => Math.max(0, current - 1));
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: USER_POSTS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: USER_DASHBOARD_QUERY_KEY }),
+      ]);
+      showToast("green", "게시글을 삭제했습니다.");
+      setPostToDelete(null);
+    } catch (error) {
+      showToast("red", getApiErrorMessage(error, "게시글을 삭제하지 못했습니다."));
+    } finally {
+      setDeletingPostId(null);
+    }
+  };
+
+  const deleteCommentItem = async (item: MyPageCommentItem) => {
+    if (deletingCommentId !== null) return;
+
+    setDeletingCommentId(item.id);
+    try {
+      await deleteComment(item.id);
+      setHiddenCommentIds((current) => new Set(current).add(item.id));
+
+      if (commentsPage > 0 && commentsQuery.data?.comments.length === 1) {
+        setCommentsPage((current) => Math.max(0, current - 1));
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: USER_COMMENTS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: USER_DASHBOARD_QUERY_KEY }),
+      ]);
+      showToast("green", "댓글을 삭제했습니다.");
+      setCommentToDelete(null);
+    } catch (error) {
+      showToast("red", getApiErrorMessage(error, "댓글을 삭제하지 못했습니다."));
+    } finally {
+      setDeletingCommentId(null);
     }
   };
 
@@ -143,6 +220,7 @@ export default function MyPage() {
             postId: scrap.infoItemId,
             type: "scrap" as const,
             scrapId: scrap.scrapId,
+            scrapType: "INFO" as const,
             title: scrap.name,
             targetPath: `/info/${scrap.mainCategory}/${scrap.infoItemId}`,
             sourceLabel: scrap.mainCategoryKo || "정보",
@@ -156,6 +234,7 @@ export default function MyPage() {
             postId: scrap.newsId,
             type: "scrap" as const,
             scrapId: scrap.scrapId,
+            scrapType: "NEWS" as const,
             title: scrap.title,
             targetPath: `/news/${scrap.newsId}`,
             sourceLabel: "소식",
@@ -169,6 +248,7 @@ export default function MyPage() {
             postId: scrap.postId,
             type: "scrap" as const,
             scrapId: scrap.scrapId,
+            scrapType: "POST" as const,
             title: scrap.title,
             targetPath: `/community/${scrap.postId}`,
             sourceLabel: "커뮤니티 게시글",
@@ -190,7 +270,7 @@ export default function MyPage() {
         type: "post" as const,
         title: post.title,
         date: formatDateWithDots(post.createdAt),
-      }))
+      })).filter((item) => !hiddenPostIds.has(item.id))
     : activeTab === "comments"
       ? (commentsQuery.data?.comments ?? []).map((comment) => ({
           id: comment.commentId,
@@ -199,7 +279,7 @@ export default function MyPage() {
           comment: comment.content,
           postTitle: comment.postTitle,
           date: formatDateWithDots(comment.createdAt),
-        }))
+        })).filter((item) => !hiddenCommentIds.has(item.id))
       : [];
   const isActivityPending = activeTab === "saved"
     ? scrapsQuery.isPending
@@ -295,11 +375,17 @@ export default function MyPage() {
               <MyPageCard
                 key={item.id}
                 item={item}
-                deleteDisabled={deletingScrapId !== null}
+                deleteDisabled={
+                  deletingScrapId !== null
+                  || deletingPostId !== null
+                  || deletingCommentId !== null
+                }
                 onDelete={
-                  activeTab === "saved" && item.type === "scrap"
+                  item.type === "scrap"
                     ? () => void deleteItem(item)
-                    : undefined
+                    : item.type === "post"
+                      ? () => setPostToDelete(item)
+                      : () => setCommentToDelete(item)
                 }
               />
             ))}
@@ -353,6 +439,30 @@ export default function MyPage() {
 
       {badgeModal === "grade" && <BadgeGradeModal onClose={() => setBadgeModal(null)} />}
       {badgeModal === "help" && <BadgeHelpModal onClose={() => setBadgeModal(null)} />}
+      <DeleteConfirmModal
+        open={postToDelete !== null}
+        title="게시글을 삭제하시겠어요?"
+        description="삭제가 완료되면 고객님의 게시글이 즉시 삭제되며, 이는 복구할 수 없습니다."
+        onCancel={() => setPostToDelete(null)}
+        onConfirm={() => {
+          if (postToDelete) {
+            void deletePostItem(postToDelete);
+          }
+        }}
+        loading={deletingPostId !== null}
+      />
+      <DeleteConfirmModal
+        open={commentToDelete !== null}
+        title="댓글을 삭제하시겠어요?"
+        description="삭제가 완료되면 고객님의 댓글이 즉시 삭제되며, 이는 복구할 수 없습니다."
+        onCancel={() => setCommentToDelete(null)}
+        onConfirm={() => {
+          if (commentToDelete) {
+            void deleteCommentItem(commentToDelete);
+          }
+        }}
+        loading={deletingCommentId !== null}
+      />
     </div>
   );
 }
