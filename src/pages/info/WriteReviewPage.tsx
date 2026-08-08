@@ -20,7 +20,8 @@ import { uploadReviewImage } from "@/apis/info";
 export default function WriteReviewPage() {
   const { category, id } = useParams();
   const [isCancelOpen, setIsCancelOpen] = useState(false);
-  const { mutate } = useCreateInfoReviewMutation();
+  const { mutate, isPending: isSubmitting } = useCreateInfoReviewMutation();
+  const [isUploading, setIsUploading] = useState(false);
 
   const navigate = useNavigate();
   const { setBreadcrumb } = useBreadcrumb();
@@ -60,8 +61,9 @@ export default function WriteReviewPage() {
   }, [category, detail, id, infoCategory, navigate, setBreadcrumb]);
 
   const handleSubmit = async () => {
-    if (!id) return;
+    if (!id || isUploading || isSubmitting) return;
 
+    setIsUploading(true);
     try {
       const imageUrls = await Promise.all(
         images.map((image) => uploadReviewImage(image)),
@@ -89,6 +91,8 @@ export default function WriteReviewPage() {
     } catch (error) {
       console.error(error);
       showToast("red", "이미지 업로드에 실패했습니다.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -146,7 +150,7 @@ export default function WriteReviewPage() {
 
           <ButtonFill
             label="게시하기"
-            disabled={!isValid || isPending}
+            disabled={!isValid || isUploading || isSubmitting}
             className="w-[200px]"
             onClick={handleSubmit}
           />
