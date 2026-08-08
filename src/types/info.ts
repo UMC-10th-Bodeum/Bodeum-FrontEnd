@@ -81,7 +81,7 @@ export interface InfoDetail {
   scrapCount: number;
   reviewCount: number;
   isScrapped: boolean;
-  tags: string[];
+  tags?: string[] | null;
   businessHours: BusinessHour[];
 }
 

@@ -4,7 +4,7 @@ import IntroIcon from "@/assets/icons/Paper.svg?react";
 
 interface IntroSectionProps {
   introduction: string;
-  tags: string[];
+  tags?: string[] | null;
 }
 
 export default function IntroSection({
@@ -13,6 +13,8 @@ export default function IntroSection({
 }: IntroSectionProps
 ) {
   if (!introduction) return null;
+
+  const safeTags = tags ?? [];
   
   return (
     <Section
@@ -27,7 +29,7 @@ export default function IntroSection({
           전문 분야
         </h4>
         <div className="flex flex-wrap gap-[10px]">
-          {tags.map((tag) => (
+          {safeTags.map((tag) => (
             <PostTag
               key={tag}
               type="ETC"
