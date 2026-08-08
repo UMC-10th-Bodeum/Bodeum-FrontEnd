@@ -201,7 +201,7 @@ export default function InfoPage() {
 
             sessionStorage.setItem("info-region-level1", regionLevel1);
             sessionStorage.setItem("info-region-level2", regionLevel2);
-
+            setPage(1);
             setLocationOpen(false);
           }}
         />
