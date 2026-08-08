@@ -4,10 +4,11 @@ import KakaoMap from "./KakaoMap";
 import { useEffect, useState } from "react";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
 import KAKAOMapLogo from "@/assets/icons/KAKAOMapLogo.svg?react"
+import { useKakaoMapUrlQuery } from "@/hooks/queries/info/useKakaoMapUrlQuery";
 
 interface Props {
+  infoItemId: number;
   address: string;
-  homepageUrl?: string;
 }
 
 declare global {
@@ -36,7 +37,9 @@ function getDistance(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export default function LocationSection({ address, homepageUrl }: Props) {
+export default function LocationSection({ infoItemId, address }: Props) {
+  const { data: kakaoMap } = useKakaoMapUrlQuery(infoItemId);
+
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;
     lng: number;
@@ -62,6 +65,10 @@ export default function LocationSection({ address, homepageUrl }: Props) {
       }
     );
   }, []);
+
+  if (!address) {
+    return null;
+  }
 
   const distance =
     currentLocation && placeLocation
@@ -94,7 +101,7 @@ export default function LocationSection({ address, homepageUrl }: Props) {
       </div>
       
       <a
-        href={homepageUrl ?? "#"}
+        href={kakaoMap?.kakaoMapUrl ?? "#"}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 flex h-[36px] w-[133px] items-center rounded-[10px] border border-background-300 bg-background-100 px-[16px]"

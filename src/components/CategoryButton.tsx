@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 import type { ParentCategory } from "@/types/info";
+import type { ComponentType, SVGProps } from "react";
 
 type CategoryButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -8,6 +9,7 @@ type CategoryButtonProps = Omit<
   category: ParentCategory;
   label: string;
   selected?: boolean;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
 const categoryButtonClassMap = {
@@ -54,6 +56,7 @@ export default function CategoryButton({
   selected = false,
   className,
   type = "button",
+  icon: Icon,
   ...buttonProps
 }: CategoryButtonProps) {
   const categoryButton = categoryButtonClassMap[category];
@@ -79,6 +82,7 @@ export default function CategoryButton({
         className,
       )}
     >
+      {Icon && <Icon className="mr-[2px]" />}
       {label}
     </button>
   );

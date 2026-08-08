@@ -35,9 +35,6 @@ if (!baseUrl) {
 const api = axios.create({
   baseURL: baseUrl,
   timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 api.interceptors.request.use((config) => {

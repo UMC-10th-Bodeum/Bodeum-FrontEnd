@@ -4,11 +4,12 @@ import {
   infoSubCategoryMap,
 } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
+import AwardIcon from "@/assets/icons/Award.svg?react";
 
 interface CategoryChipsProps {
   parentCategory: ParentCategory;
-  subCategory: string | null;
-  onChange: (subCategory: string | null) => void;
+  subCategory: number | null;
+  onChange: (subCategory: number | null) => void;
 }
 
 export default function CategoryChips({
@@ -27,8 +28,9 @@ export default function CategoryChips({
             key={item.id}
             category={parentCategory}
             label={item.label}
-            selected={subCategory === item.value}
-            onClick={() => onChange(item.value)}
+            icon={AwardIcon}
+            selected={subCategory === item.id}
+            onClick={() => onChange(item.id)}
           />
         ))}
 
@@ -46,8 +48,8 @@ export default function CategoryChips({
             key={item.id}
             category={parentCategory}
             label={item.label}
-            selected={subCategory === item.value}
-            onClick={() => onChange(item.value)}
+            selected={subCategory === item.id}
+            onClick={() => onChange(item.id)}
           />
         ))}
     </div>

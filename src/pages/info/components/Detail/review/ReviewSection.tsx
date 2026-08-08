@@ -7,16 +7,19 @@ import ButtonOutline from "@/components/ButtonOutline";
 import { useState } from "react";
 
 interface Review {
-  reviewId: number;
+  infoReviewId: number;
+  userId: number;
+  userNickname: string;
   rating: number;
-  nickname: string;
-  createdAt: string;
   content: string;
-  helpfulCount: number;
+  imageUrls: string[];
   isHelpful: boolean;
+  helpfulCount: number;
+  createdAt: string;
 }
 
 interface ReviewSectionProps {
+  infoItemId: number;
   reviews: Review[];
   totalReviewCount: number;
   averageRating: number;
@@ -30,10 +33,11 @@ export default function ReviewSection({
   totalReviewCount,
   averageRating,
   onWriteReview,
+  infoItemId
 }: ReviewSectionProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const visibleReviews = reviews.slice(0, visibleCount);
-  const remainCount = reviews.length - visibleCount;
+  const remainCount = Math.max(0, totalReviewCount - visibleCount);
 
   return (
     <Section
@@ -60,14 +64,18 @@ export default function ReviewSection({
 
           <div className="my-[14px] flex flex-col">
             {visibleReviews.map((review) => (
-              <ReviewCard key={review.reviewId} review={review} />
+              <ReviewCard
+                key={review.infoReviewId}
+                infoItemId={infoItemId}
+                review={review}
+              />
             ))}
           </div>
             
           {remainCount > 0 && (
             <ButtonOutline
               onClick={() => setVisibleCount((prev) => prev + INITIAL_COUNT)}
-              label={`후기 ${remainCount}개 더보기`}
+              label={`후기 ${Math.min(INITIAL_COUNT, remainCount)}개 더보기`}
               size="L"
             />
           )}

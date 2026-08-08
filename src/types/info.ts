@@ -6,7 +6,7 @@ export type ParentCategory =
   | "EDUCATION";
 
 export interface InfoSubCategory {
-  id?: number;
+  id: number;
   value: string;
   label: string;
 }
@@ -19,7 +19,7 @@ export interface Category {
   sub_category_ko: string;
 }
 
-export interface InfoItemResponse {
+export interface InfoItem {
   infoItemId: number;
   name: string;
   mainCategory: ParentCategory;
@@ -31,40 +31,42 @@ export interface InfoItemResponse {
   sido: string;
   sigungu: string;
   phone: string;
-  homepageUrl: string | null;
+  homepageUrl: string;
   viewCount: number;
   scrapCount: number;
   reviewCount: number;
+  tags: string[];
 }
 
-export interface InfoPageResponse {
-  selectedMainCategory: ParentCategory | null;
-  selectedMainCategoryKo: string | null;
-  selectedSubCategoryId: number | null;
-  selectedSubCategory: string | null;
-  selectedSubCategoryKo: string | null;
-  items: {
-    content: InfoItemResponse[];
-    totalElements: number;
-    totalPages: number;
-    number: number;
-    size: number;
-    first: boolean;
-    last: boolean;
-    empty: boolean;
-  };
+export interface PageResponse<T> {
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  content: T[];
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
-export interface InfoDetailResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: InfoDetail;
+export interface InfoListResponse {
+  selectedMainCategory: ParentCategory;
+  selectedMainCategoryKo: string;
+  selectedSubCategoryId: number;
+  selectedSubCategory: string;
+  selectedSubCategoryKo: string;
+  items: PageResponse<InfoItem>;
+}export interface BusinessHour {
+  dayOfWeek: string;
+  openTime: string;
+  closeTime: string;
 }
 
 export interface InfoDetail {
   infoItemId: number;
   name: string;
+  introduction: string;
   mainCategory: ParentCategory;
   mainCategoryKo: string;
   subCategoryId: number;
@@ -73,42 +75,53 @@ export interface InfoDetail {
   address: string;
   sido: string;
   sigungu: string;
-  phone: string | null;
-  homepageUrl: string | null;
+  phone: string;
+  homepageUrl: string;
   viewCount: number;
   scrapCount: number;
   reviewCount: number;
   isScrapped: boolean;
+  tags?: string[] | null;
   businessHours: BusinessHour[];
-  updatedAt: string;
-}
-
-export interface BusinessHour {
-  dayOfWeek:
-    | "월요일"
-    | "화요일"
-    | "수요일"
-    | "목요일"
-    | "금요일"
-    | "토요일"
-    | "일요일";
-  openTime: string | null;
-  closeTime: string | null;
 }
 
 // 리뷰
-export interface Review {
-  reviewId: number;
+export interface CreateInfoReviewRequest {
   rating: number;
-  nickname: string;
-  createdAt: string;
   content: string;
-  helpfulCount: number;
-  isHelpful: boolean;
+  imageUrls: string[];
 }
 
-export interface InfoReviewResponse {
-  avgRating: number;
-  totalCount: number;
-  reviews: Review[];
+export interface InfoReview {
+  infoReviewId: number;
+  userId: number;
+  userNickname: string;
+  rating: number;
+  content: string;
+  imageUrls: string[];
+  helpfulCount: number;
+  isHelpful: boolean;
+  createdAt: string;
+}
+
+export interface GetInfoReviewsParams {
+  page?: number;
+  size?: number;
+  sort?: string[];
+}
+
+export interface InfoReviewListResult {
+  averageRating: number;
+  totalElements: number;
+  reviews: PageResponse<InfoReview>;
+}
+
+// 카카오지도
+export interface KakaoMapUrlResponse {
+  kakaoMapUrl: string;
+}
+
+export interface ShareInfoResponse {
+  infoItemId: number;
+  shareUrl: string;
 }

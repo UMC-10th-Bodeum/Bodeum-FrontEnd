@@ -1,104 +1,120 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
-import { infoDetailMockData, infoReviewMockData } from "@/mocks/infoDetail";
-import DetailHeader from "./components/Detail/DetailHeader";
 import AIChatButton from "@/components/AIChatButton";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
+import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
+import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
+import AsyncState from "@/components/AsyncState";
+import CategoryModal from "./components/modal/CategoryModal";
 
 export default function InfoDetailPage() {
   const { category, id } = useParams();
   const { setBreadcrumb } = useBreadcrumb();
+  const [categoryOpen, setCategoryOpen] = useState(false);
   const navigate = useNavigate();
-  const detail = infoDetailMockData.result;
-  const reviewData = infoReviewMockData.result;
+  const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
+
+  const { data: reviewData } = useInfoReviewListQuery(
+    Number(id),
+    0,
+    100,
+  );
 
   const infoCategory = category
     ? infoCategoryMap[category as ParentCategory]
     : undefined;
 
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const data = await getInfoDetail(id!);
-
-  //     setBreadcrumb([
-  //       "정보",
-  //       infoCategoryMap[category as ParentCategory].label,
-  //       data.name,
-  //     ]);
-  //   }
-
-  //   fetchData();
-  // }, [category, id, setBreadcrumb]);
-
-  // 임시
   useEffect(() => {
-  if (!category) return;
+    if (!category || !detail) return;
 
-  setBreadcrumb([
-    {
-      label: "정보",
-      onClick: () => {},
-    },
-    {
-      label: infoCategory?.label ?? "",
-      onClick: () => navigate(`/info?category=${category}`),
-    },
-    {
-      label: detail.name,
-    },
-  ]);
+    setBreadcrumb([
+      {
+        label: "정보",
+        onClick: () => setCategoryOpen(true),
+      },
+      {
+        label: infoCategory?.label ?? "",
+        onClick: () => navigate(`/info?category=${category}`),
+      },
+      {
+        label: detail!.name,
+      },
+    ]);
 
-  return () => setBreadcrumb([]);
-}, [category, detail.name, infoCategory, navigate, setBreadcrumb]);
+    return () => setBreadcrumb([]);
+  }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
+
+  const [isScrapped, setIsScrapped] = useState<boolean>(detail?.isScrapped ?? false);
+  const [scrapCount, setScrapCount] = useState<number>(detail?.scrapCount ?? 0);
+
+  useEffect(() => {
+    setIsScrapped(detail?.isScrapped ?? false);
+    setScrapCount(detail?.scrapCount ?? 0);
+  }, [detail]);
+  
+  if (isPending) {
+    return <AsyncState type="loading" />;
+  }
+
+  if (isError || !detail) {
+    return <AsyncState type="error" />;
+  }
 
   return (
-    <div className="mx-auto flex max-w-[1240px] gap-6 px-8 py-5">
-      <main className="w-[680px]  space-y-[10px]">
-        <DetailHeader image={undefined} />
-        <IntroSection
-          // introduction={detail.introduction}
-          // tags={detail.tags}
-        />
-
-        <BusinessHoursSection hours={detail.businessHours} />
-
-        <LocationSection
-          address={detail.address}
-          homepageUrl={detail.homepageUrl ?? undefined}
-        />
-
-        <ReviewSection
-          reviews={reviewData.reviews}
-          averageRating={reviewData.avgRating}
-          totalReviewCount={reviewData.totalCount}
-          onWriteReview={() =>
-            navigate(`/info/${category}/${id}/review/write`)
-          }
-        />
-      </main>
-
-      <aside className="top-5 h-fit w-[400px] space-y-4">
+    <div className="flex justify-center gap-6 px-8 py-5">
+      <main className="w-[680px] space-y-[10px]">
         <SummaryCard
+          infoItemId={detail.infoItemId}
           name={detail.name}
           mainCategory={detail.mainCategory}
           subCategory={detail.subCategoryKo}
           homepageUrl={detail.homepageUrl ?? undefined}
           viewCount={detail.viewCount}
-          scrapCount={detail.scrapCount}
+          scrapCount={scrapCount}
           reviewCount={detail.reviewCount}
-          isScrapped={detail.isScrapped}
-          onScrap={() => { }}
-          onShare={() => { }}
+          isScrapped={isScrapped}
+          address={detail.address}
+          sido={detail.sido}
+          sigungu={detail.sigungu}
+          phone={detail.phone}
+        />
+        <IntroSection
+          introduction={detail.introduction}
+          tags={detail.tags}
         />
         <AIChatButton />
-      </aside>
+        <BusinessHoursSection hours={detail.businessHours} />
+
+        <LocationSection
+          infoItemId={detail.infoItemId}
+          address={detail.address}
+        />
+
+        <ReviewSection
+          infoItemId={detail.infoItemId}
+          reviews={reviewData?.reviews.content ?? []}
+          totalReviewCount={reviewData?.totalElements ?? 0}
+          averageRating={reviewData?.averageRating ?? 0}
+          onWriteReview={() => navigate(`/info/${category}/${id}/review/write`)}
+        />
+      </main>
+      {categoryOpen && (
+        <CategoryModal
+          category={category as ParentCategory}
+          onClose={() => setCategoryOpen(false)}
+          onSelect={(selectedCategory) => {
+            navigate(`/info?category=${selectedCategory}`);
+            setCategoryOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

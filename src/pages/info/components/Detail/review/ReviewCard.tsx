@@ -1,22 +1,59 @@
+import { toggleReviewHelpful } from "@/apis/info";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import StarIcon from "@/assets/icons/Star.svg?react";
 import FeedbackButton from "@/components/FeedbackButton";
+import { showToast } from "@/components/Toast";
+import { formatDate } from "@/utils/time";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface Review {
-  reviewId: number;
+  infoReviewId: number;
+  userId: number;
+  userNickname: string;
   rating: number;
-  nickname: string;
-  createdAt: string;
   content: string;
-  helpfulCount: number;
+  imageUrls: string[];
   isHelpful: boolean;
+  helpfulCount: number;
+  createdAt: string;
 }
 
 interface Props {
+  infoItemId: number;
   review: Review;
 }
 
-export default function ReviewCard({ review }: Props) {
+export default function ReviewCard({ infoItemId, review }: Props) {
+  const [isHelpful, setIsHelpful] = useState(review.isHelpful);
+  const [helpfulCount, setHelpfulCount] = useState(review.helpfulCount);
+
+  useEffect(() => {
+    setIsHelpful(review.isHelpful);
+    setHelpfulCount(review.helpfulCount);
+  }, [review.isHelpful, review.helpfulCount]);
+
+  const handleHelpful = async () => {
+    try {
+      const result = await toggleReviewHelpful(
+        infoItemId,
+        review.infoReviewId,
+      );
+
+      setIsHelpful(result.isHelpful);
+      setHelpfulCount(result.helpfulCount);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        showToast(
+          "red",
+          error.response?.data?.message ?? "도움돼요 등록에 실패했습니다."
+        );
+      } else {
+        showToast("red", "도움돼요 등록에 실패했습니다.");
+      }
+    }
+  };
+
   return (
     <div className="flex gap-[6px] pt-[16px] pb-[10px] border-b border-background-250">
       <ProfileIcon />
@@ -31,17 +68,13 @@ export default function ReviewCard({ review }: Props) {
             </span>
 
             <span className="text-h6 text-background-600 mr-[8px]">
-              {review.nickname}
+              {review.userNickname}
             </span>
 
             <span className="text-body-sub text-background-500">
-              {review.createdAt}
+              {formatDate(review.createdAt)}
             </span>
           </div>
-
-          <button className="text-body-sub text-background-500">
-            신고
-          </button>
         </div>
 
         <p className="my-[7px] whitespace-pre-wrap text-h6-list text-background-600">
@@ -50,9 +83,10 @@ export default function ReviewCard({ review }: Props) {
 
         <FeedbackButton
           feedbackType="Good"
-          defaultSelected={review.isHelpful}
-          defaultCount={review.helpfulCount}
+          selected={isHelpful}
+          count={helpfulCount}
           className="text-h6-list"
+          onClick={handleHelpful}
         />
       </div>
     </div>
