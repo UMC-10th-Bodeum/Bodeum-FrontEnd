@@ -24,7 +24,7 @@ export default function InfoDetailPage() {
   const { data: reviewData } = useInfoReviewListQuery(
     Number(id),
     0,
-    10,
+    100,
   );
 
   const infoCategory = category
