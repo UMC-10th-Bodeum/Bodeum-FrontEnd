@@ -39,11 +39,15 @@ export default function InfoPage() {
   useEffect(() => {
     if (!profile) return;
 
-    setRegionLevel1(profile.regionLevel1 ?? "");
-    setRegionLevel2(profile.regionLevel2 ?? "");
-    setLocation(
-      `${profile.regionLevel1 ?? ""} ${profile.regionLevel2 ?? ""}`.trim(),
-    );
+    const savedRegionLevel1 = sessionStorage.getItem("info-region-level1");
+    const savedRegionLevel2 = sessionStorage.getItem("info-region-level2");
+
+    const level1 = savedRegionLevel1 ?? profile.regionLevel1 ?? "";
+    const level2 = savedRegionLevel2 ?? profile.regionLevel2 ?? "";
+
+    setRegionLevel1(level1);
+    setRegionLevel2(level2);
+    setLocation(`${level1} ${level2}`.trim());
   }, [profile]);
   
   const [locationOpen, setLocationOpen] = useState(false);
@@ -193,7 +197,11 @@ export default function InfoPage() {
           onComplete={({ regionLevel1, regionLevel2 }) => {
             setRegionLevel1(regionLevel1);
             setRegionLevel2(regionLevel2);
-            setLocation(`${regionLevel1} ${regionLevel2}`);
+            setLocation(`${regionLevel1} ${regionLevel2}`.trim());
+
+            sessionStorage.setItem("info-region-level1", regionLevel1);
+            sessionStorage.setItem("info-region-level2", regionLevel2);
+
             setLocationOpen(false);
           }}
         />
