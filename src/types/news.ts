@@ -35,6 +35,7 @@ export interface NewsListItem {
   categoryCode: NewsCategory;
   categoryLabel: string;
   status: NewsStatus | null;
+  contact?: string | null;
   sourceName: string | null;
   publishedAt: string;
   applyEndDate: string | null;

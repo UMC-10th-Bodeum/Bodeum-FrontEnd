@@ -17,6 +17,7 @@ interface ProgramItemProps {
   categoryLabel: string;
   chipText?: string;
   chipVariant?: ChipVariant;
+  contact?: string | null;
   viewCount: number;
   scrapCount: number;
   isScrapped?: boolean;
@@ -31,13 +32,15 @@ export default function ProgramItem({
   categoryLabel,
   chipText,
   chipVariant,
+  contact,
   viewCount,
   scrapCount,
   isScrapped = false,
   onClick,
   onScrapClick,
 }: ProgramItemProps) {
-  const serviceText = services?.filter(Boolean).join(", ") || "-";
+  const serviceText = services?.filter(Boolean).join(", ");
+  const rightLabel = chipText || contact;
 
   return (
     <BaseInfoCard
@@ -49,8 +52,8 @@ export default function ProgramItem({
         </div>
       }
       left={
-        <div className="min-w-0">
-          <div className="flex min-w-0 items-center gap-[4px]">
+        <div className="flex h-[66px] min-w-0 flex-col">
+          <div className="flex h-[24px] min-w-0 items-center gap-[4px]">
             <span
               className={`shrink-0 rounded-[10px] ${newsCategoryStyle.bgColor} px-2 py-[5px] text-h5-list leading-none ${newsCategoryStyle.textColor}`}
             >
@@ -59,17 +62,25 @@ export default function ProgramItem({
             <h3 className="truncate text-h2-list text-background-600">{name}</h3>
           </div>
 
-          <p className="mt-1 truncate text-h6-list text-background-600">{address || "-"}</p>
+          <div className="mt-1 h-[18px] min-w-0">
+            {address && <p className="truncate text-h6-list text-background-600">{address}</p>}
+          </div>
 
-          <p className="mt-0.5 truncate text-body-sub text-background-500">{serviceText}</p>
+          <div className="mt-0.5 h-[14px] min-w-0">
+            {serviceText && (
+              <p className="truncate text-body-sub text-background-500">{serviceText}</p>
+            )}
+          </div>
         </div>
       }
       right={
         <div className="flex h-[64px] w-[130px] shrink-0 flex-col items-end justify-center gap-[11px]">
           <div className="flex h-[33px] w-full items-end justify-center">
-            <Chip variant={chipVariant} className="min-w-[100px]">
-              {chipText}
-            </Chip>
+            {rightLabel && (
+              <Chip variant={chipText ? chipVariant : "default"} className="min-w-[100px]">
+                {rightLabel}
+              </Chip>
+            )}
           </div>
 
           <div className="flex h-5 w-full items-center justify-center gap-2">
