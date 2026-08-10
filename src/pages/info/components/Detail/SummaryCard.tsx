@@ -73,6 +73,7 @@ export default function SummaryCard({
     setScrapCountState(scrapCount);
     setIsScrappedState(isScrapped);
   }, [scrapCount, isScrapped]);
+
   const handleShare = async () => {
     try {
       const { shareUrl } = await getInfoShareUrl(infoItemId);
@@ -87,8 +88,9 @@ export default function SummaryCard({
 
   const handleScrap = async () => {
     const accessToken = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
 
-    if (!accessToken) {
+    if (!accessToken && !refreshToken) {
       showToast("blue", "로그인/회원가입 후 만나보세요");
       return;
     }
