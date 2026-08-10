@@ -22,11 +22,19 @@ export default function HeaderSearchBar({
   className = "",
 }: HeaderSearchBarProps) {
   const [focused, setFocused] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [isKeyboardNavigation, setIsKeyboardNavigation] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const grouped = results.reduce<Record<string, InfoSearchResult[]>>((acc, item) => {
+    if (!acc[item.category]) acc[item.category] = [];
+    acc[item.category].push(item);
+    return acc;
+  }, {});
+
+  const flatResults = Object.values(grouped).flat();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -57,6 +65,10 @@ export default function HeaderSearchBar({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
+
     if (!focused || value.trim() === "" || results.length === 0) {
       return;
     }
@@ -65,9 +77,14 @@ export default function HeaderSearchBar({
       e.preventDefault();
       setIsKeyboardNavigation(true);
 
-      setActiveIndex((prev) =>
-        prev < flatResults.length - 1 ? prev + 1 : 0,
-      );
+      setActiveIndex((prev) => {
+        if (prev === null) {
+          return 0;
+        }
+
+        return prev === flatResults.length - 1 ? 0 : prev + 1;
+      });
+
       return;
     }
 
@@ -75,21 +92,27 @@ export default function HeaderSearchBar({
       e.preventDefault();
       setIsKeyboardNavigation(true);
 
-      setActiveIndex((prev) =>
-        prev > 0 ? prev - 1 : flatResults.length - 1,
-      );
+      setActiveIndex((prev) => {
+        if (prev === null) {
+          return flatResults.length - 1;
+        }
+
+        return prev === 0 ? flatResults.length - 1 : prev - 1;
+      });
+
       return;
     }
-
+    
     if (e.key === "Enter") {
       e.preventDefault();
 
-      if (activeIndex >= 0) {
+      if (activeIndex !== null) {
         const selectedItem = flatResults[activeIndex];
 
         if (selectedItem) {
           onSelect(selectedItem);
           setFocused(false);
+          setActiveIndex(null);
         }
       }
 
@@ -99,33 +122,26 @@ export default function HeaderSearchBar({
     if (e.key === "Escape") {
       e.preventDefault();
       setFocused(false);
-      setActiveIndex(-1);
+      setActiveIndex(null);
     }
   };
 
-  const grouped = results.reduce<Record<string, InfoSearchResult[]>>((acc, item) => {
-    if (!acc[item.category]) acc[item.category] = [];
-    acc[item.category].push(item);
-    return acc;
-  }, {});
-
-  const flatResults = Object.values(grouped).flat();
 
   useEffect(() => {
-    setActiveIndex(-1);
+    setActiveIndex(null);
+    setIsKeyboardNavigation(false);
     resultRefs.current = [];
-  }, [value, results]);
+  }, [value]);
 
   useEffect(() => {
-    if (activeIndex < 0) return;
+  if (activeIndex === null) return;
 
-    const activeElement = resultRefs.current[activeIndex];
-
-    activeElement?.focus();
-    activeElement?.scrollIntoView({
-      block: "nearest",
-    });
+  resultRefs.current[activeIndex]?.scrollIntoView({
+    block: "nearest",
+  });
   }, [activeIndex]);
+  
+  let globalIndex = 0;
 
   return (
     <div ref={wrapperRef} className={`relative w-full ${className}`}>
@@ -208,39 +224,42 @@ export default function HeaderSearchBar({
                 </div>
 
                 {items.map((item) => {
+                  const currentIndex = globalIndex++;
                   const Icon =
                     searchCategoryIconMap[item.category as keyof typeof searchCategoryIconMap];
                   
-                  const itemIndex = flatResults.findIndex(
-                    (result) => result.infoItemId === item.infoItemId,
-                  );
-
-                  const isActive = itemIndex === activeIndex;
+                  const isActive = activeIndex === currentIndex;
 
                   return (
                     <button
                       key={item.infoItemId}
                       type="button"
                       ref={(el) => {
-                        resultRefs.current[itemIndex] = el;
+                        resultRefs.current[currentIndex] = el;
                       }}
-                
+                      
                       onClick={() => {
                         onSelect(item);
                         setFocused(false);
                         setActiveIndex(-1);
                       }}
                       className={`
-  flex w-full items-center
-  p-3 rounded-[10px]
-  text-left
-  
-  ${isActive
+                        flex w-full items-center
+                        p-3 rounded-[10px]
+                        text-left
+                        outline-none
+                        border-none
+                        focus:outline-none
+                        focus:ring-0
+                        focus:border-none
+                        ${isActive
                           ? "bg-background-200"
-                          : ""
+                          : !isKeyboardNavigation
+                            ? "hover:bg-background-200"
+                            : ""
                         }
-  active:bg-background-200
-`}
+                         active:bg-background-200
+                      `}
                     >
                       <Icon className="mr-2 h-6 w-6 shrink-0" />
 
