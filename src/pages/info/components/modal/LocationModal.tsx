@@ -18,7 +18,11 @@ export default function LocationModal({
   onClose,
   onComplete,
 }: LocationModalProps) {
-  const [province, setProvince] = useState("");
+  const hasAccessToken = Boolean(localStorage.getItem("accessToken"));
+
+  const [province, setProvince] = useState(
+    hasAccessToken ? "" : "지역 전체",
+  );
   const [city, setCity] = useState("");
 
   const handleComplete = () => {
@@ -28,9 +32,10 @@ export default function LocationModal({
     });
   };
 
-  const districtOptions = province
-  ? districtOptionsByRegion[province] ?? []
-    : [];
+  const districtOptions =
+    province && province !== "지역 전체"
+      ? districtOptionsByRegion[province] ?? []
+      : [];
   
   const isCompleteDisabled =
     !province || (province !== "지역 전체" && !city);
@@ -73,7 +78,7 @@ export default function LocationModal({
             placeholder="시/군/구"
             variant="L"
             className="w-[262px]"
-            disabled={!province}
+            disabled={!province || province === "지역 전체"}
           />
         </div>
       </div>

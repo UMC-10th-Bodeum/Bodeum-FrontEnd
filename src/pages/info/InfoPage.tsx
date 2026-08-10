@@ -37,17 +37,23 @@ export default function InfoPage() {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
-    if (!profile) return;
-
     const savedRegionLevel1 = sessionStorage.getItem("info-region-level1");
     const savedRegionLevel2 = sessionStorage.getItem("info-region-level2");
 
-    const level1 = savedRegionLevel1 ?? profile.regionLevel1 ?? "";
-    const level2 = savedRegionLevel2 ?? profile.regionLevel2 ?? "";
+    if (profile) {
+      const level1 = savedRegionLevel1 ?? profile.regionLevel1 ?? "";
+      const level2 = savedRegionLevel2 ?? profile.regionLevel2 ?? "";
 
-    setRegionLevel1(level1);
-    setRegionLevel2(level2);
-    setLocation(`${level1} ${level2}`.trim());
+      setRegionLevel1(level1);
+      setRegionLevel2(level2);
+      setLocation(`${level1} ${level2}`.trim());
+
+      return;
+    }
+
+    setRegionLevel1("지역 전체");
+    setRegionLevel2("");
+    setLocation("지역 전체");
   }, [profile]);
   
   const [locationOpen, setLocationOpen] = useState(false);
