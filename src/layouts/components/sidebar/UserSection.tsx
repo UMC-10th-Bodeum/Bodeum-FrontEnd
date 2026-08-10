@@ -1,5 +1,6 @@
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import OnboardButton from "./OnboardButton";
+import { useNavigate } from "react-router-dom";
 
 interface UserSectionProps {
   type: "guest" | "parent" | "empty";
@@ -20,8 +21,11 @@ export default function UserSection({
   profileImageUrl,
   onButtonClick,
 }: UserSectionProps) {
+  const navigate = useNavigate();
+
   const isGuest = type === "guest";
   const isEmpty = type === "empty";
+
   const childSummary = [
     level !== undefined ? `Level${level}` : null,
     age !== undefined ? `${age}세 아이` : null,
@@ -71,16 +75,30 @@ export default function UserSection({
       </div>
 
       <div className="px-[8px] pb-[12px]">
-        <OnboardButton
-          variant={isGuest ? "primary" : "secondary"}
-          onClick={onButtonClick}
-        >
-          {isGuest
-            ? "로그인 / 회원가입"
-            : isEmpty
-              ? "맞춤 프로필 생성"
-              : "마이페이지"}
-        </OnboardButton>
+        {isEmpty ? (
+          <div className="flex flex-col gap-2">
+            <OnboardButton
+              variant="profile"
+              onClick={onButtonClick}
+            >
+              맞춤 프로필 생성
+            </OnboardButton>
+
+            <OnboardButton
+              variant="secondary"
+              onClick={() => navigate("/mypage")}
+            >
+              마이페이지
+            </OnboardButton>
+          </div>
+        ) : (
+          <OnboardButton
+            variant={isGuest ? "primary" : "secondary"}
+            onClick={onButtonClick}
+          >
+            {isGuest ? "로그인 / 회원가입" : "마이페이지"}
+          </OnboardButton>
+        )}
       </div>
     </div>
   );
