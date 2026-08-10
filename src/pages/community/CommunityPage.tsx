@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import CategoryButton from "@/components/CategoryButton";
 import Input from "@/components/Input";
 import Pagination from "@/components/pagination/Pagination";
@@ -71,7 +71,10 @@ export default function CommunityPage() {
     : "ALL";
   const [inputKeyword, setInputKeyword] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [sort, setSort] = useState<CommunityPostSort | "">("");
+  const location = useLocation();
+  const initialSort = location.state?.sort ?? "view";
+
+  const [sort, setSort] = useState<CommunityPostSort>(initialSort);
   const [page, setPage] = useState(1);
   const { data, isPending, isError, refetch } = useCommunityPosts({
     page: page - 1,
