@@ -18,11 +18,7 @@ export default function LocationModal({
   onClose,
   onComplete,
 }: LocationModalProps) {
-  const hasAccessToken = Boolean(localStorage.getItem("accessToken"));
-
-  const [province, setProvince] = useState(
-    hasAccessToken ? "" : "지역 전체",
-  );
+  const [province, setProvince] = useState("");
   const [city, setCity] = useState("");
 
   const handleComplete = () => {
