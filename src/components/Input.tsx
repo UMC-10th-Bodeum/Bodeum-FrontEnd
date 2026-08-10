@@ -74,7 +74,7 @@ export default function Input({
     searchType === "news"
     ? item.type === "NEWS_TITLE"
     : searchType === "community"
-      ? item.type === "COMMUNITY_TITLE"
+      ? item.type === "POST_TITLE"
       : true
   );
 

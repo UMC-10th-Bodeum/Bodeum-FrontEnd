@@ -12,8 +12,11 @@ import {
   isCommunityCategoryCode,
   type CommunityCategory,
 } from "@/constants/communityCategory";
-import { useCommunityPosts } from "@/hooks/useCommunity";
-import { searchSuggestionMockData } from "@/mocks/search";
+import {
+  useCommunityPostSearchSuggestions,
+  useCommunityPosts,
+} from "@/hooks/useCommunity";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { CommunityPostSort } from "@/types/community";
 import CommunityPostCard from "./components/CommunityPostCard";
 import CommunitySection from "./components/CommunitySection";
@@ -73,6 +76,9 @@ export default function CommunityPage() {
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState<CommunityPostSort | "">("");
   const [page, setPage] = useState(1);
+  const debouncedInputKeyword = useDebouncedValue(inputKeyword.trim(), 300);
+  const { data: suggestions = [] } =
+    useCommunityPostSearchSuggestions(debouncedInputKeyword);
   const { data, isPending, isError, refetch } = useCommunityPosts({
     page: page - 1,
     size: 14,
@@ -106,13 +112,6 @@ export default function CommunityPage() {
     setKeyword(normalizedKeyword.length >= 2 ? normalizedKeyword : "");
     setPage(1);
   };
-
-  const suggestions =
-    inputKeyword.trim().length >= 2
-      ? searchSuggestionMockData.result.suggestions.filter((item) =>
-          item.text.includes(inputKeyword),
-        )
-      : [];
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-background-100">

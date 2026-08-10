@@ -112,6 +112,15 @@ export interface CommunityPostListParams {
   categoryCode?: CommunityCategoryCode;
 }
 
+export interface CommunityPostSearchSuggestion {
+  text: string;
+  type: "POST_TITLE";
+}
+
+export interface CommunityPostSearchSuggestionsResult {
+  suggestions: CommunityPostSearchSuggestion[];
+}
+
 interface CommunityPageSort {
   empty: boolean;
   sorted: boolean;

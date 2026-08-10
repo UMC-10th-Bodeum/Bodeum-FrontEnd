@@ -10,6 +10,7 @@ import type {
   CommunityPostLikeResult,
   CommunityPostListParams,
   CommunityPostPage,
+  CommunityPostSearchSuggestionsResult,
   CommunityPostScrapResult,
 } from "@/types/community";
 
@@ -115,6 +116,16 @@ export const getCommunityPosts = async ({
   });
 
   return data.result;
+};
+
+// 게시글 검색어 추천 조회
+export const getCommunityPostSearchSuggestions = async (keyword: string, size = 10) => {
+  const { data } = await api.get<ApiResponse<CommunityPostSearchSuggestionsResult>>(
+    "/api/v1/community/posts/search/suggestions",
+    { params: { keyword: keyword.trim(), size } },
+  );
+
+  return data.result.suggestions;
 };
 
 // 게시글 작성
