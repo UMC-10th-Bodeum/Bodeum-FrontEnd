@@ -104,7 +104,7 @@ export default function CommunityCommentsSection({
           type="submit"
           label="등록"
           disabled={!comment.trim() || isCreatePending}
-          className="!h-[44px] !bg-main-400 !text-background-100"
+          className="!h-[44px]"
         />
       </form>
       <p className="mt-2 pl-[66.5px] text-body-sub text-background-400">
