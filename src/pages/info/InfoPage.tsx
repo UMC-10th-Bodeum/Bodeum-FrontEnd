@@ -37,12 +37,31 @@ export default function InfoPage() {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
-    const savedRegionLevel1 = sessionStorage.getItem("info-region-level1");
-    const savedRegionLevel2 = sessionStorage.getItem("info-region-level2");
+    const savedRegionLevel1 = sessionStorage.getItem(
+      "info-region-level1",
+    );
+    const savedRegionLevel2 = sessionStorage.getItem(
+      "info-region-level2",
+    );
 
+    // 사용자가 선택한 지역이 있으면 무조건 우선
+    if (savedRegionLevel1 !== null) {
+      setRegionLevel1(savedRegionLevel1);
+      setRegionLevel2(savedRegionLevel2 ?? "");
+
+      setLocation(
+        savedRegionLevel1
+          ? `${savedRegionLevel1} ${savedRegionLevel2 ?? ""}`.trim()
+          : "지역 전체",
+      );
+
+      return;
+    }
+
+    // 로그인 상태인데 저장된 지역이 없으면 프로필 지역
     if (profile) {
-      const level1 = savedRegionLevel1 ?? profile.regionLevel1 ?? "";
-      const level2 = savedRegionLevel2 ?? profile.regionLevel2 ?? "";
+      const level1 = profile.regionLevel1 ?? "";
+      const level2 = profile.regionLevel2 ?? "";
 
       setRegionLevel1(level1);
       setRegionLevel2(level2);
@@ -51,7 +70,8 @@ export default function InfoPage() {
       return;
     }
 
-    setRegionLevel1("지역 전체");
+    // 비로그인
+    setRegionLevel1("");
     setRegionLevel2("");
     setLocation("지역 전체");
   }, [profile]);
