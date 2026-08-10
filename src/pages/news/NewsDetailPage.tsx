@@ -123,7 +123,7 @@ export default function NewsDetailPage() {
 
   return (
     <div className="min-h-full px-[32px] py-[20px]">
-      <div className="mx-auto flex w-full max-w-[680px] flex-col gap-[18px]">
+      <div className="mx-auto flex w-[680px] flex-col gap-[18px]">
         <div className="flex flex-col gap-[10px]">
           <NewsDetailHeader
             news={news}
