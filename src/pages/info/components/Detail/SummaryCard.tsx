@@ -86,6 +86,13 @@ export default function SummaryCard({
   };
 
   const handleScrap = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      showToast("blue", "로그인/회원가입 후 만나보세요");
+      return;
+    }
+
     try {
       const result = await toggleInfoScrap(infoItemId);
 
