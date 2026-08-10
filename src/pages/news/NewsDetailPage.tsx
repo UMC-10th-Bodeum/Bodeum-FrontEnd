@@ -20,6 +20,13 @@ const breadcrumbLabelMap: Record<NewsType, string> = {
   LOCAL: "지역소식",
 };
 
+const getDisplayText = (value: string | null | undefined) => value?.trim() || null;
+
+const formatPeriod = (
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+) => [getDisplayText(startDate), getDisplayText(endDate)].filter(Boolean).join(" ~ ") || null;
+
 export default function NewsDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -52,20 +59,22 @@ export default function NewsDetailPage() {
     );
   }
 
-  const status = getNewsStatusPresentation(news.status, news.applyEndDate);
+  const status = news.status
+    ? getNewsStatusPresentation(news.status, news.applyEndDate)
+    : undefined;
   const regionLevel1Label =
     formatRegionDisplayLabel(news.region?.trim().split(/\s+/)[0] ?? "") || "해당 지역";
 
-  const activityInfo: [string, string][] = [
-    ["진행기간", `${news?.programStartDate ?? "-"} ~ ${news?.programEndDate ?? "-"}`],
-    ["신청기간", `${news?.applyStartDate ?? "-"} ~ ${news?.applyEndDate ?? "-"}`],
-    ["지역", news?.region || "-"],
-    ["주관기관", news?.sourceName || "-"],
-    ["대상", news?.targetAudience || "-"],
-    ["문의", news?.contact || "-"],
-    ["담당자", news?.manager || "-"],
-    ["게시일", news?.publishedAt || "-"],
-  ];
+  const activityInfo = [
+    ["진행기간", formatPeriod(news.programStartDate, news.programEndDate)],
+    ["신청기간", formatPeriod(news.applyStartDate, news.applyEndDate)],
+    ["지역", getDisplayText(news.region)],
+    ["주관기관", getDisplayText(news.sourceName)],
+    ["대상", getDisplayText(news.targetAudience)],
+    ["문의", getDisplayText(news.contact)],
+    ["담당자", getDisplayText(news.manager)],
+    ["게시일", getDisplayText(news.publishedAt)],
+  ].filter((item): item is [string, string] => item[1] !== null);
 
   const handleRelatedNewsMoreClick = () => {
     const params = new URLSearchParams();
@@ -112,7 +121,7 @@ export default function NewsDetailPage() {
             onToggleScrap={handleToggleScrap}
           />
 
-          <ActivityInfoTable items={activityInfo} />
+          {activityInfo.length > 0 && <ActivityInfoTable items={activityInfo} />}
           <AIChatButton />
 
           <div className="py-[20px]">

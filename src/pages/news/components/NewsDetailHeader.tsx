@@ -23,7 +23,7 @@ function HomepageArrowIcon(props: SVGProps<SVGSVGElement>) {
 
 interface NewsDetailHeaderProps {
   news: NewsDetail;
-  status: NewsStatusPresentation;
+  status?: NewsStatusPresentation;
   isScrapPending: boolean;
   onToggleScrap: () => void;
 }
@@ -45,9 +45,11 @@ export default function NewsDetailHeader({
       <div className="px-[16px] py-[24px]">
         <div className="mb-[12px] flex items-center gap-[10px]">
           <Chip className="!h-[24px]">{news.categoryLabel}</Chip>
-          <Chip variant={status.variant} className="!h-[23.5px]">
-            {status.label}
-          </Chip>
+          {status && (
+            <Chip variant={status.variant} className="!h-[23.5px]">
+              {status.label}
+            </Chip>
+          )}
         </div>
 
         <h1 className="text-h1-onboard text-background-600">{news.title}</h1>
@@ -56,7 +58,7 @@ export default function NewsDetailHeader({
         <div className="mt-[12px] py-2 flex items-center gap-[20px]">
           <ViewStat count={news.viewCount} showLabel />
           <ScrapStat count={news.scrapCount} isActive={news.scrapped} onClick={onToggleScrap} />
-          <DateStat date={news.publishedAt} showLabel />
+          {news.publishedAt && <DateStat date={news.publishedAt} showLabel />}
         </div>
 
         <div className="flex gap-[8px] border-t border-background-250 pt-[12px]">
@@ -66,7 +68,11 @@ export default function NewsDetailHeader({
             className="h-[40px]"
             iconPosition="right"
             disabled={!news.originalUrl}
-            onClick={() => window.open(news.originalUrl, "_blank", "noopener,noreferrer")}
+            onClick={() => {
+              if (news.originalUrl) {
+                window.open(news.originalUrl, "_blank", "noopener,noreferrer");
+              }
+            }}
           />
           <ButtonOutline
             label="스크랩"
