@@ -72,7 +72,11 @@ export default function CommunityPage() {
   const [inputKeyword, setInputKeyword] = useState("");
   const [keyword, setKeyword] = useState("");
   const location = useLocation();
-  const initialSort = location.state?.sort ?? "view";
+  const routeSort = (location.state as { sort?: unknown } | null | undefined)?.sort;
+  const initialSort: CommunityPostSort =
+    routeSort === "view" || routeSort === "scrap" || routeSort === "comment"
+      ? routeSort
+      : "view";
 
   const [sort, setSort] = useState<CommunityPostSort>(initialSort);
   const [page, setPage] = useState(1);
