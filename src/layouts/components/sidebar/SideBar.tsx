@@ -3,11 +3,13 @@ import Logo from "@/assets/icons/Logo_kr.svg?react";
 import { AUTH_STATE_CHANGED_EVENT } from "@/apis/authApi";
 import { getApiErrorMessage } from "@/apis/apiError";
 import { USER_PROFILE_CHANGED_EVENT } from "@/apis/userApi";
-import { showToast } from "@/components/Toast";
 import { legalLinks } from "@/constants/legalLinks";
 import { useLogoutMutation } from "@/hooks/useAuthMutations";
 import { useUserBrief } from "@/hooks/useUser";
-import { clearAuthProgress } from "@/pages/auth/authProgressStorage";
+import {
+  clearAuthProgress,
+  queueLogoutToast,
+} from "@/pages/auth/authProgressStorage";
 import { clearAgreementBrowserSession } from "@/pages/auth/agreementBrowserSession";
 import { clearOnboardingBrowserSession } from "@/pages/auth/onboardingBrowserSession";
 import type { UserBrief } from "@/types/user";
@@ -62,23 +64,37 @@ export default function SideBar() {
 
     logoutInFlight.current = true;
 
+    let toastColor: "green" | "yellow" = "green";
+    let toastMessage = "로그아웃되었습니다.";
+
     try {
       await logoutRequest({});
-      showToast("green", "로그아웃되었습니다.");
     } catch (error) {
-      showToast(
-        "yellow",
-        getApiErrorMessage(
-          error,
-          "서버 로그아웃에는 실패했지만 이 기기에서는 로그아웃되었습니다.",
-        ),
+      toastColor = "yellow";
+      toastMessage = getApiErrorMessage(
+        error,
+        "서버 로그아웃에는 실패했지만 이 기기에서는 로그아웃되었습니다.",
       );
     } finally {
-      clearAuthProgress();
-      clearAgreementBrowserSession();
-      clearOnboardingBrowserSession();
-      logoutInFlight.current = false;
-      navigate("/");
+      try {
+        const cleanupTasks = [
+          clearAuthProgress,
+          clearAgreementBrowserSession,
+          clearOnboardingBrowserSession,
+          () => queueLogoutToast(toastColor, toastMessage),
+        ];
+
+        cleanupTasks.forEach((cleanup) => {
+          try {
+            cleanup();
+          } catch (storageError) {
+            console.warn("로그아웃 브라우저 상태를 정리하지 못했습니다.", storageError);
+          }
+        });
+      } finally {
+        logoutInFlight.current = false;
+        window.location.replace("/");
+      }
     }
   };
 
