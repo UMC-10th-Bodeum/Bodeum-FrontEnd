@@ -24,7 +24,7 @@ export default function LocationModal({
   const handleComplete = () => {
     onComplete({
       regionLevel1: province,
-      regionLevel2: city,
+      regionLevel2: province === "지역 전체" ? "" : city,
     });
   };
 
@@ -32,7 +32,8 @@ export default function LocationModal({
   ? districtOptionsByRegion[province] ?? []
     : [];
   
-  const isCompleteDisabled = !province || !city;
+  const isCompleteDisabled =
+    !province || (province !== "지역 전체" && !city);
 
   return (
     <CloseModalFrame
