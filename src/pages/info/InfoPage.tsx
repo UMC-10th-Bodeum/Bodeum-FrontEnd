@@ -29,7 +29,7 @@ export default function InfoPage() {
   const [subCategory, setSubCategory] = useState<number | null>(
     subCategoryParam ? Number(subCategoryParam) : null,
   );
-  const [sort, setSort] = useState("VIEW");
+  const [sort, setSort] = useState("");
   const navigate = useNavigate();
   
   const [regionLevel1, setRegionLevel1] = useState("");
