@@ -81,8 +81,8 @@ export default function InfoPage() {
   const { data, isPending, isError } = useInfoListQuery({
     category: parentCategory,
     subCategory: subCategory ?? undefined,
-    regionLevel1,
-    regionLevel2,
+    regionLevel1: regionLevel1 || null,
+  regionLevel2: regionLevel2 || null,
     page: page - 1,
     size: PAGE_SIZE,
     sort: sortValue,
@@ -212,12 +212,24 @@ export default function InfoPage() {
           location={location}
           onClose={() => setLocationOpen(false)}
           onComplete={({ regionLevel1, regionLevel2 }) => {
-            setRegionLevel1(regionLevel1);
-            setRegionLevel2(regionLevel2);
-            setLocation(`${regionLevel1} ${regionLevel2}`.trim());
+            setRegionLevel1(regionLevel1 ?? "");
+            setRegionLevel2(regionLevel2 ?? "");
 
-            sessionStorage.setItem("info-region-level1", regionLevel1);
-            sessionStorage.setItem("info-region-level2", regionLevel2);
+            setLocation(
+              regionLevel1
+                ? `${regionLevel1} ${regionLevel2 ?? ""}`.trim()
+                : "지역 전체",
+            );
+
+            sessionStorage.setItem(
+              "info-region-level1",
+              regionLevel1 ?? "",
+            );
+            sessionStorage.setItem(
+              "info-region-level2",
+              regionLevel2 ?? "",
+            );
+
             setPage(1);
             setLocationOpen(false);
           }}

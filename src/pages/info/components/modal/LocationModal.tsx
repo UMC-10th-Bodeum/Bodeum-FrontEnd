@@ -8,8 +8,8 @@ interface LocationModalProps {
   location: string;
   onClose: () => void;
   onComplete: (location: {
-    regionLevel1: string;
-    regionLevel2: string;
+    regionLevel1: string | null;
+    regionLevel2: string | null;
   }) => void;
 }
 
@@ -22,19 +22,26 @@ export default function LocationModal({
   const [city, setCity] = useState("");
 
   const handleComplete = () => {
+  if (province === "지역 전체") {
     onComplete({
-      regionLevel1: province,
-      regionLevel2: province === "지역 전체" ? "" : city,
+      regionLevel1: null,
+      regionLevel2: null,
     });
-  };
+    return;
+  }
+
+  onComplete({
+    regionLevel1: province,
+    regionLevel2: city || null,
+  });
+};
 
   const districtOptions =
     province && province !== "지역 전체"
       ? districtOptionsByRegion[province] ?? []
       : [];
   
-  const isCompleteDisabled =
-    !province || (province !== "지역 전체" && !city);
+  const isCompleteDisabled = !province;
 
   return (
     <CloseModalFrame
