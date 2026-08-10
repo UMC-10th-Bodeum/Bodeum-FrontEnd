@@ -22,8 +22,11 @@ export default function HeaderSearchBar({
   className = "",
 }: HeaderSearchBarProps) {
   const [focused, setFocused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [isKeyboardNavigation, setIsKeyboardNavigation] = useState(false);
+
   const wrapperRef = useRef<HTMLDivElement>(null);
-  
+  const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -53,11 +56,76 @@ export default function HeaderSearchBar({
     );
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!focused || value.trim() === "" || results.length === 0) {
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setIsKeyboardNavigation(true);
+
+      setActiveIndex((prev) =>
+        prev < flatResults.length - 1 ? prev + 1 : 0,
+      );
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setIsKeyboardNavigation(true);
+
+      setActiveIndex((prev) =>
+        prev > 0 ? prev - 1 : flatResults.length - 1,
+      );
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      if (activeIndex >= 0) {
+        const selectedItem = flatResults[activeIndex];
+
+        if (selectedItem) {
+          onSelect(selectedItem);
+          setFocused(false);
+        }
+      }
+
+      return;
+    }
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setFocused(false);
+      setActiveIndex(-1);
+    }
+  };
+
   const grouped = results.reduce<Record<string, InfoSearchResult[]>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
     acc[item.category].push(item);
     return acc;
   }, {});
+
+  const flatResults = Object.values(grouped).flat();
+
+  useEffect(() => {
+    setActiveIndex(-1);
+    resultRefs.current = [];
+  }, [value, results]);
+
+  useEffect(() => {
+    if (activeIndex < 0) return;
+
+    const activeElement = resultRefs.current[activeIndex];
+
+    activeElement?.focus();
+    activeElement?.scrollIntoView({
+      block: "nearest",
+    });
+  }, [activeIndex]);
 
   return (
     <div ref={wrapperRef} className={`relative w-full ${className}`}>
@@ -80,6 +148,7 @@ export default function HeaderSearchBar({
           onFocus={() => setFocused(true)}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          onKeyDown={handleKeyDown}
           className="
             w-full bg-transparent
             text-h3-category-sub
@@ -104,13 +173,13 @@ export default function HeaderSearchBar({
         <div
           className="
             absolute left-0 right-0 top-[48px]
+            z-50 max-h-[400px]
+            overflow-y-auto
             rounded-[10px]
             border border-background-200
             bg-white
-            shadow-[1px_2px_15px_0px_#00000026]
-            overflow-hidden
-            z-50
             px-1 py-2
+            shadow-[1px_2px_15px_0px_#00000026]
           "
         >
           {results.length === 0 ? (
@@ -141,23 +210,37 @@ export default function HeaderSearchBar({
                 {items.map((item) => {
                   const Icon =
                     searchCategoryIconMap[item.category as keyof typeof searchCategoryIconMap];
+                  
+                  const itemIndex = flatResults.findIndex(
+                    (result) => result.infoItemId === item.infoItemId,
+                  );
+
+                  const isActive = itemIndex === activeIndex;
 
                   return (
                     <button
                       key={item.infoItemId}
                       type="button"
+                      ref={(el) => {
+                        resultRefs.current[itemIndex] = el;
+                      }}
+                
                       onClick={() => {
                         onSelect(item);
                         setFocused(false);
+                        setActiveIndex(-1);
                       }}
-                      className="
-                        flex w-full items-center
-                        p-3 rounded-[10px]
-                        text-left
-                        hover:bg-background-200
-                        active:bg-background-200
-                        active:border active:border-background-300
-                      "
+                      className={`
+  flex w-full items-center
+  p-3 rounded-[10px]
+  text-left
+  
+  ${isActive
+                          ? "bg-background-200"
+                          : ""
+                        }
+  active:bg-background-200
+`}
                     >
                       <Icon className="mr-2 h-6 w-6 shrink-0" />
 
