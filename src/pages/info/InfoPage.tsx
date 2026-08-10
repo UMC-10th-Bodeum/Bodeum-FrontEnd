@@ -65,7 +65,7 @@ export default function InfoPage() {
 
       setRegionLevel1(level1);
       setRegionLevel2(level2);
-      setLocation(`${level1} ${level2}`.trim());
+      setLocation(level1 ? `${level1} ${level2}`.trim() : "지역 전체");
 
       return;
     }
