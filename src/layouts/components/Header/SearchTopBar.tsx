@@ -1,5 +1,5 @@
 import { useState } from "react";
-import HeaderSearchBar from "@/components/HeaderSearchBar";
+import HeaderSearchBar from "@/components/search/HeaderSearchBar";
 import { useNavigate } from "react-router-dom";
 import { useInfoSearch } from "@/hooks/useInfo";
 

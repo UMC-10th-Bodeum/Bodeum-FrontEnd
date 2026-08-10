@@ -111,8 +111,22 @@ export default function SideBar() {
 
   return (
     <aside className="flex h-screen flex-col bg-white w-[213px]">
-      <div className="h-[60px] py-[18px] flex items-center justify-center border-b border-background-250">
-        <Logo className="w-[62px] h-[24px]" />
+      <div
+        className="h-[60px] py-[18px] flex items-center justify-center border-b border-background-250"
+      >
+        <button
+          type="button"
+          className="cursor-pointer"
+          onClick={() => {
+            if (location.pathname === "/") {
+              window.location.reload();
+              return;
+            }
+            navigate("/");
+          }}
+        >
+          <Logo className="h-[24px] w-[62px]" />
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col border-r border-background-250">
