@@ -58,6 +58,13 @@ export default function InfoPage() {
     ? (categoryParam as ParentCategory)
     : "INSTITUTION";
   
+  const currentSubCategory = infoSubCategoryMap[parentCategory].find(
+    (item) => item.id === subCategory,
+  );
+
+  const isRecommendation =
+    currentSubCategory?.value.endsWith("_ETC") ?? false;
+  
   const sortValue =
   sort === "VIEW"
     ? "viewCount,desc"
@@ -165,7 +172,7 @@ export default function InfoPage() {
         />
       </div>
       
-      {!profile ? (
+      {isRecommendation && !profile ? (
         <div className="flex h-[200px] items-center justify-center text-background-500">
           로그인 / 회원가입 하고 추천 기능을 이용해 보세요!
         </div>
