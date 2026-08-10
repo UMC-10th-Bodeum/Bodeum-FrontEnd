@@ -1124,7 +1124,7 @@ export default function AIChatPage() {
           {effectiveAccessState === "error" && (
             <div
               role="alert"
-              className="flex min-h-full w-full flex-col items-center justify-center gap-[12px] text-center"
+              className="flex h-full min-h-full w-full flex-1 flex-col items-center justify-center gap-[12px] text-center"
             >
               <p className="text-h3-onboard text-background-600">
                 대화를 불러오지 못했습니다.

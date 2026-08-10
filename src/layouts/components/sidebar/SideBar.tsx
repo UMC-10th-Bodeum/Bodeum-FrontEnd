@@ -76,12 +76,25 @@ export default function SideBar() {
         "서버 로그아웃에는 실패했지만 이 기기에서는 로그아웃되었습니다.",
       );
     } finally {
-      clearAuthProgress();
-      clearAgreementBrowserSession();
-      clearOnboardingBrowserSession();
-      queueLogoutToast(toastColor, toastMessage);
-      logoutInFlight.current = false;
-      window.location.replace("/");
+      try {
+        const cleanupTasks = [
+          clearAuthProgress,
+          clearAgreementBrowserSession,
+          clearOnboardingBrowserSession,
+          () => queueLogoutToast(toastColor, toastMessage),
+        ];
+
+        cleanupTasks.forEach((cleanup) => {
+          try {
+            cleanup();
+          } catch (storageError) {
+            console.warn("로그아웃 브라우저 상태를 정리하지 못했습니다.", storageError);
+          }
+        });
+      } finally {
+        logoutInFlight.current = false;
+        window.location.replace("/");
+      }
     }
   };
 

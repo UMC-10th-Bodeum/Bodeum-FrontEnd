@@ -887,7 +887,7 @@ export default function AuthPage() {
       className={[
         "relative flex items-center justify-center px-[20px] py-[40px] max-sm:px-[16px] max-sm:py-[24px]",
         flow === "onboarding"
-          ? "h-screen overflow-hidden"
+          ? "h-dvh overflow-hidden"
           : "min-h-screen overflow-x-hidden overflow-y-auto",
         flow === "onboarding" ? "bg-background-500" : "bg-main-150",
       ].join(" ")}
