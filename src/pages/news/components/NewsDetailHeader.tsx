@@ -7,7 +7,6 @@ import ScrapStat from "@/components/post-stat/ScrapStat";
 import ViewStat from "@/components/post-stat/ViewStat";
 import ArrowUpRightIcon from "@/assets/icons/arrow-up-right.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
-import GalleryMainImage from "@/assets/icons/gallery-main.svg";
 import ShareButton from "@/components/ShareButton";
 import type { NewsDetail } from "@/types/news";
 import type { NewsStatusPresentation } from "@/utils/newsStatus";
@@ -46,12 +45,6 @@ export default function NewsDetailHeader({
 
   return (
     <article className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
-      <img
-        src={news.thumbnailUrl || GalleryMainImage}
-        alt={news.thumbnailUrl ? `${news.title} 대표 이미지` : ""}
-        aria-hidden={!news.thumbnailUrl}
-        className="h-[220px] w-full object-cover"
-      />
       <div className="px-[16px] py-[24px]">
         <div className="mb-[12px] flex items-center gap-[10px]">
           <Chip className="!h-[24px]">{news.categoryLabel}</Chip>
@@ -77,7 +70,7 @@ export default function NewsDetailHeader({
             icon={HomepageArrowIcon}
             className="h-[40px]"
             iconPosition="right"
-            disabled={!safeOriginalUrl}
+            disabled
             onClick={() => {
               if (safeOriginalUrl) {
                 window.open(safeOriginalUrl, "_blank", "noopener,noreferrer");
