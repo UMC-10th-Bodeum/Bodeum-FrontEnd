@@ -23,7 +23,7 @@ export default function CommunityReplyForm({
 
   const submitReply = () => {
     const value = reply.trim();
-    if (!value) return;
+    if (!value || isSubmitting) return;
 
     onSubmit(value);
   };
@@ -41,6 +41,14 @@ export default function CommunityReplyForm({
         maxLength={1000}
         disabled={isSubmitting}
         onChange={(event) => setReply(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.nativeEvent.isComposing) return;
+
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            submitReply();
+          }
+        }}
         placeholder={`${targetAuthor}에게 답글 쓰기`}
         className="h-[100px] w-full resize-none rounded-[9px] border border-background-300 bg-background-100 px-[16px] py-[14px] text-h6-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 disabled:cursor-not-allowed disabled:opacity-50"
       />

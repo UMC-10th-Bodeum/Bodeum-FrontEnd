@@ -84,27 +84,29 @@ export default function CommunityCommentsSection({
         댓글 <span className="ml-[8px] text-main-400">{data?.totalCount ?? 0}</span>
       </p>
 
-      <div className="mt-[16px] flex items-center gap-[26.5px]">
+      <form
+        className="mt-[16px] flex items-center gap-[26.5px]"
+        onSubmit={(event) => {
+          event.preventDefault();
+          submitComment();
+        }}
+      >
         <ProfileIcon className="h-[40px] w-[40px] shrink-0" />
         <input
           value={comment}
           maxLength={1000}
           disabled={isCreatePending}
           onChange={(event) => setComment(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.nativeEvent.isComposing) return;
-            if (event.key === "Enter") submitComment();
-          }}
           placeholder="이웃 부모에게 따뜻한 댓글을 남겨주세요"
           className="h-[44px] w-[947px] flex-1 rounded-[10px] border border-transparent bg-background-200 px-[16px] text-h4-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 disabled:cursor-not-allowed disabled:opacity-50"
         />
         <ButtonFill
+          type="submit"
           label="등록"
           disabled={!comment.trim() || isCreatePending}
-          onClick={submitComment}
           className="!h-[44px] !bg-main-400 !text-background-100"
         />
-      </div>
+      </form>
       <p className="mt-2 pl-[66.5px] text-body-sub text-background-400">
         욕설·비방·광고성 링크가 포함된 댓글은 별도 안내 없이 삭제될 수 있습니다.
       </p>
