@@ -34,6 +34,16 @@ export default function NewsDetailHeader({
   isScrapPending,
   onToggleScrap,
 }: NewsDetailHeaderProps) {
+  const safeOriginalUrl = (() => {
+    try {
+      const url = new URL(news.originalUrl ?? "");
+
+      return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+    } catch {
+      return null;
+    }
+  })();
+
   return (
     <article className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
       <img
@@ -67,10 +77,10 @@ export default function NewsDetailHeader({
             icon={HomepageArrowIcon}
             className="h-[40px]"
             iconPosition="right"
-            disabled={!news.originalUrl}
+            disabled={!safeOriginalUrl}
             onClick={() => {
-              if (news.originalUrl) {
-                window.open(news.originalUrl, "_blank", "noopener,noreferrer");
+              if (safeOriginalUrl) {
+                window.open(safeOriginalUrl, "_blank", "noopener,noreferrer");
               }
             }}
           />
