@@ -92,6 +92,7 @@ export interface RecommendedCommunityPostResponse {
 export interface HomePostPreview {
   postId: number;
   categoryName: string;
+  regionName: string;
   title: string;
   likeCount: number;
   commentCount: number;
