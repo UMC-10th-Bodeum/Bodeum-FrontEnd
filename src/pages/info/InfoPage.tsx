@@ -132,7 +132,7 @@ export default function InfoPage() {
     <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
       
       <h2 className="text-h1-info -mb-[10px]">
-        {profile?.nickname || "NN"}님,
+        {profile?.nickname || "보호자"}님,
       </h2>
       <div className="flex gap-[10px] items-center">
         <LocationButton
