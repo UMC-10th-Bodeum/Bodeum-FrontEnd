@@ -38,7 +38,7 @@ type LimitedTextInputProps = {
 };
 
 const currentYear = new Date().getFullYear();
-const birthYearStart = 2008;
+const birthYearStart = 1990;
 const nicknameMaxLength = 20;
 
 const yearOptions: SelectOption[] = Array.from(
@@ -462,7 +462,7 @@ function LimitedTextInput({
   const length = Array.from(value).length;
 
   return (
-    <div className="relative w-full max-w-[536px]">
+    <div className="flex w-full max-w-[536px] flex-col gap-[4px]">
       <Input
         id={id}
         value={value}
@@ -470,9 +470,9 @@ function LimitedTextInput({
           onChange(limitTextLength(event.target.value, maxLength))
         }
         placeholder={placeholder}
-        className="w-full pr-[74px]!"
+        className="w-full"
       />
-      <span className="pointer-events-none absolute right-[20px] top-1/2 -translate-y-1/2 text-h6-list text-background-400">
+      <span className="self-end text-h6-list text-background-400">
         {length}/{maxLength}
       </span>
     </div>

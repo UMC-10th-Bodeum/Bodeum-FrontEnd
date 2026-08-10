@@ -1,5 +1,5 @@
 interface OnboardButtonProps {
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "profile";
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
@@ -22,10 +22,15 @@ export default function OnboardButton({
         bg-main-400 text-background-100
         hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)]
       `
-      : `
+      : variant === "secondary"
+        ? `
         border-1 border-background-400 bg-background-100 text-background-400
         hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)]
-      `;
+      `
+        : `
+            bg-main-150 text-main-400
+            hover:shadow-[1px_2px_15px_rgba(0,0,0,0.15)]
+          `;
 
   return (
     <button

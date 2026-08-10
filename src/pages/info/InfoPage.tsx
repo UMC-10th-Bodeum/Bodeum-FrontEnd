@@ -29,7 +29,7 @@ export default function InfoPage() {
   const [subCategory, setSubCategory] = useState<number | null>(
     subCategoryParam ? Number(subCategoryParam) : null,
   );
-  const [sort, setSort] = useState("VIEW");
+  const [sort, setSort] = useState("");
   const navigate = useNavigate();
   
   const [regionLevel1, setRegionLevel1] = useState("");
@@ -37,17 +37,43 @@ export default function InfoPage() {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
-    if (!profile) return;
+    const savedRegionLevel1 = sessionStorage.getItem(
+      "info-region-level1",
+    );
+    const savedRegionLevel2 = sessionStorage.getItem(
+      "info-region-level2",
+    );
 
-    const savedRegionLevel1 = sessionStorage.getItem("info-region-level1");
-    const savedRegionLevel2 = sessionStorage.getItem("info-region-level2");
+    // 사용자가 선택한 지역이 있으면 무조건 우선
+    if (savedRegionLevel1 !== null) {
+      setRegionLevel1(savedRegionLevel1);
+      setRegionLevel2(savedRegionLevel2 ?? "");
 
-    const level1 = savedRegionLevel1 ?? profile.regionLevel1 ?? "";
-    const level2 = savedRegionLevel2 ?? profile.regionLevel2 ?? "";
+      setLocation(
+        savedRegionLevel1
+          ? `${savedRegionLevel1} ${savedRegionLevel2 ?? ""}`.trim()
+          : "지역 전체",
+      );
 
-    setRegionLevel1(level1);
-    setRegionLevel2(level2);
-    setLocation(`${level1} ${level2}`.trim());
+      return;
+    }
+
+    // 로그인 상태인데 저장된 지역이 없으면 프로필 지역
+    if (profile) {
+      const level1 = profile.regionLevel1 ?? "";
+      const level2 = profile.regionLevel2 ?? "";
+
+      setRegionLevel1(level1);
+      setRegionLevel2(level2);
+      setLocation(level1 ? `${level1} ${level2}`.trim() : "지역 전체");
+
+      return;
+    }
+
+    // 비로그인
+    setRegionLevel1("");
+    setRegionLevel2("");
+    setLocation("지역 전체");
   }, [profile]);
   
   const [locationOpen, setLocationOpen] = useState(false);
@@ -57,6 +83,13 @@ export default function InfoPage() {
   const parentCategory = (categoryParam && categoryParam in infoSubCategoryMap)
     ? (categoryParam as ParentCategory)
     : "INSTITUTION";
+  
+  const currentSubCategory = infoSubCategoryMap[parentCategory].find(
+    (item) => item.id === subCategory,
+  );
+
+  const isRecommendation =
+    currentSubCategory?.value.endsWith("_ETC") ?? false;
   
   const sortValue =
   sort === "VIEW"
@@ -68,8 +101,8 @@ export default function InfoPage() {
   const { data, isPending, isError } = useInfoListQuery({
     category: parentCategory,
     subCategory: subCategory ?? undefined,
-    regionLevel1,
-    regionLevel2,
+    regionLevel1: regionLevel1 || null,
+  regionLevel2: regionLevel2 || null,
     page: page - 1,
     size: PAGE_SIZE,
     sort: sortValue,
@@ -132,7 +165,7 @@ export default function InfoPage() {
     <div className="flex min-h-screen flex-col gap-[18px] bg-background-100 px-[32px] py-[20px]">
       
       <h2 className="text-h1-info -mb-[10px]">
-        {profile?.nickname || "NN"}님,
+        {profile?.nickname || "보호자"}님,
       </h2>
       <div className="flex gap-[10px] items-center">
         <LocationButton
@@ -165,7 +198,11 @@ export default function InfoPage() {
         />
       </div>
       
-      {items.length === 0 ? (
+      {isRecommendation && !profile ? (
+        <div className="flex h-[200px] items-center justify-center text-background-500">
+          로그인 / 회원가입 하고 추천 기능을 이용해 보세요!
+        </div>
+      ) : items.length === 0 ? (
         <div className="flex h-[200px] items-center justify-center text-background-500">
           조건에 맞는 정보가 없습니다.
         </div>
@@ -195,12 +232,24 @@ export default function InfoPage() {
           location={location}
           onClose={() => setLocationOpen(false)}
           onComplete={({ regionLevel1, regionLevel2 }) => {
-            setRegionLevel1(regionLevel1);
-            setRegionLevel2(regionLevel2);
-            setLocation(`${regionLevel1} ${regionLevel2}`.trim());
+            setRegionLevel1(regionLevel1 ?? "");
+            setRegionLevel2(regionLevel2 ?? "");
 
-            sessionStorage.setItem("info-region-level1", regionLevel1);
-            sessionStorage.setItem("info-region-level2", regionLevel2);
+            setLocation(
+              regionLevel1
+                ? `${regionLevel1} ${regionLevel2 ?? ""}`.trim()
+                : "지역 전체",
+            );
+
+            sessionStorage.setItem(
+              "info-region-level1",
+              regionLevel1 ?? "",
+            );
+            sessionStorage.setItem(
+              "info-region-level2",
+              regionLevel2 ?? "",
+            );
+
             setPage(1);
             setLocationOpen(false);
           }}

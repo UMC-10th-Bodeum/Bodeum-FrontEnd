@@ -18,6 +18,10 @@ export function clearAuthTokens() {
   localStorage.removeItem("tokenType");
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
+
+  sessionStorage.removeItem("info-region-level1");
+  sessionStorage.removeItem("info-region-level2");
+  
   resetAiChatSession();
   notifyAuthStateChanged();
 }

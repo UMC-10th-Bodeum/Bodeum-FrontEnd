@@ -9,6 +9,7 @@ import { onboardingStatusQueryOptions } from "@/hooks/useOnboarding";
 
 import {
   consumeLoginToast,
+  consumeLogoutToast,
   getStoredAuthNextStep,
   storeAuthNextStep,
 } from "../authProgressStorage";
@@ -40,6 +41,16 @@ function showPendingLoginToast() {
   );
 }
 
+function showPendingLogoutToast() {
+  const pendingToast = consumeLogoutToast();
+
+  if (!pendingToast) {
+    return;
+  }
+
+  showToast(pendingToast.color, pendingToast.message);
+}
+
 export default function AuthStateGate({ children }: AuthStateGateProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -55,6 +66,7 @@ export default function AuthStateGate({ children }: AuthStateGateProps) {
     }
 
     if (!hasStoredAuthSession()) {
+      showPendingLogoutToast();
       setIsChecking(false);
       setErrorMessage(null);
       return;

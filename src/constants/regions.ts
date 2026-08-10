@@ -289,7 +289,10 @@ export const districtNamesByRegion: Record<string, string[]> = {
 const createOptions = (values: string[]): RegionSelectOption[] =>
   values.map((value) => ({ label: value, value }));
 
-export const regionOptions = createOptions(sidoNames);
+export const regionOptions: RegionSelectOption[] = [
+  { label: "지역 전체", value: "지역 전체" },
+  ...createOptions(sidoNames),
+];
 
 export const districtOptionsByRegion: Record<string, RegionSelectOption[]> = Object.fromEntries(
   sidoNames.map((sido) => [sido, createOptions(districtNamesByRegion[sido] ?? [])]),
