@@ -37,6 +37,7 @@ import AuthLoadErrorState from "./components/AuthLoadErrorState";
 import AuthLoadingState from "./components/AuthLoadingState";
 import AuthLoginCard from "./components/AuthLoginCard";
 import OnboardingStepCard from "./components/OnboardingStepCard";
+import ResponsiveOnboardingStage from "./components/ResponsiveOnboardingStage";
 import type {
   OnboardingFormState,
   OnboardingStep,
@@ -884,7 +885,10 @@ export default function AuthPage() {
   return (
     <main
       className={[
-        "relative flex min-h-screen items-center justify-center overflow-x-hidden overflow-y-auto px-[20px] py-[40px] max-sm:px-[16px] max-sm:py-[24px]",
+        "relative flex items-center justify-center px-[20px] py-[40px] max-sm:px-[16px] max-sm:py-[24px]",
+        flow === "onboarding"
+          ? "h-screen overflow-hidden"
+          : "min-h-screen overflow-x-hidden overflow-y-auto",
         flow === "onboarding" ? "bg-background-500" : "bg-main-150",
       ].join(" ")}
     >
@@ -923,16 +927,18 @@ export default function AuthPage() {
       {flow === "onboarding" &&
         (!isInitializing || keepOnboardingVisible) &&
         !onboardingLoadError && (
-        <OnboardingStepCard
-          step={onboardingStep}
-          form={onboardingForm}
-          onChange={setOnboardingForm}
-          onPrev={movePrevOnboardingStep}
-          onNext={moveNextOnboardingStep}
-          onClose={() => setModal("cancel")}
-          onSkip={() => setModal("skip")}
-          isSubmitting={isSubmitting || isInitializing}
-        />
+        <ResponsiveOnboardingStage>
+          <OnboardingStepCard
+            step={onboardingStep}
+            form={onboardingForm}
+            onChange={setOnboardingForm}
+            onPrev={movePrevOnboardingStep}
+            onNext={moveNextOnboardingStep}
+            onClose={() => setModal("cancel")}
+            onSkip={() => setModal("skip")}
+            isSubmitting={isSubmitting || isInitializing}
+          />
+        </ResponsiveOnboardingStage>
       )}
 
       {modal === "cancel" && (
