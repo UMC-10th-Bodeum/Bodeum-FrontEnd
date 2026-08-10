@@ -35,8 +35,8 @@ export default function CommunityCard({
       onClick={() => navigate(`/community/${postId}`)}
       className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left cursor-pointer"
     >
-      <div className="mb-[8px] flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="mb-[8px] flex w-full justify-between ">
+        <div className="flex w-full items-center gap-2">
           <PostTag
             type="ETC"
             label={categoryName}
@@ -44,14 +44,14 @@ export default function CommunityCard({
           <span className="text-body-sub text-background-500">{authorDisplay}</span>
         </div>
 
-        <span className="text-body-sub text-background-500">{getRelativeTime(createdAt)}</span>
+        <span className="ml-auto shrink-0 text-body-sub text-background-500">{getRelativeTime(createdAt)}</span>
       </div>
 
       <h3 className="mb-[8px] line-clamp-1 text-h5-list text-background-600">{title}</h3>
 
-      <p className="line-clamp-2 flex-1 text-h6-list text-background-500">{content}</p>
+      <p className="min-h-0 line-clamp-2 flex-1 text-h6-list text-background-500">{content}</p>
 
-      <div className="mt-[8px] flex items-center gap-[14px] border-t border-background-250 pt-[8px] text-h4-list text-background-500">
+      <div className="mt-[8px] w-full flex items-center gap-[14px] border-t border-background-250 pt-[8px] text-h4-list text-background-500">
         <div className="flex items-center gap-1">
           <HeartIcon className="h-[12px] w-[12px]" />
           <span>{likeCount}</span>

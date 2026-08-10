@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchIcon from "@/assets/icons/Search.svg?react";
 import CancelIcon from "@/assets/icons/Cancel-rounded.svg?react";
 import NewsIcon from "@/assets/icons/searchNews.svg?react";
-import CommunityIcon from "@/assets/icons/searchCommunity.svg?react"; 
+import CommunityIcon from "@/assets/icons/searchCommunity.svg?react";
+import EmptySearchResult from "./search/EmptySearchResult";
 
 interface Suggestion {
   text: string;
@@ -44,7 +45,11 @@ export default function Input({
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(value.trim() !== "");
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [isKeyboardNavigation, setIsKeyboardNavigation] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const wrapperStyle = search
     ? isFilled
@@ -53,30 +58,96 @@ export default function Input({
     : isFilled
       ? "border-0 bg-background-200 focus-within:border focus-within:border-main-400"
       : "border border-background-300 bg-background-200";
-  
-  function EmptySearchResult() {
-    return (
-      <div className="flex flex-col items-center justify-center py-[25.5px]">
-        <SearchIcon className="mb-3 h-[50px] w-[50px] text-background-300" />
-
-        <p className="text-h3-category-sub text-background-700">
-          검색결과가 없어요
-        </p>
-
-        <p className="text-h6 text-background-400">
-          검색어를 변경해보세요
-        </p>
-      </div>
-    );
-  }
 
   const filteredSuggestions = suggestions.filter((item) =>
     searchType === "news"
-    ? item.type === "NEWS_TITLE"
-    : searchType === "community"
-      ? item.type === "POST_TITLE"
-      : true
+      ? item.type === "NEWS_TITLE"
+      : searchType === "community"
+        ? item.type === "POST_TITLE"
+        : true,
   );
+
+  // 검색어(value)나 제안 목록이 변경되면 인덱스 초기화
+  useEffect(() => {
+    setActiveIndex(null);
+    setIsKeyboardNavigation(false);
+    itemRefs.current = [];
+  }, [value]);
+
+  // activeIndex 변경 시 해당 위치로 자동 스크롤
+  useEffect(() => {
+    if (activeIndex === null) return;
+    itemRefs.current[activeIndex]?.scrollIntoView({
+      block: "nearest",
+    });
+  }, [activeIndex]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 외부에서 전달된 onKeyDown 먼저 실행
+    onKeyDown?.(e);
+
+    // 검색 모드가 아니거나 검색어가 2자 미만, 제안 목록이 없으면 기존 Enter 동작만 처리
+    const isDropdownOpen = search && isFocused && value.trim().length >= 2;
+
+    if (!isDropdownOpen) {
+      if (search && e.key === "Enter") {
+        setIsFilled(value.trim() !== "");
+        (e.target as HTMLInputElement).blur();
+        onEnter?.(value);
+      }
+      return;
+    }
+
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setIsKeyboardNavigation(true);
+
+      if (filteredSuggestions.length === 0) return;
+
+      setActiveIndex((prev) =>
+        prev === null || prev === filteredSuggestions.length - 1 ? 0 : prev + 1,
+      );
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setIsKeyboardNavigation(true);
+
+      if (filteredSuggestions.length === 0) return;
+
+      setActiveIndex((prev) =>
+        prev === null || prev === 0 ? filteredSuggestions.length - 1 : prev - 1,
+      );
+      return;
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      if (activeIndex !== null && filteredSuggestions[activeIndex]) {
+        const selectedText = filteredSuggestions[activeIndex].text;
+        inputRef.current?.blur();
+        setIsFilled(selectedText.trim() !== "");
+        onSuggestionClick?.(selectedText);
+      } else if (search) {
+        setIsFilled(value.trim() !== "");
+        inputRef.current?.blur();
+        onEnter?.(value);
+      }
+      return;
+    }
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setIsFocused(false);
+      setActiveIndex(null);
+    }
+  };
 
   return (
     <div className={`relative ${className}`}>
@@ -111,14 +182,7 @@ export default function Input({
             setIsFocused(false);
             onBlur?.();
           }}
-          onKeyDown={(e) => {
-            onKeyDown?.(e);
-            if (search && e.key === "Enter") {
-              setIsFilled(value.trim() !== "");
-              (e.target as HTMLInputElement).blur();
-              onEnter?.(value);
-            }
-          }}
+          onKeyDown={handleKeyDown}
           className={`
             flex-1 bg-transparent
             ${search ? "text-h3-category-sub" : "text-h2-onboard"}
@@ -143,70 +207,79 @@ export default function Input({
             <CancelIcon />
           </button>
         )}
-        
-        
       </div>
-      {search &&
-        isFocused &&
-        value.trim().length >= 2 && (
-          <div
-            className="
-              absolute left-0 right-0 top-[40px]
-              z-50 mt-2
-              rounded-[10px]
-              border border-background-200
-              bg-background-100
-              shadow-[1px_2px_15px_0px_#00000026]
-              px-1 py-2
-            "
-          >
-            {filteredSuggestions.length === 0 ? (
-              <EmptySearchResult />
-            ) : (
-              filteredSuggestions.map((item) => {
-                const Icon =
-                  item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
-              
-                const index = item.text.indexOf(value);
 
-                return (
-                  <button
-                    key={item.text}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      if (search) {
-                        inputRef.current?.blur();
-                      }
+      {search && isFocused && value.trim().length >= 2 && (
+        <div
+          className="
+            absolute left-0 right-0 top-[40px]
+            z-50 mt-2
+            max-h-[300px] overflow-y-auto
+            rounded-[10px]
+            border border-background-200
+            bg-background-100
+            shadow-[1px_2px_15px_0px_#00000026]
+            px-1 py-2
+          "
+        >
+          {filteredSuggestions.length === 0 ? (
+            <EmptySearchResult />
+          ) : (
+            filteredSuggestions.map((item, index) => {
+              const Icon = item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
 
-                      onSuggestionClick?.(item.text);
-                    }}
-                    className="
+              const matchIndex = item.text.indexOf(value);
+              const isActive = activeIndex === index;
+
+              return (
+                <button
+                  key={`${item.type}-${item.text}-${index}`}
+                  type="button"
+                  ref={(el) => {
+                    itemRefs.current[index] = el;
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onMouseMove={() => setIsKeyboardNavigation(false)}
+                  onClick={() => {
+                    if (search) {
+                      inputRef.current?.blur();
+                    }
+                    onSuggestionClick?.(item.text);
+                  }}
+                  className={`
                     flex w-full items-center
                     p-3
-                    hover:bg-background-200
                     text-h3-category
                     rounded-[10px]
-                  "
-                  >
-                    <Icon className="mr-2 text-background-400" />
-                    {index === -1 ? (
-                      <span>{item.text}</span>
-                    ) : (
-                      <span className="text-background-500">
-                        {item.text.slice(0, index)}
-                        <span className="text-background-600">
-                          {item.text.slice(index, index + value.length)}
-                        </span>
-                        {item.text.slice(index + value.length)}
+                    text-left outline-none
+                    ${
+                      isActive
+                        ? "bg-background-200"
+                        : !isKeyboardNavigation
+                          ? "hover:bg-background-200"
+                          : ""
+                    }
+                    active:bg-background-200
+                  `}
+                >
+                  <Icon className="mr-2 text-background-400 shrink-0" />
+                  {matchIndex === -1 ? (
+                    <span>{item.text}</span>
+                  ) : (
+                    <span className="text-background-500">
+                      {item.text.slice(0, matchIndex)}
+                      <span className="text-background-600 font-bold">
+                        {item.text.slice(matchIndex, matchIndex + value.length)}
                       </span>
-                    )}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        )}
+                      {item.text.slice(matchIndex + value.length)}
+                    </span>
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 }

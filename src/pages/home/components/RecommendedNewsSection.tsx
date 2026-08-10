@@ -40,7 +40,10 @@ export default function RecommendedNewsSection() {
       )}
 
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
-        <PostSection title="활동소식">
+        <PostSection
+          title="활동소식"
+          onMoreClick={() => navigate("/news?newsType=ACTIVITY")}
+        >
           {activityNews.map((news) => (
             <PostListItem
               key={news.newsId}
@@ -52,7 +55,10 @@ export default function RecommendedNewsSection() {
             />
           ))}
         </PostSection>
-        <PostSection title="지역소식">
+        <PostSection
+          title="지역소식"
+          onMoreClick={() => navigate("/news?newsType=LOCAL")}
+        >
           {localNews.map((news) => (
             <PostListItem
               key={news.newsId}

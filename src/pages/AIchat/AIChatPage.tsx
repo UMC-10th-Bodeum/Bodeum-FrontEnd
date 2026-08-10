@@ -1102,14 +1102,8 @@ export default function AIChatPage() {
   });
 
   return (
-    <div className="flex min-h-[calc(100vh-60px)] justify-center bg-background-100 px-[27.5px] pb-[40px] pt-[20px]">
-      <div className="flex w-full flex-col items-center gap-[18px]">
-        <div className="w-full rounded-[8px] bg-main-200 px-[12px] py-[8px] text-body-sub text-main-500">
-          AI 답변의 특성상 최신 변경된 제도와 일부 다를 수 있습니다. 정확한
-          자격 요건과 지원 금액은 반드시 해당 공공기관이나 지자체에 최종
-          확인하시기 바랍니다.
-        </div>
-
+    <div className="flex h-[calc(100vh-60px)] min-h-0 justify-center overflow-hidden bg-background-100 px-[27.5px] py-[20px]">
+      <div className="flex h-full min-h-0 w-full flex-col items-center">
         <AiChatPanel
           inputValue={inputValue}
           inputVariant={inputVariant}
@@ -1130,7 +1124,7 @@ export default function AIChatPage() {
           {effectiveAccessState === "error" && (
             <div
               role="alert"
-              className="flex h-[544px] w-full flex-col items-center justify-center gap-[12px] text-center"
+              className="flex h-full min-h-full w-full flex-1 flex-col items-center justify-center gap-[12px] text-center"
             >
               <p className="text-h3-onboard text-background-600">
                 대화를 불러오지 못했습니다.
