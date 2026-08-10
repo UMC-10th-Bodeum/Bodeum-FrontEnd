@@ -16,7 +16,7 @@ function HomepageArrowIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <ArrowUpRightIcon
       {...props}
-      className="bodeum-icon-color h-[14px] w-[14px] shrink-0 text-background-100"
+      className="bodeum-icon-color relative top-px h-[14px] w-[14px] shrink-0 text-background-100"
     />
   );
 }
@@ -63,6 +63,7 @@ export default function NewsDetailHeader({
           <ButtonFill
             label="홈페이지"
             icon={HomepageArrowIcon}
+            className="h-[40px]"
             iconPosition="right"
             disabled={!news.originalUrl}
             onClick={() => window.open(news.originalUrl, "_blank", "noopener,noreferrer")}
@@ -70,11 +71,12 @@ export default function NewsDetailHeader({
           <ButtonOutline
             label="스크랩"
             icon={ScrapIcon}
+            className="h-[40px]"
             iconPosition="left"
             disabled={isScrapPending}
             onClick={onToggleScrap}
           />
-          <ShareButton url={window.location.href} />
+          <ShareButton url={window.location.href} className="h-[40px]" />
         </div>
       </div>
     </article>
