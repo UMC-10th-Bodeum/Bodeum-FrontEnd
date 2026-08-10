@@ -103,8 +103,8 @@ export default function NewsDetailPage() {
 
   return (
     <div className="min-h-full px-[32px] py-[20px]">
-      <div className="mx-auto grid max-w-[1098px] grid-cols-[680px_400px] items-start gap-[18px]">
-        <div className="flex flex-col gap-[11px]">
+      <div className="mx-auto flex w-full max-w-[680px] flex-col gap-[18px]">
+        <div className="flex flex-col gap-[10px]">
           <NewsDetailHeader
             news={news}
             status={status}
@@ -113,6 +113,7 @@ export default function NewsDetailPage() {
           />
 
           <ActivityInfoTable items={activityInfo} />
+          <AIChatButton />
 
           <div className="py-[20px]">
             <RelatedNewsSection
@@ -124,8 +125,6 @@ export default function NewsDetailPage() {
             />
           </div>
         </div>
-
-        <AIChatButton />
       </div>
     </div>
   );
