@@ -2,9 +2,15 @@ import type { NextStep } from "@/types/api";
 
 const AUTH_NEXT_STEP_KEY = "bodeum:auth-next-step";
 const LOGIN_TOAST_KEY = "bodeum:pending-login-toast";
+const LOGOUT_TOAST_KEY = "bodeum:pending-logout-toast";
 
 type PendingLoginToast = {
   nickname: string;
+};
+
+type PendingLogoutToast = {
+  color: "green" | "yellow";
+  message: string;
 };
 
 export function getStoredAuthNextStep(): NextStep | null {
@@ -50,6 +56,40 @@ export function consumeLoginToast(): PendingLoginToast | null {
     return JSON.parse(storedToast) as PendingLoginToast;
   } catch {
     return { nickname: "" };
+  }
+}
+
+export function queueLogoutToast(
+  color: PendingLogoutToast["color"],
+  message: string,
+) {
+  sessionStorage.setItem(
+    LOGOUT_TOAST_KEY,
+    JSON.stringify({ color, message } satisfies PendingLogoutToast),
+  );
+}
+
+export function consumeLogoutToast(): PendingLogoutToast | null {
+  const storedToast = sessionStorage.getItem(LOGOUT_TOAST_KEY);
+  sessionStorage.removeItem(LOGOUT_TOAST_KEY);
+
+  if (!storedToast) {
+    return null;
+  }
+
+  try {
+    const toast = JSON.parse(storedToast) as Partial<PendingLogoutToast>;
+
+    if (
+      (toast.color !== "green" && toast.color !== "yellow") ||
+      typeof toast.message !== "string"
+    ) {
+      return null;
+    }
+
+    return { color: toast.color, message: toast.message };
+  } catch {
+    return null;
   }
 }
 
