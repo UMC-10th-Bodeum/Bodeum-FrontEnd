@@ -15,10 +15,10 @@ export default function ActivityInfoTable({ items }: ActivityInfoTableProps) {
         {items.map(([label, value]) => (
           <div
             key={label}
-            className="mb-[10px] grid min-h-[38px] grid-cols-[64px_1fr] items-center border-b border-background-250"
+            className="flex min-h-[38px] items-center border-b border-background-250"
           >
-            <dt className="text-h6-list text-background-500">{label}</dt>
-            <dd className="text-h6-list text-background-600">{value}</dd>
+            <dt className="w-[64px] shrink-0 text-h6-list text-background-500">{label}</dt>
+            <dd className="flex-1 text-h6-list text-background-600">{value}</dd>
           </div>
         ))}
       </dl>

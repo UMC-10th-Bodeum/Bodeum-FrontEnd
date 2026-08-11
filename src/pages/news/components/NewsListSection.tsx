@@ -37,8 +37,9 @@ export default function NewsListSection({ items, isLoading, isError }: NewsListS
             address={item.region}
             services={[item.sourceName]}
             categoryLabel={item.categoryLabel}
-            chipText={status.label}
+            chipText={item.status ? status.label : undefined}
             chipVariant={status.variant}
+            contact={item.contact}
             viewCount={item.viewCount}
             scrapCount={item.scrapCount}
             onClick={() => navigate(`/news/${item.newsId}`)}
