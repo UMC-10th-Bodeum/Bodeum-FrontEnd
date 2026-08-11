@@ -20,20 +20,6 @@ export interface CommunityPostCreateRequest {
   imageUrls?: string[];
 }
 
-export interface CommunityPost {
-  id: number;
-  category: CommunityCategory;
-  diagnosis: DiagnosisType;
-  author: string;
-  createdAt: string;
-  title: string;
-  content: string;
-  likes: number;
-  comments: number;
-  views: number;
-  imageCount: number;
-}
-
 export type CommunityCommentStatus = "ACTIVE";
 
 export interface CommunityComment {
@@ -89,7 +75,7 @@ export interface CommunityPostAuthor {
 
 export interface CommunityPostListItem {
   postId: number;
-  boardType: string;
+  boardType: CommunityCategoryCode;
   anonymityType: string;
   title: string;
   content: string;

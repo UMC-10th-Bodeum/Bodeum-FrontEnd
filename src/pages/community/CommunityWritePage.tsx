@@ -3,6 +3,7 @@ import { useBlocker, useNavigate } from "react-router-dom";
 
 import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import { hasStoredAuthSession } from "@/apis/authApi";
+import { uploadCommunityPostImage } from "@/apis/community";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { communityCategoryCodeMap } from "@/constants/communityCategory";
@@ -87,11 +88,7 @@ export default function CommunityWritePage() {
         const imageUrls: string[] = [];
 
         if (payload.images.length > 0) {
-          const uploads = await Promise.all(
-            payload.images.map((file) =>
-              import("@/apis/community").then((m) => m.uploadCommunityPostImage(file)),
-            ),
-          );
+          const uploads = await Promise.all(payload.images.map(uploadCommunityPostImage));
 
           imageUrls.push(...uploads.filter(Boolean));
         }

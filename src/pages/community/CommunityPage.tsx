@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { hasStoredAuthSession } from "@/apis/authApi";
 import CategoryButton from "@/components/CategoryButton";
 import Input from "@/components/Input";
@@ -37,20 +37,8 @@ const sortOptions = [
   { label: "댓글순", value: "comment" },
 ];
 
-function getCommunityCategory(boardType: string): CommunityCategory {
-  if (boardType.includes("GROWTH") || boardType.includes("THERAPY")) {
-    return "GROWTH_RECORD";
-  }
-  if (boardType.includes("LOCAL") || boardType.includes("NEIGHBOR")) {
-    return "LOCAL_NEWS";
-  }
-  if (boardType.includes("REVIEW") || boardType.includes("CENTER")) {
-    return "CENTER_REVIEW";
-  }
-  if (boardType.includes("QUESTION") || boardType.includes("INFORMATION")) {
-    return "QUESTION";
-  }
-  return "FREE";
+function isCommunityPostSort(value: unknown): value is CommunityPostSort {
+  return value === "latest" || value === "view" || value === "like" || value === "comment";
 }
 
 export default function CommunityPage() {
@@ -64,20 +52,12 @@ export default function CommunityPage() {
   const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
     ? getCommunityCategoryByCode(categoryCodeParam)
     : "ALL";
-  const [inputKeyword, setInputKeyword] = useState("");
-  const [keyword, setKeyword] = useState("");
-  const location = useLocation();
-  const routeSort = (location.state as { sort?: unknown } | null | undefined)?.sort;
-  const initialSort: CommunityPostSort | "" =
-    routeSort === "latest" ||
-    routeSort === "view" ||
-    routeSort === "like" ||
-    routeSort === "comment"
-      ? routeSort
-      : "";
-
-  const [sort, setSort] = useState<CommunityPostSort | "">(initialSort);
-  const [page, setPage] = useState(1);
+  const sortParam = searchParams.get("sort");
+  const sort: CommunityPostSort | "" = isCommunityPostSort(sortParam) ? sortParam : "";
+  const keyword = searchParams.get("keyword")?.trim() ?? "";
+  const parsedPage = Number(searchParams.get("page"));
+  const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const [inputKeyword, setInputKeyword] = useState(keyword);
   const debouncedInputKeyword = useDebouncedValue(inputKeyword.trim(), 300);
   const { data: suggestions = [] } = useCommunityPostSearchSuggestions(debouncedInputKeyword);
   const { data, isPending, isError, refetch } = useCommunityPosts({
@@ -89,6 +69,10 @@ export default function CommunityPage() {
   });
   const visiblePosts = data?.content ?? [];
 
+  useEffect(() => {
+    setInputKeyword(keyword);
+  }, [keyword]);
+
   const selectCategory = (value: CommunityCategory | "ALL") => {
     setSearchParams(
       (currentParams) => {
@@ -99,19 +83,55 @@ export default function CommunityPage() {
         } else {
           nextParams.set("categoryCode", communityCategoryCodeMap[value]);
         }
+        nextParams.set("page", "1");
 
         return nextParams;
       },
       { replace: true },
     );
-    setPage(1);
   };
 
   const handleSearch = (nextKeyword: string) => {
     const normalizedKeyword = nextKeyword.trim();
     setInputKeyword(nextKeyword);
-    setKeyword(normalizedKeyword.length >= 2 ? normalizedKeyword : "");
-    setPage(1);
+    setSearchParams(
+      (currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+
+        if (normalizedKeyword.length >= 2) {
+          nextParams.set("keyword", normalizedKeyword);
+        } else {
+          nextParams.delete("keyword");
+        }
+        nextParams.set("page", "1");
+
+        return nextParams;
+      },
+      { replace: true },
+    );
+  };
+
+  const updatePage = (nextPage: number) => {
+    setSearchParams(
+      (currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+        nextParams.set("page", String(nextPage));
+        return nextParams;
+      },
+      { replace: true },
+    );
+  };
+
+  const updateSort = (nextSort: CommunityPostSort) => {
+    setSearchParams(
+      (currentParams) => {
+        const nextParams = new URLSearchParams(currentParams);
+        nextParams.set("sort", nextSort);
+        nextParams.set("page", "1");
+        return nextParams;
+      },
+      { replace: true },
+    );
   };
 
   const runAfterLoginCheck = async (onAuthenticated: () => void) => {
@@ -190,10 +210,7 @@ export default function CommunityPage() {
             <Select
               options={sortOptions}
               value={sort}
-              onChange={(value) => {
-                setSort(value as CommunityPostSort);
-                setPage(1);
-              }}
+              onChange={(value) => updateSort(value as CommunityPostSort)}
               placeholder={isLoggedIn ? "최신순" : "조회순"}
               variant="S"
               ariaLabel="게시글 정렬"
@@ -221,7 +238,7 @@ export default function CommunityPage() {
           ) : (
             <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
               {visiblePosts.map((post) => {
-                const postCategory = getCommunityCategory(post.boardType);
+                const postCategory = getCommunityCategoryByCode(post.boardType);
 
                 return (
                   <CommunityPostCard
@@ -245,7 +262,7 @@ export default function CommunityPage() {
 
         {data && data.totalPages > 1 && (
           <div className="mt-[5px] py-2">
-            <Pagination currentPage={page} totalPages={data.totalPages} onChange={setPage} />
+            <Pagination currentPage={page} totalPages={data.totalPages} onChange={updatePage} />
           </div>
         )}
       </div>
