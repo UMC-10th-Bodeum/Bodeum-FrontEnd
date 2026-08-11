@@ -23,8 +23,12 @@ const sortOptions = [
 
 export default function InfoPage() {
   const { data: profile } = useMyProfileQuery();
-  const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
+
+  const [page, setPage] = useState(() => {
+    const pageParam = searchParams.get("page");
+    return pageParam ? Number(pageParam) : 1;
+  });
   const subCategoryParam = searchParams.get("subCategory");
   const [subCategory, setSubCategory] = useState<number | null>(
     subCategoryParam ? Number(subCategoryParam) : null,
@@ -106,7 +110,7 @@ export default function InfoPage() {
     category: parentCategory,
     subCategory: subCategory ?? undefined,
     regionLevel1: regionLevel1 || null,
-  regionLevel2: regionLevel2 || null,
+    regionLevel2: regionLevel2 || null,
     page: page - 1,
     size: PAGE_SIZE,
     sort: sortValue,
@@ -125,12 +129,9 @@ export default function InfoPage() {
       prevCategory.current = parentCategory;
     }
   }, [parentCategory]);
-  
-  useEffect(() => {
-    setPage(1);
-  }, [subCategory, parentCategory, sort]);
 
   const moveToSubCategory = (id: number | null) => {
+    setPage(1);
     setSubCategory(id);
 
     const params = new URLSearchParams({
@@ -141,18 +142,23 @@ export default function InfoPage() {
       params.set("subCategory", String(id));
     }
 
+    params.set("page", "1");
+
     navigate(`/info?${params.toString()}`, {
       replace: true,
     });
   };
 
   const moveToCategory = (category: ParentCategory) => {
+    setPage(1);
+
     const params = new URLSearchParams({
       category,
     });
 
     const defaultSubCategory = infoSubCategoryMap[category][0].id;
     params.set("subCategory", String(defaultSubCategory));
+    params.set("page", "1");
 
     navigate(`/info?${params.toString()}`);
   };
@@ -202,7 +208,17 @@ export default function InfoPage() {
         <Select
           options={sortOptions}
           value={sort}
-          onChange={setSort}
+          onChange={(value) => {
+            setSort(value);
+            setPage(1);
+
+            const params = new URLSearchParams(searchParams);
+            params.set("page", "1");
+
+            navigate(`/info?${params.toString()}`, {
+              replace: true,
+            });
+          }}
           placeholder="조회순"
           variant="S"
           className="w-[120px]"
@@ -231,7 +247,16 @@ export default function InfoPage() {
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-            onChange={setPage}
+            onChange={(newPage) => {
+              setPage(newPage);
+
+              const params = new URLSearchParams(searchParams);
+              params.set("page", String(newPage));
+
+              navigate(`/info?${params.toString()}`, {
+                replace: true,
+              });
+            }}
           />
         </>
       )}
