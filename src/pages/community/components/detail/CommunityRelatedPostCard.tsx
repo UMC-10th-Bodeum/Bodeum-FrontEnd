@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import CommentStat from "@/components/post-stat/CommentStat";
 import HeartStat from "@/components/post-stat/HeartStat";
 import ViewStat from "@/components/post-stat/ViewStat";
@@ -21,8 +19,6 @@ export default function CommunityRelatedPostCard({
   views,
   onClick,
 }: CommunityRelatedPostCardProps) {
-  const [liked, setLiked] = useState(false);
-
   return (
     <article
       role="link"
@@ -38,16 +34,16 @@ export default function CommunityRelatedPostCard({
           onClick?.();
         }
       }}
-      className="flex h-[44px] w-[1128px] cursor-pointer items-center rounded-[10px] border border-transparent bg-background-200 px-[16px] py-[12px] text-left transition-[border-color,box-shadow] duration-300 ease-out hover:shadow-[1px_2px_15px_0px_#00000026] active:border-background-500"
+      className="grid h-[44px] w-full cursor-pointer items-center gap-x-[8px] rounded-[10px] border border-transparent bg-background-200 px-[16px] py-[12px] text-left transition-[border-color,box-shadow] duration-300 ease-out hover:shadow-[1px_2px_15px_0px_#00000026] active:border-background-500"
+      style={{ gridTemplateColumns: "max-content minmax(0, 1fr) max-content" }}
     >
-      <time className="mr-[8px] text-body-sub-2 text-background-500">{createdAt}</time>
+      <time className="text-body-sub text-background-500">{createdAt}</time>
       <span className="min-w-0 flex-1 truncate text-h5-list text-background-600">{title}</span>
-      <span className="flex shrink-0 items-center gap-[14px]">
-        <HeartStat
-          count={likes + (liked ? 1 : 0)}
-          isActive={liked}
-          onClick={() => setLiked((current) => !current)}
-        />
+      <span
+        className="grid items-center gap-x-[4px]"
+        style={{ gridTemplateColumns: "44px 44px 52px" }}
+      >
+        <HeartStat count={likes} />
         <CommentStat count={comments} />
         <ViewStat count={views} />
       </span>
