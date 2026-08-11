@@ -180,7 +180,7 @@ export default function SideBar() {
               className="cursor-pointer"
               onClick={() =>
                 window.open(
-                  "https://app.notion.com/p/3ac34bae492a80ee99e3c6c69b794801",
+                  "https://lightning-diplodocus-2bb.notion.site/3b934bae492a801d910dea1912c6390a?source=copy_link",
                   "_blank",
                   "noopener,noreferrer"
                 )
