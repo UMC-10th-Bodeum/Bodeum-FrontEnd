@@ -15,6 +15,7 @@ interface CommunityCardProps {
   commentCount: number;
   viewCount: number;
   createdAt: string;
+  onClick?: () => void;
 }
 
 export default function CommunityCard({
@@ -27,12 +28,13 @@ export default function CommunityCard({
   viewCount,
   createdAt,
   categoryName,
+  onClick,
 }: CommunityCardProps) {
   const navigate = useNavigate();
 
   return (
     <button
-      onClick={() => navigate(`/community/${postId}`)}
+      onClick={() => (onClick ? onClick() : navigate(`/community/${postId}`))}
       className="flex w-[380px] shrink-0 flex-col rounded-[10px] border border-background-250 bg-background-100 p-[16px] text-left cursor-pointer"
     >
       <div className="mb-[8px] flex w-full justify-between ">

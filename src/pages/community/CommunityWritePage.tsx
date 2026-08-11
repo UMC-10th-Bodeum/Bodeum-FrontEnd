@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
+import { uploadCommunityPostImage } from "@/apis/community";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { communityCategoryCodeMap } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useCreateCommunityPost } from "@/hooks/useCommunity";
+import { useLoginCheck } from "@/hooks/useLoginCheck";
 import type { CommunityPostPayload } from "@/types/community";
 
 import CommunityWriteForm from "./components/write/CommunityWriteForm";
@@ -18,6 +20,9 @@ export default function CommunityWritePage() {
   const submissionInProgressRef = useRef(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isWriteAccessAllowed, setIsWriteAccessAllowed] = useState(false);
+  const hasShownLoginToast = useRef(false);
+  const { runAfterLoginCheck } = useLoginCheck();
   const { mutateAsync: createPost } = useCreateCommunityPost();
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
@@ -39,6 +44,23 @@ export default function CommunityWritePage() {
     }
   }, [blocker.state]);
 
+  useEffect(() => {
+    void runAfterLoginCheck(
+      () => {
+        setIsWriteAccessAllowed(true);
+      },
+      () => {
+        if (!hasShownLoginToast.current) {
+          hasShownLoginToast.current = true;
+          showToast("blue", "로그인/회원가입 후 만나보세요");
+        }
+
+        allowNavigationRef.current = true;
+        navigate("/community", { replace: true });
+      },
+    );
+  }, [navigate, runAfterLoginCheck]);
+
   const publishPost = (payload: CommunityPostPayload) => {
     if (submissionInProgressRef.current) return;
 
@@ -52,11 +74,7 @@ export default function CommunityWritePage() {
         const imageUrls: string[] = [];
 
         if (payload.images.length > 0) {
-          const uploads = await Promise.all(
-            payload.images.map((file) =>
-              import("@/apis/community").then((m) => m.uploadCommunityPostImage(file)),
-            ),
-          );
+          const uploads = await Promise.all(payload.images.map(uploadCommunityPostImage));
 
           imageUrls.push(...uploads.filter(Boolean));
         }
@@ -75,12 +93,20 @@ export default function CommunityWritePage() {
         showToast("green", "게시물이 성공적으로 등록됐습니다!");
         navigate("/community");
       } catch (error) {
+        if (isUnauthorizedError(error)) {
+          showToast("blue", "로그인/회원가입 후 만나보세요");
+          setIsWriteAccessAllowed(false);
+          allowNavigationRef.current = true;
+          navigate("/community", { replace: true });
+          return;
+        }
+
         showToast(
           "red",
           getApiErrorMessage(
             error,
             submissionStage === "upload"
-              ? "이미지 업로드 중 오류가 발생했습니다."
+              ? "이미지 업로드에 실패했습니다."
               : "게시물을 등록하지 못했습니다.",
           ),
         );
@@ -107,6 +133,10 @@ export default function CommunityWritePage() {
     allowNavigationRef.current = true;
     navigate("/community");
   };
+
+  if (!isWriteAccessAllowed) {
+    return <div className="min-h-full bg-background-100" />;
+  }
 
   return (
     <div className="min-h-full bg-background-100 px-[24px] py-[16px]">

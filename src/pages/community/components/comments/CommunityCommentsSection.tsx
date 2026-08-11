@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import ButtonFill from "@/components/ButtonFill";
 import { showToast } from "@/components/Toast";
@@ -18,11 +18,13 @@ import CommunityCommentItem from "./CommunityCommentItem";
 interface CommunityCommentsSectionProps {
   postId: number;
   canAdopt?: boolean;
+  onLoginRequired: () => void;
 }
 
 export default function CommunityCommentsSection({
   postId,
   canAdopt = false,
+  onLoginRequired,
 }: CommunityCommentsSectionProps) {
   const [comment, setComment] = useState("");
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
@@ -39,8 +41,13 @@ export default function CommunityCommentsSection({
   const { mutate: deleteComment } = useDeleteCommunityComment(postId);
   const comments = data?.comments ?? [];
 
-  const showCreateError = (error: unknown) => {
-    showToast("red", getApiErrorMessage(error, "댓글을 등록하지 못했습니다."));
+  const showMutationError = (error: unknown, fallbackMessage: string) => {
+    if (isUnauthorizedError(error)) {
+      onLoginRequired();
+      return;
+    }
+
+    showToast("red", getApiErrorMessage(error, fallbackMessage));
   };
 
   const submitComment = () => {
@@ -51,7 +58,7 @@ export default function CommunityCommentsSection({
       { content },
       {
         onSuccess: () => setComment(""),
-        onError: showCreateError,
+        onError: (error) => showMutationError(error, "댓글을 등록하지 못했습니다."),
       },
     );
   };
@@ -63,7 +70,7 @@ export default function CommunityCommentsSection({
       { content, parentCommentId },
       {
         onSuccess: () => setReplyTargetId(null),
-        onError: showCreateError,
+        onError: (error) => showMutationError(error, "답글을 등록하지 못했습니다."),
       },
     );
   };
@@ -73,7 +80,7 @@ export default function CommunityCommentsSection({
       { commentId, isCurrentlyLiked },
       {
         onError: (error) =>
-          showToast("red", getApiErrorMessage(error, "댓글 공감 상태를 변경하지 못했습니다.")),
+          showMutationError(error, "댓글 공감 상태를 변경하지 못했습니다."),
       },
     );
   };
@@ -94,11 +101,14 @@ export default function CommunityCommentsSection({
         <ProfileIcon className="h-[40px] w-[40px] shrink-0" />
         <input
           value={comment}
-          maxLength={1000}
           disabled={isCreatePending}
           onChange={(event) => setComment(event.target.value)}
           placeholder="이웃 부모에게 따뜻한 댓글을 남겨주세요"
-          className="h-[44px] w-[947px] flex-1 rounded-[10px] border border-transparent bg-background-200 px-[16px] text-h4-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`h-[44px] w-[947px] flex-1 rounded-[10px] border px-[18px] py-[10px] text-h4-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 focus:bg-background-100 disabled:cursor-not-allowed disabled:opacity-50 ${
+            comment.length > 0
+              ? "border-main-400 bg-background-100"
+              : "border-transparent bg-main-100"
+          }`}
         />
         <ButtonFill
           type="submit"
@@ -145,6 +155,7 @@ export default function CommunityCommentsSection({
               isReplyPending={isReplyPending}
               onLike={likeComment}
               likingCommentId={isLikePending ? likingComment?.commentId : undefined}
+              onLoginRequired={onLoginRequired}
               onAdopt={(commentId, isAccepted) =>
                 toggleCommentAdoption(commentId, {
                   onSuccess: () => {
@@ -153,15 +164,14 @@ export default function CommunityCommentsSection({
                       isAccepted ? "댓글 채택이 취소되었습니다." : "댓글이 채택되었습니다.",
                     );
                   },
-                  onError: (error) =>
-                    showToast("red", getApiErrorMessage(error, "댓글을 채택하지 못했습니다.")),
+                  onError: (error) => showMutationError(error, "댓글을 채택하지 못했습니다."),
                 })
               }
               isAdoptPending={isAdoptPending}
               onDelete={(commentId: number) =>
                 deleteComment(commentId, {
                   onError: (error: unknown) =>
-                    showToast("red", getApiErrorMessage(error, "댓글을 삭제하지 못했습니다.")),
+                    showMutationError(error, "댓글을 삭제하지 못했습니다."),
                 })
               }
             />

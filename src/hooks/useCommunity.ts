@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { hasStoredAuthSession } from "@/apis/authApi";
 import {
   createCommunityComment,
   createCommunityCommentLike,
@@ -14,6 +15,7 @@ import {
   deleteCommunityPostScrap,
   getCommunityComments,
   getCommunityPost,
+  getCommunityPostSearchSuggestions,
   getCommunityPosts,
   deleteCommunityPost,
   updateCommunityPost,
@@ -128,13 +130,19 @@ export const communityPostKeys = {
   all: ["community-posts"] as const,
   detail: (postId: number) => [...communityPostKeys.all, "detail", postId] as const,
   comments: (postId: number) => [...communityPostKeys.detail(postId), "comments"] as const,
-  list: ({ page = 0, size = 14, sort = "view", keyword, categoryCode }: CommunityPostListParams) =>
+  searchSuggestions: (keyword: string, size: number) =>
+    [...communityPostKeys.all, "search-suggestions", keyword, size] as const,
+  list: (
+    { page = 0, size = 14, sort, keyword, categoryCode }: CommunityPostListParams,
+    viewerScope: "member" | "guest",
+  ) =>
     [
       ...communityPostKeys.all,
       {
         page,
         size,
-        sort,
+        sort: sort ?? "SERVER_DEFAULT",
+        viewerScope,
         keyword: keyword?.trim() ?? "",
         categoryCode: categoryCode ?? "ALL",
       },
@@ -142,10 +150,22 @@ export const communityPostKeys = {
 };
 
 export function useCommunityPosts(params: CommunityPostListParams) {
+  const viewerScope = hasStoredAuthSession() ? "member" : "guest";
+
   return useQuery({
-    queryKey: communityPostKeys.list(params),
+    queryKey: communityPostKeys.list(params, viewerScope),
     queryFn: () => getCommunityPosts(params),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useCommunityPostSearchSuggestions(keyword: string, size = 10) {
+  const normalizedKeyword = keyword.trim();
+
+  return useQuery({
+    queryKey: communityPostKeys.searchSuggestions(normalizedKeyword, size),
+    queryFn: () => getCommunityPostSearchSuggestions(normalizedKeyword, size),
+    enabled: normalizedKeyword.length >= 2 && normalizedKeyword.length <= 50,
   });
 }
 

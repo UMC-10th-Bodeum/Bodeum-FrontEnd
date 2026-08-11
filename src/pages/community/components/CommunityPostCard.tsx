@@ -1,13 +1,9 @@
-import { getApiErrorMessage } from "@/apis/apiError";
 import PostTag from "@/components/PostTag";
-import { showToast } from "@/components/Toast";
 import CommentStat from "@/components/post-stat/CommentStat";
 import HeartStat from "@/components/post-stat/HeartStat";
 import ViewStat from "@/components/post-stat/ViewStat";
-import { useToggleCommunityPostLike } from "@/hooks/useCommunity";
 
 interface CommunityPostCardProps {
-  id: number;
   categoryLabel: string;
   title: string;
   content: string;
@@ -21,7 +17,6 @@ interface CommunityPostCardProps {
 }
 
 export default function CommunityPostCard({
-  id,
   categoryLabel,
   title,
   content,
@@ -32,8 +27,6 @@ export default function CommunityPostCard({
   initialIsLiked = false,
   onClick,
 }: CommunityPostCardProps) {
-  const { mutate: toggleLike, isPending: isLikePending } = useToggleCommunityPostLike(id);
-
   return (
     <article
       role="link"
@@ -55,17 +48,7 @@ export default function CommunityPostCard({
         <div className="flex min-w-0 items-center gap-2">
           <PostTag type="ETC" label={categoryLabel} />
           <div className="flex gap-[14px]">
-            <HeartStat
-              count={likes}
-              isActive={initialIsLiked}
-              disabled={isLikePending}
-              onClick={() =>
-                toggleLike(initialIsLiked, {
-                  onError: (error) =>
-                    showToast("red", getApiErrorMessage(error, "공감 상태를 변경하지 못했습니다.")),
-                })
-              }
-            />
+            <HeartStat count={likes} isActive={initialIsLiked} />
             <CommentStat count={comments} />
             <ViewStat count={views} />
           </div>

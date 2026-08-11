@@ -63,8 +63,8 @@ export default function Input({
     searchType === "news"
       ? item.type === "NEWS_TITLE"
       : searchType === "community"
-        ? item.type === "COMMUNITY_TITLE"
-        : true
+        ? item.type === "POST_TITLE" || item.type === "POST_CONTENT"
+        : true,
   );
 
   // 검색어(value)나 제안 목록이 변경되면 인덱스 초기화
@@ -87,8 +87,7 @@ export default function Input({
     onKeyDown?.(e);
 
     // 검색 모드가 아니거나 검색어가 2자 미만, 제안 목록이 없으면 기존 Enter 동작만 처리
-    const isDropdownOpen =
-      search && isFocused && value.trim().length >= 2;
+    const isDropdownOpen = search && isFocused && value.trim().length >= 2;
 
     if (!isDropdownOpen) {
       if (search && e.key === "Enter") {
@@ -110,7 +109,7 @@ export default function Input({
       if (filteredSuggestions.length === 0) return;
 
       setActiveIndex((prev) =>
-        prev === null || prev === filteredSuggestions.length - 1 ? 0 : prev + 1
+        prev === null || prev === filteredSuggestions.length - 1 ? 0 : prev + 1,
       );
       return;
     }
@@ -122,7 +121,7 @@ export default function Input({
       if (filteredSuggestions.length === 0) return;
 
       setActiveIndex((prev) =>
-        prev === null || prev === 0 ? filteredSuggestions.length - 1 : prev - 1
+        prev === null || prev === 0 ? filteredSuggestions.length - 1 : prev - 1,
       );
       return;
     }
@@ -227,8 +226,7 @@ export default function Input({
             <EmptySearchResult />
           ) : (
             filteredSuggestions.map((item, index) => {
-              const Icon =
-                item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
+              const Icon = item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
 
               const matchIndex = item.text.indexOf(value);
               const isActive = activeIndex === index;
@@ -264,8 +262,29 @@ export default function Input({
                     active:bg-background-200
                   `}
                 >
-                  <Icon className="mr-2 text-background-400 shrink-0" />
-                  {matchIndex === -1 ? (
+                  <Icon
+                    className={`${searchType === "community" ? "mr-[11px]" : "mr-2"} shrink-0 text-background-400`}
+                  />
+                  {searchType === "community" ? (
+                    <span
+                      className="min-w-0 flex-1 truncate text-h3-category-sub text-background-400"
+                      title={item.text}
+                    >
+                      {item.type === "POST_CONTENT" && "…"}
+                      {matchIndex === -1 ? (
+                        item.text
+                      ) : (
+                        <>
+                          {item.text.slice(0, matchIndex)}
+                          <span className="font-bold text-background-600">
+                            {item.text.slice(matchIndex, matchIndex + value.length)}
+                          </span>
+                          {item.text.slice(matchIndex + value.length)}
+                        </>
+                      )}
+                      {item.type === "POST_CONTENT" && "…"}
+                    </span>
+                  ) : matchIndex === -1 ? (
                     <span>{item.text}</span>
                   ) : (
                     <span className="text-background-500">
