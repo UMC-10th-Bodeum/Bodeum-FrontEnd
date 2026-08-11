@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
@@ -24,6 +24,7 @@ export interface CommunityCommentNodeProps {
   isReplyPending: boolean;
   onLike: (commentId: number, isCurrentlyLiked: boolean) => void;
   likingCommentId?: number;
+  onLoginRequired: () => void;
   onAdopt?: (commentId: number, isAccepted: boolean) => void;
   isAdoptPending?: boolean;
   onDelete?: (commentId: number) => void;
@@ -41,6 +42,7 @@ export default function CommunityCommentNode({
   isReplyPending,
   onLike,
   likingCommentId,
+  onLoginRequired,
   onAdopt,
   isAdoptPending = false,
   onDelete,
@@ -100,8 +102,14 @@ export default function CommunityCommentNode({
           setIsEditing(false);
           showToast("green", "댓글이 수정되었습니다.");
         },
-        onError: (error) =>
-          showToast("red", getApiErrorMessage(error, "댓글을 수정하지 못했습니다.")),
+        onError: (error) => {
+          if (isUnauthorizedError(error)) {
+            onLoginRequired();
+            return;
+          }
+
+          showToast("red", getApiErrorMessage(error, "댓글을 수정하지 못했습니다."));
+        },
       },
     );
   };
@@ -276,6 +284,7 @@ export default function CommunityCommentNode({
       isReplyPending={isReplyPending}
       onLike={onLike}
       likingCommentId={likingCommentId}
+      onLoginRequired={onLoginRequired}
       onAdopt={onAdopt}
       isAdoptPending={isAdoptPending}
       onDelete={onDelete}

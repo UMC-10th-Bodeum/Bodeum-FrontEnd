@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { hasStoredAuthSession } from "@/apis/authApi";
 import CategoryButton from "@/components/CategoryButton";
 import Input from "@/components/Input";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
 import Pagination from "@/components/pagination/Pagination";
 import { Select } from "@/components/Select";
+import { showToast } from "@/components/Toast";
 import {
   communityCategoryEntries,
   communityCategoryCodeMap,
@@ -16,6 +16,7 @@ import {
 } from "@/constants/communityCategory";
 import { useCommunityPostSearchSuggestions, useCommunityPosts } from "@/hooks/useCommunity";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useUserBrief } from "@/hooks/useUser";
 import type { CommunityPostSort } from "@/types/community";
 import { formatDate } from "@/utils/time";
 import CommunityPostCard from "./components/CommunityPostCard";
@@ -55,7 +56,10 @@ function getCommunityCategory(boardType: string): CommunityCategory {
 export default function CommunityPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { data: userBrief, isError: isUserBriefError, refetch: refetchUserBrief } = useUserBrief();
+  const accessCheckInFlight = useRef(false);
+  const isLoggedIn =
+    !isUserBriefError && hasStoredAuthSession() && userBrief?.isLoggedIn === true;
   const categoryCodeParam = searchParams.get("categoryCode");
   const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
     ? getCommunityCategoryByCode(categoryCodeParam)
@@ -110,19 +114,49 @@ export default function CommunityPage() {
     setPage(1);
   };
 
-  const handleWriteClick = () => {
-    if (!hasStoredAuthSession()) {
-      setShowLoginModal(true);
+  const runAfterLoginCheck = async (onAuthenticated: () => void) => {
+    if (accessCheckInFlight.current) {
       return;
     }
 
-    navigate("/community/write");
+    if (!hasStoredAuthSession()) {
+      showToast("blue", "로그인/회원가입 후 만나보세요");
+      return;
+    }
+
+    accessCheckInFlight.current = true;
+
+    try {
+      const result = await refetchUserBrief();
+      const canWrite =
+        !result.isError && hasStoredAuthSession() && result.data?.isLoggedIn === true;
+
+      if (!canWrite) {
+        showToast("blue", "로그인/회원가입 후 만나보세요");
+        return;
+      }
+
+      onAuthenticated();
+    } finally {
+      accessCheckInFlight.current = false;
+    }
+  };
+
+  const handleWriteClick = () => {
+    void runAfterLoginCheck(() => navigate("/community/write"));
+  };
+
+  const handlePostClick = (postId: number) => {
+    void runAfterLoginCheck(() => navigate(`/community/${postId}`));
   };
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
-        <CommunitySection onWriteClick={handleWriteClick} />
+        <CommunitySection
+          onWriteClick={handleWriteClick}
+          onPostClick={handlePostClick}
+        />
 
         <div className="mt-[18px] flex flex-col gap-[16px]">
           <div className="flex flex-wrap gap-[16px]">
@@ -160,7 +194,7 @@ export default function CommunityPage() {
                 setSort(value as CommunityPostSort);
                 setPage(1);
               }}
-              placeholder={hasStoredAuthSession() ? "최신순" : "조회순"}
+              placeholder={isLoggedIn ? "최신순" : "조회순"}
               variant="S"
               ariaLabel="게시글 정렬"
               className="w-[120px]"
@@ -201,7 +235,7 @@ export default function CommunityPage() {
                     imageCount={post.thumbnailUrl ? 1 : 0}
                     initialIsLiked={post.isLiked}
                     createdAt={formatDate(post.createdAt)}
-                    onClick={() => navigate(`/community/${post.postId}`)}
+                    onClick={() => handlePostClick(post.postId)}
                   />
                 );
               })}
@@ -216,18 +250,6 @@ export default function CommunityPage() {
         )}
       </div>
 
-      {showLoginModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
-          <OnboardCancelBox
-            title="로그인하고 더 많은 기능을 이용해 보세요!"
-            description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
-            leftButtonText="둘러보기"
-            rightButtonText="로그인/회원가입"
-            onLeftButtonClick={() => setShowLoginModal(false)}
-            onRightButtonClick={() => navigate("/auth")}
-          />
-        </div>
-      )}
     </div>
   );
 }

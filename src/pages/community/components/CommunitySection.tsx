@@ -4,9 +4,10 @@ import { useRecommendedCommunityPosts } from "@/hooks/useHome";
 
 interface CommunitySectionProps {
   onWriteClick: () => void;
+  onPostClick: (postId: number) => void;
 }
 
-export default function CommunitySection({ onWriteClick }: CommunitySectionProps) {
+export default function CommunitySection({ onWriteClick, onPostClick }: CommunitySectionProps) {
   const { data: posts = [] } = useRecommendedCommunityPosts();
 
   return (
@@ -29,7 +30,11 @@ export default function CommunitySection({ onWriteClick }: CommunitySectionProps
       <div className="no-scrollbar w-full min-w-0 overflow-x-auto">
         <div className="inline-flex gap-4">
           {posts.map((post) => (
-            <CommunityCard key={post.postId} {...post} />
+            <CommunityCard
+              key={post.postId}
+              {...post}
+              onClick={() => onPostClick(post.postId)}
+            />
           ))}
         </div>
       </div>

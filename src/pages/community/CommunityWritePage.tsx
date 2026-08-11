@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
+import { hasStoredAuthSession } from "@/apis/authApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { communityCategoryCodeMap } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useCreateCommunityPost } from "@/hooks/useCommunity";
+import { useUserBrief } from "@/hooks/useUser";
 import type { CommunityPostPayload } from "@/types/community";
 
 import CommunityWriteForm from "./components/write/CommunityWriteForm";
@@ -18,6 +20,10 @@ export default function CommunityWritePage() {
   const submissionInProgressRef = useRef(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isWriteAccessAllowed, setIsWriteAccessAllowed] = useState(false);
+  const hasShownLoginToast = useRef(false);
+  const writeAccessCheckStarted = useRef(false);
+  const { refetch: refetchUserBrief } = useUserBrief();
   const { mutateAsync: createPost } = useCreateCommunityPost();
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
@@ -38,6 +44,35 @@ export default function CommunityWritePage() {
       setShowCancelModal(true);
     }
   }, [blocker.state]);
+
+  useEffect(() => {
+    if (writeAccessCheckStarted.current) {
+      return;
+    }
+
+    writeAccessCheckStarted.current = true;
+
+    const checkWriteAccess = async () => {
+      const result = await refetchUserBrief();
+      const canWrite =
+        !result.isError && hasStoredAuthSession() && result.data?.isLoggedIn === true;
+
+      if (canWrite) {
+        setIsWriteAccessAllowed(true);
+        return;
+      }
+
+      if (!hasShownLoginToast.current) {
+        hasShownLoginToast.current = true;
+        showToast("blue", "로그인/회원가입 후 만나보세요");
+      }
+
+      allowNavigationRef.current = true;
+      navigate("/community", { replace: true });
+    };
+
+    void checkWriteAccess();
+  }, [navigate, refetchUserBrief]);
 
   const publishPost = (payload: CommunityPostPayload) => {
     if (submissionInProgressRef.current) return;
@@ -75,6 +110,14 @@ export default function CommunityWritePage() {
         showToast("green", "게시물이 성공적으로 등록됐습니다!");
         navigate("/community");
       } catch (error) {
+        if (isUnauthorizedError(error)) {
+          showToast("blue", "로그인/회원가입 후 만나보세요");
+          setIsWriteAccessAllowed(false);
+          allowNavigationRef.current = true;
+          navigate("/community", { replace: true });
+          return;
+        }
+
         showToast(
           "red",
           getApiErrorMessage(
@@ -107,6 +150,10 @@ export default function CommunityWritePage() {
     allowNavigationRef.current = true;
     navigate("/community");
   };
+
+  if (!isWriteAccessAllowed) {
+    return <div className="min-h-full bg-background-100" />;
+  }
 
   return (
     <div className="min-h-full bg-background-100 px-[24px] py-[16px]">

@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { isUnauthorizedError } from "@/apis/apiError";
 import { hasStoredAuthSession } from "@/apis/authApi";
 import ButtonOutline from "@/components/ButtonOutline";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
+import { showToast } from "@/components/Toast";
 import {
   communityCategoryMap,
   communityCategoryCodeMap,
@@ -11,6 +12,7 @@ import {
 } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useCommunityPost, useCommunityPosts } from "@/hooks/useCommunity";
+import { useUserBrief } from "@/hooks/useUser";
 import { formatMonthDay } from "@/utils/time";
 import CommunityCommentsSection from "./components/comments/CommunityCommentsSection";
 import CommunityPostDetailCard from "./components/detail/CommunityPostDetailCard";
@@ -19,17 +21,40 @@ import CommunityRelatedPostCard from "./components/detail/CommunityRelatedPostCa
 export default function CommunityDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isAuthenticated = hasStoredAuthSession();
-  const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated);
+  const hasShownLoginToast = useRef(false);
   const { setBreadcrumb } = useBreadcrumb();
+  const {
+    data: userBrief,
+    isPending: isAuthPending,
+    isError: isAuthError,
+  } = useUserBrief();
+  const hasDetailAccess =
+    !isAuthError && hasStoredAuthSession() && userBrief?.isLoggedIn === true;
   const parsedPostId = id && /^\d+$/.test(id) ? Number(id) : undefined;
   const postId =
     parsedPostId !== undefined && Number.isSafeInteger(parsedPostId) && parsedPostId > 0
       ? parsedPostId
       : undefined;
-  const { data: post, isPending, isError, refetch } = useCommunityPost(postId);
+  const { data: post, isPending, isError, error: postError, refetch } = useCommunityPost(
+    hasDetailAccess ? postId : undefined,
+  );
   const category = post ? getCommunityCategoryByCode(post.boardType) : undefined;
   const categoryLabel = category ? communityCategoryMap[category] : "커뮤니티";
+
+  const handleLoginRequired = useCallback(() => {
+    if (!hasShownLoginToast.current) {
+      hasShownLoginToast.current = true;
+      showToast("blue", "로그인/회원가입 후 만나보세요");
+    }
+
+    navigate("/community", { replace: true });
+  }, [navigate]);
+
+  useEffect(() => {
+    if ((!isAuthPending && !hasDetailAccess) || isUnauthorizedError(postError)) {
+      handleLoginRequired();
+    }
+  }, [handleLoginRequired, hasDetailAccess, isAuthPending, postError]);
 
   useEffect(() => {
     setBreadcrumb([{ label: "커뮤니티" }, { label: categoryLabel }]);
@@ -39,6 +64,10 @@ export default function CommunityDetailPage() {
 
   if (postId === undefined) {
     return <NotFoundState />;
+  }
+
+  if (isAuthPending || !hasDetailAccess || isUnauthorizedError(postError)) {
+    return <div className="min-h-[calc(100vh-60px)] bg-background-200" />;
   }
 
   if (isPending) {
@@ -68,22 +97,22 @@ export default function CommunityDetailPage() {
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
-      <div className="mx-auto flex w-full flex-col gap-[18px]">
-        <div
-          className={
-            showLoginModal ? "pointer-events-none select-none blur-sm" : undefined
-          }
-          aria-hidden={showLoginModal}
+      <div
+        className="mx-auto flex w-full flex-col gap-[18px]"
+      >
+        <CommunityPostDetailCard
+          key={post.postId}
+          post={post}
+          category={category}
+          onLoginRequired={handleLoginRequired}
         >
-          <CommunityPostDetailCard key={post.postId} post={post} category={category}>
-            <CommunityCommentsSection
-              key={post.postId}
-              postId={post.postId}
-              canAdopt={post.isMine && post.boardType === "INFORMATION_QUESTION"}
-              onLoginRequired={() => setShowLoginModal(true)}
-            />
-          </CommunityPostDetailCard>
-        </div>
+          <CommunityCommentsSection
+            key={post.postId}
+            postId={post.postId}
+            canAdopt={post.isMine && post.boardType === "INFORMATION_QUESTION"}
+            onLoginRequired={handleLoginRequired}
+          />
+        </CommunityPostDetailCard>
 
         <CommunityRelatedPostsSection
           key={post.boardType}
@@ -92,19 +121,6 @@ export default function CommunityDetailPage() {
         />
       </div>
 
-      {showLoginModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
-          <OnboardCancelBox
-            title="로그인하고 더 많은 기능을 이용해 보세요!"
-            description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
-            leftButtonText="둘러보기"
-            rightButtonText="로그인/회원가입"
-            className="z-[70]!"
-            onLeftButtonClick={() => navigate("/community")}
-            onRightButtonClick={() => navigate("/auth")}
-          />
-        </div>
-      )}
     </div>
   );
 }

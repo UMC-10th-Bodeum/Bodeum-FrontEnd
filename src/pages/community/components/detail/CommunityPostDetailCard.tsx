@@ -4,7 +4,7 @@ import HeartDisabledIcon from "@/assets/icons/HeartDisabled.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
 import WarningIcon from "@/assets/icons/Warning.svg?react";
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import DetailBackButton from "@/components/DetailBackButton";
 import { useNavigate } from "react-router-dom";
 import PostTag from "@/components/PostTag";
@@ -28,6 +28,7 @@ interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
   category: CommunityCategory;
   children: ReactNode;
+  onLoginRequired: () => void;
 }
 
 interface ImageThumbProps {
@@ -70,6 +71,7 @@ export default function CommunityPostDetailCard({
   post,
   category,
   children,
+  onLoginRequired,
 }: CommunityPostDetailCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(post.title);
@@ -82,6 +84,16 @@ export default function CommunityPostDetailCard({
   const { mutate: deletePost, isPending: isDeleting } = useDeleteCommunityPost(post.postId);
   const { mutate: updatePost, isPending: isUpdating } = useUpdateCommunityPost(post.postId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const showMutationError = (error: unknown, fallbackMessage: string) => {
+    if (isUnauthorizedError(error)) {
+      setShowDeleteModal(false);
+      onLoginRequired();
+      return;
+    }
+
+    showToast("red", getApiErrorMessage(error, fallbackMessage));
+  };
 
   const startEditing = () => {
     setEditedTitle(post.title);
@@ -109,8 +121,7 @@ export default function CommunityPostDetailCard({
         setIsEditing(false);
         showToast("green", "게시글이 수정되었습니다.");
       },
-      onError: (error) =>
-        showToast("red", getApiErrorMessage(error, "게시글을 수정하지 못했습니다.")),
+      onError: (error) => showMutationError(error, "게시글을 수정하지 못했습니다."),
     });
   };
 
@@ -198,7 +209,7 @@ export default function CommunityPostDetailCard({
             onClick={() =>
               toggleLike(post.isLiked, {
                 onError: (error) =>
-                  showToast("red", getApiErrorMessage(error, "공감 상태를 변경하지 못했습니다.")),
+                  showMutationError(error, "공감 상태를 변경하지 못했습니다."),
               })
             }
           />
@@ -212,7 +223,7 @@ export default function CommunityPostDetailCard({
             onClick={() =>
               toggleScrap(post.isScrapped, {
                 onError: (error) =>
-                  showToast("red", getApiErrorMessage(error, "스크랩 상태를 변경하지 못했습니다.")),
+                  showMutationError(error, "스크랩 상태를 변경하지 못했습니다."),
               })
             }
           />
@@ -269,7 +280,7 @@ export default function CommunityPostDetailCard({
                       navigate("/community");
                     },
                     onError: (error) =>
-                      showToast("red", getApiErrorMessage(error, "게시물을 삭제하지 못했습니다.")),
+                      showMutationError(error, "게시물을 삭제하지 못했습니다."),
                   })
                 }
                 loading={isDeleting}
