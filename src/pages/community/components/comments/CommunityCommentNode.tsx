@@ -221,6 +221,15 @@ export default function CommunityCommentNode({
                   disabled={isAdoptPending}
                   onClick={(event) => {
                     event?.stopPropagation();
+
+                    if (comment.isMine && !comment.isAccepted) {
+                      showToast(
+                        "red",
+                        "본인이 작성한 댓글 혹은 답글은 채택할 수 없습니다.",
+                      );
+                      return;
+                    }
+
                     onAdopt?.(comment.commentId, comment.isAccepted);
                   }}
                   label="채택"
