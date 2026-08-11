@@ -17,6 +17,7 @@ import {
 import { useCommunityPostSearchSuggestions, useCommunityPosts } from "@/hooks/useCommunity";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { CommunityPostSort } from "@/types/community";
+import { formatDate } from "@/utils/time";
 import CommunityPostCard from "./components/CommunityPostCard";
 import CommunitySection from "./components/CommunitySection";
 
@@ -49,20 +50,6 @@ function getCommunityCategory(boardType: string): CommunityCategory {
     return "QUESTION";
   }
   return "FREE";
-}
-
-function formatCreatedAt(createdAt: string) {
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return createdAt;
-  }
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
 }
 
 export default function CommunityPage() {
@@ -213,7 +200,7 @@ export default function CommunityPage() {
                     views={post.viewCount}
                     imageCount={post.thumbnailUrl ? 1 : 0}
                     initialIsLiked={post.isLiked}
-                    createdAt={formatCreatedAt(post.createdAt)}
+                    createdAt={formatDate(post.createdAt)}
                     onClick={() => navigate(`/community/${post.postId}`)}
                   />
                 );

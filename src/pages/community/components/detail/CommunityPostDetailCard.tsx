@@ -22,6 +22,7 @@ import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
 import ShareButton from "@/components/ShareButton";
 import { diagnosisMap } from "@/constants/diagnosis";
+import { formatDate } from "@/utils/time";
 
 interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
@@ -144,11 +145,7 @@ export default function CommunityPostDetailCard({
           </div>
         </div>
         <time className="shrink-0 text-body-sub text-background-400">
-          {new Intl.DateTimeFormat("ko-KR", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-          }).format(new Date(post.createdAt))}
+          {formatDate(post.createdAt)}
         </time>
       </header>
 
