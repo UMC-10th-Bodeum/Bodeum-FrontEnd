@@ -10,10 +10,7 @@ import {
   sidoDisplayNameByRegion,
 } from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
-import {
-  createChildBirthMonthOptions,
-  birthYearOptions,
-} from "./birthDateOptions";
+import { createChildBirthMonthOptions, birthYearOptions } from "./birthDateOptions";
 import type { ProfileSettingsForm } from "@/types/mypage";
 import { formatDateWithDots } from "@/utils/time";
 import ProfileImagePicker from "./components/ProfileImagePicker";
@@ -81,7 +78,7 @@ export default function ProfileManagementCard({
     childNickname.length <= 20 &&
     hasCompleteBirth &&
     form.diagnoses.length > 0;
-  const birthMonthOptions = createChildBirthMonthOptions(form.birthYear);
+  const birthMonthOptions = createChildBirthMonthOptions();
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -95,18 +92,6 @@ export default function ProfileManagementCard({
       : [...form.diagnoses, diagnosis];
 
     updateField("diagnoses", diagnoses);
-  };
-
-  const updateBirthYear = (birthYear: string) => {
-    const canKeepBirthMonth = createChildBirthMonthOptions(birthYear).some(
-      ({ value }) => value === form.birthMonth,
-    );
-
-    onChange({
-      ...form,
-      birthYear,
-      birthMonth: canKeepBirthMonth ? form.birthMonth : "",
-    });
   };
 
   const startEditing = () => {
@@ -236,16 +221,17 @@ export default function ProfileManagementCard({
       </div>
 
       <div className="mt-[26px]">
-        <span className="mb-[12px] block text-h3-onboard text-background-500">자녀 생년월일*</span>
+        <span className="mb-[12px] block text-h3-onboard text-background-500">자녀 생년월*</span>
         <div className="grid grid-cols-2 gap-[14px]">
           <ProfileSelect
             variant="L"
             ariaLabel="출생 연도"
             options={birthYearOptions}
+            initialScrollIndex={Math.floor(birthYearOptions.length / 2)}
             value={form.birthYear}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthYear")}
-            onChange={updateBirthYear}
+            onChange={(birthYear) => updateField("birthYear", birthYear)}
             placeholder="년도"
             className="w-full"
           />

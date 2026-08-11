@@ -4,6 +4,10 @@ import Input from "@/components/Input";
 import OnboardBoxFrame from "@/components/OnboardBoxFrame";
 import { Select, type SelectOption } from "@/components/Select";
 import type { OnboardingDraft } from "@/types/onboarding";
+import {
+  createChildBirthMonthOptions,
+  createChildBirthYearOptions,
+} from "@/utils/childBirthDateOptions";
 
 import SelectableChip from "./SelectableChip";
 
@@ -37,17 +41,9 @@ type LimitedTextInputProps = {
   maxLength: number;
 };
 
-const currentYear = new Date().getFullYear();
-const birthYearStart = 1990;
 const nicknameMaxLength = 20;
-
-const yearOptions: SelectOption[] = Array.from(
-  { length: currentYear - birthYearStart + 1 },
-  (_, index) => {
-    const year = birthYearStart + index;
-    return { label: `${year}년`, value: `${year}` };
-  },
-);
+const birthYearOptions = createChildBirthYearOptions();
+const birthMonthOptions = createChildBirthMonthOptions();
 
 const createOptions = (values: string[]): SelectOption[] =>
   values.map((value) => ({ label: value, value }));
@@ -328,11 +324,6 @@ const districtOptionsByRegion: Record<string, SelectOption[]> = Object.fromEntri
   sidoNames.map((sido) => [sido, createOptions(districtNamesByRegion[sido] ?? [])]),
 );
 
-const monthOptions: SelectOption[] = Array.from({ length: 12 }, (_, index) => {
-  const month = index + 1;
-  return { label: `${month}월`, value: `${month}` };
-});
-
 const careAreaOptions = [
   "자폐스펙트럼",
   "지적장애",
@@ -569,8 +560,8 @@ export default function OnboardingStepCard({
                 id={birthYearId}
                 variant="L"
                 value={form.birthYear}
-                options={yearOptions}
-                initialScrollIndex={Math.floor(yearOptions.length / 2)}
+                options={birthYearOptions}
+                initialScrollIndex={Math.floor(birthYearOptions.length / 2)}
                 onChange={(value) => updateField("birthYear", value)}
                 placeholder="년도"
                 ariaLabel="자녀 생년월 년도"
@@ -580,7 +571,7 @@ export default function OnboardingStepCard({
                 id={birthMonthId}
                 variant="L"
                 value={form.birthMonth}
-                options={monthOptions}
+                options={birthMonthOptions}
                 onChange={(value) => updateField("birthMonth", value)}
                 placeholder="월"
                 ariaLabel="자녀 생년월 월"

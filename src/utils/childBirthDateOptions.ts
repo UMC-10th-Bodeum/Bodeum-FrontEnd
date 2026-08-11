@@ -1,25 +1,23 @@
-const MAX_CHILD_AGE = 18;
+const CHILD_BIRTH_YEAR_START = 1990;
 
 export function createChildBirthYearOptions() {
   const currentYear = new Date().getFullYear();
-  const birthYearStart = currentYear - MAX_CHILD_AGE;
 
-  return Array.from({ length: MAX_CHILD_AGE + 1 }, (_, index) => {
-    const year = birthYearStart + index;
+  return Array.from(
+    { length: currentYear - CHILD_BIRTH_YEAR_START + 1 },
+    (_, index) => {
+      const year = CHILD_BIRTH_YEAR_START + index;
 
-    return {
-      label: `${year}년`,
-      value: `${year}`,
-    };
-  });
+      return {
+        label: `${year}년`,
+        value: `${year}`,
+      };
+    },
+  );
 }
 
-export function createChildBirthMonthOptions(birthYear = "") {
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const lastMonth = birthYear === `${currentYear}` ? today.getMonth() + 1 : 12;
-
-  return Array.from({ length: lastMonth }, (_, index) => {
+export function createChildBirthMonthOptions() {
+  return Array.from({ length: 12 }, (_, index) => {
     const month = index + 1;
 
     return {
