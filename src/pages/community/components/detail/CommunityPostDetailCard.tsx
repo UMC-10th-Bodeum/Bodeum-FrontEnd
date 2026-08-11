@@ -23,6 +23,7 @@ import type { CommunityPostDetail } from "@/types/community";
 import ShareButton from "@/components/ShareButton";
 import { diagnosisMap } from "@/constants/diagnosis";
 import { formatDate } from "@/utils/time";
+import CommunityContentFields from "../CommunityContentFields";
 
 interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
@@ -162,18 +163,13 @@ export default function CommunityPostDetailCard({
 
       <div className="pb-[20px] pt-[12px]">
         {isEditing ? (
-          <>
-            <input
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              className="w-full rounded-[6px] border border-background-200 px-3 py-2 text-h1-onboard"
-            />
-            <textarea
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-              className="mt-[12px] w-full min-h-[120px] rounded-[6px] border border-background-200 p-3 text-h3-onboard"
-            />
-          </>
+          <CommunityContentFields
+            title={editedTitle}
+            content={editedContent}
+            onTitleChange={setEditedTitle}
+            onContentChange={setEditedContent}
+            showLegend={false}
+          />
         ) : (
           <>
             <h1 className="text-h1-onboard text-background-600">{post.title}</h1>
