@@ -570,6 +570,7 @@ export default function OnboardingStepCard({
                 variant="L"
                 value={form.birthYear}
                 options={yearOptions}
+                initialScrollIndex={Math.floor(yearOptions.length / 2)}
                 onChange={(value) => updateField("birthYear", value)}
                 placeholder="년도"
                 ariaLabel="자녀 생년월 년도"
@@ -604,7 +605,7 @@ export default function OnboardingStepCard({
               id={childKeywordsId}
               value={form.childKeywords}
               onChange={(value) => updateField("childKeywords", value)}
-              placeholder="아이와 닮은 친구를 찾기 위한 키워드를 입력해주세요(소심함, 활발함, 소리 예민 등)"
+              placeholder="자녀의 특징을 키워드로 입력해주세요(소심함, 활발함, 소리 예민 등)"
               maxLength={100}
             />
           </FormGroup>

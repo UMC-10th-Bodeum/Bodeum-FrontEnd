@@ -23,6 +23,7 @@ export interface SelectProps {
   className?: string;
   triggerClassName?: string;
   dropdownClassName?: string;
+  initialScrollIndex?: number;
 }
 
 const triggerBaseClass =
@@ -97,6 +98,7 @@ export function Select({
   className,
   triggerClassName: customTriggerClassName,
   dropdownClassName,
+  initialScrollIndex,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -108,6 +110,7 @@ export function Select({
   const dropdownRef = useRef<HTMLUListElement>(null);
   const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
   const shouldFocusActiveOptionRef = useRef(false);
+  const shouldCenterActiveOptionRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -177,7 +180,14 @@ export function Select({
       return 0;
     }
 
-    return selectedIndex >= 0 ? selectedIndex : 0;
+    if (selectedIndex >= 0) {
+      return selectedIndex;
+    }
+
+    return Math.min(
+      Math.max(initialScrollIndex ?? 0, 0),
+      options.length - 1,
+    );
   };
   const restoreTriggerFocus = () => {
     window.requestAnimationFrame(() => {
@@ -193,11 +203,14 @@ export function Select({
     }
 
     shouldFocusActiveOptionRef.current = shouldFocusActiveOption;
+    shouldCenterActiveOptionRef.current =
+      !shouldFocusActiveOption && initialScrollIndex !== undefined;
     setActiveIndex(nextActiveIndex);
     setIsOpen(true);
   };
   const closeListbox = (shouldRestoreFocus = false) => {
     shouldFocusActiveOptionRef.current = false;
+    shouldCenterActiveOptionRef.current = false;
     setIsOpen(false);
 
     if (shouldRestoreFocus) {
@@ -325,14 +338,28 @@ export function Select({
       return;
     }
 
-    if (!shouldFocusActiveOptionRef.current) {
-      return;
+    if (shouldCenterActiveOptionRef.current) {
+      shouldCenterActiveOptionRef.current = false;
+      window.requestAnimationFrame(() => {
+        const activeOption = optionRefs.current[nextActiveIndex];
+        const dropdown = dropdownRef.current;
+
+        if (activeOption && dropdown) {
+          dropdown.scrollTop = Math.max(
+            0,
+            activeOption.offsetTop -
+              (dropdown.clientHeight - activeOption.offsetHeight) / 2,
+          );
+        }
+      });
     }
 
-    shouldFocusActiveOptionRef.current = false;
-    const activeOption = optionRefs.current[nextActiveIndex];
-    activeOption?.focus();
-    activeOption?.scrollIntoView({ block: "nearest" });
+    if (shouldFocusActiveOptionRef.current) {
+      shouldFocusActiveOptionRef.current = false;
+      const activeOption = optionRefs.current[nextActiveIndex];
+      activeOption?.focus();
+      activeOption?.scrollIntoView({ block: "nearest" });
+    }
   }, [activeIndex, isOpen, options.length]);
 
   const chevronClassName = [
