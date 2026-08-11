@@ -1,0 +1,80 @@
+import axios from "axios";
+import reissueTokens from "./reissueTokens";
+import type { RetryRequestConfig } from "@/types/api";
+
+function replaceLogoutRefreshToken(
+  request: RetryRequestConfig,
+  refreshToken: string,
+) {
+  if (!request.url?.endsWith("/api/v1/auth/logout") || !request.data) {
+    return;
+  }
+
+  try {
+    const requestData =
+      typeof request.data === "string"
+        ? JSON.parse(request.data)
+        : { ...request.data };
+
+    requestData.refreshToken = refreshToken;
+    request.data =
+      typeof request.data === "string"
+        ? JSON.stringify(requestData)
+        : requestData;
+  } catch {
+    request.data = JSON.stringify({ refreshToken });
+  }
+}
+
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
+if (!baseUrl) {
+  throw new Error("VITE_BASE_URL이 설정되지 않았습니다.");
+}
+
+const api = axios.create({
+  baseURL: baseUrl,
+  timeout: 10000,
+});
+
+api.interceptors.request.use((config) => {
+  const accessToken = localStorage.getItem("accessToken");
+  const tokenType = localStorage.getItem("tokenType") ?? "Bearer";
+
+  if (accessToken) {
+    config.headers.Authorization = `${tokenType} ${accessToken}`;
+  }
+
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config as RetryRequestConfig;
+
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const newTokens = await reissueTokens();
+
+      if (newTokens) {
+        originalRequest.headers.Authorization =
+          `${newTokens.tokenType} ${newTokens.accessToken}`;
+        replaceLogoutRefreshToken(originalRequest, newTokens.refreshToken);
+
+        return api(originalRequest);
+      }
+
+      console.error("토큰 재발급에 실패했습니다.");
+    }
+
+    return Promise.reject(error);
+  },
+);
+
+export default api;

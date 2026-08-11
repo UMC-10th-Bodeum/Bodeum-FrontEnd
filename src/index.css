@@ -1,1 +1,139 @@
+@import "@fontsource/noto-sans-kr/400.css";
+@import "@fontsource/noto-sans-kr/500.css";
+@import "@fontsource/noto-sans-kr/600.css";
+@import "@fontsource/noto-sans-kr/700.css";
+
 @import "tailwindcss";
+
+@theme {
+  /* Font */
+  --font-sans: "Noto Sans KR", sans-serif;
+
+  /* Main Colors */
+
+  --color-main-500: #063F7B;
+  --color-main-400: #0C72E0;
+  --color-main-300: #91C3F9;
+  --color-main-200: #E5F1FF;
+  --color-main-150: #E1EFFE;
+  --color-main-100: #EDF0F6;
+
+  /* Sub Colors */
+
+  --color-sub-yellow: #F2B31D;
+  --color-sub-yellow-2: #FFF7E4;
+
+  --color-sub-red: #DC2E31;
+  --color-sub-red-2: #FDF2F8;
+
+  --color-sub-green: #0EA345;
+  --color-sub-green-2: #F0FFF6;
+
+  --color-sub-purple: #603183;
+  --color-sub-purple-2: #F4EEFF;
+
+  /* Background */
+
+  --color-background-600: #2E2E2E;
+  --color-background-500: #616368;
+  --color-background-400: #9DA0AD;
+  --color-background-300: #C1C6D1;
+  --color-background-250: #D7DBE4;
+  --color-background-200: #F3F4F8;
+  --color-background-100: #FFFFFF;
+
+  /* Effects */
+
+  --shadow-button: 1px 2px 15px rgb(0 0 0 / 0.15);
+
+  /* Typography */
+
+  --text-h1: 18px;
+  --text-h1--line-height: 27px;
+  --text-h1--font-weight: 400;
+
+  --text-h1-onboard: 22px;
+  --text-h1-onboard--line-height: 33px;
+  --text-h1-onboard--font-weight: 700;
+
+  --text-h1-info: 22px;
+  --text-h1-info--line-height: 33px;
+  --text-h1-info--font-weight: 400;
+
+  --text-h2-list: 16px;
+  --text-h2-list--line-height: 24px;
+  --text-h2-list--font-weight: 600;
+
+  --text-h2-onboard: 16px;
+  --text-h2-onboard--line-height: 24px;
+  --text-h2-onboard--font-weight: 400;
+
+  --text-h2-button: 20px;
+  --text-h2-button--line-height: 30px;
+  --text-h2-button--font-weight: 500;
+
+  --text-h3-category: 16px;
+  --text-h3-category--line-height: 24px;
+  --text-h3-category--font-weight: 500;
+
+  --text-h3-category-sub: 14px;
+  --text-h3-category-sub--line-height: 21px;
+  --text-h3-category-sub--font-weight: 500;
+
+  --text-h3-onboard: 14px;
+  --text-h3-onboard--line-height: 21px;
+  --text-h3-onboard--font-weight: 400;
+
+  --text-h4-list: 13px;
+  --text-h4-list--line-height: 19.5px;
+  --text-h4-list--font-weight: 500;
+
+  --text-h5-list: 13px;
+  --text-h5-list--line-height: 19.5px;
+  --text-h5-list--font-weight: 600;
+
+  --text-h6: 12px;
+  --text-h6--line-height: 18px;
+  --text-h6--font-weight: 500;
+
+  --text-h6-list: 12px;
+  --text-h6-list--line-height: 18px;
+  --text-h6-list--font-weight: 400;
+
+  --text-body-sub: 11px;
+  --text-body-sub--line-height: 16.5px;
+  --text-body-sub--font-weight: 400;
+
+  --text-body-label: 11px;
+  --text-body-label--line-height: 16.5px;
+  --text-body-label--font-weight: 500;
+
+  --text-body-sub-2: 10px;
+  --text-body-sub-2--line-height: 15px;
+  --text-body-sub-2--font-weight: 400;
+
+  --text-body-label-2: 10px;
+  --text-body-label-2--line-height: 15px;
+  --text-body-label-2--font-weight: 500;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.bodeum-icon-color [fill]:not([fill="none"]) {
+  fill: currentColor;
+}
+
+.bodeum-icon-color [stroke]:not([stroke="none"]) {
+  stroke: currentColor;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}

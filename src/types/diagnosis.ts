@@ -1,0 +1,8 @@
+export type DiagnosisType =
+  | "AUTISM"
+  | "INTELLECTUAL_DISABILITY"
+  | "BRAIN_LESION"
+  | "ADHD"
+  | "DEVELOPMENTAL_DELAY"
+  | "LANGUAGE_DISORDER"
+  | "ETC";
