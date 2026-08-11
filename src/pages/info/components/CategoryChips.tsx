@@ -19,9 +19,15 @@ export default function CategoryChips({
 }: CategoryChipsProps) {
   const categories = infoSubCategoryMap[parentCategory];
 
+  const visibleCategories = categories.filter(
+    (item) =>
+      item.value !== "YOUTH_CENTER" &&
+      item.value !== "KEAD_JOB",
+  );
+
   return (
     <div className="flex flex-wrap gap-2">
-      {categories
+      {visibleCategories
         .filter((item) => item.value.endsWith("_ETC"))
         .map((item) => (
           <CategoryButton
@@ -41,7 +47,7 @@ export default function CategoryChips({
         onClick={() => onChange(null)}
       />
 
-      {categories
+      {visibleCategories
         .filter((item) => !item.value.endsWith("_ETC"))
         .map((item) => (
           <CategoryButton
