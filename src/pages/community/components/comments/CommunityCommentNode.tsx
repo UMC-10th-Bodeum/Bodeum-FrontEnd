@@ -10,6 +10,7 @@ import { useUpdateCommunityComment } from "@/hooks/useCommunity";
 import type { CommunityComment } from "@/types/community";
 import { getRelativeTime } from "@/utils/time";
 
+import { CommunityTextarea } from "../CommunityContentFields";
 import CommunityReplyForm from "./CommunityReplyForm";
 
 export interface CommunityCommentNodeProps {
@@ -183,11 +184,13 @@ export default function CommunityCommentNode({
 
         {isEditing ? (
           <div className="mt-3 pr-[14px]">
-            <textarea
+            <CommunityTextarea
               value={editedContent}
-              maxLength={1000}
-              onChange={(event) => setEditedContent(event.target.value)}
-              className="min-h-[96px] w-full resize-none rounded-[8px] border border-background-300 bg-background-100 px-[16px] py-[12px] text-body text-background-600 outline-none focus:border-primary-500"
+              onChange={setEditedContent}
+              placeholder="댓글을 입력해 주세요"
+              placeholderClassName="placeholder:text-h3-onboard"
+              ariaLabel={`${isRoot ? "댓글" : "답글"} 내용`}
+              compact
             />
             <div className="mt-[12px] flex justify-end gap-2">
               <ButtonOutline
@@ -231,10 +234,7 @@ export default function CommunityCommentNode({
                     event?.stopPropagation();
 
                     if (comment.isMine && !comment.isAccepted) {
-                      showToast(
-                        "red",
-                        "본인이 작성한 댓글 혹은 답글은 채택할 수 없습니다.",
-                      );
+                      showToast("red", "본인이 작성한 댓글 혹은 답글은 채택할 수 없습니다.");
                       return;
                     }
 

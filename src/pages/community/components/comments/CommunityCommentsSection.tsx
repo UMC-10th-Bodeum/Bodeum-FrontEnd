@@ -101,11 +101,14 @@ export default function CommunityCommentsSection({
         <ProfileIcon className="h-[40px] w-[40px] shrink-0" />
         <input
           value={comment}
-          maxLength={1000}
           disabled={isCreatePending}
           onChange={(event) => setComment(event.target.value)}
           placeholder="이웃 부모에게 따뜻한 댓글을 남겨주세요"
-          className="h-[44px] w-[947px] flex-1 rounded-[10px] border border-transparent bg-background-200 px-[16px] text-h4-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className={`h-[44px] w-[947px] flex-1 rounded-[10px] border px-[18px] py-[10px] text-h4-list text-background-600 outline-none placeholder:text-background-500 focus:border-main-400 focus:bg-background-100 disabled:cursor-not-allowed disabled:opacity-50 ${
+            comment.length > 0
+              ? "border-main-400 bg-background-100"
+              : "border-transparent bg-main-100"
+          }`}
         />
         <ButtonFill
           type="submit"
