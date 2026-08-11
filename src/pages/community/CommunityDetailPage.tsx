@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { isUnauthorizedError } from "@/apis/apiError";
-import { hasStoredAuthSession } from "@/apis/authApi";
+import AsyncState from "@/components/AsyncState";
 import ButtonOutline from "@/components/ButtonOutline";
 import { showToast } from "@/components/Toast";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useCommunityPost, useCommunityPosts } from "@/hooks/useCommunity";
-import { useUserBrief } from "@/hooks/useUser";
+import { useLoginCheck } from "@/hooks/useLoginCheck";
 import { formatMonthDay } from "@/utils/time";
 import CommunityCommentsSection from "./components/comments/CommunityCommentsSection";
 import CommunityPostDetailCard from "./components/detail/CommunityPostDetailCard";
@@ -23,19 +23,13 @@ export default function CommunityDetailPage() {
   const navigate = useNavigate();
   const hasShownLoginToast = useRef(false);
   const { setBreadcrumb } = useBreadcrumb();
-  const {
-    data: userBrief,
-    isPending: isAuthPending,
-    isError: isAuthError,
-  } = useUserBrief();
-  const hasDetailAccess =
-    !isAuthError && hasStoredAuthSession() && userBrief?.isLoggedIn === true;
+  const { isLoggedIn: hasDetailAccess, isPending: isAuthPending } = useLoginCheck();
   const parsedPostId = id && /^\d+$/.test(id) ? Number(id) : undefined;
   const postId =
     parsedPostId !== undefined && Number.isSafeInteger(parsedPostId) && parsedPostId > 0
       ? parsedPostId
       : undefined;
-  const { data: post, isPending, isError, error: postError, refetch } = useCommunityPost(
+  const { data: post, isPending, isError, error: postError } = useCommunityPost(
     hasDetailAccess ? postId : undefined,
   );
   const category = post ? getCommunityCategoryByCode(post.boardType) : undefined;
@@ -63,36 +57,23 @@ export default function CommunityDetailPage() {
   }, [categoryLabel, setBreadcrumb]);
 
   if (postId === undefined) {
-    return <NotFoundState />;
+    return <AsyncState type="error" />;
   }
 
-  if (isAuthPending || !hasDetailAccess || isUnauthorizedError(postError)) {
+  if (isAuthPending) {
+    return <AsyncState type="loading" />;
+  }
+
+  if (!hasDetailAccess || isUnauthorizedError(postError)) {
     return <div className="min-h-[calc(100vh-60px)] bg-background-200" />;
   }
 
   if (isPending) {
-    return (
-      <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[80px] text-center text-background-500">
-        게시글을 불러오는 중입니다.
-      </div>
-    );
+    return <AsyncState type="loading" />;
   }
 
   if (isError || !post || !category) {
-    return (
-      <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
-        <div className="mx-auto flex w-[680px] flex-col items-center gap-3 rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
-          <h1 className="text-h2-list text-background-600">게시글을 불러오지 못했습니다.</h1>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-lg border border-background-300 px-4 py-2 text-background-500"
-          >
-            다시 시도
-          </button>
-        </div>
-      </div>
-    );
+    return <AsyncState type="error" />;
   }
 
   return (
@@ -124,7 +105,6 @@ export default function CommunityDetailPage() {
     </div>
   );
 }
-
 interface CommunityRelatedPostsSectionProps {
   currentPostId: number;
   category: CommunityCategory;
@@ -194,18 +174,5 @@ function CommunityRelatedPostsSection({
         className="h-[40px] w-full"
       />
     </section>
-  );
-}
-
-function NotFoundState() {
-  return (
-    <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
-      <div className="mx-auto flex w-[680px] flex-col items-center rounded-[10px] border border-background-250 bg-background-100 px-[24px] py-[48px] text-center">
-        <h1 className="text-h2-list text-background-600">게시글을 찾을 수 없습니다.</h1>
-        <p className="mt-[8px] text-h5 text-background-500">
-          삭제되었거나 존재하지 않는 게시글입니다.
-        </p>
-      </div>
-    </div>
   );
 }

@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
 
 import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
-import { hasStoredAuthSession } from "@/apis/authApi";
 import { uploadCommunityPostImage } from "@/apis/community";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { communityCategoryCodeMap } from "@/constants/communityCategory";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { useCreateCommunityPost } from "@/hooks/useCommunity";
-import { useUserBrief } from "@/hooks/useUser";
+import { useLoginCheck } from "@/hooks/useLoginCheck";
 import type { CommunityPostPayload } from "@/types/community";
 
 import CommunityWriteForm from "./components/write/CommunityWriteForm";
@@ -23,8 +22,7 @@ export default function CommunityWritePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isWriteAccessAllowed, setIsWriteAccessAllowed] = useState(false);
   const hasShownLoginToast = useRef(false);
-  const writeAccessCheckStarted = useRef(false);
-  const { refetch: refetchUserBrief } = useUserBrief();
+  const { runAfterLoginCheck } = useLoginCheck();
   const { mutateAsync: createPost } = useCreateCommunityPost();
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
@@ -47,33 +45,21 @@ export default function CommunityWritePage() {
   }, [blocker.state]);
 
   useEffect(() => {
-    if (writeAccessCheckStarted.current) {
-      return;
-    }
-
-    writeAccessCheckStarted.current = true;
-
-    const checkWriteAccess = async () => {
-      const result = await refetchUserBrief();
-      const canWrite =
-        !result.isError && hasStoredAuthSession() && result.data?.isLoggedIn === true;
-
-      if (canWrite) {
+    void runAfterLoginCheck(
+      () => {
         setIsWriteAccessAllowed(true);
-        return;
-      }
+      },
+      () => {
+        if (!hasShownLoginToast.current) {
+          hasShownLoginToast.current = true;
+          showToast("blue", "로그인/회원가입 후 만나보세요");
+        }
 
-      if (!hasShownLoginToast.current) {
-        hasShownLoginToast.current = true;
-        showToast("blue", "로그인/회원가입 후 만나보세요");
-      }
-
-      allowNavigationRef.current = true;
-      navigate("/community", { replace: true });
-    };
-
-    void checkWriteAccess();
-  }, [navigate, refetchUserBrief]);
+        allowNavigationRef.current = true;
+        navigate("/community", { replace: true });
+      },
+    );
+  }, [navigate, runAfterLoginCheck]);
 
   const publishPost = (payload: CommunityPostPayload) => {
     if (submissionInProgressRef.current) return;

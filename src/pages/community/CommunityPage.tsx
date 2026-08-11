@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { hasStoredAuthSession } from "@/apis/authApi";
+import AsyncState from "@/components/AsyncState";
 import CategoryButton from "@/components/CategoryButton";
-import Input from "@/components/Input";
 import Pagination from "@/components/pagination/Pagination";
-import { Select } from "@/components/Select";
 import { showToast } from "@/components/Toast";
 import {
   communityCategoryEntries,
@@ -16,11 +14,12 @@ import {
 } from "@/constants/communityCategory";
 import { useCommunityPostSearchSuggestions, useCommunityPosts } from "@/hooks/useCommunity";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { useUserBrief } from "@/hooks/useUser";
+import { useLoginCheck } from "@/hooks/useLoginCheck";
 import type { CommunityPostSort } from "@/types/community";
 import { formatDate } from "@/utils/time";
 import CommunityPostCard from "./components/CommunityPostCard";
 import CommunitySection from "./components/CommunitySection";
+import CommunityToolbar from "./components/CommunityToolbar";
 
 const categories: Array<{
   value: CommunityCategory | "ALL";
@@ -30,13 +29,6 @@ const categories: Array<{
   ...communityCategoryEntries.map(([value, label]) => ({ value, label })),
 ];
 
-const sortOptions = [
-  { label: "최신순", value: "latest" },
-  { label: "조회순", value: "view" },
-  { label: "공감순", value: "like" },
-  { label: "댓글순", value: "comment" },
-];
-
 function isCommunityPostSort(value: unknown): value is CommunityPostSort {
   return value === "latest" || value === "view" || value === "like" || value === "comment";
 }
@@ -44,10 +36,7 @@ function isCommunityPostSort(value: unknown): value is CommunityPostSort {
 export default function CommunityPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { data: userBrief, isError: isUserBriefError, refetch: refetchUserBrief } = useUserBrief();
-  const accessCheckInFlight = useRef(false);
-  const isLoggedIn =
-    !isUserBriefError && hasStoredAuthSession() && userBrief?.isLoggedIn === true;
+  const { isLoggedIn, runAfterLoginCheck } = useLoginCheck();
   const categoryCodeParam = searchParams.get("categoryCode");
   const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
     ? getCommunityCategoryByCode(categoryCodeParam)
@@ -60,7 +49,7 @@ export default function CommunityPage() {
   const [inputKeyword, setInputKeyword] = useState(keyword);
   const debouncedInputKeyword = useDebouncedValue(inputKeyword.trim(), 300);
   const { data: suggestions = [] } = useCommunityPostSearchSuggestions(debouncedInputKeyword);
-  const { data, isPending, isError, refetch } = useCommunityPosts({
+  const { data, isPending, isError } = useCommunityPosts({
     page: page - 1,
     size: 14,
     sort: sort || undefined,
@@ -134,49 +123,30 @@ export default function CommunityPage() {
     );
   };
 
-  const runAfterLoginCheck = async (onAuthenticated: () => void) => {
-    if (accessCheckInFlight.current) {
-      return;
-    }
-
-    if (!hasStoredAuthSession()) {
-      showToast("blue", "로그인/회원가입 후 만나보세요");
-      return;
-    }
-
-    accessCheckInFlight.current = true;
-
-    try {
-      const result = await refetchUserBrief();
-      const canWrite =
-        !result.isError && hasStoredAuthSession() && result.data?.isLoggedIn === true;
-
-      if (!canWrite) {
-        showToast("blue", "로그인/회원가입 후 만나보세요");
-        return;
-      }
-
-      onAuthenticated();
-    } finally {
-      accessCheckInFlight.current = false;
-    }
+  const showLoginRequiredToast = () => {
+    showToast("blue", "로그인/회원가입 후 만나보세요");
   };
 
   const handleWriteClick = () => {
-    void runAfterLoginCheck(() => navigate("/community/write"));
+    void runAfterLoginCheck(() => navigate("/community/write"), showLoginRequiredToast);
   };
 
   const handlePostClick = (postId: number) => {
-    void runAfterLoginCheck(() => navigate(`/community/${postId}`));
+    void runAfterLoginCheck(() => navigate(`/community/${postId}`), showLoginRequiredToast);
   };
+
+  if (isPending) {
+    return <AsyncState type="loading" />;
+  }
+
+  if (isError) {
+    return <AsyncState type="error" />;
+  }
 
   return (
     <div className="min-h-[calc(100vh-60px)] bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
-        <CommunitySection
-          onWriteClick={handleWriteClick}
-          onPostClick={handlePostClick}
-        />
+        <CommunitySection onWriteClick={handleWriteClick} onPostClick={handlePostClick} />
 
         <div className="mt-[18px] flex flex-col gap-[16px]">
           <div className="flex flex-wrap gap-[16px]">
@@ -191,49 +161,17 @@ export default function CommunityPage() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between gap-6">
-            <Input
-              search
-              searchType="community"
-              value={inputKeyword}
-              onChange={(event) => {
-                const nextKeyword = event.target.value;
-                setInputKeyword(nextKeyword);
-                if (!nextKeyword.trim()) handleSearch("");
-              }}
-              onEnter={handleSearch}
-              suggestions={suggestions}
-              onSuggestionClick={handleSearch}
-              placeholder="게시글을 검색해보세요"
-              className="h-[44px] w-[640px]"
-            />
-            <Select
-              options={sortOptions}
-              value={sort}
-              onChange={(value) => updateSort(value as CommunityPostSort)}
-              placeholder={isLoggedIn ? "최신순" : "조회순"}
-              variant="S"
-              ariaLabel="게시글 정렬"
-              className="w-[120px]"
-            />
-          </div>
+          <CommunityToolbar
+            keyword={inputKeyword}
+            suggestions={suggestions}
+            sort={sort}
+            isLoggedIn={isLoggedIn}
+            onKeywordChange={setInputKeyword}
+            onSearch={handleSearch}
+            onSortChange={updateSort}
+          />
 
-          {isPending ? (
-            <div className="flex items-center justify-center py-16 text-center text-background-500">
-              게시글을 불러오는 중입니다.
-            </div>
-          ) : isError ? (
-            <div className="min-h-[320px] flex flex-col items-center justify-center gap-3 text-background-500">
-              <p>게시글을 불러오지 못했습니다.</p>
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="rounded-lg border border-background-300 px-4 py-2"
-              >
-                다시 시도
-              </button>
-            </div>
-          ) : visiblePosts.length === 0 ? (
+          {visiblePosts.length === 0 ? (
             <div className="py-16 text-center text-background-500">검색 결과가 없습니다.</div>
           ) : (
             <div className="grid grid-cols-2 gap-x-[20px] gap-y-[12px]">
@@ -266,7 +204,6 @@ export default function CommunityPage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }
