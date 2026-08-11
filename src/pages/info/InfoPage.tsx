@@ -75,6 +75,10 @@ export default function InfoPage() {
     setRegionLevel2("");
     setLocation("지역 전체");
   }, [profile]);
+
+  const hasProfileRegion = Boolean(
+    profile?.regionLevel1 && profile?.regionLevel2,
+  );
   
   const [locationOpen, setLocationOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -153,6 +157,13 @@ export default function InfoPage() {
     navigate(`/info?${params.toString()}`);
   };
 
+  const emptyMessage =
+    isRecommendation && !profile
+      ? "로그인 / 회원가입 하고 추천 기능을 이용해 보세요!"
+      : isRecommendation && profile && !hasProfileRegion
+        ? "맞춤 프로필로 지역을 설정하고 추천 기능을 이용해 보세요!"
+        : "조건에 맞는 정보가 없습니다.";
+
   if (isPending) {
     return <AsyncState type="loading" />;
   }
@@ -198,13 +209,11 @@ export default function InfoPage() {
         />
       </div>
       
-      {isRecommendation && !profile ? (
+      {(isRecommendation && !profile) ||
+        isRecommendation && profile && !hasProfileRegion ||
+        items.length === 0 ? (
         <div className="flex h-[200px] items-center justify-center text-background-500">
-          로그인 / 회원가입 하고 추천 기능을 이용해 보세요!
-        </div>
-      ) : items.length === 0 ? (
-        <div className="flex h-[200px] items-center justify-center text-background-500">
-          조건에 맞는 정보가 없습니다.
+          {emptyMessage}
         </div>
       ) : (
         <>
