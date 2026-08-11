@@ -13,7 +13,6 @@ import {
   updateMyProfile,
   updateProfileImage,
 } from "@/apis/mypage";
-import { getRegions } from "@/apis/onboardingApi";
 import { getMyProfile } from "@/apis/userApi";
 
 export const USER_PROFILE_QUERY_KEY = ["user", "profile"] as const;
@@ -25,12 +24,6 @@ export const USER_COMMENTS_QUERY_KEY = ["user", "comments"] as const;
 export const myProfileQueryOptions = queryOptions({
   queryKey: USER_PROFILE_QUERY_KEY,
   queryFn: getMyProfile,
-  retry: false,
-});
-
-export const myPageRegionsQueryOptions = queryOptions({
-  queryKey: ["regions"],
-  queryFn: getRegions,
   retry: false,
 });
 

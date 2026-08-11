@@ -3,16 +3,14 @@ import ButtonOutline from "@/components/ButtonOutline";
 import ButtonFill from "@/components/ButtonFill";
 import ChoiceChips from "@/components/ChoiceChips";
 import Input from "@/components/Input";
+import { getApiErrorMessage } from "@/apis/apiError";
 import { diagnosisMap } from "@/constants/diagnosis";
-import {
-  districtOptionsByRegion,
-  regionOptions,
-  sidoDisplayNameByRegion,
-} from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
+import type { Region } from "@/types/onboarding";
 import { createChildBirthMonthOptions, birthYearOptions } from "./birthDateOptions";
 import type { ProfileSettingsForm } from "@/types/mypage";
 import { formatDateWithDots } from "@/utils/time";
+import { createRegionOptions } from "@/utils/regionOptions";
 import ProfileImagePicker from "./components/ProfileImagePicker";
 import ProfileSelect from "./components/ProfileSelect";
 
@@ -27,6 +25,10 @@ interface ProfileManagementCardProps {
   onCancel: () => void;
   onApply: () => void;
   isApplying?: boolean;
+  regions: Region[];
+  isRegionsLoading: boolean;
+  regionsError: unknown;
+  onRetryRegions: () => void;
 }
 
 const diagnosisEntries = Object.entries(diagnosisMap) as Array<
@@ -61,8 +63,13 @@ export default function ProfileManagementCard({
   onCancel,
   onApply,
   isApplying = false,
+  regions,
+  isRegionsLoading,
+  regionsError,
+  onRetryRegions,
 }: ProfileManagementCardProps) {
   const initialSelectValuesRef = useRef<ProfileSelectValues | null>(null);
+  const selectedFieldsRef = useRef<Set<ProfileSelectField>>(new Set());
   const guardianTypeLabel = guardianType
     ? (guardianTypeLabels[guardianType] ?? guardianType)
     : null;
@@ -79,6 +86,22 @@ export default function ProfileManagementCard({
     hasCompleteBirth &&
     form.diagnoses.length > 0;
   const birthMonthOptions = createChildBirthMonthOptions();
+  const apiRegionOptions = createRegionOptions(regions);
+  const regionOptions = apiRegionOptions.regionOptions.length > 0
+    ? apiRegionOptions.regionOptions
+    : form.region
+      ? [{
+          label: form.region,
+          value: form.region,
+        }]
+      : [];
+  const districtOptionsByRegion = apiRegionOptions.regionOptions.length > 0
+    ? apiRegionOptions.districtOptionsByRegion
+    : {
+        [form.region]: form.district
+          ? [{ label: form.district, value: form.district }]
+          : [],
+      };
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -96,13 +119,33 @@ export default function ProfileManagementCard({
 
   const startEditing = () => {
     initialSelectValuesRef.current = getProfileSelectValues(form);
+    selectedFieldsRef.current.clear();
     onStartEdit();
+  };
+
+  const markFieldSelected = (field: ProfileSelectField) => {
+    selectedFieldsRef.current.add(field);
   };
 
   const hasSelectChanged = (field: ProfileSelectField) => {
     const initialValues = initialSelectValuesRef.current;
-    return isEditing && initialValues !== null && initialValues[field] !== form[field];
+
+    if (!isEditing || initialValues === null) {
+      return false;
+    }
+
+    if (field === "district") {
+      return (
+        initialValues.region !== form.region
+        || initialValues.district !== form.district
+      );
+    }
+
+    return initialValues[field] !== form[field];
   };
+
+  const hasSelectBeenSelected = (field: ProfileSelectField) =>
+    isEditing && selectedFieldsRef.current.has(field);
 
   return (
     <section className="w-[634px] rounded-[20px] bg-background-100 p-[20px]">
@@ -171,14 +214,13 @@ export default function ProfileManagementCard({
           <ProfileSelect
             variant="L"
             ariaLabel="시/도 선택"
-            options={regionOptions.map((option) => ({
-              ...option,
-              label: sidoDisplayNameByRegion[option.value] ?? option.label,
-            }))}
+            options={regionOptions}
             value={form.region}
-            disabled={!isEditing || isApplying}
+            disabled={!isEditing || isApplying || isRegionsLoading || Boolean(regionsError)}
             changed={hasSelectChanged("region")}
+            selected={hasSelectBeenSelected("region")}
             onChange={(region) => {
+              markFieldSelected("region");
               onChange({
                 ...form,
                 region,
@@ -192,12 +234,39 @@ export default function ProfileManagementCard({
             ariaLabel="시/군/구 선택"
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
-            disabled={!isEditing || isApplying}
+            disabled={
+              !isEditing
+              || isApplying
+              || isRegionsLoading
+              || Boolean(regionsError)
+              || (districtOptionsByRegion[form.region]?.length ?? 0) === 0
+            }
             changed={hasSelectChanged("district")}
-            onChange={(district) => updateField("district", district)}
+            selected={hasSelectBeenSelected("district")}
+            onChange={(district) => {
+              markFieldSelected("district");
+              updateField("district", district);
+            }}
             className="w-full"
           />
         </div>
+        {isEditing && isRegionsLoading && (
+          <p className="mt-[8px] text-h4-list text-background-500">
+            지역 목록을 불러오는 중입니다.
+          </p>
+        )}
+        {isEditing && Boolean(regionsError) && (
+          <div className="mt-[8px] flex items-center gap-[8px] text-h4-list text-sub-red">
+            <p>{getApiErrorMessage(regionsError, "지역 목록을 불러오지 못했습니다.")}</p>
+            <button
+              type="button"
+              onClick={onRetryRegions}
+              className="cursor-pointer text-main-400 underline"
+            >
+              다시 시도
+            </button>
+          </div>
+        )}
       </div>
 
       <h2 className="mt-[24px] border-b border-background-300 py-[8px] text-h2-list text-background-600">
@@ -231,7 +300,11 @@ export default function ProfileManagementCard({
             value={form.birthYear}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthYear")}
-            onChange={(birthYear) => updateField("birthYear", birthYear)}
+            selected={hasSelectBeenSelected("birthYear")}
+            onChange={(birthYear) => {
+              markFieldSelected("birthYear");
+              updateField("birthYear", birthYear);
+            }}
             placeholder="년도"
             className="w-full"
           />
@@ -242,7 +315,11 @@ export default function ProfileManagementCard({
             value={form.birthMonth}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthMonth")}
-            onChange={(birthMonth) => updateField("birthMonth", birthMonth)}
+            selected={hasSelectBeenSelected("birthMonth")}
+            onChange={(birthMonth) => {
+              markFieldSelected("birthMonth");
+              updateField("birthMonth", birthMonth);
+            }}
             placeholder="월"
             className="w-full"
           />

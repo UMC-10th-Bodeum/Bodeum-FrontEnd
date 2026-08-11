@@ -25,6 +25,10 @@ export default function ProfileSettingsPage() {
           onCancel={settings.cancelEditing}
           onApply={settings.applyEditing}
           isApplying={settings.isApplying}
+          regions={settings.regions}
+          isRegionsLoading={settings.isRegionsLoading}
+          regionsError={settings.regionsError}
+          onRetryRegions={() => void settings.retryRegions()}
         />
         <AccountManagementCard onWithdraw={() => setIsWithdrawalModalOpen(true)} />
       </div>

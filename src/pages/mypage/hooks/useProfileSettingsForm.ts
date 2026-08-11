@@ -4,13 +4,13 @@ import { getApiErrorDetailMessage } from "@/apis/apiError";
 import { notifyUserProfileChanged } from "@/apis/userApi";
 import { showToast } from "@/components/Toast";
 import {
-  myPageRegionsQueryOptions,
   myProfileQueryOptions,
   USER_DASHBOARD_QUERY_KEY,
   USER_PROFILE_QUERY_KEY,
   useUpdateMyProfile,
   useUpdateProfileImage,
 } from "@/hooks/useMyPage";
+import { regionsQueryOptions, useRegions } from "@/hooks/useOnboarding";
 import type { ProfileSettingsForm, UpdateMyProfileRequest } from "@/types/mypage";
 import { findRegionId } from "@/utils/onboarding";
 import { useMyPageProfile } from "../settings/myPageProfileContext";
@@ -41,6 +41,7 @@ export function useProfileSettingsForm() {
   const [draftProfile, setDraftProfile] = useState(() => cloneProfileSettings(profile));
   const [isEditing, setIsEditing] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const regionsQuery = useRegions();
 
   const startEditing = () => {
     setDraftProfile(cloneProfileSettings(profile));
@@ -75,7 +76,8 @@ export function useProfileSettingsForm() {
       }
 
       if (draftProfile.region !== profile.region || draftProfile.district !== profile.district) {
-        const regions = await queryClient.fetchQuery(myPageRegionsQueryOptions);
+        const regions = regionsQuery.data
+          ?? await queryClient.fetchQuery(regionsQueryOptions());
         const regionId = findRegionId(regions, draftProfile.region, draftProfile.district);
         if (regionId === undefined) throw new Error("선택한 지역을 찾을 수 없습니다.");
         request.regionId = regionId;
@@ -161,6 +163,10 @@ export function useProfileSettingsForm() {
     setDraftProfile,
     isEditing,
     isApplying,
+    regions: regionsQuery.data ?? [],
+    isRegionsLoading: regionsQuery.isPending,
+    regionsError: regionsQuery.error,
+    retryRegions: regionsQuery.refetch,
     startEditing,
     cancelEditing,
     applyEditing,
