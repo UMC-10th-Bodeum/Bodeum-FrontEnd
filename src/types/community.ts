@@ -121,6 +121,10 @@ export interface CommunityPostSearchSuggestionsResult {
   suggestions: CommunityPostSearchSuggestion[];
 }
 
+export interface CommunityPostImageUploadResult {
+  imageUrl: string;
+}
+
 interface CommunityPageSort {
   empty: boolean;
   sorted: boolean;

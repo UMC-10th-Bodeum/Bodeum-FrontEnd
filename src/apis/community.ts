@@ -7,6 +7,7 @@ import type {
   CommunityCommentsResult,
   CommunityPostDetail,
   CommunityPostCreateRequest,
+  CommunityPostImageUploadResult,
   CommunityPostLikeResult,
   CommunityPostListParams,
   CommunityPostPage,
@@ -180,9 +181,12 @@ export const uploadCommunityPostImage = async (file: File) => {
   const form = new FormData();
   form.append("image", file);
 
-  const { data } = await api.post<ApiResponse<string>>("/api/v1/community/posts/images", form);
+  const { data } = await api.post<ApiResponse<CommunityPostImageUploadResult>>(
+    "/api/v1/community/posts/images",
+    form,
+  );
 
-  return data.result;
+  return data.result.imageUrl;
 };
 
 // 댓글 공감 등록
