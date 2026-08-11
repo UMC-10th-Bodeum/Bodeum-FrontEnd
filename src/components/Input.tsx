@@ -63,7 +63,7 @@ export default function Input({
     searchType === "news"
       ? item.type === "NEWS_TITLE"
       : searchType === "community"
-        ? item.type === "POST_TITLE"
+        ? item.type === "POST_TITLE" || item.type === "POST_CONTENT"
         : true,
   );
 
@@ -262,8 +262,34 @@ export default function Input({
                     active:bg-background-200
                   `}
                 >
-                  <Icon className="mr-2 text-background-400 shrink-0" />
-                  {matchIndex === -1 ? (
+                  <Icon
+                    className={`${searchType === "community" ? "mr-[11px]" : "mr-2"} shrink-0 text-background-400`}
+                  />
+                  {searchType === "community" ? (
+                    <span className="flex min-w-0 flex-1 flex-col items-start text-background-500">
+                      <span className="shrink-0 text-background-500">
+                        {item.type === "POST_TITLE" ? "제목" : "본문"}
+                      </span>
+                      <span
+                        className="w-full truncate text-h3-category-sub text-background-400"
+                        title={item.text}
+                      >
+                        {item.type === "POST_CONTENT" && "…"}
+                        {matchIndex === -1 ? (
+                          item.text
+                        ) : (
+                          <>
+                            {item.text.slice(0, matchIndex)}
+                            <span className="text-background-600 font-bold">
+                              {item.text.slice(matchIndex, matchIndex + value.length)}
+                            </span>
+                            {item.text.slice(matchIndex + value.length)}
+                          </>
+                        )}
+                        {item.type === "POST_CONTENT" && "…"}
+                      </span>
+                    </span>
+                  ) : matchIndex === -1 ? (
                     <span>{item.text}</span>
                   ) : (
                     <span className="text-background-500">

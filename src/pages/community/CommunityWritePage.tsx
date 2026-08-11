@@ -80,7 +80,7 @@ export default function CommunityWritePage() {
           getApiErrorMessage(
             error,
             submissionStage === "upload"
-              ? "이미지 업로드 중 오류가 발생했습니다."
+              ? "이미지 업로드에 실패했습니다."
               : "게시물을 등록하지 못했습니다.",
           ),
         );

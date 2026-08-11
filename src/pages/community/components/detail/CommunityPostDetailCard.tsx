@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import HeartIcon from "@/assets/icons/Heart.svg?react";
 import HeartDisabledIcon from "@/assets/icons/HeartDisabled.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
+import WarningIcon from "@/assets/icons/Warning.svg?react";
 import { getApiErrorMessage } from "@/apis/apiError";
 import DetailBackButton from "@/components/DetailBackButton";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +16,6 @@ import {
   useDeleteCommunityPost,
 } from "@/hooks/useCommunity";
 import { useUpdateCommunityPost } from "@/hooks/useCommunity";
-import { useState } from "react";
 import ButtonOutline from "@/components/ButtonOutline";
 import ButtonFill from "@/components/ButtonFill";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
@@ -27,6 +27,42 @@ interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
   category: CommunityCategory;
   children: ReactNode;
+}
+
+interface ImageThumbProps {
+  src: string;
+  alt: string;
+  className?: string;
+}
+
+function ImageThumb({ src, alt, className }: ImageThumbProps) {
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[10px] bg-background-150${className ? ` ${className}` : ""}`}
+    >
+      {status === "error" ? (
+        <div
+          className="flex h-full w-full flex-col items-center justify-center gap-2 text-body-sub text-background-400"
+          role="img"
+          aria-label={alt}
+        >
+          <WarningIcon className="h-6 w-6" />
+          <span>이미지를 불러올 수 없습니다.</span>
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          onLoad={() => setStatus("loaded")}
+          onError={() => setStatus("error")}
+          className={`h-full w-full object-cover transition-opacity ${status === "loading" ? "opacity-0" : "opacity-100"}`}
+        />
+      )}
+    </div>
+  );
 }
 
 export default function CommunityPostDetailCard({
@@ -78,12 +114,20 @@ export default function CommunityPostDetailCard({
   };
 
   const isFullyAnonymous = post.anonymityType === "FULLY_ANONYMOUS";
+  const authorName =
+    post.authorNickname?.trim() || (post.authorId === null ? "탈퇴한 사용자" : "사용자");
+  const authorDisplayName = post.authorId === null ? authorName : `${authorName}님`;
+  const disabilityLabels = post.disabilityTypes
+    .map((type) => diagnosisMap[type]?.label)
+    .filter((label): label is string => Boolean(label));
   const nameLineItems = isFullyAnonymous
     ? ["익명"]
     : [
-        `${post.authorNickname ?? "알 수 없는 사용자"}님`,
-        ...post.disabilityTypes.map((type) => diagnosisMap[type].label),
-      ];
+        authorDisplayName,
+        post.authorLevel !== null ? `Level${post.authorLevel}` : null,
+        ...disabilityLabels,
+        post.childAge !== null ? `${post.childAge}세 아이` : null,
+      ].filter((item): item is string => item !== null);
 
   return (
     <article className="min-h-[574px] rounded-[18px] border border-background-250 bg-background-100 px-[40px] py-[20px]">
@@ -132,13 +176,13 @@ export default function CommunityPostDetailCard({
         )}
 
         {post.imageUrls.length > 0 && (
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {post.imageUrls.map((imageUrl, index) => (
-              <img
-                key={imageUrl}
+              <ImageThumb
+                key={`${imageUrl}-${index}`}
                 src={imageUrl}
                 alt={`${post.title} 첨부 이미지 ${index + 1}`}
-                className="max-h-[360px] w-full rounded-[10px] object-cover"
+                className="aspect-square"
               />
             ))}
           </div>

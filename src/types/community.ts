@@ -76,7 +76,7 @@ export interface CommunityCommentLikeResult {
   likeCount: number;
 }
 
-export type CommunityPostSort = "view" | "scrap" | "comment";
+export type CommunityPostSort = "latest" | "view" | "like" | "comment";
 
 export interface CommunityPostAuthor {
   authorId: number;
@@ -114,7 +114,7 @@ export interface CommunityPostListParams {
 
 export interface CommunityPostSearchSuggestion {
   text: string;
-  type: "POST_TITLE";
+  type: "POST_TITLE" | "POST_CONTENT";
 }
 
 export interface CommunityPostSearchSuggestionsResult {
@@ -158,8 +158,10 @@ export type CommunityAnonymityType = "PROFILE_TAG_VISIBLE" | "FULLY_ANONYMOUS";
 
 export interface CommunityPostDetail {
   postId: number;
-  authorId: number;
+  authorId: number | null;
   authorNickname: string | null;
+  authorLevel: number | null;
+  childAge: number | null;
   isMine: boolean;
   boardType: CommunityCategoryCode;
   anonymityType: CommunityAnonymityType;

@@ -101,7 +101,7 @@ export const deleteCommunityPostLike = async (postId: number) => {
 export const getCommunityPosts = async ({
   page = 0,
   size = 14,
-  sort = "view",
+  sort,
   keyword,
   categoryCode,
 }: CommunityPostListParams = {}) => {
@@ -110,7 +110,7 @@ export const getCommunityPosts = async ({
     params: {
       page,
       size,
-      sort,
+      ...(sort ? { sort } : {}),
       ...(normalizedKeyword && normalizedKeyword.length >= 2 ? { keyword: normalizedKeyword } : {}),
       ...(categoryCode ? { categoryCode } : {}),
     },
@@ -145,7 +145,12 @@ export const getCommunityPost = async (postId: number) => {
     `/api/v1/community/posts/${postId}`,
   );
 
-  return data.result;
+  return {
+    ...data.result,
+    authorLevel: data.result.authorLevel ?? null,
+    childAge: data.result.childAge ?? null,
+    disabilityTypes: data.result.disabilityTypes ?? [],
+  };
 };
 
 // 게시글 삭제

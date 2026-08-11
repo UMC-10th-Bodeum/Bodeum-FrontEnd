@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { hasStoredAuthSession } from "@/apis/authApi";
 import CategoryButton from "@/components/CategoryButton";
 import Input from "@/components/Input";
+import OnboardCancelBox from "@/components/OnboardCancelBox";
 import Pagination from "@/components/pagination/Pagination";
 import { Select } from "@/components/Select";
 import {
@@ -12,10 +14,7 @@ import {
   isCommunityCategoryCode,
   type CommunityCategory,
 } from "@/constants/communityCategory";
-import {
-  useCommunityPostSearchSuggestions,
-  useCommunityPosts,
-} from "@/hooks/useCommunity";
+import { useCommunityPostSearchSuggestions, useCommunityPosts } from "@/hooks/useCommunity";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { CommunityPostSort } from "@/types/community";
 import CommunityPostCard from "./components/CommunityPostCard";
@@ -30,8 +29,9 @@ const categories: Array<{
 ];
 
 const sortOptions = [
+  { label: "최신순", value: "latest" },
   { label: "조회순", value: "view" },
-  { label: "스크랩순", value: "scrap" },
+  { label: "공감순", value: "like" },
   { label: "댓글순", value: "comment" },
 ];
 
@@ -68,6 +68,7 @@ function formatCreatedAt(createdAt: string) {
 export default function CommunityPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const categoryCodeParam = searchParams.get("categoryCode");
   const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
     ? getCommunityCategoryByCode(categoryCodeParam)
@@ -76,20 +77,22 @@ export default function CommunityPage() {
   const [keyword, setKeyword] = useState("");
   const location = useLocation();
   const routeSort = (location.state as { sort?: unknown } | null | undefined)?.sort;
-  const initialSort: CommunityPostSort =
-    routeSort === "view" || routeSort === "scrap" || routeSort === "comment"
+  const initialSort: CommunityPostSort | "" =
+    routeSort === "latest" ||
+    routeSort === "view" ||
+    routeSort === "like" ||
+    routeSort === "comment"
       ? routeSort
-      : "view";
+      : "";
 
-  const [sort, setSort] = useState<CommunityPostSort>(initialSort);
+  const [sort, setSort] = useState<CommunityPostSort | "">(initialSort);
   const [page, setPage] = useState(1);
   const debouncedInputKeyword = useDebouncedValue(inputKeyword.trim(), 300);
-  const { data: suggestions = [] } =
-    useCommunityPostSearchSuggestions(debouncedInputKeyword);
+  const { data: suggestions = [] } = useCommunityPostSearchSuggestions(debouncedInputKeyword);
   const { data, isPending, isError, refetch } = useCommunityPosts({
     page: page - 1,
     size: 14,
-    sort: sort || "view",
+    sort: sort || undefined,
     keyword,
     categoryCode: category === "ALL" ? undefined : communityCategoryCodeMap[category],
   });
@@ -120,10 +123,19 @@ export default function CommunityPage() {
     setPage(1);
   };
 
+  const handleWriteClick = () => {
+    if (!hasStoredAuthSession()) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    navigate("/community/write");
+  };
+
   return (
     <div className="min-h-[calc(100vh-60px)] bg-background-100">
       <div className="mx-auto flex max-w-[1440px] flex-col px-[32px] py-[20px]">
-        <CommunitySection />
+        <CommunitySection onWriteClick={handleWriteClick} />
 
         <div className="mt-[18px] flex flex-col gap-[16px]">
           <div className="flex flex-wrap gap-[16px]">
@@ -161,7 +173,7 @@ export default function CommunityPage() {
                 setSort(value as CommunityPostSort);
                 setPage(1);
               }}
-              placeholder="조회순"
+              placeholder={hasStoredAuthSession() ? "최신순" : "조회순"}
               variant="S"
               ariaLabel="게시글 정렬"
               className="w-[120px]"
@@ -193,7 +205,6 @@ export default function CommunityPage() {
                 return (
                   <CommunityPostCard
                     key={post.postId}
-                    id={post.postId}
                     categoryLabel={communityCategoryMap[postCategory]}
                     title={post.title}
                     content={post.content}
@@ -218,6 +229,18 @@ export default function CommunityPage() {
         )}
       </div>
 
+      {showLoginModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
+          <OnboardCancelBox
+            title="로그인하고 더 많은 기능을 이용해 보세요!"
+            description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
+            leftButtonText="둘러보기"
+            rightButtonText="로그인/회원가입"
+            onLeftButtonClick={() => setShowLoginModal(false)}
+            onRightButtonClick={() => navigate("/auth")}
+          />
+        </div>
+      )}
     </div>
   );
 }
