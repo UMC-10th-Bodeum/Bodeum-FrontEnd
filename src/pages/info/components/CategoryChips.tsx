@@ -22,7 +22,8 @@ export default function CategoryChips({
   const visibleCategories = categories.filter(
     (item) =>
       item.value !== "YOUTH_CENTER" &&
-      item.value !== "KEAD_JOB",
+      item.value !== "KEAD_JOB" &&
+      item.value !== "GENERAL_HOSPITAL" ,
   );
 
   return (
