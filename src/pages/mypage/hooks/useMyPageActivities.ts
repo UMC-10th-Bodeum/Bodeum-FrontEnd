@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { getApiErrorMessage } from "@/apis/apiError";
 import { showToast } from "@/components/Toast";
 import {
@@ -26,13 +27,24 @@ import { formatDateWithDots } from "@/utils/time";
 
 const MY_ACTIVITY_PAGE_SIZE = 6;
 
+function isMyPageTabKey(value: string | null): value is MyPageTabKey {
+  return value === "saved" || value === "posts" || value === "comments";
+}
+
 export function useMyPageActivities() {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { mutateAsync: deleteScrap } = useDeleteMyScrap();
   const { mutateAsync: deletePostScrap } = useDeleteMyPostScrap();
   const { mutateAsync: deletePost } = useDeleteMyPost();
   const { mutateAsync: deleteComment } = useDeleteMyComment();
-  const [activeTab, setActiveTab] = useState<MyPageTabKey>("saved");
+  const tabParam = searchParams.get("tab");
+  const activeTab: MyPageTabKey = isMyPageTabKey(tabParam) ? tabParam : "saved";
+  const setActiveTab = (tab: MyPageTabKey) => {
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.set("tab", tab);
+    setSearchParams(nextSearchParams);
+  };
   const [scrapsPage, setScrapsPage] = useState(0);
   const [postsPage, setPostsPage] = useState(0);
   const [commentsPage, setCommentsPage] = useState(0);
