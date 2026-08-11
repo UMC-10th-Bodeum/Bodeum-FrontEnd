@@ -7,7 +7,6 @@ import ScrapStat from "@/components/post-stat/ScrapStat";
 import ViewStat from "@/components/post-stat/ViewStat";
 import ArrowUpRightIcon from "@/assets/icons/arrow-up-right.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
-import GalleryMainImage from "@/assets/icons/gallery-main.svg";
 import ShareButton from "@/components/ShareButton";
 import type { NewsDetail } from "@/types/news";
 import type { NewsStatusPresentation } from "@/utils/newsStatus";
@@ -16,14 +15,14 @@ function HomepageArrowIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <ArrowUpRightIcon
       {...props}
-      className="bodeum-icon-color h-[14px] w-[14px] shrink-0 text-background-100"
+      className="bodeum-icon-color relative top-px h-[14px] w-[14px] shrink-0 text-background-100"
     />
   );
 }
 
 interface NewsDetailHeaderProps {
   news: NewsDetail;
-  status: NewsStatusPresentation;
+  status?: NewsStatusPresentation;
   isScrapPending: boolean;
   onToggleScrap: () => void;
 }
@@ -34,20 +33,26 @@ export default function NewsDetailHeader({
   isScrapPending,
   onToggleScrap,
 }: NewsDetailHeaderProps) {
+  const safeOriginalUrl = (() => {
+    try {
+      const url = new URL(news.originalUrl ?? "");
+
+      return url.protocol === "http:" || url.protocol === "https:" ? url.href : null;
+    } catch {
+      return null;
+    }
+  })();
+
   return (
     <article className="overflow-hidden rounded-[10px] border border-background-250 bg-background-100">
-      <img
-        src={news.thumbnailUrl || GalleryMainImage}
-        alt={news.thumbnailUrl ? `${news.title} 대표 이미지` : ""}
-        aria-hidden={!news.thumbnailUrl}
-        className="h-[220px] w-full object-cover"
-      />
       <div className="px-[16px] py-[24px]">
         <div className="mb-[12px] flex items-center gap-[10px]">
           <Chip className="!h-[24px]">{news.categoryLabel}</Chip>
-          <Chip variant={status.variant} className="!h-[23.5px]">
-            {status.label}
-          </Chip>
+          {status && (
+            <Chip variant={status.variant} className="!h-[23.5px]">
+              {status.label}
+            </Chip>
+          )}
         </div>
 
         <h1 className="text-h1-onboard text-background-600">{news.title}</h1>
@@ -56,25 +61,31 @@ export default function NewsDetailHeader({
         <div className="mt-[12px] py-2 flex items-center gap-[20px]">
           <ViewStat count={news.viewCount} showLabel />
           <ScrapStat count={news.scrapCount} isActive={news.scrapped} onClick={onToggleScrap} />
-          <DateStat date={news.publishedAt} showLabel />
+          {news.publishedAt && <DateStat date={news.publishedAt} showLabel />}
         </div>
 
         <div className="flex gap-[8px] border-t border-background-250 pt-[12px]">
           <ButtonFill
             label="홈페이지"
             icon={HomepageArrowIcon}
+            className="h-[40px]"
             iconPosition="right"
-            disabled={!news.originalUrl}
-            onClick={() => window.open(news.originalUrl, "_blank", "noopener,noreferrer")}
+            disabled
+            onClick={() => {
+              if (safeOriginalUrl) {
+                window.open(safeOriginalUrl, "_blank", "noopener,noreferrer");
+              }
+            }}
           />
           <ButtonOutline
             label="스크랩"
             icon={ScrapIcon}
+            className="h-[40px]"
             iconPosition="left"
             disabled={isScrapPending}
             onClick={onToggleScrap}
           />
-          <ShareButton url={window.location.href} />
+          <ShareButton url={window.location.href} className="h-[40px]" />
         </div>
       </div>
     </article>

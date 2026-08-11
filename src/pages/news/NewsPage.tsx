@@ -42,9 +42,7 @@ export default function NewsPage() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="flex flex-col gap-[18px] px-[32px] py-[20px]">
-        <div className="py-[20px]">
-          <RecommendedNewsTopSection />
-        </div>
+        <RecommendedNewsTopSection />
 
         <div className="flex flex-col gap-[16px]">
           <NewsTabs value={filters.tab} onChange={filters.selectTab} />
