@@ -74,13 +74,13 @@ export default function AuthLoginCard({
           <div className="flex w-full flex-col items-center gap-[16px]">
             <SocialLoginButton
               provider="naver"
-              label="네이버 로그인"
+              label="네이버로 계속하기"
               onClick={() => onAuthenticate("naver")}
               disabled={isRedirecting}
             />
             <SocialLoginButton
               provider="kakao"
-              label="카카오 로그인"
+              label="카카오로 계속하기"
               onClick={() => onAuthenticate("kakao")}
               disabled={isRedirecting}
             />

@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import ChevronLeft from "@/assets/icons/ChevronLeft.svg?react";
+import { normalizeOptionIndex } from "./selectOptionIndex";
 
 export interface SelectOption {
   label: string;
@@ -23,6 +24,7 @@ export interface SelectProps {
   className?: string;
   triggerClassName?: string;
   dropdownClassName?: string;
+  initialScrollIndex?: number;
 }
 
 const triggerBaseClass =
@@ -97,6 +99,7 @@ export function Select({
   className,
   triggerClassName: customTriggerClassName,
   dropdownClassName,
+  initialScrollIndex,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -108,6 +111,16 @@ export function Select({
   const dropdownRef = useRef<HTMLUListElement>(null);
   const optionRefs = useRef<Array<HTMLLIElement | null>>([]);
   const shouldFocusActiveOptionRef = useRef(false);
+  const shouldCenterActiveOptionRef = useRef(false);
+  const centerScrollFrameRef = useRef<number | null>(null);
+  const cancelPendingCenterScroll = useCallback(() => {
+    if (centerScrollFrameRef.current === null) {
+      return;
+    }
+
+    window.cancelAnimationFrame(centerScrollFrameRef.current);
+    centerScrollFrameRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -116,13 +129,14 @@ export function Select({
 
     function handleClickOutside(e: MouseEvent) {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        cancelPendingCenterScroll();
         setIsOpen(false);
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  }, [cancelPendingCenterScroll, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -177,7 +191,11 @@ export function Select({
       return 0;
     }
 
-    return selectedIndex >= 0 ? selectedIndex : 0;
+    if (selectedIndex >= 0) {
+      return selectedIndex;
+    }
+
+    return normalizeOptionIndex(initialScrollIndex, options.length);
   };
   const restoreTriggerFocus = () => {
     window.requestAnimationFrame(() => {
@@ -193,11 +211,15 @@ export function Select({
     }
 
     shouldFocusActiveOptionRef.current = shouldFocusActiveOption;
+    shouldCenterActiveOptionRef.current =
+      !shouldFocusActiveOption && initialScrollIndex !== undefined;
     setActiveIndex(nextActiveIndex);
     setIsOpen(true);
   };
   const closeListbox = (shouldRestoreFocus = false) => {
+    cancelPendingCenterScroll();
     shouldFocusActiveOptionRef.current = false;
+    shouldCenterActiveOptionRef.current = false;
     setIsOpen(false);
 
     if (shouldRestoreFocus) {
@@ -325,15 +347,33 @@ export function Select({
       return;
     }
 
-    if (!shouldFocusActiveOptionRef.current) {
-      return;
+    if (shouldCenterActiveOptionRef.current) {
+      shouldCenterActiveOptionRef.current = false;
+      cancelPendingCenterScroll();
+      centerScrollFrameRef.current = window.requestAnimationFrame(() => {
+        centerScrollFrameRef.current = null;
+        const activeOption = optionRefs.current[nextActiveIndex];
+        const dropdown = dropdownRef.current;
+
+        if (activeOption && dropdown) {
+          dropdown.scrollTop = Math.max(
+            0,
+            activeOption.offsetTop -
+              (dropdown.clientHeight - activeOption.offsetHeight) / 2,
+          );
+        }
+      });
     }
 
-    shouldFocusActiveOptionRef.current = false;
-    const activeOption = optionRefs.current[nextActiveIndex];
-    activeOption?.focus();
-    activeOption?.scrollIntoView({ block: "nearest" });
-  }, [activeIndex, isOpen, options.length]);
+    if (shouldFocusActiveOptionRef.current) {
+      shouldFocusActiveOptionRef.current = false;
+      const activeOption = optionRefs.current[nextActiveIndex];
+      activeOption?.focus();
+      activeOption?.scrollIntoView({ block: "nearest" });
+    }
+
+    return cancelPendingCenterScroll;
+  }, [activeIndex, cancelPendingCenterScroll, isOpen, options.length]);
 
   const chevronClassName = [
     "shrink-0 text-background-500!",
