@@ -60,7 +60,7 @@ export default function CommunitySection() {
         <PostSection
           title="최신글"
           onMoreClick={() => navigate("/community", {
-            state: { sort: "scrap" },
+            state: { sort: "latest" },
           })}
         >
           {latestPosts.map((post) => (
