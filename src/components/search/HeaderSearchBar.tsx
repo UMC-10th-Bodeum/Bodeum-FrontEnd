@@ -98,7 +98,7 @@ export default function HeaderSearchBar({
   }, [activeIndex]);
 
   return (
-    <div ref={wrapperRef} className={`relative w-full ${className}`}>
+    <div ref={wrapperRef} className={`relative w-[921px] ${className}`}>
       <div
         className={`
           flex h-[40px] items-center rounded-[10px]

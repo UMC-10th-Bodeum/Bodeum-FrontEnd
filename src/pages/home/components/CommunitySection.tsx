@@ -4,12 +4,25 @@ import PostSection from "@/components/PostSection";
 import PostListItem from "@/components/PostListItem";
 import { useNavigate } from "react-router-dom";
 import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
+import { useState } from "react";
+import { hasStoredAuthSession } from "@/apis/authStorage";
+import OnboardCancelBox from "@/components/OnboardCancelBox";
 
 export default function CommunitySection() {
   const navigate = useNavigate();
   const { data: posts = [] } = useRecommendedCommunityPosts();
   const { data: popularPosts = [] } = useHomePostPreview("popular");
   const { data: latestPosts = [] } = useHomePostPreview("latest");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const handleWriteClick = () => {
+    if (!hasStoredAuthSession()) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    navigate("/community/write");
+  };
 
   return (
     <section className="w-full min-w-0 overflow-hidden">
@@ -22,7 +35,7 @@ export default function CommunitySection() {
         </div>
 
         <div className="flex gap-[10px]">
-          <MainButton size="S" onClick={() => navigate("/community/write")}>
+          <MainButton size="S" onClick={handleWriteClick}>
             글쓰기
           </MainButton>
           <MainButton size="S" stroke onClick={() => navigate("/community")}>
@@ -60,7 +73,7 @@ export default function CommunitySection() {
         <PostSection
           title="최신글"
           onMoreClick={() => navigate("/community", {
-            state: { sort: "scrap" },
+            state: { sort: "latest" },
           })}
         >
           {latestPosts.map((post) => (
@@ -76,6 +89,20 @@ export default function CommunitySection() {
           ))}
         </PostSection>
       </div>
+      {isLoginModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <OnboardCancelBox
+            title="로그인하고 더 많은 기능을 이용해 보세요!"
+            description={`회원가입 후 프로필을 등록하시면,
+              AI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이
+              자유롭게 이용하실 수 있습니다.`}
+            leftButtonText="둘러보기"
+            rightButtonText="로그인/회원가입"
+            onLeftButtonClick={() => setIsLoginModalOpen(false)}
+            onRightButtonClick={() => navigate("/auth")}
+          />
+        </div>
+      )}
     </section>
   );
 }

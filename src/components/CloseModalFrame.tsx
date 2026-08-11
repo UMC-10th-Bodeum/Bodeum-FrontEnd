@@ -40,7 +40,7 @@ export default function CloseModalFrame({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-[20px] right-[20px] z-10"
+            className="absolute top-[20px] right-[20px] z-10 cursor-pointer"
           >
             <CloseIcon />
           </button>
