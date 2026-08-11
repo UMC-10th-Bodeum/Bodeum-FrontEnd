@@ -33,7 +33,9 @@ export default function InfoPage() {
   const [subCategory, setSubCategory] = useState<number | null>(
     subCategoryParam ? Number(subCategoryParam) : null,
   );
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState(
+    () => searchParams.get("sort") ?? "",
+  );
   const navigate = useNavigate();
   
   const [regionLevel1, setRegionLevel1] = useState("");
@@ -130,23 +132,36 @@ export default function InfoPage() {
     }
   }, [parentCategory]);
 
+  const updateUrl = (
+    params: URLSearchParams,
+    replace = true,
+  ) => {
+    navigate(`/info?${params.toString()}`, { replace });
+  };
+
+  const updatePage = (newPage: number) => {
+    setPage(newPage);
+
+    const params = new URLSearchParams(searchParams);
+    params.set("page", String(newPage));
+
+    updateUrl(params);
+  };
+
   const moveToSubCategory = (id: number | null) => {
-    setPage(1);
     setSubCategory(id);
+    setPage(1);
 
     const params = new URLSearchParams({
       category: parentCategory,
+      page: "1",
     });
 
     if (id !== null) {
       params.set("subCategory", String(id));
     }
 
-    params.set("page", "1");
-
-    navigate(`/info?${params.toString()}`, {
-      replace: true,
-    });
+    updateUrl(params);
   };
 
   const moveToCategory = (category: ParentCategory) => {
@@ -210,14 +225,13 @@ export default function InfoPage() {
           value={sort}
           onChange={(value) => {
             setSort(value);
-            setPage(1);
+            updatePage(1);
 
             const params = new URLSearchParams(searchParams);
             params.set("page", "1");
+            params.set("sort", value);
 
-            navigate(`/info?${params.toString()}`, {
-              replace: true,
-            });
+            updateUrl(params);
           }}
           placeholder="조회순"
           variant="S"
@@ -247,16 +261,7 @@ export default function InfoPage() {
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-            onChange={(newPage) => {
-              setPage(newPage);
-
-              const params = new URLSearchParams(searchParams);
-              params.set("page", String(newPage));
-
-              navigate(`/info?${params.toString()}`, {
-                replace: true,
-              });
-            }}
+            onChange={updatePage}
           />
         </>
       )}
