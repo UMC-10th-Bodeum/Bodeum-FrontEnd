@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { hasStoredAuthSession } from "@/apis/authApi";
 import ButtonOutline from "@/components/ButtonOutline";
@@ -20,6 +20,7 @@ export default function CommunityDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isAuthenticated = hasStoredAuthSession();
+  const [showLoginModal, setShowLoginModal] = useState(!isAuthenticated);
   const { setBreadcrumb } = useBreadcrumb();
   const parsedPostId = id && /^\d+$/.test(id) ? Number(id) : undefined;
   const postId =
@@ -69,14 +70,17 @@ export default function CommunityDetailPage() {
     <div className="min-h-[calc(100vh-60px)] bg-background-200 px-[32px] py-[20px]">
       <div className="mx-auto flex w-full flex-col gap-[18px]">
         <div
-          className={isAuthenticated ? undefined : "pointer-events-none select-none blur-sm"}
-          aria-hidden={!isAuthenticated}
+          className={
+            showLoginModal ? "pointer-events-none select-none blur-sm" : undefined
+          }
+          aria-hidden={showLoginModal}
         >
           <CommunityPostDetailCard key={post.postId} post={post} category={category}>
             <CommunityCommentsSection
               key={post.postId}
               postId={post.postId}
               canAdopt={post.isMine && post.boardType === "INFORMATION_QUESTION"}
+              onLoginRequired={() => setShowLoginModal(true)}
             />
           </CommunityPostDetailCard>
         </div>
@@ -88,7 +92,7 @@ export default function CommunityDetailPage() {
         />
       </div>
 
-      {!isAuthenticated && (
+      {showLoginModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
           <OnboardCancelBox
             title="로그인하고 더 많은 기능을 이용해 보세요!"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import ButtonFill from "@/components/ButtonFill";
 import { showToast } from "@/components/Toast";
@@ -18,11 +18,13 @@ import CommunityCommentItem from "./CommunityCommentItem";
 interface CommunityCommentsSectionProps {
   postId: number;
   canAdopt?: boolean;
+  onLoginRequired?: () => void;
 }
 
 export default function CommunityCommentsSection({
   postId,
   canAdopt = false,
+  onLoginRequired,
 }: CommunityCommentsSectionProps) {
   const [comment, setComment] = useState("");
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
@@ -40,6 +42,11 @@ export default function CommunityCommentsSection({
   const comments = data?.comments ?? [];
 
   const showCreateError = (error: unknown) => {
+    if (isUnauthorizedError(error)) {
+      onLoginRequired?.();
+      return;
+    }
+
     showToast("red", getApiErrorMessage(error, "댓글을 등록하지 못했습니다."));
   };
 
