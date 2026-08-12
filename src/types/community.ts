@@ -100,7 +100,8 @@ export interface CommunityPostListParams {
 }
 
 export interface CommunityPostSearchSuggestion {
-  text: string;
+  title: string;
+  content: string;
   type: "POST_TITLE" | "POST_CONTENT";
 }
 

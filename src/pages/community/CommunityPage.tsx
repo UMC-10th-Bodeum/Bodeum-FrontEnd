@@ -53,7 +53,11 @@ export default function CommunityPage() {
   const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const [inputKeyword, setInputKeyword] = useState(keyword);
   const debouncedInputKeyword = useDebouncedValue(inputKeyword.trim(), 300);
-  const { data: suggestions = [] } = useCommunityPostSearchSuggestions(debouncedInputKeyword);
+  const { data: suggestions = [], isPending: areSuggestionsPending } =
+    useCommunityPostSearchSuggestions(debouncedInputKeyword);
+  const areSuggestionsLoading =
+    inputKeyword.trim().length >= 2 &&
+    (inputKeyword.trim() !== debouncedInputKeyword || areSuggestionsPending);
   const { data, isPending, isError } = useCommunityPosts({
     page: page - 1,
     size: 14,
@@ -179,6 +183,7 @@ export default function CommunityPage() {
           <CommunityToolbar
             keyword={inputKeyword}
             suggestions={suggestions}
+            suggestionsLoading={areSuggestionsLoading}
             sort={sort}
             isLoggedIn={isLoggedIn}
             onKeywordChange={setInputKeyword}
