@@ -87,7 +87,13 @@ export function useProfileSettingsForm() {
       }
 
       const hasProfileChanges = Object.keys(request).length > 0;
-      if (hasProfileChanges) await updateProfile(request);
+      if (hasProfileChanges) {
+        await updateProfile(request);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["myProfile"],
+        });
+      }
 
       let uploadedProfile: Awaited<ReturnType<typeof uploadProfileImage>> | null = null;
       if (draftProfile.profileImageFile) {
