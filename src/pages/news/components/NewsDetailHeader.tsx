@@ -70,6 +70,7 @@ export default function NewsDetailHeader({
             icon={HomepageArrowIcon}
             className="h-[40px]"
             iconPosition="right"
+            disabled={!safeOriginalUrl}
             onClick={() => {
               if (safeOriginalUrl) {
                 window.open(safeOriginalUrl, "_blank", "noopener,noreferrer");
