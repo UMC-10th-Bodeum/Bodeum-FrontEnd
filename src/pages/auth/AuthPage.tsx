@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { flushSync } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,6 +20,7 @@ import {
 } from "@/apis/apiError";
 import {
   hasStoredAuthSession,
+  logoutCurrentUser,
   startSocialLogin,
 } from "@/apis/authApi";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
@@ -43,6 +50,7 @@ import type {
   OnboardingStep,
 } from "./components/OnboardingStepCard";
 import {
+  clearAuthProgress,
   getStoredAuthNextStep,
   storeAuthNextStep,
 } from "./authProgressStorage";
@@ -54,9 +62,7 @@ import {
 } from "./authFlow";
 import {
   clearAgreementBrowserSession,
-  consumeAgreementInterruptedLogoutNotice,
-  startAgreementBrowserSession,
-  wasAgreementBrowserSessionInterrupted,
+  clearAgreementInterruptedLogoutNotice,
 } from "./agreementBrowserSession";
 import {
   clearOnboardingBrowserSession,
@@ -64,6 +70,7 @@ import {
   startOnboardingBrowserSession,
   wasOnboardingBrowserSessionInterrupted,
 } from "./onboardingBrowserSession";
+import { clearAuthBrowserSession } from "./authBrowserSession";
 
 type OnboardingModal = "cancel" | "skip" | null;
 
@@ -183,26 +190,57 @@ export default function AuthPage() {
   const [isBackGuardActive, setIsBackGuardActive] = useState(false);
   const requestInFlight = useRef(false);
   const browserBackInFlight = useRef(false);
+  const agreementExitInProgress = useRef(false);
   const authHistoryGuardId = useRef<string | null>(null);
   const isCollapsingAuthHistory = useRef(false);
   const lastBrowserBackAt = useRef(0);
-  const protectedFlowWasVisible = useRef(false);
-  const interruptedAgreement = useRef<Promise<boolean> | null>(null);
   const interruptedOnboarding = useRef<Promise<boolean> | null>(null);
-
-  if (interruptedAgreement.current === null) {
-    interruptedAgreement.current = wasAgreementBrowserSessionInterrupted();
-  }
 
   if (interruptedOnboarding.current === null) {
     interruptedOnboarding.current = wasOnboardingBrowserSessionInterrupted();
   }
-  const showAgreementBackBlockedToast = useCallback(() => {
-    showToast(
-      "red",
-      "필수 약관 동의를 완료해야 회원가입을 계속할 수 있습니다.",
-    );
-  }, []);
+
+  const exitIncompleteAgreement = useCallback(() => {
+    if (agreementExitInProgress.current) {
+      return;
+    }
+
+    agreementExitInProgress.current = true;
+
+    if (getStoredAuthNextStep() !== "TERMS") {
+      authHistoryGuardId.current = null;
+      window.location.replace("/");
+      return;
+    }
+
+    requestInFlight.current = true;
+
+    const cleanupTasks = [
+      clearAuthProgress,
+      clearAgreementBrowserSession,
+      clearAgreementInterruptedLogoutNotice,
+      clearOnboardingBrowserSession,
+      () => queryClient.clear(),
+    ];
+
+    cleanupTasks.forEach((cleanup) => {
+      try {
+        cleanup();
+      } catch (cleanupError) {
+        console.warn(
+          "약관 동의 중단 상태를 정리하지 못했습니다.",
+          cleanupError,
+        );
+      }
+    });
+
+    void logoutCurrentUser({ clearImmediately: true }).catch(() => {
+      // 로컬 로그아웃은 완료됐으므로 서버 세션 해제 실패와 무관하게 홈으로 이동한다.
+    });
+
+    authHistoryGuardId.current = null;
+    window.location.replace("/");
+  }, [queryClient]);
 
   useEffect(() => {
     if (isCollapsingAuthHistory.current) {
@@ -292,13 +330,6 @@ export default function AuthPage() {
           clearOnboardingBrowserSession();
 
           if (requestedFlow !== "agreement") {
-            if (
-              navigationTypeRef.current === "POP" &&
-              protectedFlowWasVisible.current
-            ) {
-              showAgreementBackBlockedToast();
-            }
-
             setSearchParams({ flow: "agreement" }, { replace: true });
             return;
           }
@@ -437,7 +468,6 @@ export default function AuthPage() {
     queryClient,
     requestedFlow,
     setSearchParams,
-    showAgreementBackBlockedToast,
   ]);
 
   useEffect(() => {
@@ -447,7 +477,6 @@ export default function AuthPage() {
       (flow === "agreement" ||
         (flow === "onboarding" && !isProfileOnboarding))
     ) {
-      protectedFlowWasVisible.current = true;
       setIsBackGuardActive(true);
     }
   }, [flow, isInitializing, isProfileOnboarding, onboardingLoadError]);
@@ -458,8 +487,15 @@ export default function AuthPage() {
         return;
       }
 
-      interruptedAgreement.current =
-        wasAgreementBrowserSessionInterrupted();
+      if (getStoredAuthNextStep() === "TERMS") {
+        exitIncompleteAgreement();
+        return;
+      }
+
+      requestInFlight.current = false;
+      browserBackInFlight.current = false;
+      agreementExitInProgress.current = false;
+      setIsSubmitting(false);
       interruptedOnboarding.current =
         wasOnboardingBrowserSessionInterrupted();
       setIsInitializing(true);
@@ -471,34 +507,7 @@ export default function AuthPage() {
     return () => {
       window.removeEventListener("pageshow", restoreFromBackForwardCache);
     };
-  }, []);
-
-  useEffect(() => {
-    if (flow !== "agreement" || isInitializing || onboardingLoadError) {
-      return;
-    }
-
-    let cancelled = false;
-
-    void interruptedAgreement.current?.then((wasInterrupted) => {
-      if (cancelled) {
-        return;
-      }
-
-      startAgreementBrowserSession();
-
-      if (
-        wasInterrupted ||
-        consumeAgreementInterruptedLogoutNotice()
-      ) {
-        showToast("red", "약관 동의 전 브라우저를 종료하셨어요");
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [flow, isInitializing, onboardingLoadError]);
+  }, [exitIncompleteAgreement]);
 
   useEffect(() => {
     if (
@@ -582,6 +591,7 @@ export default function AuthPage() {
           : "가입이 완료되었습니다. 보듬에 오신 것을 환영합니다!",
       );
       storeAuthNextStep("HOME");
+      clearAuthBrowserSession();
       clearAgreementBrowserSession();
       clearOnboardingBrowserSession();
       navigate("/", { replace: true });
@@ -616,10 +626,15 @@ export default function AuthPage() {
     try {
       await request();
     } catch (error) {
-      showToast("red", getApiErrorMessage(error, fallbackMessage));
+      if (!agreementExitInProgress.current) {
+        showToast("red", getApiErrorMessage(error, fallbackMessage));
+      }
     } finally {
       requestInFlight.current = false;
-      setIsSubmitting(false);
+
+      if (!agreementExitInProgress.current) {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -650,6 +665,11 @@ export default function AuthPage() {
   const handleAgreementSubmit = (agreements: AgreementFormValues) => {
     void runRequest(async () => {
       const result = await submitAgreementsRequest(agreements);
+
+      if (agreementExitInProgress.current) {
+        return;
+      }
+
       storeAuthNextStep(result.nextStep);
       clearAgreementBrowserSession();
 
@@ -747,20 +767,36 @@ export default function AuthPage() {
     }, "온보딩을 건너뛰지 못했습니다. 잠시 후 다시 시도해주세요.");
   };
 
-  const shouldProtectAuthHistory =
+  const hasActiveAuthFlow =
     hasStoredAuthSession() &&
     !onboardingLoadError &&
-    (isBackGuardActive || !isInitializing) &&
-    (flow === "agreement" ||
-      (flow === "onboarding" && !isProfileOnboarding));
+    (isBackGuardActive || !isInitializing);
+  const shouldHandleAgreementBack =
+    hasActiveAuthFlow && flow === "agreement";
+  const shouldProtectOnboardingHistory =
+    hasActiveAuthFlow && flow === "onboarding" && !isProfileOnboarding;
+  const shouldSeedAuthHistory =
+    shouldHandleAgreementBack || shouldProtectOnboardingHistory;
   const keepOnboardingVisible =
     flow === "onboarding" &&
     isBackGuardActive &&
     !isProfileOnboarding &&
     !onboardingLoadError;
 
-  useEffect(() => {
-    if (!shouldProtectAuthHistory) {
+  useLayoutEffect(() => {
+    if (!shouldHandleAgreementBack) {
+      return;
+    }
+
+    window.addEventListener("popstate", exitIncompleteAgreement);
+
+    return () => {
+      window.removeEventListener("popstate", exitIncompleteAgreement);
+    };
+  }, [exitIncompleteAgreement, shouldHandleAgreementBack]);
+
+  useLayoutEffect(() => {
+    if (!shouldProtectOnboardingHistory) {
       return;
     }
 
@@ -776,10 +812,7 @@ export default function AuthPage() {
       if (guardId) {
         const nextIndex =
           currentGuard?.id === guardId ? currentGuard.index + 1 : 1;
-        const protectedUrl =
-          flow === "agreement"
-            ? "/auth?flow=agreement"
-            : "/auth?flow=onboarding";
+        const protectedUrl = "/auth?flow=onboarding";
 
         window.history.pushState(
           createAuthHistoryState({ id: guardId, index: nextIndex }),
@@ -788,12 +821,7 @@ export default function AuthPage() {
         );
       }
 
-      if (flow === "agreement") {
-        showAgreementBackBlockedToast();
-        return;
-      }
-
-      if (flow !== "onboarding" || browserBackInFlight.current) {
+      if (browserBackInFlight.current) {
         return;
       }
 
@@ -840,31 +868,47 @@ export default function AuthPage() {
     };
   }, [
     completeOnboarding,
-    flow,
-    isProfileOnboarding,
     skipOnboardingRequest,
-    shouldProtectAuthHistory,
-    showAgreementBackBlockedToast,
+    shouldProtectOnboardingHistory,
     waitForBrowserBackToSettle,
   ]);
 
-  useEffect(() => {
-    if (!shouldProtectAuthHistory || authHistoryGuardId.current) {
+  useLayoutEffect(() => {
+    if (!shouldSeedAuthHistory) {
       return;
     }
 
-    const existingGuard = getAuthHistoryGuard();
-
-    if (existingGuard) {
-      authHistoryGuardId.current = existingGuard.id;
-      return;
-    }
-
-    const guardId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const protectedUrl =
       flow === "agreement"
         ? "/auth?flow=agreement"
         : "/auth?flow=onboarding";
+    const targetGuardDepth =
+      flow === "agreement" ? 1 : AUTH_HISTORY_GUARD_DEPTH;
+    const existingGuard = getAuthHistoryGuard();
+
+    if (authHistoryGuardId.current) {
+      if (
+        existingGuard?.id !== authHistoryGuardId.current ||
+        existingGuard.index >= targetGuardDepth
+      ) {
+        return;
+      }
+
+      for (
+        let index = existingGuard.index + 1;
+        index <= targetGuardDepth;
+        index += 1
+      ) {
+        window.history.pushState(
+          createAuthHistoryState({ id: existingGuard.id, index }),
+          "",
+          protectedUrl,
+        );
+      }
+      return;
+    }
+
+    const guardId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     authHistoryGuardId.current = guardId;
     window.history.replaceState(
@@ -873,14 +917,14 @@ export default function AuthPage() {
       protectedUrl,
     );
 
-    for (let index = 1; index <= AUTH_HISTORY_GUARD_DEPTH; index += 1) {
+    for (let index = 1; index <= targetGuardDepth; index += 1) {
       window.history.pushState(
         createAuthHistoryState({ id: guardId, index }),
         "",
         protectedUrl,
       );
     }
-  }, [flow, shouldProtectAuthHistory]);
+  }, [flow, shouldSeedAuthHistory]);
 
   return (
     <main

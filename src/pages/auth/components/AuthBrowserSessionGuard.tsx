@@ -7,12 +7,7 @@ import {
   logoutCurrentUser,
 } from "@/apis/authApi";
 
-import {
-  clearAgreementBrowserSession,
-  markAgreementInterruptedLogoutNotice,
-  shouldCheckAgreementBrowserSessionInterruption,
-  wasAgreementBrowserSessionInterrupted,
-} from "../agreementBrowserSession";
+import { clearAgreementBrowserSession } from "../agreementBrowserSession";
 import {
   clearAuthBrowserSession,
   isAuthBrowserSessionPending,
@@ -20,7 +15,10 @@ import {
   startAuthBrowserSession,
   wasAuthBrowserSessionInterrupted,
 } from "../authBrowserSession";
-import { clearAuthProgress } from "../authProgressStorage";
+import {
+  clearAuthProgress,
+  getStoredAuthNextStep,
+} from "../authProgressStorage";
 import {
   clearOnboardingBrowserSession,
   completeInterruptedOnboarding,
@@ -30,14 +28,18 @@ import {
 import AuthLoadingState from "./AuthLoadingState";
 
 type InterruptedSession = {
-  agreement: boolean;
   onboarding: boolean;
 };
 
 let interruptionLogoutPromise: Promise<boolean> | null = null;
 
+function hasIncompleteAuthFlow() {
+  const nextStep = getStoredAuthNextStep();
+  return nextStep === "TERMS" || nextStep === "ONBOARDING";
+}
+
 function shouldCheckInterruptedSession() {
-  if (!hasStoredAuthSession()) {
+  if (!hasStoredAuthSession() || !hasIncompleteAuthFlow()) {
     return false;
   }
 
@@ -45,11 +47,7 @@ function shouldCheckInterruptedSession() {
     return shouldCheckAuthBrowserSessionInterruption();
   }
 
-  // Compatibility for flows that started before the global session marker existed.
-  return (
-    shouldCheckAgreementBrowserSessionInterruption() ||
-    shouldCheckOnboardingBrowserSessionInterruption()
-  );
+  return shouldCheckOnboardingBrowserSessionInterruption();
 }
 
 async function getInterruptedSession(): Promise<InterruptedSession | null> {
@@ -62,21 +60,15 @@ async function getInterruptedSession(): Promise<InterruptedSession | null> {
     }
 
     return {
-      agreement: shouldCheckAgreementBrowserSessionInterruption(),
       onboarding: shouldCheckOnboardingBrowserSessionInterruption(),
     };
   }
 
-  const [agreement, onboarding] = await Promise.all([
-    shouldCheckAgreementBrowserSessionInterruption()
-      ? wasAgreementBrowserSessionInterrupted()
-      : false,
-    shouldCheckOnboardingBrowserSessionInterruption()
-      ? wasOnboardingBrowserSessionInterrupted()
-      : false,
-  ]);
+  const onboarding = shouldCheckOnboardingBrowserSessionInterruption()
+    ? await wasOnboardingBrowserSessionInterrupted()
+    : false;
 
-  return agreement || onboarding ? { agreement, onboarding } : null;
+  return onboarding ? { onboarding } : null;
 }
 
 function enforceInterruptedAuthLogout() {
@@ -97,10 +89,6 @@ function enforceInterruptedAuthLogout() {
       } catch {
         // Closing the browser must still end the local login session.
       }
-    }
-
-    if (interruptedSession.agreement) {
-      markAgreementInterruptedLogoutNotice();
     }
 
     clearAuthBrowserSession();
@@ -128,7 +116,7 @@ export default function AuthBrowserSessionGuard() {
     let cancelled = false;
 
     const syncAuthBrowserSession = () => {
-      if (hasStoredAuthSession()) {
+      if (hasStoredAuthSession() && hasIncompleteAuthFlow()) {
         startAuthBrowserSession();
         return;
       }
@@ -138,6 +126,12 @@ export default function AuthBrowserSessionGuard() {
 
     const initializeAuthBrowserSession = async () => {
       if (!hasStoredAuthSession()) {
+        clearAuthBrowserSession();
+        setIsChecking(false);
+        return;
+      }
+
+      if (!hasIncompleteAuthFlow()) {
         clearAuthBrowserSession();
         setIsChecking(false);
         return;
