@@ -1,5 +1,5 @@
 import type { ProfileSettingsForm, UserDashboard } from "@/types/mypage";
-import type { DisabilityType, UserProfile } from "@/types/user";
+import type { DisabilityType, InterestCategory, UserProfile } from "@/types/user";
 import type { DiagnosisType } from "@/types/diagnosis";
 
 type ProfileSettingsSource = Pick<
@@ -9,6 +9,7 @@ type ProfileSettingsSource = Pick<
   | "regionLevel1"
   | "regionLevel2"
   | "childProfile"
+  | "interestCategories"
 >;
 
 const diagnosisByApiCode: Record<string, DiagnosisType> = {
@@ -38,6 +39,7 @@ export function cloneProfileSettings(
   return {
     ...profile,
     diagnoses: [...profile.diagnoses],
+    interests: [...profile.interests],
   };
 }
 
@@ -51,6 +53,14 @@ export function toProfileSettings(profile: ProfileSettingsSource): ProfileSettin
   const diagnoses = (profile.childProfile?.disabilityTypes ?? [])
     .map(({ code }) => diagnosisByApiCode[code])
     .filter((diagnosis): diagnosis is DiagnosisType => Boolean(diagnosis));
+  const interests = (profile.interestCategories ?? [])
+    .map(({ code }) => code)
+    .filter((code): code is InterestCategory =>
+      code === "WELFARE_SUBSIDY"
+      || code === "HOSPITAL_HEALTH"
+      || code === "PARENTING_COMMUNICATION"
+      || code === "GROWTH_EDUCATION"
+    );
 
   return {
     profileImageUrl: profile.profileImageUrl,
@@ -65,5 +75,6 @@ export function toProfileSettings(profile: ProfileSettingsSource): ProfileSettin
     birthYear,
     birthMonth: birthMonth.replace(/^0/, ""),
     diagnoses,
+    interests,
   };
 }

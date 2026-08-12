@@ -209,4 +209,5 @@ export interface ProfileSettingsForm {
   birthYear: string;
   birthMonth: string;
   diagnoses: DiagnosisType[];
+  interests: InterestCategory[];
 }

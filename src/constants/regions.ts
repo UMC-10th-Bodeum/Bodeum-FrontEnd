@@ -294,6 +294,8 @@ export const regionOptions: RegionSelectOption[] = [
   ...createOptions(sidoNames),
 ];
 
+export const regionSelectionOptions: RegionSelectOption[] = createOptions(sidoNames);
+
 export const districtOptionsByRegion: Record<string, RegionSelectOption[]> = Object.fromEntries(
   sidoNames.map((sido) => [sido, createOptions(districtNamesByRegion[sido] ?? [])]),
 );
