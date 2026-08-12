@@ -155,7 +155,7 @@ export default function NewsDetailPage() {
 
           <div className="pt-[20px]">
             <RelatedNewsSection
-              title={`${regionLevel1Label}에서 모집 중인 소식`}
+              title={`${regionLevel1Label}에서 모집중인 소식`}
               items={relatedNews}
               isPending={Boolean(relatedRegionLevel1) && relatedNewsQuery.isPending}
               isError={relatedNewsQuery.isError}
