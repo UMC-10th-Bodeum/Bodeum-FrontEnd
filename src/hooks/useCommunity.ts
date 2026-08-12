@@ -30,6 +30,11 @@ import type {
   CommunityPostListParams,
   CommunityPostPage,
 } from "@/types/community";
+import {
+  myPointsQueryOptions,
+  USER_COMMENTS_QUERY_KEY,
+  USER_DASHBOARD_QUERY_KEY,
+} from "@/hooks/useMyPage";
 
 function updateCommunityCommentLike(
   comments: CommunityComment[],
@@ -45,6 +50,16 @@ function updateCommunityCommentLike(
       ? updateCommunityCommentLike(comment.replies, commentId, result)
       : comment.replies,
   }));
+}
+
+function invalidateMyPageCommentData(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  void Promise.all([
+    queryClient.invalidateQueries({ queryKey: USER_COMMENTS_QUERY_KEY }),
+    queryClient.invalidateQueries({ queryKey: USER_DASHBOARD_QUERY_KEY }),
+    queryClient.fetchQuery(myPointsQueryOptions),
+  ]);
 }
 
 function appendCommunityReply(
@@ -222,6 +237,7 @@ export function useCreateCommunityComment(postId: number) {
       );
 
       incrementCommunityPostCommentCount(queryClient, postId);
+      invalidateMyPageCommentData(queryClient);
     },
   });
 }
@@ -254,6 +270,7 @@ export function useCreateCommunityReply(postId: number) {
       );
 
       incrementCommunityPostCommentCount(queryClient, postId);
+      invalidateMyPageCommentData(queryClient);
     },
   });
 }

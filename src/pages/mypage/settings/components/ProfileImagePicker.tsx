@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
+import ProfileImageEditIcon from "@/assets/icons/ProfileImageEdit.svg?react";
 
 interface ProfileImagePickerProps {
   imageUrl: string | null;
@@ -64,25 +65,31 @@ export default function ProfileImagePicker({
 
   return (
     <div className="relative h-[90px] w-[90px] shrink-0">
-      <button
-        type="button"
-        disabled={!isEditing || disabled}
-        onClick={() => inputRef.current?.click()}
-        aria-label={isEditing ? "프로필 이미지 변경" : "보듬 부모님 프로필"}
-        className={`relative block h-full w-full overflow-hidden rounded-full ${
-          isEditing && !disabled ? "cursor-pointer" : "cursor-default"
-        }`}
-      >
+      <div className="h-full w-full overflow-hidden rounded-full">
         {displayedImageUrl ? (
-          <img
-            src={displayedImageUrl}
-            alt="프로필"
-            className="h-full w-full object-cover"
-          />
+          <img src={displayedImageUrl} alt="프로필" className="h-full w-full object-cover" />
         ) : (
           <ProfileIcon className="h-full w-full" aria-hidden="true" />
         )}
-      </button>
+      </div>
+
+      {isEditing && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => inputRef.current?.click()}
+          aria-label="프로필 이미지 변경"
+          className="
+          absolute bottom-0 right-0
+          flex h-[28px] w-[28px]
+          items-center justify-center
+          rounded-full bg-main-400 cursor-pointer
+          disabled:cursor-default
+        "
+        >
+          <ProfileImageEditIcon className="h-[12.25px] w-[12.25px]" aria-hidden="true" />
+        </button>
+      )}
 
       <input
         ref={inputRef}
