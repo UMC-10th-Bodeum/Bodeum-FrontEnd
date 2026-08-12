@@ -42,7 +42,41 @@ export default function InfoPage() {
   const [regionLevel2, setRegionLevel2] = useState("");
   const [location, setLocation] = useState("");
 
+  const prevProfileRegion = useRef<string | null>(null);
+
   useEffect(() => {
+    const profileRegionKey = profile
+      ? `${profile.regionLevel1 ?? ""}|${profile.regionLevel2 ?? ""}`
+      : null;
+
+    const profileRegionChanged =
+      prevProfileRegion.current !== null &&
+      profileRegionKey !== prevProfileRegion.current;
+
+    // 마이페이지에서 프로필 지역이 변경된 경우
+    if (profileRegionChanged) {
+      sessionStorage.removeItem("info-region-level1");
+      sessionStorage.removeItem("info-region-level2");
+
+      const level1 = profile?.regionLevel1 ?? "";
+      const level2 = profile?.regionLevel2 ?? "";
+
+      setRegionLevel1(level1);
+      setRegionLevel2(level2);
+      setLocation(
+        level1 ? `${level1} ${level2}`.trim() : "지역 전체",
+      );
+
+      setPage(1);
+
+      prevProfileRegion.current = profileRegionKey;
+
+      return;
+    }
+
+    // 기존 프로필 지역 저장
+    prevProfileRegion.current = profileRegionKey;
+
     const savedRegionLevel1 = sessionStorage.getItem(
       "info-region-level1",
     );
@@ -50,7 +84,7 @@ export default function InfoPage() {
       "info-region-level2",
     );
 
-    // 사용자가 선택한 지역이 있으면 무조건 우선
+    // 사용자가 모달에서 선택한 지역이 있으면 우선
     if (savedRegionLevel1 !== null) {
       setRegionLevel1(savedRegionLevel1);
       setRegionLevel2(savedRegionLevel2 ?? "");
@@ -64,14 +98,16 @@ export default function InfoPage() {
       return;
     }
 
-    // 로그인 상태인데 저장된 지역이 없으면 프로필 지역
+    // 저장된 모달 지역이 없으면 프로필 지역 사용
     if (profile) {
       const level1 = profile.regionLevel1 ?? "";
       const level2 = profile.regionLevel2 ?? "";
 
       setRegionLevel1(level1);
       setRegionLevel2(level2);
-      setLocation(level1 ? `${level1} ${level2}`.trim() : "지역 전체");
+      setLocation(
+        level1 ? `${level1} ${level2}`.trim() : "지역 전체",
+      );
 
       return;
     }
