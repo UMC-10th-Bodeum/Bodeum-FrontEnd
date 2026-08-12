@@ -23,6 +23,9 @@ const breadcrumbLabelMap: Record<NewsType, string> = {
 
 const getDisplayText = (value: string | null | undefined) => value?.trim() || null;
 
+const formatTargetAudience = (value: string | null | undefined) =>
+  getDisplayText(value)?.replace(/\s*\|\s*/g, "\n").replace(/\s*\+\s*/g, ", ") ?? null;
+
 const formatPeriod = (startDate: string | null | undefined, endDate: string | null | undefined) =>
   [getDisplayText(startDate), getDisplayText(endDate)].filter(Boolean).join(" ~ ") || null;
 
@@ -69,7 +72,7 @@ export default function NewsDetailPage() {
     ["신청기간", formatPeriod(news.applyStartDate, news.applyEndDate)],
     ["지역", getDisplayText(news.region)],
     ["주관기관", getDisplayText(news.sourceName)],
-    ["대상", getDisplayText(news.targetAudience)],
+    ["대상", formatTargetAudience(news.targetAudience)],
     ["문의", getDisplayText(news.contact)],
     ["담당자", getDisplayText(news.manager)],
     ["게시일", getDisplayText(news.publishedAt)],
