@@ -4,6 +4,7 @@ import Input from "@/components/Input";
 import OnboardBoxFrame from "@/components/OnboardBoxFrame";
 import { Select, type SelectOption } from "@/components/Select";
 import type { OnboardingDraft } from "@/types/onboarding";
+import { interestOptions } from "@/constants/interests";
 import {
   createChildBirthMonthOptions,
   createChildBirthYearOptions,
@@ -332,13 +333,6 @@ const careAreaOptions = [
   "발달지연",
   "언어장애",
   "기타",
-];
-
-const interestOptions = [
-  "맞춤 복지·지원금",
-  "안심 병원·건강",
-  "육아 상담·소통",
-  "성장·교육",
 ];
 
 const guardianTypeOptions = ["부모", "조부모", "형제·자매", "기타"];
