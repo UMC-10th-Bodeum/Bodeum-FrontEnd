@@ -106,6 +106,10 @@ export default function ProfileSettingsPage() {
 
       if (hasProfileChanges) {
         await updateProfile(request);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["myProfile"],
+        });
       }
 
       let uploadedProfile: Awaited<ReturnType<typeof uploadProfileImage>> | null = null;
