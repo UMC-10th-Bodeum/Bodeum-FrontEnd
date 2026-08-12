@@ -126,8 +126,8 @@ export default function InfoPage() {
 
   useEffect(() => {
     if (prevCategory.current !== parentCategory) {
-      const subCategories = infoSubCategoryMap[parentCategory];
-      setSubCategory(subCategories[0].id);
+      setSubCategory(null);
+      setPage(1);
       prevCategory.current = parentCategory;
     }
   }, [parentCategory]);
