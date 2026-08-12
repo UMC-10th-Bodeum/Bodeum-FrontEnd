@@ -57,6 +57,15 @@ export default function CommunityCommentNode({
   const isRoot = depth === 0;
   const isReplyFormOpen = !isEditing && replyTargetId === comment.commentId;
   const authorName = comment.authorNickname || "익명";
+  const profileImage = comment.profileImageUrl ? (
+    <img
+      src={comment.profileImageUrl}
+      alt=""
+      className={`${isRoot ? "h-[40px] w-[40px]" : "h-[24px] w-[24px]"} shrink-0 rounded-full object-cover`}
+    />
+  ) : (
+    <ProfileIcon className={`${isRoot ? "h-[40px] w-[40px]" : "h-[24px] w-[24px]"} shrink-0`} />
+  );
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -123,12 +132,12 @@ export default function CommunityCommentNode({
           : `relative ml-[20px] py-[20px] pl-[48px] before:absolute before:left-0 before:top-[28px] before:h-[24px] before:w-[24px] before:border-b before:border-l before:border-background-300 ${isReplyFormOpen ? "" : "after:absolute after:bottom-0 after:left-[-20px] after:right-0 after:border-b after:border-background-250"}`
       }
     >
-      {isRoot && <ProfileIcon className="h-[40px] w-[40px] shrink-0" />}
+      {isRoot && profileImage}
 
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between">
+        <div className="flex min-w-0 items-center justify-between">
           <div className="flex min-w-0 items-center gap-[8px]">
-            {!isRoot && <ProfileIcon className="h-[24px] w-[24px] shrink-0" />}
+            {!isRoot && profileImage}
             <p className="truncate text-h6 text-background-600">{authorName}</p>
             <time className="shrink-0 text-body-sub text-background-500">
               {getRelativeTime(comment.createdAt)}
@@ -144,9 +153,9 @@ export default function CommunityCommentNode({
                 aria-haspopup="menu"
                 aria-expanded={isMenuOpen}
                 onClick={() => setIsMenuOpen((current) => !current)}
-                className="flex h-[26px] w-[26px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
+                className="flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
               >
-                <span aria-hidden="true" className="text-[20px] leading-none">
+                <span aria-hidden="true" className="text-[18px] leading-none">
                   ⋮
                 </span>
               </button>
@@ -211,9 +220,7 @@ export default function CommunityCommentNode({
           </div>
         ) : (
           <>
-            <p className={`${isRoot ? "" : "mt-[8px]"} text-h3-onboard text-background-600`}>
-              {comment.content}
-            </p>
+            <p className="mt-[8px] text-h3-onboard text-background-600">{comment.content}</p>
             <div className="mt-[16px] flex items-center gap-[24px] text-body-sub text-background-500">
               {!canAdopt && (
                 <HeartStat

@@ -27,6 +27,7 @@ export interface CommunityComment {
   parentCommentId: number | null;
   authorId: number;
   authorNickname: string;
+  profileImageUrl: string;
   isMine: boolean;
   content: string;
   isAccepted: boolean;

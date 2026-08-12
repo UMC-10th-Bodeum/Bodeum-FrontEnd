@@ -12,6 +12,7 @@ import {
   useToggleCommunityCommentAdoption,
   useDeleteCommunityComment,
 } from "@/hooks/useCommunity";
+import { useUserBrief } from "@/hooks/useUser";
 import CommentEmptyState from "./CommentEmptyState";
 import CommunityCommentItem from "./CommunityCommentItem";
 
@@ -28,6 +29,7 @@ export default function CommunityCommentsSection({
 }: CommunityCommentsSectionProps) {
   const [comment, setComment] = useState("");
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
+  const { data: userBrief } = useUserBrief();
   const { data, isPending, isError, refetch } = useCommunityComments(postId);
   const { mutate: createComment, isPending: isCreatePending } = useCreateCommunityComment(postId);
   const { mutate: createReply, isPending: isReplyPending } = useCreateCommunityReply(postId);
@@ -98,7 +100,15 @@ export default function CommunityCommentsSection({
           submitComment();
         }}
       >
-        <ProfileIcon className="h-[40px] w-[40px] shrink-0" />
+        {userBrief?.isLoggedIn && userBrief.profileImageUrl ? (
+          <img
+            src={userBrief.profileImageUrl}
+            alt="내 프로필"
+            className="h-[40px] w-[40px] shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <ProfileIcon className="h-[40px] w-[40px] shrink-0" />
+        )}
         <input
           value={comment}
           disabled={isCreatePending}
