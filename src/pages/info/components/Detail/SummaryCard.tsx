@@ -144,13 +144,11 @@ export default function SummaryCard({
             label="홈페이지"
             icon={GoIcon}
             iconPosition="right"
+            disabled={!homepageUrl}
             onClick={() => {
-              if (!homepageUrl) {
-                showToast("yellow", "등록된 홈페이지가 없습니다.");
-                return;
+              if (homepageUrl) {
+                window.open(homepageUrl, "_blank", "noopener,noreferrer");
               }
-
-              window.open(homepageUrl, "_blank", "noopener,noreferrer");
             }}
           />
 
