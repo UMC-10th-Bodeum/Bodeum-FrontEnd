@@ -4,16 +4,13 @@ import ButtonFill from "@/components/ButtonFill";
 import ChoiceChips from "@/components/ChoiceChips";
 import Input from "@/components/Input";
 import { diagnosisMap } from "@/constants/diagnosis";
+import { interestCategoryByLabel, interestOptions } from "@/constants/interests";
 import {
   districtOptionsByRegion,
-  regionOptions,
-  sidoDisplayNameByRegion,
+  regionSelectionOptions,
 } from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
-import {
-  createChildBirthMonthOptions,
-  birthYearOptions,
-} from "./birthDateOptions";
+import { createChildBirthMonthOptions, birthYearOptions } from "./birthDateOptions";
 import type { ProfileSettingsForm } from "@/types/mypage";
 import { formatDateWithDots } from "@/utils/time";
 import ProfileImagePicker from "./components/ProfileImagePicker";
@@ -66,6 +63,7 @@ export default function ProfileManagementCard({
   isApplying = false,
 }: ProfileManagementCardProps) {
   const initialSelectValuesRef = useRef<ProfileSelectValues | null>(null);
+  const selectedFieldsRef = useRef<Set<ProfileSelectField>>(new Set());
   const guardianTypeLabel = guardianType
     ? (guardianTypeLabels[guardianType] ?? guardianType)
     : null;
@@ -80,8 +78,9 @@ export default function ProfileManagementCard({
     childNickname.length > 0 &&
     childNickname.length <= 20 &&
     hasCompleteBirth &&
-    form.diagnoses.length > 0;
-  const birthMonthOptions = createChildBirthMonthOptions(form.birthYear);
+    form.diagnoses.length > 0 &&
+    form.interests.length > 0;
+  const birthMonthOptions = createChildBirthMonthOptions();
   const updateField = <Key extends keyof ProfileSettingsForm>(
     key: Key,
     value: ProfileSettingsForm[Key],
@@ -97,27 +96,43 @@ export default function ProfileManagementCard({
     updateField("diagnoses", diagnoses);
   };
 
-  const updateBirthYear = (birthYear: string) => {
-    const canKeepBirthMonth = createChildBirthMonthOptions(birthYear).some(
-      ({ value }) => value === form.birthMonth,
-    );
+  const toggleInterest = (label: (typeof interestOptions)[number]) => {
+    const interest = interestCategoryByLabel[label];
+    const interests = form.interests.includes(interest)
+      ? form.interests.filter((item) => item !== interest)
+      : form.interests.length < 2
+        ? [...form.interests, interest]
+        : form.interests;
 
-    onChange({
-      ...form,
-      birthYear,
-      birthMonth: canKeepBirthMonth ? form.birthMonth : "",
-    });
+    updateField("interests", interests);
   };
 
   const startEditing = () => {
     initialSelectValuesRef.current = getProfileSelectValues(form);
+    selectedFieldsRef.current.clear();
     onStartEdit();
+  };
+
+  const markFieldSelected = (field: ProfileSelectField) => {
+    selectedFieldsRef.current.add(field);
   };
 
   const hasSelectChanged = (field: ProfileSelectField) => {
     const initialValues = initialSelectValuesRef.current;
-    return isEditing && initialValues !== null && initialValues[field] !== form[field];
+
+    if (!isEditing || initialValues === null) {
+      return false;
+    }
+
+    if (field === "district") {
+      return initialValues.region !== form.region || initialValues.district !== form.district;
+    }
+
+    return initialValues[field] !== form[field];
   };
+
+  const hasSelectBeenSelected = (field: ProfileSelectField) =>
+    isEditing && selectedFieldsRef.current.has(field);
 
   return (
     <section className="w-[634px] rounded-[20px] bg-background-100 p-[20px]">
@@ -169,7 +184,7 @@ export default function ProfileManagementCard({
           htmlFor="parent-nickname"
           className="mb-[12px] block text-h3-onboard text-background-500"
         >
-          닉네임
+          보호자 닉네임*
         </label>
         <Input
           id="parent-nickname"
@@ -179,21 +194,40 @@ export default function ProfileManagementCard({
           className="h-[48px] w-full [&>div]:!border [&>div]:!border-background-250 [&_input:disabled]:!text-background-500 [&_input:disabled]:opacity-100"
         />
       </div>
+      <fieldset className="mt-[24px]">
+        <legend className="mb-[12px] text-h3-onboard text-background-500">
+          가장 큰 관심사* (최대 2개 선택)
+        </legend>
+        <div className="flex flex-wrap gap-[8px]">
+          {interestOptions.map((label) => {
+            const interest = interestCategoryByLabel[label];
 
+            return (
+              <ChoiceChips
+                key={interest}
+                label={label}
+                selected={form.interests.includes(interest)}
+                disabled={!isEditing || isApplying}
+                onClick={() => toggleInterest(label)}
+                className="h-[40px] px-[18px] py-2"
+              />
+            );
+          })}
+        </div>
+      </fieldset>
       <div className="mt-[24px]">
-        <span className="mb-[12px] block text-h3-onboard text-background-500">지역</span>
+        <span className="mb-[12px] block text-h3-onboard text-background-500">주 활동 지역*</span>
         <div className="grid grid-cols-2 gap-[12px]">
           <ProfileSelect
             variant="L"
             ariaLabel="시/도 선택"
-            options={regionOptions.map((option) => ({
-              ...option,
-              label: sidoDisplayNameByRegion[option.value] ?? option.label,
-            }))}
+            options={regionSelectionOptions}
             value={form.region}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("region")}
+            selected={hasSelectBeenSelected("region")}
             onChange={(region) => {
+              markFieldSelected("region");
               onChange({
                 ...form,
                 region,
@@ -207,9 +241,17 @@ export default function ProfileManagementCard({
             ariaLabel="시/군/구 선택"
             options={districtOptionsByRegion[form.region] ?? []}
             value={form.district}
-            disabled={!isEditing || isApplying}
+            disabled={
+              !isEditing ||
+              isApplying ||
+              (districtOptionsByRegion[form.region]?.length ?? 0) === 0
+            }
             changed={hasSelectChanged("district")}
-            onChange={(district) => updateField("district", district)}
+            selected={hasSelectBeenSelected("district")}
+            onChange={(district) => {
+              markFieldSelected("district");
+              updateField("district", district);
+            }}
             className="w-full"
           />
         </div>
@@ -224,7 +266,7 @@ export default function ProfileManagementCard({
           htmlFor="child-nickname"
           className="mb-[12px] block text-h3-onboard text-background-500"
         >
-          자녀 별명
+          자녀 이름 또는 별명 (선택)
         </label>
         <Input
           id="child-nickname"
@@ -236,16 +278,21 @@ export default function ProfileManagementCard({
       </div>
 
       <div className="mt-[26px]">
-        <span className="mb-[12px] block text-h3-onboard text-background-500">자녀 생년월일*</span>
+        <span className="mb-[12px] block text-h3-onboard text-background-500">자녀 생년월*</span>
         <div className="grid grid-cols-2 gap-[14px]">
           <ProfileSelect
             variant="L"
             ariaLabel="출생 연도"
             options={birthYearOptions}
+            initialScrollIndex={Math.floor(birthYearOptions.length / 2)}
             value={form.birthYear}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthYear")}
-            onChange={updateBirthYear}
+            selected={hasSelectBeenSelected("birthYear")}
+            onChange={(birthYear) => {
+              markFieldSelected("birthYear");
+              updateField("birthYear", birthYear);
+            }}
             placeholder="년도"
             className="w-full"
           />
@@ -256,7 +303,11 @@ export default function ProfileManagementCard({
             value={form.birthMonth}
             disabled={!isEditing || isApplying}
             changed={hasSelectChanged("birthMonth")}
-            onChange={(birthMonth) => updateField("birthMonth", birthMonth)}
+            selected={hasSelectBeenSelected("birthMonth")}
+            onChange={(birthMonth) => {
+              markFieldSelected("birthMonth");
+              updateField("birthMonth", birthMonth);
+            }}
             placeholder="월"
             className="w-full"
           />
