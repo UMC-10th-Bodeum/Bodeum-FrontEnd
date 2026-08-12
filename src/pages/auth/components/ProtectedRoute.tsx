@@ -11,6 +11,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(hasStoredAuthSession);
+  const wasLoggedInOnMount = useRef(isLoggedIn);
   const hasShownLoginRequiredToast = useRef(false);
 
   useEffect(() => {
@@ -26,7 +27,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn || hasShownLoginRequiredToast.current) {
+    if (
+      isLoggedIn ||
+      wasLoggedInOnMount.current ||
+      hasShownLoginRequiredToast.current
+    ) {
       return;
     }
 
