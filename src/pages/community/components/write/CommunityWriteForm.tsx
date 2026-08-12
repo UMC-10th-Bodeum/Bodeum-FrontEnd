@@ -3,25 +3,21 @@ import { useState, type FormEvent } from "react";
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
 import { communityCategoryEntries, type CommunityCategory } from "@/constants/communityCategory";
-import type { CommunityAuthorVisibility, CommunityPostPayload } from "@/types/community";
+import type {
+  CommunityAuthorVisibility,
+  CommunityPostFormInitialValues,
+  CommunityPostFormValues,
+} from "@/types/community";
 
 import CommunityContentFields from "../CommunityContentFields";
 import CommunityImageField from "./CommunityImageField";
 import SelectableChipGroup from "./SelectableChipGroup";
 
-export type CommunityWriteFormInitialValues = {
-  category: CommunityCategory;
-  authorVisibility: CommunityAuthorVisibility;
-  title: string;
-  content: string;
-  existingImageUrls: string[];
-};
-
 type CommunityWriteFormProps = {
   onCancel: () => void;
-  onSubmit: (payload: CommunityPostPayload) => void;
+  onSubmit: (payload: CommunityPostFormValues) => void;
   isSubmitting?: boolean;
-  initialValues?: CommunityWriteFormInitialValues;
+  initialValues?: CommunityPostFormInitialValues;
   submitLabel?: string;
 };
 

@@ -20,6 +20,7 @@ type CommunityTextareaProps = {
   ariaLabel: string;
   showGuideline?: boolean;
   compact?: boolean;
+  onEnter?: () => void;
 };
 
 export function CommunityTextarea({
@@ -31,6 +32,7 @@ export function CommunityTextarea({
   ariaLabel,
   showGuideline = false,
   compact = false,
+  onEnter,
 }: CommunityTextareaProps) {
   return (
     <div
@@ -48,6 +50,14 @@ export function CommunityTextarea({
                 : event.target.value.slice(0, maxLength),
             )
           }
+          onKeyDown={(event) => {
+            if (!onEnter || event.nativeEvent.isComposing) return;
+
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              onEnter();
+            }
+          }}
           required
           maxLength={maxLength}
           placeholder={placeholder}

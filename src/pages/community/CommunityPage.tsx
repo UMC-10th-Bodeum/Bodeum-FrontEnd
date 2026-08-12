@@ -207,7 +207,6 @@ export default function CommunityPage() {
                     likes={post.likeCount}
                     comments={post.commentCount}
                     views={post.viewCount}
-                    imageCount={post.thumbnailUrl ? 1 : 0}
                     initialIsLiked={post.isLiked}
                     createdAt={formatDate(post.createdAt)}
                     onClick={() => handlePostClick(post.postId)}

@@ -4,7 +4,6 @@ import HeartDisabledIcon from "@/assets/icons/HeartDisabled.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
 import WarningIcon from "@/assets/icons/Warning.svg?react";
-import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import DetailBackButton from "@/components/DetailBackButton";
 import { useNavigate } from "react-router-dom";
 import PostTag from "@/components/PostTag";
@@ -21,6 +20,7 @@ import type { CommunityPostDetail } from "@/types/community";
 import ShareButton from "@/components/ShareButton";
 import { diagnosisMap } from "@/constants/diagnosis";
 import { formatDate } from "@/utils/time";
+import useCommunityMutationError from "../../hooks/useCommunityMutationError";
 
 interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
@@ -79,15 +79,9 @@ export default function CommunityPostDetailCard({
   const { mutate: deletePost, isPending: isDeleting } = useDeleteCommunityPost(post.postId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const showMutationError = (error: unknown, fallbackMessage: string) => {
-    if (isUnauthorizedError(error)) {
-      setShowDeleteModal(false);
-      onLoginRequired();
-      return;
-    }
-
-    showToast("red", getApiErrorMessage(error, fallbackMessage));
-  };
+  const showMutationError = useCommunityMutationError(onLoginRequired, () =>
+    setShowDeleteModal(false),
+  );
 
   const isFullyAnonymous = post.anonymityType === "FULLY_ANONYMOUS";
   const authorName =

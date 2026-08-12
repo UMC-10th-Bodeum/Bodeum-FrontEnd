@@ -112,9 +112,9 @@ function CommunityRelatedPostsSection({
   category,
 }: CommunityRelatedPostsSectionProps) {
   const navigate = useNavigate();
-  const { data, isPending, isError, refetch } = useCommunityPosts({
+  const { data, isPending, isError } = useCommunityPosts({
     page: 0,
-    size: 14,
+    size: 6,
     sort: "latest",
     categoryCode: communityCategoryCodeMap[category],
   });
@@ -135,16 +135,7 @@ function CommunityRelatedPostsSection({
       {isPending ? (
         <p className="py-6 text-center text-background-500">게시글을 불러오는 중입니다.</p>
       ) : isError ? (
-        <div className="flex flex-col items-center gap-3 py-6 text-background-500">
-          <p>게시글을 불러오지 못했습니다.</p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-lg border border-background-300 px-4 py-2"
-          >
-            다시 시도
-          </button>
-        </div>
+        <p className="py-6 text-center text-background-500">게시글을 불러오지 못했습니다.</p>
       ) : relatedPosts.length === 0 ? (
         <p className="py-6 text-center text-background-500">같은 게시판의 다른 글이 없습니다.</p>
       ) : (
