@@ -38,7 +38,6 @@ export default function CommunityReplyForm({
       </span>
       <textarea
         value={reply}
-        maxLength={1000}
         disabled={isSubmitting}
         onChange={(event) => setReply(event.target.value)}
         onKeyDown={(event) => {

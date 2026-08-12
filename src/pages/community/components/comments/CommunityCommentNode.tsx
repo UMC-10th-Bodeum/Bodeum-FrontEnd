@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { getApiErrorMessage } from "@/apis/apiError";
+import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import ButtonFill from "@/components/ButtonFill";
 import ButtonOutline from "@/components/ButtonOutline";
@@ -10,6 +10,7 @@ import { useUpdateCommunityComment } from "@/hooks/useCommunity";
 import type { CommunityComment } from "@/types/community";
 import { getRelativeTime } from "@/utils/time";
 
+import { CommunityTextarea } from "../CommunityContentFields";
 import CommunityReplyForm from "./CommunityReplyForm";
 
 export interface CommunityCommentNodeProps {
@@ -24,6 +25,7 @@ export interface CommunityCommentNodeProps {
   isReplyPending: boolean;
   onLike: (commentId: number, isCurrentlyLiked: boolean) => void;
   likingCommentId?: number;
+  onLoginRequired: () => void;
   onAdopt?: (commentId: number, isAccepted: boolean) => void;
   isAdoptPending?: boolean;
   onDelete?: (commentId: number) => void;
@@ -41,6 +43,7 @@ export default function CommunityCommentNode({
   isReplyPending,
   onLike,
   likingCommentId,
+  onLoginRequired,
   onAdopt,
   isAdoptPending = false,
   onDelete,
@@ -100,8 +103,14 @@ export default function CommunityCommentNode({
           setIsEditing(false);
           showToast("green", "댓글이 수정되었습니다.");
         },
-        onError: (error) =>
-          showToast("red", getApiErrorMessage(error, "댓글을 수정하지 못했습니다.")),
+        onError: (error) => {
+          if (isUnauthorizedError(error)) {
+            onLoginRequired();
+            return;
+          }
+
+          showToast("red", getApiErrorMessage(error, "댓글을 수정하지 못했습니다."));
+        },
       },
     );
   };
@@ -175,11 +184,13 @@ export default function CommunityCommentNode({
 
         {isEditing ? (
           <div className="mt-3 pr-[14px]">
-            <textarea
+            <CommunityTextarea
               value={editedContent}
-              maxLength={1000}
-              onChange={(event) => setEditedContent(event.target.value)}
-              className="min-h-[96px] w-full resize-none rounded-[8px] border border-background-300 bg-background-100 px-[16px] py-[12px] text-body text-background-600 outline-none focus:border-primary-500"
+              onChange={setEditedContent}
+              placeholder="댓글을 입력해 주세요"
+              placeholderClassName="placeholder:text-h3-onboard"
+              ariaLabel={`${isRoot ? "댓글" : "답글"} 내용`}
+              compact
             />
             <div className="mt-[12px] flex justify-end gap-2">
               <ButtonOutline
@@ -221,6 +232,12 @@ export default function CommunityCommentNode({
                   disabled={isAdoptPending}
                   onClick={(event) => {
                     event?.stopPropagation();
+
+                    if (comment.isMine && !comment.isAccepted) {
+                      showToast("red", "본인이 작성한 댓글 혹은 답글은 채택할 수 없습니다.");
+                      return;
+                    }
+
                     onAdopt?.(comment.commentId, comment.isAccepted);
                   }}
                   label="채택"
@@ -267,6 +284,7 @@ export default function CommunityCommentNode({
       isReplyPending={isReplyPending}
       onLike={onLike}
       likingCommentId={likingCommentId}
+      onLoginRequired={onLoginRequired}
       onAdopt={onAdopt}
       isAdoptPending={isAdoptPending}
       onDelete={onDelete}

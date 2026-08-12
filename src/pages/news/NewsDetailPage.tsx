@@ -164,7 +164,7 @@ export default function NewsDetailPage() {
             leftButtonText="둘러보기"
             rightButtonText="로그인/회원가입"
             className="z-[70]!"
-            onLeftButtonClick={() => navigate("/news")}
+            onLeftButtonClick={() => setShowLoginModal(false)}
             onRightButtonClick={() => navigate("/auth")}
           />
         </div>

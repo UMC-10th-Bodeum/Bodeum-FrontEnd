@@ -8,7 +8,7 @@ import type {
   CommunityPostPayload,
 } from "@/types/community";
 
-import CommunityContentFields from "./CommunityContentFields";
+import CommunityContentFields from "../CommunityContentFields";
 import CommunityImageField from "./CommunityImageField";
 import SelectableChipGroup from "./SelectableChipGroup";
 

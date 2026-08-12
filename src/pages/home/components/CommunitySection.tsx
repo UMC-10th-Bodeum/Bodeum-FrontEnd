@@ -54,9 +54,7 @@ export default function CommunitySection() {
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
         <PostSection
           title="인기글"
-          onMoreClick={() => navigate("/community", {
-            state: { sort: "view" },
-          })}
+          onMoreClick={() => navigate("/community?sort=view")}
         >
           {popularPosts.map((post) => (
             <PostListItem
@@ -72,9 +70,7 @@ export default function CommunitySection() {
         </PostSection>
         <PostSection
           title="최신글"
-          onMoreClick={() => navigate("/community", {
-            state: { sort: "latest" },
-          })}
+          onMoreClick={() => navigate("/community?sort=latest")}
         >
           {latestPosts.map((post) => (
             <PostListItem

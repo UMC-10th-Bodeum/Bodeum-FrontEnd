@@ -26,6 +26,7 @@ export default function NewsCard({
   thumbnailUrl,
 }: NewsCardProps) {
   const navigate = useNavigate();
+  const hasTag = dDay != null || status != null;
 
   return (
     <button
@@ -45,12 +46,14 @@ export default function NewsCard({
         </div>
 
         <div className="flex items-center">
-          <PostTag
-            type="ETC"
-            label={dDay ? `D-${dDay}` : `${status}`}
-          />
+          {hasTag && (
+            <PostTag
+              type="ETC"
+              label={dDay != null ? `D-${dDay}` : status}
+            />
+          )}
           
-          <ViewIcon className="h-[12px] w-[12px] ml-[8px] mr-[4px]" />
+          <ViewIcon className={`h-[12px] w-[12px] ${hasTag ? "ml-[8px]" : ""} mr-[4px]`} />
           <span className="text-body-sub leading-none text-background-500 mr-[4px]">조회</span>
           <span className="text-h4-list leading-none text-gray-500">{viewCount}</span>
         </div>

@@ -40,7 +40,3 @@ export function getCommunityCategoryByCode(code: CommunityCategoryCode): Communi
 export const communityCategoryEntries = Object.entries(communityCategoryMap) as Array<
   [CommunityCategory, string]
 >;
-
-export function isCommunityCategory(value: string | null): value is CommunityCategory {
-  return value !== null && Object.prototype.hasOwnProperty.call(communityCategoryMap, value);
-}

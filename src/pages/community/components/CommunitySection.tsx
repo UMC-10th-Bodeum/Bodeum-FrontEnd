@@ -1,10 +1,13 @@
-import { useNavigate } from "react-router-dom";
 import ButtonFill from "@/components/ButtonFill";
 import CommunityCard from "@/components/CommunityCard";
 import { useRecommendedCommunityPosts } from "@/hooks/useHome";
 
-export default function CommunitySection() {
-  const navigate = useNavigate();
+interface CommunitySectionProps {
+  onWriteClick: () => void;
+  onPostClick: (postId: number) => void;
+}
+
+export default function CommunitySection({ onWriteClick, onPostClick }: CommunitySectionProps) {
   const { data: posts = [] } = useRecommendedCommunityPosts();
 
   return (
@@ -19,7 +22,7 @@ export default function CommunitySection() {
 
         <ButtonFill
           label="글쓰기"
-          onClick={() => navigate("/community/write")}
+          onClick={onWriteClick}
           className="!h-[38px] !w-[84px] !px-[16px] !py-[10px]"
         />
       </div>
@@ -27,7 +30,11 @@ export default function CommunitySection() {
       <div className="no-scrollbar w-full min-w-0 overflow-x-auto">
         <div className="inline-flex gap-4">
           {posts.map((post) => (
-            <CommunityCard key={post.postId} {...post} />
+            <CommunityCard
+              key={post.postId}
+              {...post}
+              onClick={() => onPostClick(post.postId)}
+            />
           ))}
         </div>
       </div>

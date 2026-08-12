@@ -7,9 +7,11 @@ import type {
   CommunityCommentsResult,
   CommunityPostDetail,
   CommunityPostCreateRequest,
+  CommunityPostImageUploadResult,
   CommunityPostLikeResult,
   CommunityPostListParams,
   CommunityPostPage,
+  CommunityPostSearchSuggestionsResult,
   CommunityPostScrapResult,
 } from "@/types/community";
 
@@ -99,7 +101,7 @@ export const deleteCommunityPostLike = async (postId: number) => {
 export const getCommunityPosts = async ({
   page = 0,
   size = 14,
-  sort = "view",
+  sort,
   keyword,
   categoryCode,
 }: CommunityPostListParams = {}) => {
@@ -108,13 +110,23 @@ export const getCommunityPosts = async ({
     params: {
       page,
       size,
-      sort,
+      ...(sort ? { sort } : {}),
       ...(normalizedKeyword && normalizedKeyword.length >= 2 ? { keyword: normalizedKeyword } : {}),
       ...(categoryCode ? { categoryCode } : {}),
     },
   });
 
   return data.result;
+};
+
+// 게시글 검색어 추천 조회
+export const getCommunityPostSearchSuggestions = async (keyword: string, size = 10) => {
+  const { data } = await api.get<ApiResponse<CommunityPostSearchSuggestionsResult>>(
+    "/api/v1/community/posts/search/suggestions",
+    { params: { keyword: keyword.trim(), size } },
+  );
+
+  return data.result.suggestions;
 };
 
 // 게시글 작성
@@ -133,7 +145,12 @@ export const getCommunityPost = async (postId: number) => {
     `/api/v1/community/posts/${postId}`,
   );
 
-  return data.result;
+  return {
+    ...data.result,
+    authorLevel: data.result.authorLevel ?? null,
+    childAge: data.result.childAge ?? null,
+    disabilityTypes: data.result.disabilityTypes ?? [],
+  };
 };
 
 // 게시글 삭제
@@ -169,9 +186,12 @@ export const uploadCommunityPostImage = async (file: File) => {
   const form = new FormData();
   form.append("image", file);
 
-  const { data } = await api.post<ApiResponse<string>>("/api/v1/community/posts/images", form);
+  const { data } = await api.post<ApiResponse<CommunityPostImageUploadResult>>(
+    "/api/v1/community/posts/images",
+    form,
+  );
 
-  return data.result;
+  return data.result.imageUrl;
 };
 
 // 댓글 공감 등록

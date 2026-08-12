@@ -13,7 +13,6 @@ import {
   updateMyProfile,
   updateProfileImage,
 } from "@/apis/mypage";
-import { getRegions } from "@/apis/onboardingApi";
 import { getMyProfile } from "@/apis/userApi";
 
 export const USER_PROFILE_QUERY_KEY = ["user", "profile"] as const;
@@ -21,6 +20,7 @@ export const USER_DASHBOARD_QUERY_KEY = ["user", "dashboard"] as const;
 export const USER_SCRAPS_QUERY_KEY = ["user", "scraps"] as const;
 export const USER_POSTS_QUERY_KEY = ["user", "posts"] as const;
 export const USER_COMMENTS_QUERY_KEY = ["user", "comments"] as const;
+export const USER_POINTS_QUERY_KEY = ["user", "points"] as const;
 
 export const myProfileQueryOptions = queryOptions({
   queryKey: USER_PROFILE_QUERY_KEY,
@@ -28,9 +28,9 @@ export const myProfileQueryOptions = queryOptions({
   retry: false,
 });
 
-export const myPageRegionsQueryOptions = queryOptions({
-  queryKey: ["regions"],
-  queryFn: getRegions,
+export const myPointsQueryOptions = queryOptions({
+  queryKey: USER_POINTS_QUERY_KEY,
+  queryFn: getMyPoints,
   retry: false,
 });
 
@@ -50,11 +50,7 @@ export const useMyDashboard = () => {
 };
 
 export const useMyPoints = () => {
-  return useQuery({
-    queryKey: ["user", "points"],
-    queryFn: getMyPoints,
-    retry: false,
-  });
+  return useQuery(myPointsQueryOptions);
 };
 
 export const useMyScraps = (

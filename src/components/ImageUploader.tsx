@@ -1,17 +1,28 @@
 import { useRef } from "react";
 import PlusIcon from "@/assets/icons/add-picture.svg?react";
 import CloseIcon from "@/assets/icons/Close.svg?react";
+import { showToast } from "@/components/Toast";
 
 interface ImageUploaderProps {
   images: File[];
   onChange: (images: File[]) => void;
+  allowedMimeTypes?: readonly string[];
+  allowedExtensions?: readonly string[];
+  allowedFormatLabel?: string;
+  maxFileSize?: number;
 }
 
 const MAX_IMAGE = 5;
+const DEFAULT_ALLOWED_MIME_TYPES = ["image/png", "image/jpeg"] as const;
+const DEFAULT_ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png"] as const;
 
 export default function ImageUploader({
   images,
   onChange,
+  allowedMimeTypes = DEFAULT_ALLOWED_MIME_TYPES,
+  allowedExtensions = DEFAULT_ALLOWED_EXTENSIONS,
+  allowedFormatLabel = "JPG, PNG",
+  maxFileSize,
 }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -20,7 +31,40 @@ export default function ImageUploader({
 
     if (!files.length) return;
 
-    const next = [...images, ...files].slice(0, MAX_IMAGE);
+    const hasAllowedFormat = (file: File) => {
+      const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+
+      return allowedMimeTypes.includes(file.type) && allowedExtensions.includes(extension);
+    };
+    const unsupportedFiles = files.filter((file) => !hasAllowedFormat(file));
+    const oversizedFiles = maxFileSize
+      ? files.filter((file) => file.size > maxFileSize)
+      : [];
+    const validFiles = files.filter(
+      (file) => hasAllowedFormat(file) && (!maxFileSize || file.size <= maxFileSize),
+    );
+    const remainingSlots = Math.max(0, MAX_IMAGE - images.length);
+
+    if (unsupportedFiles.length > 0) {
+      showToast(
+        "red",
+        `이미지 업로드 실패. ${allowedFormatLabel} 형식의 이미지만 업로드할 수 있습니다.`,
+      );
+    }
+
+    if (oversizedFiles.length > 0 && maxFileSize) {
+      const maxFileSizeInMb = maxFileSize / (1024 * 1024);
+      showToast(
+        "red",
+        `이미지 업로드 실패. 이미지는 장당 최대 ${maxFileSizeInMb}MB까지 업로드할 수 있습니다.`,
+      );
+    }
+
+    if (validFiles.length > remainingSlots) {
+      showToast("red", `이미지 업로드 실패. 이미지는 최대 ${MAX_IMAGE}장까지 첨부할 수 있습니다.`);
+    }
+
+    const next = [...images, ...validFiles.slice(0, remainingSlots)];
 
     onChange(next);
 
@@ -81,14 +125,16 @@ export default function ImageUploader({
       <input
         ref={inputRef}
         type="file"
-        accept="image/png,image/jpeg,image/jpg"
+        accept={allowedMimeTypes.join(",")}
         multiple
         hidden
         onChange={handleUpload}
       />
 
       <p className="mt-3 text-body-sub text-background-400">
-        최대 5장까지 업로드할 수 있습니다.
+        최대 5장
+        {maxFileSize ? `, 장당 최대 ${maxFileSize / (1024 * 1024)}MB` : ""}까지 업로드할 수
+        있습니다.
       </p>
     </div>
   );
