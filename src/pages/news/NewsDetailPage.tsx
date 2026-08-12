@@ -46,6 +46,7 @@ export default function NewsDetailPage() {
       sort: "VIEW",
       newsType: news?.newsType,
       regionLevel1: relatedRegionLevel1,
+      category: news?.categoryCode,
     },
     Boolean(news && relatedRegionLevel1),
   );
@@ -106,6 +107,7 @@ export default function NewsDetailPage() {
     }
 
     params.set("newsType", news.newsType);
+    params.set("category", news.categoryCode);
     navigate(`/news?${params.toString()}`);
   };
 
