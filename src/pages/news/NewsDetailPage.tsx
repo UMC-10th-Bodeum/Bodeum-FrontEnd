@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { hasStoredAuthSession } from "@/apis/authApi";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import AIChatButton from "@/components/AIChatButton";
-import { useNewsDetail, useRelatedNews, useToggleNewsScrap } from "@/hooks/useNews";
+import { useNews, useNewsDetail, useToggleNewsScrap } from "@/hooks/useNews";
 import type { NewsType } from "@/types/news";
 
 import { showToast } from "@/components/Toast";
@@ -24,7 +24,9 @@ const breadcrumbLabelMap: Record<NewsType, string> = {
 const getDisplayText = (value: string | null | undefined) => value?.trim() || null;
 
 const formatTargetAudience = (value: string | null | undefined) =>
-  getDisplayText(value)?.replace(/\s*\|\s*/g, "\n").replace(/\s*\+\s*/g, ", ") ?? null;
+  getDisplayText(value)
+    ?.replace(/\s*\|\s*/g, "\n")
+    .replace(/\s*\+\s*/g, ", ") ?? null;
 
 const formatPeriod = (startDate: string | null | undefined, endDate: string | null | undefined) =>
   [getDisplayText(startDate), getDisplayText(endDate)].filter(Boolean).join(" ~ ") || null;
@@ -36,11 +38,17 @@ export default function NewsDetailPage() {
   const parsedNewsId = Number(id);
   const newsId = Number.isSafeInteger(parsedNewsId) && parsedNewsId > 0 ? parsedNewsId : undefined;
   const { data: news, isPending, isError } = useNewsDetail(newsId);
-  const {
-    data: relatedNews = [],
-    isPending: isRelatedNewsPending,
-    isError: isRelatedNewsError,
-  } = useRelatedNews(newsId);
+  const relatedRegionLevel1 = news?.region?.trim().split(/\s+/)[0];
+  const relatedNewsQuery = useNews(
+    {
+      page: 0,
+      size: 14,
+      sort: "VIEW",
+      newsType: news?.newsType,
+      regionLevel1: relatedRegionLevel1,
+    },
+    Boolean(news && relatedRegionLevel1),
+  );
   const { mutate: toggleScrap, isPending: isScrapPending } = useToggleNewsScrap();
 
   const breadcrumbLabel = news ? breadcrumbLabelMap[news.newsType] : "소식";
@@ -66,6 +74,13 @@ export default function NewsDetailPage() {
     : undefined;
   const regionLevel1Label =
     formatRegionDisplayLabel(news.region?.trim().split(/\s+/)[0] ?? "") || "해당 지역";
+  const relatedNews = Array.from(
+    new Map(
+      (relatedNewsQuery.data?.items ?? [])
+        .filter((item) => item.newsId !== news.newsId)
+        .map((item) => [item.newsId, { ...item, region: item.region ?? "" }] as const),
+    ).values(),
+  ).slice(0, 5);
 
   const activityInfo = [
     ["진행기간", formatPeriod(news.programStartDate, news.programEndDate)],
@@ -136,12 +151,12 @@ export default function NewsDetailPage() {
           {activityInfo.length > 0 && <ActivityInfoTable items={activityInfo} />}
           <AIChatButton />
 
-          <div className="py-[20px]">
+          <div className="pt-[20px]">
             <RelatedNewsSection
               title={`${regionLevel1Label}에서 모집 중인 소식`}
               items={relatedNews}
-              isPending={isRelatedNewsPending}
-              isError={isRelatedNewsError}
+              isPending={Boolean(relatedRegionLevel1) && relatedNewsQuery.isPending}
+              isError={relatedNewsQuery.isError}
               onMoreClick={handleRelatedNewsMoreClick}
             />
           </div>

@@ -3,7 +3,6 @@ import {
   getNews,
   getNewsDetail,
   getNewsSearchSuggestions,
-  getRelatedNews,
   searchNews,
   toggleNewsScrap,
 } from "@/apis/news";
@@ -46,14 +45,6 @@ export function useNewsDetail(newsId: number | undefined) {
   return useQuery({
     queryKey: ["news", "detail", newsId],
     queryFn: () => getNewsDetail(newsId as number),
-    enabled: newsId !== undefined,
-  });
-}
-
-export function useRelatedNews(newsId: number | undefined, size = 5) {
-  return useQuery({
-    queryKey: ["news", "related", newsId, size],
-    queryFn: () => getRelatedNews(newsId as number, size),
     enabled: newsId !== undefined,
   });
 }
