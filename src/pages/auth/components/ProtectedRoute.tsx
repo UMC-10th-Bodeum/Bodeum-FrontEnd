@@ -1,10 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 
-import {
-  AUTH_STATE_CHANGED_EVENT,
-  hasStoredAuthSession,
-} from "@/apis/authApi";
+import { AUTH_STATE_CHANGED_EVENT, hasStoredAuthSession } from "@/apis/authApi";
+import { showToast } from "@/components/Toast";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,6 +11,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(hasStoredAuthSession);
+  const hasShownLoginRequiredToast = useRef(false);
 
   useEffect(() => {
     const syncAuthState = () => {
@@ -26,10 +25,19 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (isLoggedIn || hasShownLoginRequiredToast.current) {
+      return;
+    }
+
+    hasShownLoginRequiredToast.current = true;
+    showToast("blue", "로그인/회원가입 후 만나보세요");
+  }, [isLoggedIn]);
+
   if (!isLoggedIn) {
     return (
       <Navigate
-        to="/auth"
+        to="/"
         replace
         state={{ from: `${location.pathname}${location.search}` }}
       />
