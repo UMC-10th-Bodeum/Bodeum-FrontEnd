@@ -9,6 +9,7 @@ export interface CommunityPostPayload {
   title: string;
   content: string;
   images: File[];
+  existingImageUrls: string[];
 }
 
 export interface CommunityPostCreateRequest {

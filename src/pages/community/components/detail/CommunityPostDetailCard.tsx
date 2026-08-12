@@ -15,15 +15,12 @@ import {
   useToggleCommunityPostScrap,
   useDeleteCommunityPost,
 } from "@/hooks/useCommunity";
-import { useUpdateCommunityPost } from "@/hooks/useCommunity";
 import ButtonOutline from "@/components/ButtonOutline";
-import ButtonFill from "@/components/ButtonFill";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
 import ShareButton from "@/components/ShareButton";
 import { diagnosisMap } from "@/constants/diagnosis";
 import { formatDate } from "@/utils/time";
-import CommunityContentFields from "../CommunityContentFields";
 
 interface CommunityPostDetailCardProps {
   post: CommunityPostDetail;
@@ -74,16 +71,12 @@ export default function CommunityPostDetailCard({
   children,
   onLoginRequired,
 }: CommunityPostDetailCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(post.title);
-  const [editedContent, setEditedContent] = useState(post.content);
   const { mutate: toggleLike, isPending: isLikePending } = useToggleCommunityPostLike(post.postId);
   const { mutate: toggleScrap, isPending: isScrapPending } = useToggleCommunityPostScrap(
     post.postId,
   );
   const navigate = useNavigate();
   const { mutate: deletePost, isPending: isDeleting } = useDeleteCommunityPost(post.postId);
-  const { mutate: updatePost, isPending: isUpdating } = useUpdateCommunityPost(post.postId);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const showMutationError = (error: unknown, fallbackMessage: string) => {
@@ -94,36 +87,6 @@ export default function CommunityPostDetailCard({
     }
 
     showToast("red", getApiErrorMessage(error, fallbackMessage));
-  };
-
-  const startEditing = () => {
-    setEditedTitle(post.title);
-    setEditedContent(post.content);
-    setIsEditing(true);
-  };
-
-  const onCancel = () => {
-    setIsEditing(false);
-  };
-
-  const onApply = () => {
-    const payload = {
-      boardType: post.boardType,
-      anonymityType: post.anonymityType,
-      title: editedTitle.trim() || post.title,
-      content: editedContent,
-      disabilityTypes: post.disabilityTypes,
-      hashtags: post.hashtags,
-      imageUrls: post.imageUrls,
-    };
-
-    updatePost(payload, {
-      onSuccess: () => {
-        setIsEditing(false);
-        showToast("green", "게시글이 수정되었습니다.");
-      },
-      onError: (error) => showMutationError(error, "게시글을 수정하지 못했습니다."),
-    });
   };
 
   const isFullyAnonymous = post.anonymityType === "FULLY_ANONYMOUS";
@@ -162,22 +125,10 @@ export default function CommunityPostDetailCard({
       </header>
 
       <div className="pb-[20px] pt-[12px]">
-        {isEditing ? (
-          <CommunityContentFields
-            title={editedTitle}
-            content={editedContent}
-            onTitleChange={setEditedTitle}
-            onContentChange={setEditedContent}
-            showLegend={false}
-          />
-        ) : (
-          <>
-            <h1 className="text-h1-onboard text-background-600">{post.title}</h1>
-            <p className="mt-[12px] whitespace-pre-wrap text-h3-onboard text-background-600">
-              {post.content}
-            </p>
-          </>
-        )}
+        <h1 className="text-h1-onboard text-background-600">{post.title}</h1>
+        <p className="mt-[12px] whitespace-pre-wrap text-h3-onboard text-background-600">
+          {post.content}
+        </p>
 
         {post.imageUrls.length > 0 && (
           <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -233,27 +184,11 @@ export default function CommunityPostDetailCard({
         <div className="flex items-center gap-2">
           {post.isMine && (
             <>
-              {isEditing ? (
-                <div className="ml-auto flex gap-[8px]">
-                  <ButtonOutline
-                    label="취소하기"
-                    onClick={onCancel}
-                    className="w-[88px] !h-[36px]"
-                  />
-                  <ButtonFill
-                    label="적용하기"
-                    disabled={editedTitle.trim().length === 0 || isUpdating}
-                    onClick={onApply}
-                    className="w-[88px] !min-h-[36px] h-[36px]"
-                  />
-                </div>
-              ) : (
-                <ButtonOutline
-                  label="수정"
-                  onClick={startEditing}
-                  className="ml-auto !h-[36px] px-[20px] !py-[8px]"
-                />
-              )}
+              <ButtonOutline
+                label="수정"
+                onClick={() => navigate(`/community/write/${post.postId}`)}
+                className="ml-auto !h-[36px] px-[20px] !py-[8px]"
+              />
 
               <DetailBackButton
                 icon={null}
