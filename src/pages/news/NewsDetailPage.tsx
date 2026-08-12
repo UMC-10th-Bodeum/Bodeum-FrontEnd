@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { hasStoredAuthSession } from "@/apis/authApi";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import AIChatButton from "@/components/AIChatButton";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { useNewsDetail, useRelatedNews, useToggleNewsScrap } from "@/hooks/useNews";
 import type { NewsType } from "@/types/news";
 
@@ -31,7 +30,6 @@ export default function NewsDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { setBreadcrumb } = useBreadcrumb();
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const parsedNewsId = Number(id);
   const newsId = Number.isSafeInteger(parsedNewsId) && parsedNewsId > 0 ? parsedNewsId : undefined;
   const { data: news, isPending, isError } = useNewsDetail(newsId);
@@ -99,7 +97,7 @@ export default function NewsDetailPage() {
     }
 
     if (!hasStoredAuthSession()) {
-      setShowLoginModal(true);
+      showToast("blue", "로그인/회원가입 후 만나보세요");
       return;
     }
 
@@ -112,7 +110,7 @@ export default function NewsDetailPage() {
       },
       onError: (error) => {
         if (isUnauthorizedError(error)) {
-          setShowLoginModal(true);
+          showToast("blue", "로그인/회원가입 후 만나보세요");
           return;
         }
 
@@ -146,29 +144,6 @@ export default function NewsDetailPage() {
           </div>
         </div>
       </div>
-
-      {showLoginModal && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]"
-          onMouseDown={(event) => {
-            const dialog = event.currentTarget.querySelector('[role="dialog"]');
-
-            if (event.target instanceof Node && !dialog?.contains(event.target)) {
-              setShowLoginModal(false);
-            }
-          }}
-        >
-          <OnboardCancelBox
-            title="로그인하고 더 많은 기능을 이용해 보세요!"
-            description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
-            leftButtonText="둘러보기"
-            rightButtonText="로그인/회원가입"
-            className="z-[70]!"
-            onLeftButtonClick={() => setShowLoginModal(false)}
-            onRightButtonClick={() => navigate("/auth")}
-          />
-        </div>
-      )}
     </div>
   );
 }
