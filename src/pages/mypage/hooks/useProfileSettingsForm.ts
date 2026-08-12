@@ -10,7 +10,7 @@ import {
   useUpdateMyProfile,
   useUpdateProfileImage,
 } from "@/hooks/useMyPage";
-import { regionsQueryOptions, useRegions } from "@/hooks/useOnboarding";
+import { regionsQueryOptions } from "@/hooks/useOnboarding";
 import type { ProfileSettingsForm, UpdateMyProfileRequest } from "@/types/mypage";
 import { findRegionId } from "@/utils/onboarding";
 import { useMyPageProfile } from "../settings/myPageProfileContext";
@@ -41,7 +41,6 @@ export function useProfileSettingsForm() {
   const [draftProfile, setDraftProfile] = useState(() => cloneProfileSettings(profile));
   const [isEditing, setIsEditing] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
-  const regionsQuery = useRegions();
 
   const startEditing = () => {
     setDraftProfile(cloneProfileSettings(profile));
@@ -65,6 +64,8 @@ export function useProfileSettingsForm() {
       const currentChildBirth = getChildBirth(profile);
       const disabilityTypes = toApiDisabilityTypes(draftProfile.diagnoses);
       const currentDisabilityTypes = toApiDisabilityTypes(profile.diagnoses);
+      const interestCategories = draftProfile.interests;
+      const currentInterestCategories = profile.interests;
 
       if (nickname && nickname !== profile.parentNickname.trim()) request.nickname = nickname;
       if (childNickname && childNickname !== profile.childNickname.trim()) {
@@ -74,10 +75,12 @@ export function useProfileSettingsForm() {
       if (!haveSameValues(disabilityTypes, currentDisabilityTypes)) {
         request.disabilityTypes = disabilityTypes;
       }
+      if (!haveSameValues(interestCategories, currentInterestCategories)) {
+        request.interestCategories = interestCategories;
+      }
 
       if (draftProfile.region !== profile.region || draftProfile.district !== profile.district) {
-        const regions = regionsQuery.data
-          ?? await queryClient.fetchQuery(regionsQueryOptions());
+        const regions = await queryClient.fetchQuery(regionsQueryOptions());
         const regionId = findRegionId(regions, draftProfile.region, draftProfile.district);
         if (regionId === undefined) throw new Error("선택한 지역을 찾을 수 없습니다.");
         request.regionId = regionId;
@@ -163,10 +166,6 @@ export function useProfileSettingsForm() {
     setDraftProfile,
     isEditing,
     isApplying,
-    regions: regionsQuery.data ?? [],
-    isRegionsLoading: regionsQuery.isPending,
-    regionsError: regionsQuery.error,
-    retryRegions: regionsQuery.refetch,
     startEditing,
     cancelEditing,
     applyEditing,
