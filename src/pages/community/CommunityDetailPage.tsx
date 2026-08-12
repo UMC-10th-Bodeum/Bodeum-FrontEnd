@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { isUnauthorizedError } from "@/apis/apiError";
 import AsyncState from "@/components/AsyncState";
 import ButtonOutline from "@/components/ButtonOutline";
-import { showToast } from "@/components/Toast";
 import {
   communityCategoryMap,
   communityCategoryCodeMap,
@@ -21,7 +20,7 @@ import CommunityRelatedPostCard from "./components/detail/CommunityRelatedPostCa
 export default function CommunityDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const hasShownLoginToast = useRef(false);
+  const hasHandledLoginRequired = useRef(false);
   const { setBreadcrumb } = useBreadcrumb();
   const { isLoggedIn: hasDetailAccess, isPending: isAuthPending } = useLoginCheck();
   const parsedPostId = id && /^\d+$/.test(id) ? Number(id) : undefined;
@@ -36,12 +35,10 @@ export default function CommunityDetailPage() {
   const categoryLabel = category ? communityCategoryMap[category] : "커뮤니티";
 
   const handleLoginRequired = useCallback(() => {
-    if (!hasShownLoginToast.current) {
-      hasShownLoginToast.current = true;
-      showToast("blue", "로그인/회원가입 후 만나보세요");
-    }
+    if (hasHandledLoginRequired.current) return;
+    hasHandledLoginRequired.current = true;
 
-    navigate("/community", { replace: true });
+    navigate("/community", { replace: true, state: { showLoginModal: true } });
   }, [navigate]);
 
   useEffect(() => {

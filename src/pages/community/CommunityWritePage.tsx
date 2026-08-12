@@ -21,7 +21,7 @@ export default function CommunityWritePage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isWriteAccessAllowed, setIsWriteAccessAllowed] = useState(false);
-  const hasShownLoginToast = useRef(false);
+  const hasHandledLoginRequired = useRef(false);
   const { runAfterLoginCheck } = useLoginCheck();
   const { mutateAsync: createPost } = useCreateCommunityPost();
   const blocker = useBlocker(
@@ -50,13 +50,11 @@ export default function CommunityWritePage() {
         setIsWriteAccessAllowed(true);
       },
       () => {
-        if (!hasShownLoginToast.current) {
-          hasShownLoginToast.current = true;
-          showToast("blue", "로그인/회원가입 후 만나보세요");
-        }
+        if (hasHandledLoginRequired.current) return;
+        hasHandledLoginRequired.current = true;
 
         allowNavigationRef.current = true;
-        navigate("/community", { replace: true });
+        navigate("/community", { replace: true, state: { showLoginModal: true } });
       },
     );
   }, [navigate, runAfterLoginCheck]);
@@ -94,10 +92,9 @@ export default function CommunityWritePage() {
         navigate("/community");
       } catch (error) {
         if (isUnauthorizedError(error)) {
-          showToast("blue", "로그인/회원가입 후 만나보세요");
           setIsWriteAccessAllowed(false);
           allowNavigationRef.current = true;
-          navigate("/community", { replace: true });
+          navigate("/community", { replace: true, state: { showLoginModal: true } });
           return;
         }
 
