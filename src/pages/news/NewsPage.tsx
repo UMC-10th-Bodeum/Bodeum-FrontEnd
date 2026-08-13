@@ -63,7 +63,7 @@ export default function NewsPage() {
             category={filters.category}
             onCategoryChange={filters.setCategory}
           />
-          <NewsListSection items={data?.items ?? []} isLoading={isPending} isError={isError} />
+          <NewsListSection items={data?.items ?? []} isError={isError} />
           {(data?.totalPages ?? 0) > 0 && (
             <nav aria-label="소식 페이지네이션" className="p-2">
               <Pagination
