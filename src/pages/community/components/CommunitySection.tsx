@@ -11,7 +11,6 @@ interface CommunitySectionProps {
 export default function CommunitySection({ onWriteClick, onPostClick }: CommunitySectionProps) {
   const { data: posts = [], isPending, isError } = useRecommendedCommunityPosts();
   const {
-    isDragging,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
