@@ -50,14 +50,6 @@ export default function InfoDetailPage() {
 
     return () => setBreadcrumb([]);
   }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
-
-  const [isScrapped, setIsScrapped] = useState<boolean>(detail?.isScrapped ?? false);
-  const [scrapCount, setScrapCount] = useState<number>(detail?.scrapCount ?? 0);
-
-  useEffect(() => {
-    setIsScrapped(detail?.isScrapped ?? false);
-    setScrapCount(detail?.scrapCount ?? 0);
-  }, [detail]);
   
   if (isPending) {
     return <AsyncState type="loading" />;
@@ -77,9 +69,9 @@ export default function InfoDetailPage() {
           subCategory={detail.subCategoryKo}
           homepageUrl={detail.homepageUrl ?? undefined}
           viewCount={detail.viewCount}
-          scrapCount={scrapCount}
+          scrapCount={detail.scrapCount}
           reviewCount={detail.reviewCount}
-          isScrapped={isScrapped}
+          isScrapped={detail.isScrapped}
           address={detail.address}
           sido={detail.sido}
           sigungu={detail.sigungu}
