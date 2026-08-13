@@ -86,24 +86,36 @@ export default function AiMessageBubble({
 
       {visibleResources.length > 0 && (
         <div className="flex w-full flex-col gap-[10px]">
-          {visibleResources.map((visibleResource, index) => (
-            <a
-              key={`${visibleResource.title}-${visibleResource.url ?? ""}-${index}`}
-              href={visibleResource.url || undefined}
-              target={visibleResource.url ? "_blank" : undefined}
-              rel={visibleResource.url ? "noreferrer" : undefined}
-              aria-disabled={!visibleResource.url}
-              className={`flex w-full flex-col items-start gap-[6px] rounded-[10px] border border-main-100 bg-main-100 px-[16px] py-[10px] text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400 ${
-                visibleResource.url
-                  ? "cursor-pointer hover:bg-main-150"
-                  : "cursor-default"
-              }`}
-            >
-              <span className="w-full text-h6 text-background-600">
-                📌 {visibleResource.title} &gt;
-              </span>
-            </a>
-          ))}
+          {visibleResources.map((visibleResource, index) => {
+            const resourceUrl = visibleResource.url?.trim();
+            const resourceKey = `${visibleResource.title}-${resourceUrl ?? ""}-${index}`;
+            const resourceClassName =
+              "flex w-full flex-col items-start gap-[6px] rounded-[10px] border border-main-100 bg-main-100 px-[16px] py-[10px] text-left";
+
+            if (!resourceUrl) {
+              return (
+                <div key={resourceKey} className={resourceClassName}>
+                  <span className="w-full text-h6 text-background-600">
+                    {visibleResource.title}
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <a
+                key={resourceKey}
+                href={resourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={`${resourceClassName} cursor-pointer transition-colors hover:bg-main-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-main-400`}
+              >
+                <span className="w-full text-h6 text-background-600">
+                  📌 {visibleResource.title} &gt;
+                </span>
+              </a>
+            );
+          })}
           <p className="w-full text-body-sub text-background-400">
             해당 출처는 믿을 수 있는 공공기관 및 전문 사이트의 정보를 바탕으로
             제공됩니다.
