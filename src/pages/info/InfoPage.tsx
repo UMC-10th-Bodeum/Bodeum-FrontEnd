@@ -119,8 +119,14 @@ export default function InfoPage() {
   }, [profile]);
 
   const hasProfileRegion = Boolean(
-    profile?.regionLevel1 && profile?.regionLevel2,
-  );
+  profile?.regionLevel1 && profile?.regionLevel2,
+);
+
+  const isProfileRegion =
+    Boolean(profile?.regionLevel1) &&
+    Boolean(profile?.regionLevel2) &&
+    regionLevel1 === profile?.regionLevel1 &&
+    regionLevel2 === profile?.regionLevel2;
   
   const [locationOpen, setLocationOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -219,7 +225,9 @@ export default function InfoPage() {
       ? "로그인 / 회원가입 하고 추천 기능을 이용해 보세요!"
       : isRecommendation && profile && !hasProfileRegion
         ? "맞춤 프로필로 지역을 설정하고 추천 기능을 이용해 보세요!"
-        : "조건에 맞는 정보가 없습니다.";
+        : isRecommendation && profile && !isProfileRegion
+          ? "마이페이지 > 설정에서 활동 지역을 변경하면, 다른 지역의 추천 목록을 확인하실 수 있어요!"
+          : "조건에 맞는 정보가 없습니다.";
 
   if (isPending) {
     return <AsyncState type="loading" />;
