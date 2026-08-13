@@ -7,6 +7,7 @@ import RegionOnboardingBox from "./components/RegionOnboardingBox";
 import { useNews, useNewsSearch } from "@/hooks/useNews";
 import type { NewsListParams } from "@/types/news";
 import { useNewsFilters } from "./useNewsFilters";
+import AsyncState from "@/components/AsyncState";
 
 const PAGE_SIZE = 14;
 
@@ -38,6 +39,10 @@ export default function NewsPage() {
     hasSearchKeyword && !region.isRegionInitializing,
   );
   const { data, isPending, isError } = hasSearchKeyword ? newsSearchQuery : newsQuery;
+
+  if (isPending) {
+    return <AsyncState type="loading" />;
+  }
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">

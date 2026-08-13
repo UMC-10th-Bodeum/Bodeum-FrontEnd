@@ -10,6 +10,7 @@ import {
   getQuerySort,
   getQueryCategory,
   getQueryStatus,
+  getQueryPage,
   parseInitialRegion,
 } from "./newsQueryParams";
 import { useRegionFilter } from "./useRegionFilter";
@@ -34,7 +35,7 @@ export function useNewsFilters() {
   const [status, setStatus] = useState<NewsStatus | undefined>(() =>
     getQueryStatus(searchParams.get("status")),
   );
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => getQueryPage(searchParams.get("page")));
 
   const updateNewsSearchParams = ({
     nextNewsType = newsTypeByTab[selectedTab],
@@ -44,6 +45,7 @@ export function useNewsFilters() {
     nextCategory,
     nextKeyword = searchKeyword,
     nextStatus = status,
+    nextPage = page,
   }: {
     nextNewsType?: NewsType;
     nextRegionLevel1?: string | null;
@@ -52,6 +54,7 @@ export function useNewsFilters() {
     nextCategory?: NewsCategoryFilter | null;
     nextKeyword?: string;
     nextStatus?: NewsStatus;
+    nextPage?: number;
   }) => {
     const params = new URLSearchParams();
     params.set("newsType", nextNewsType);
@@ -80,6 +83,9 @@ export function useNewsFilters() {
     if (nextKeyword) {
       params.set("keyword", nextKeyword);
     }
+    if (nextPage > 1) {
+      params.set("page", String(nextPage));
+    }
 
     setSearchParams(params);
   };
@@ -90,7 +96,11 @@ export function useNewsFilters() {
     hasAuthSession,
     onCommit: ({ regionLevel1, regionLevel2 }) => {
       setPage(1);
-      updateNewsSearchParams({ nextRegionLevel1: regionLevel1, nextRegionLevel2: regionLevel2 });
+      updateNewsSearchParams({
+        nextRegionLevel1: regionLevel1,
+        nextRegionLevel2: regionLevel2,
+        nextPage: 1,
+      });
     },
   });
 
@@ -101,19 +111,20 @@ export function useNewsFilters() {
     updateNewsSearchParams({
       nextNewsType: newsTypeByTab[value],
       nextCategory: null,
+      nextPage: 1,
     });
   };
 
   const changeSort = (value: NewsSort) => {
     setSort(value);
     setPage(1);
-    updateNewsSearchParams({ nextSort: value });
+    updateNewsSearchParams({ nextSort: value, nextPage: 1 });
   };
 
   const changeCategory = (value: NewsCategoryFilter) => {
     setCategory(value);
     setPage(1);
-    updateNewsSearchParams({ nextCategory: value || null });
+    updateNewsSearchParams({ nextCategory: value || null, nextPage: 1 });
   };
 
   const search = (nextKeyword: string) => {
@@ -121,11 +132,17 @@ export function useNewsFilters() {
     setKeyword(normalizedKeyword);
     setSearchKeyword(normalizedKeyword);
     setPage(1);
-    updateNewsSearchParams({ nextKeyword: normalizedKeyword });
+    updateNewsSearchParams({ nextKeyword: normalizedKeyword, nextPage: 1 });
   };
 
   const onKeywordChange = (value: string) => {
     setKeyword(value);
+  };
+
+  const changePage = (nextPage: number) => {
+    const normalizedPage = Number.isSafeInteger(nextPage) && nextPage >= 1 ? nextPage : 1;
+    setPage(normalizedPage);
+    updateNewsSearchParams({ nextPage: normalizedPage });
   };
 
   useEffect(() => {
@@ -134,6 +151,7 @@ export function useNewsFilters() {
     const nextCategory = getQueryCategory(searchParams.get("category"));
     const nextStatus = getQueryStatus(searchParams.get("status"));
     const nextKeyword = searchParams.get("keyword")?.trim() ?? "";
+    const nextPage = getQueryPage(searchParams.get("page"));
 
     setSelectedTab(nextTab);
     setSort(nextSort);
@@ -141,7 +159,7 @@ export function useNewsFilters() {
     setStatus(nextStatus);
     setKeyword(nextKeyword);
     setSearchKeyword(nextKeyword);
-    setPage(1);
+    setPage(nextPage);
   }, [searchParams]);
 
   return {
@@ -158,7 +176,7 @@ export function useNewsFilters() {
     setCategory: changeCategory,
     status,
     page,
-    setPage,
+    setPage: changePage,
     region,
   };
 }

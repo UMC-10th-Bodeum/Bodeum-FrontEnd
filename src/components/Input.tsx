@@ -243,7 +243,7 @@ export default function Input({
           className="
             absolute left-0 right-0 top-[40px]
             z-50 mt-2
-            max-h-[300px] overflow-y-auto
+            max-h-[300px] overflow-y-auto overscroll-contain
             rounded-[10px]
             border border-background-200
             bg-background-100

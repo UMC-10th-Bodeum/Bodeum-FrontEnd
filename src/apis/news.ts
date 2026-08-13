@@ -5,7 +5,6 @@ import type {
   NewsListResponse,
   NewsScrapResponse,
   NewsSearchParams,
-  RelatedNewsResponse,
 } from "@/types/news";
 import type { SearchSuggestionResponse } from "@/types/search";
 
@@ -36,15 +35,6 @@ export const getNewsSearchSuggestions = async (keyword: string, size = 10) => {
 
 export const getNewsDetail = async (newsId: number) => {
   const { data } = await api.get<NewsDetailResponse>(`/api/v1/news/${newsId}`);
-
-  return data.result;
-};
-
-export const getRelatedNews = async (newsId: number, size = 5) => {
-  const { data } = await api.get<RelatedNewsResponse>(
-    `/api/v1/news/${newsId}/related`,
-    { params: { size } },
-  );
 
   return data.result;
 };

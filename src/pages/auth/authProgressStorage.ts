@@ -96,4 +96,5 @@ export function consumeLogoutToast(): PendingLogoutToast | null {
 export function clearAuthProgress() {
   clearStoredAuthNextStep();
   sessionStorage.removeItem(LOGIN_TOAST_KEY);
+  sessionStorage.removeItem(LOGOUT_TOAST_KEY);
 }
