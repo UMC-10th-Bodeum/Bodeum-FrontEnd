@@ -61,14 +61,16 @@ export default function MyPageActivitySection({ counts }: MyPageActivitySectionP
           </div>
         )}
 
-        {!activity.isPending && !activity.error && activity.items.map((item) => (
-          <MyPageCard
-            key={item.id}
-            item={item}
-            deleteDisabled={activity.deleteDisabled}
-            onDelete={() => activity.requestDelete(item)}
-          />
-        ))}
+        {!activity.isPending &&
+          !activity.error &&
+          activity.items.map((item) => (
+            <MyPageCard
+              key={item.id}
+              item={item}
+              deleteDisabled={activity.deleteDisabled}
+              onDelete={() => activity.requestDelete(item)}
+            />
+          ))}
 
         {!activity.isPending && !activity.error && activity.items.length === 0 && (
           <div className="flex h-[144px] items-center justify-center rounded-[10px] border border-background-250 bg-background-100 text-[13px] text-background-500">

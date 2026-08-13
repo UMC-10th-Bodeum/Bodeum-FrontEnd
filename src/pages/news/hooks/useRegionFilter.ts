@@ -1,8 +1,9 @@
 import { useMyProfile } from "@/hooks/useMyPage";
-import { useEffect, useState } from "react";
-import { ALL_REGIONS_LABEL, ALL_REGIONS_VALUE } from "./components/RegionOnboardingBox";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { ALL_REGIONS_LABEL, ALL_REGIONS_VALUE } from "../components/RegionOnboardingBox";
 import { formatRegionDisplayLabel } from "@/constants/regions";
-import { getRegions } from "@/apis/onboardingApi";
+import { regionsQueryOptions } from "@/hooks/useOnboarding";
 import { findRegionId } from "@/utils/onboarding";
 
 type RegionCommit = {
@@ -21,6 +22,7 @@ export function useRegionFilter({
   hasAuthSession: boolean;
   onCommit: (change: RegionCommit) => void;
 }) {
+  const queryClient = useQueryClient();
   const profileQuery = useMyProfile(hasAuthSession);
   const [selectedRegion, setSelectedRegion] = useState(() => {
     if (initialRegionLevel1 === ALL_REGIONS_VALUE) return ALL_REGIONS_LABEL;
@@ -30,52 +32,55 @@ export function useRegionFilter({
   const [regionId, setRegionId] = useState<number>();
   const [regionLevel1, setRegionLevel1] = useState(initialRegionLevel1);
   const [regionLevel2, setRegionLevel2] = useState(initialRegionLevel2);
-  const [isResolvingRegionId, setIsResolvingRegionId] = useState(Boolean(initialRegionLevel2));
+  const [isRegionInitializing, setIsRegionInitializing] = useState(
+    Boolean(initialRegionLevel2) || (hasAuthSession && !initialRegionLevel1),
+  );
   const [showRegionOnboarding, setShowRegionOnboarding] = useState(false);
 
-  const [hasAppliedProfileDefault, setHasAppliedProfileDefault] = useState(false);
-
-  useEffect(() => {
-    const profile = profileQuery.data;
-    const sido = profile?.regionLevel1?.trim();
-
-    if (hasAppliedProfileDefault || regionLevel1 || !profile || !sido) {
-      return;
-    }
-
-    const district =
-      profile.regionLevel2 && profile.regionLevel2 !== sido ? profile.regionLevel2.trim() : "";
-    const region = district ? `${sido} ${district}` : sido;
-
-    setSelectedRegion(formatRegionDisplayLabel(region));
-    setRegionId(profile.regionId ?? undefined);
-    setRegionLevel1(sido);
-    setRegionLevel2(district || undefined);
-    setHasAppliedProfileDefault(true);
-  }, [regionLevel1, profileQuery.data, hasAppliedProfileDefault]);
+  const resolveRegionId = useCallback(
+    async (sido: string, district: string) => {
+      const regions = await queryClient.fetchQuery(regionsQueryOptions());
+      return findRegionId(regions, sido, district);
+    },
+    [queryClient],
+  );
 
   useEffect(() => {
     let cancelled = false;
 
-    async function syncFromUrl() {
+    async function syncRegion() {
       if (initialRegionLevel1 === ALL_REGIONS_VALUE) {
         setSelectedRegion(ALL_REGIONS_LABEL);
         setRegionId(undefined);
         setRegionLevel1(ALL_REGIONS_VALUE);
         setRegionLevel2(undefined);
-        setIsResolvingRegionId(false);
+        setIsRegionInitializing(false);
         return;
       }
 
       if (!initialRegionLevel1) {
-        setSelectedRegion("");
-        setRegionId(undefined);
-        setRegionLevel1(undefined);
-        setRegionLevel2(undefined);
-        setIsResolvingRegionId(false);
+        if (hasAuthSession && profileQuery.isPending) {
+          setIsRegionInitializing(true);
+          return;
+        }
+
+        const profile = hasAuthSession ? profileQuery.data : undefined;
+        const sido = profile?.regionLevel1?.trim();
+        const district =
+          sido && profile?.regionLevel2 && profile.regionLevel2 !== sido
+            ? profile.regionLevel2.trim()
+            : "";
+        const region = sido ? [sido, district].filter(Boolean).join(" ") : "";
+
+        setSelectedRegion(region ? formatRegionDisplayLabel(region) : "");
+        setRegionId(profile?.regionId ?? undefined);
+        setRegionLevel1(sido || undefined);
+        setRegionLevel2(district || undefined);
+        setIsRegionInitializing(false);
         return;
       }
 
+      setIsRegionInitializing(Boolean(initialRegionLevel2));
       const region = [initialRegionLevel1, initialRegionLevel2].filter(Boolean).join(" ");
       setSelectedRegion(formatRegionDisplayLabel(region));
       setRegionLevel1(initialRegionLevel1);
@@ -83,31 +88,32 @@ export function useRegionFilter({
 
       if (!initialRegionLevel2) {
         setRegionId(undefined);
-        setIsResolvingRegionId(false);
+        setIsRegionInitializing(false);
         return;
       }
 
-      setIsResolvingRegionId(true);
-
       try {
-        const nextRegionId = findRegionId(
-          await getRegions(),
-          initialRegionLevel1,
-          initialRegionLevel2 ?? "",
-        );
+        const nextRegionId = await resolveRegionId(initialRegionLevel1, initialRegionLevel2 ?? "");
         if (!cancelled) setRegionId(nextRegionId);
       } catch {
         if (!cancelled) setRegionId(undefined);
       } finally {
-        if (!cancelled) setIsResolvingRegionId(false);
+        if (!cancelled) setIsRegionInitializing(false);
       }
     }
 
-    syncFromUrl();
+    void syncRegion();
     return () => {
       cancelled = true;
     };
-  }, [initialRegionLevel1, initialRegionLevel2, regionLevel1, regionLevel2]);
+  }, [
+    hasAuthSession,
+    initialRegionLevel1,
+    initialRegionLevel2,
+    profileQuery.data,
+    profileQuery.isPending,
+    resolveRegionId,
+  ]);
 
   const completeRegionOnboarding = async ({
     sido,
@@ -130,9 +136,9 @@ export function useRegionFilter({
     let nextRegionId: number | undefined;
 
     try {
-      nextRegionId = findRegionId(await getRegions(), sido, district);
+      nextRegionId = await resolveRegionId(sido, district);
     } catch {
-      // 시/군/구 ID 조회가 실패하면 시/도 전체 조회로 대체
+      // regionId를 구하지 못하면 NewsPage가 regionLevel1으로 시·도 전체를 조회한다.
     }
 
     setSelectedRegion(formatRegionDisplayLabel(region));
@@ -149,8 +155,7 @@ export function useRegionFilter({
     regionLevel1,
     regionLevel2,
     isAllRegionsSelected: regionLevel1 === ALL_REGIONS_VALUE,
-    isRegionInitializing:
-      isResolvingRegionId || (hasAuthSession && profileQuery.isPending && !regionLevel1),
+    isRegionInitializing,
     showRegionOnboarding,
     openRegionOnboarding: () => setShowRegionOnboarding(true),
     closeRegionOnboarding: () => setShowRegionOnboarding(false),

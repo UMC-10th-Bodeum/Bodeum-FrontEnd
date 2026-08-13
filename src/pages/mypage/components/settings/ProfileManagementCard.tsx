@@ -10,11 +10,14 @@ import {
   regionSelectionOptions,
 } from "@/constants/regions";
 import type { DiagnosisType } from "@/types/diagnosis";
-import { createChildBirthMonthOptions, birthYearOptions } from "./birthDateOptions";
+import {
+  createChildBirthMonthOptions,
+  birthYearOptions,
+} from "../../settings/birthDateOptions";
 import type { ProfileSettingsForm } from "@/types/mypage";
 import { formatDateWithDots } from "@/utils/time";
-import ProfileImagePicker from "./components/ProfileImagePicker";
-import ProfileSelect from "./components/ProfileSelect";
+import ProfileImagePicker from "./ProfileImagePicker";
+import ProfileSelect from "./ProfileSelect";
 
 interface ProfileManagementCardProps {
   form: ProfileSettingsForm;
@@ -246,7 +249,9 @@ export default function ProfileManagementCard({
               isApplying ||
               (districtOptionsByRegion[form.region]?.length ?? 0) === 0
             }
-            changed={hasSelectChanged("district")}
+            changed={
+              hasSelectBeenSelected("district") && hasSelectChanged("district")
+            }
             selected={hasSelectBeenSelected("district")}
             onChange={(district) => {
               markFieldSelected("district");
