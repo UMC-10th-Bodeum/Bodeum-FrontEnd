@@ -19,8 +19,7 @@ export const isNewsCategory = (value: string | null): value is NewsCategory =>
   value === "LOCAL_POLICY" ||
   value === "RECRUITMENT_PARTICIPATION" ||
   value === "EDUCATION_SEMINAR" ||
-  value === "BENEFIT_WELFARE_SERVICE" ||
-  value === "INSTITUTION_NOTICE_NEWS";
+  value === "BENEFIT_WELFARE_SERVICE";
 
 export const isNewsStatus = (value: string | null): value is NewsStatus =>
   value === "RECRUITING" || value === "CLOSED" || value === "ALWAYS_OPEN" || value === "UPCOMING";
