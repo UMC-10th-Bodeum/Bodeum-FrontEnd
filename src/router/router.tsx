@@ -112,6 +112,10 @@ export const router = createBrowserRouter([
             path: "/community/write",
             element: <CommunityWritePage />,
           },
+          {
+            path: "/community/write/:postId",
+            element: <CommunityWritePage />,
+          },
         ],
       },
     ],

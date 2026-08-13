@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AsyncState from "@/components/AsyncState";
 import CategoryButton from "@/components/CategoryButton";
+import OnboardCancelBox from "@/components/OnboardCancelBox";
 import Pagination from "@/components/pagination/Pagination";
-import { showToast } from "@/components/Toast";
 import {
   communityCategoryEntries,
   communityCategoryCodeMap,
@@ -35,7 +35,12 @@ function isCommunityPostSort(value: unknown): value is CommunityPostSort {
 
 export default function CommunityPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showLoginModal, setShowLoginModal] = useState(
+    () =>
+      (location.state as { showLoginModal?: unknown } | null)?.showLoginModal === true,
+  );
   const { isLoggedIn, runAfterLoginCheck } = useLoginCheck();
   const categoryCodeParam = searchParams.get("categoryCode");
   const category: CommunityCategory | "ALL" = isCommunityCategoryCode(categoryCodeParam)
@@ -48,7 +53,11 @@ export default function CommunityPage() {
   const page = Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
   const [inputKeyword, setInputKeyword] = useState(keyword);
   const debouncedInputKeyword = useDebouncedValue(inputKeyword.trim(), 300);
-  const { data: suggestions = [] } = useCommunityPostSearchSuggestions(debouncedInputKeyword);
+  const { data: suggestions = [], isPending: areSuggestionsPending } =
+    useCommunityPostSearchSuggestions(debouncedInputKeyword);
+  const areSuggestionsLoading =
+    inputKeyword.trim().length >= 2 &&
+    (inputKeyword.trim() !== debouncedInputKeyword || areSuggestionsPending);
   const { data, isPending, isError } = useCommunityPosts({
     page: page - 1,
     size: 14,
@@ -61,6 +70,14 @@ export default function CommunityPage() {
   useEffect(() => {
     setInputKeyword(keyword);
   }, [keyword]);
+
+  useEffect(() => {
+    if ((location.state as { showLoginModal?: unknown } | null)?.showLoginModal !== true) {
+      return;
+    }
+
+    navigate(`${location.pathname}${location.search}`, { replace: true, state: null });
+  }, [location.pathname, location.search, location.state, navigate]);
 
   const selectCategory = (value: CommunityCategory | "ALL") => {
     setSearchParams(
@@ -123,16 +140,18 @@ export default function CommunityPage() {
     );
   };
 
-  const showLoginRequiredToast = () => {
-    showToast("blue", "로그인/회원가입 후 만나보세요");
-  };
-
   const handleWriteClick = () => {
-    void runAfterLoginCheck(() => navigate("/community/write"), showLoginRequiredToast);
+    void runAfterLoginCheck(
+      () => navigate("/community/write"),
+      () => setShowLoginModal(true),
+    );
   };
 
   const handlePostClick = (postId: number) => {
-    void runAfterLoginCheck(() => navigate(`/community/${postId}`), showLoginRequiredToast);
+    void runAfterLoginCheck(
+      () => navigate(`/community/${postId}`),
+      () => setShowLoginModal(true),
+    );
   };
 
   if (isPending) {
@@ -164,6 +183,7 @@ export default function CommunityPage() {
           <CommunityToolbar
             keyword={inputKeyword}
             suggestions={suggestions}
+            suggestionsLoading={areSuggestionsLoading}
             sort={sort}
             isLoggedIn={isLoggedIn}
             onKeywordChange={setInputKeyword}
@@ -187,7 +207,6 @@ export default function CommunityPage() {
                     likes={post.likeCount}
                     comments={post.commentCount}
                     views={post.viewCount}
-                    imageCount={post.thumbnailUrl ? 1 : 0}
                     initialIsLiked={post.isLiked}
                     createdAt={formatDate(post.createdAt)}
                     onClick={() => handlePostClick(post.postId)}
@@ -204,6 +223,29 @@ export default function CommunityPage() {
           </div>
         )}
       </div>
+
+      {showLoginModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]"
+          onMouseDown={(event) => {
+            const dialog = event.currentTarget.querySelector('[role="dialog"]');
+
+            if (event.target instanceof Node && !dialog?.contains(event.target)) {
+              setShowLoginModal(false);
+            }
+          }}
+        >
+          <OnboardCancelBox
+            title="로그인하고 더 많은 기능을 이용해 보세요!"
+            description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
+            leftButtonText="둘러보기"
+            rightButtonText="로그인/회원가입"
+            className="z-[70]!"
+            onLeftButtonClick={() => setShowLoginModal(false)}
+            onRightButtonClick={() => navigate("/auth")}
+          />
+        </div>
+      )}
     </div>
   );
 }

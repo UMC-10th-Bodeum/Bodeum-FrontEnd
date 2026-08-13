@@ -516,7 +516,10 @@ export function useUpdateCommunityPost(postId: number) {
       queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), updated);
 
       void queryClient.invalidateQueries({
-        predicate: ({ queryKey }) => queryKey[0] === communityPostKeys.all[0],
+        predicate: ({ queryKey }) =>
+          queryKey[0] === communityPostKeys.all[0] &&
+          queryKey.length === 2 &&
+          typeof queryKey[1] === "object",
       });
     },
   });

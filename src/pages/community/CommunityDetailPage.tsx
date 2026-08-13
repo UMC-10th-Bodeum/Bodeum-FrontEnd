@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { isUnauthorizedError } from "@/apis/apiError";
 import AsyncState from "@/components/AsyncState";
 import ButtonOutline from "@/components/ButtonOutline";
-import { showToast } from "@/components/Toast";
 import {
   communityCategoryMap,
   communityCategoryCodeMap,
@@ -21,7 +20,7 @@ import CommunityRelatedPostCard from "./components/detail/CommunityRelatedPostCa
 export default function CommunityDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const hasShownLoginToast = useRef(false);
+  const hasHandledLoginRequired = useRef(false);
   const { setBreadcrumb } = useBreadcrumb();
   const { isLoggedIn: hasDetailAccess, isPending: isAuthPending } = useLoginCheck();
   const parsedPostId = id && /^\d+$/.test(id) ? Number(id) : undefined;
@@ -36,12 +35,10 @@ export default function CommunityDetailPage() {
   const categoryLabel = category ? communityCategoryMap[category] : "커뮤니티";
 
   const handleLoginRequired = useCallback(() => {
-    if (!hasShownLoginToast.current) {
-      hasShownLoginToast.current = true;
-      showToast("blue", "로그인/회원가입 후 만나보세요");
-    }
+    if (hasHandledLoginRequired.current) return;
+    hasHandledLoginRequired.current = true;
 
-    navigate("/community", { replace: true });
+    navigate("/community", { replace: true, state: { showLoginModal: true } });
   }, [navigate]);
 
   useEffect(() => {
@@ -115,9 +112,9 @@ function CommunityRelatedPostsSection({
   category,
 }: CommunityRelatedPostsSectionProps) {
   const navigate = useNavigate();
-  const { data, isPending, isError, refetch } = useCommunityPosts({
+  const { data, isPending, isError } = useCommunityPosts({
     page: 0,
-    size: 14,
+    size: 6,
     sort: "latest",
     categoryCode: communityCategoryCodeMap[category],
   });
@@ -138,16 +135,7 @@ function CommunityRelatedPostsSection({
       {isPending ? (
         <p className="py-6 text-center text-background-500">게시글을 불러오는 중입니다.</p>
       ) : isError ? (
-        <div className="flex flex-col items-center gap-3 py-6 text-background-500">
-          <p>게시글을 불러오지 못했습니다.</p>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-lg border border-background-300 px-4 py-2"
-          >
-            다시 시도
-          </button>
-        </div>
+        <p className="py-6 text-center text-background-500">게시글을 불러오지 못했습니다.</p>
       ) : relatedPosts.length === 0 ? (
         <p className="py-6 text-center text-background-500">같은 게시판의 다른 글이 없습니다.</p>
       ) : (

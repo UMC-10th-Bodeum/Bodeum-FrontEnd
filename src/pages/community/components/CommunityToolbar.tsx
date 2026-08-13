@@ -1,9 +1,6 @@
-import Input from "@/components/Input";
+import Input, { type InputSuggestion } from "@/components/Input";
 import { Select } from "@/components/Select";
-import type {
-  CommunityPostSearchSuggestion,
-  CommunityPostSort,
-} from "@/types/community";
+import type { CommunityPostSearchSuggestion, CommunityPostSort } from "@/types/community";
 
 const sortOptions = [
   { label: "최신순", value: "latest" },
@@ -12,9 +9,21 @@ const sortOptions = [
   { label: "댓글순", value: "comment" },
 ];
 
+function mapCommunitySuggestion(
+  suggestion: CommunityPostSearchSuggestion,
+): InputSuggestion {
+  return {
+    text: suggestion.title,
+    description: suggestion.content,
+    value: suggestion.type === "POST_TITLE" ? suggestion.title : suggestion.content,
+    type: suggestion.type,
+  };
+}
+
 interface CommunityToolbarProps {
   keyword: string;
   suggestions: CommunityPostSearchSuggestion[];
+  suggestionsLoading: boolean;
   sort: CommunityPostSort | "";
   isLoggedIn: boolean;
   onKeywordChange: (keyword: string) => void;
@@ -25,6 +34,7 @@ interface CommunityToolbarProps {
 export default function CommunityToolbar({
   keyword,
   suggestions,
+  suggestionsLoading,
   sort,
   isLoggedIn,
   onKeywordChange,
@@ -37,17 +47,15 @@ export default function CommunityToolbar({
         search
         searchType="community"
         value={keyword}
-        onChange={(event) => {
-          const nextKeyword = event.target.value;
-          onKeywordChange(nextKeyword);
-
-          if (!nextKeyword.trim()) {
-            onSearch("");
-          }
-        }}
+        onChange={(event) => onKeywordChange(event.target.value)}
+        onClear={() => onSearch("")}
         onEnter={onSearch}
-        suggestions={suggestions}
-        onSuggestionClick={onSearch}
+        suggestions={suggestions.map(mapCommunitySuggestion)}
+        suggestionsLoading={suggestionsLoading}
+        onSuggestionClick={(nextKeyword) => {
+          onKeywordChange(nextKeyword);
+          onSearch(nextKeyword);
+        }}
         placeholder="게시글을 검색해보세요"
         className="h-[44px] w-[640px]"
       />
