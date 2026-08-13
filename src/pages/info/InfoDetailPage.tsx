@@ -9,8 +9,8 @@ import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
-import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
-import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
+import { useInfoDetail } from "@/hooks/useInfoDetail";
+import { useInfoReviewList } from "@/hooks/useInfoReviewList";
 import AsyncState from "@/components/AsyncState";
 import CategoryModal from "./components/modal/CategoryModal";
 
@@ -19,9 +19,9 @@ export default function InfoDetailPage() {
   const { setBreadcrumb } = useBreadcrumb();
   const [categoryOpen, setCategoryOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
+  const { data: detail, isPending, isError } = useInfoDetail(Number(id));
 
-  const { data: reviewData } = useInfoReviewListQuery(
+  const { data: reviewData } = useInfoReviewList(
     Number(id),
     0,
     100,

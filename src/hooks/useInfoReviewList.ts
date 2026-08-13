@@ -1,7 +1,7 @@
 import { getInfoReviews } from "@/apis/info";
 import { useQuery } from "@tanstack/react-query";
 
-export const useInfoReviewListQuery = (
+export const useInfoReviewList = (
   infoItemId: number,
   page: number,
   size: number

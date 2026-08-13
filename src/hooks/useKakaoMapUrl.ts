@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getKakaoMapUrl } from "@/apis/info";
 
-export const useKakaoMapUrlQuery = (infoItemId: number) => {
+export const useKakaoMapUrl = (infoItemId: number) => {
   return useQuery({
     queryKey: ["kakaoMapUrl", infoItemId],
     queryFn: () => getKakaoMapUrl(infoItemId),

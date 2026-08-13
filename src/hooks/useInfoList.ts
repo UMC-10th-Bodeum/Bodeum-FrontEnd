@@ -12,7 +12,7 @@ interface Props {
   size: number;
 }
 
-export const useInfoListQuery = ({
+export const useInfoList = ({
   category,
   subCategory,
   regionLevel1,
