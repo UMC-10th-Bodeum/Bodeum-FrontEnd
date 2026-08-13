@@ -246,7 +246,9 @@ export default function ProfileManagementCard({
               isApplying ||
               (districtOptionsByRegion[form.region]?.length ?? 0) === 0
             }
-            changed={hasSelectChanged("district")}
+            changed={
+              hasSelectBeenSelected("district") && hasSelectChanged("district")
+            }
             selected={hasSelectBeenSelected("district")}
             onChange={(district) => {
               markFieldSelected("district");
