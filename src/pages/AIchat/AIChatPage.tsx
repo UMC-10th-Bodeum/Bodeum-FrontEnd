@@ -4,7 +4,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 import {
   useQueryClient,
@@ -83,6 +82,8 @@ import {
   isAiChatTransportUncertainError,
   isAiTermsNotAgreedError,
 } from "./aiChatErrors";
+import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
+import Modal from "@/components/modal/Modal";
 
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_PAGINATION_REQUESTS = 50;
@@ -113,14 +114,6 @@ type AccessState =
   | "error";
 
 type AuthResolution = "checking" | "guest" | "authenticated";
-
-function CenteredModal({ children }: { children: ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
-      {children}
-    </div>
-  );
-}
 
 function UserMessageRow({ text }: { text: string }) {
   return (
@@ -1014,18 +1007,15 @@ export default function AIChatPage() {
   );
   const entryModal =
     entryModalType === "login-required" ? (
-      <CenteredModal>
-        <OnboardCancelBox
-          title="로그인하고 더 많은 기능을 이용해 보세요!"
-          description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
-          leftButtonText="둘러보기"
-          rightButtonText="로그인/회원가입"
-          onLeftButtonClick={() => navigate(-1)}
-          onRightButtonClick={() => navigate("/auth")}
-        />
-      </CenteredModal>
+      <LoginRequiredModal
+      open
+      onClose={() => navigate(-1)}
+    />
     ) : entryModalType === "consent-required" ? (
-      <CenteredModal>
+        <Modal
+          open
+    onClose={() => navigate(-1)}
+        >
         <OnboardCancelBox
           title="대화를 시작하기 전, 이용 동의가 필요해요!"
           description={
@@ -1061,9 +1051,12 @@ export default function AIChatPage() {
           onLeftButtonClick={() => navigate(-1)}
           onRightButtonClick={() => void handleConsentSubmit()}
         />
-      </CenteredModal>
+      </Modal>
     ) : entryModalType === "guide" ? (
-      <CenteredModal>
+        <Modal
+          open
+          onClose={() => navigate(-1)}
+        >
         <OnboardCancelBox
           title="AI 챗봇 이용 전 안내드립니다"
           description={
@@ -1089,7 +1082,7 @@ export default function AIChatPage() {
           onLeftButtonClick={() => navigate(-1)}
           onRightButtonClick={() => void handleGuideSubmit()}
         />
-      </CenteredModal>
+      </Modal>
     ) : null;
 
   const showHistoryButton = shouldShowPreviousHistoryButton({
@@ -1182,7 +1175,10 @@ export default function AIChatPage() {
       {entryModal}
 
       {feedbackOpen && (
-        <CenteredModal>
+        <Modal
+          open
+          onClose={() => setFeedbackOpen(false)}
+        >
           <OnboardCancelBox
             title="어떤 정보가 잘못되었나요?"
             description={
@@ -1208,9 +1204,8 @@ export default function AIChatPage() {
             onLeftButtonClick={() => setFeedbackOpen(false)}
             onRightButtonClick={() => void submitFeedback()}
           />
-        </CenteredModal>
+        </Modal>
       )}
-
     </div>
   );
 }

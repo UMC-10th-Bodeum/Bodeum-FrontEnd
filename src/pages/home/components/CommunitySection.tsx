@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useHomePostPreview } from "@/hooks/useHome";
 import { useState } from "react";
 import { hasStoredAuthSession } from "@/apis/authStorage";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
 import RecommendedCommunitySection from "@/components/RecommendedCommunitySection";
+import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 
 export default function CommunitySection() {
   const navigate = useNavigate();
@@ -80,20 +80,10 @@ export default function CommunitySection() {
           ))}
         </PostSection>
       </div>
-      {isLoginModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <OnboardCancelBox
-            title="로그인하고 더 많은 기능을 이용해 보세요!"
-            description={`회원가입 후 프로필을 등록하시면,
-              AI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이
-              자유롭게 이용하실 수 있습니다.`}
-            leftButtonText="둘러보기"
-            rightButtonText="로그인/회원가입"
-            onLeftButtonClick={() => setIsLoginModalOpen(false)}
-            onRightButtonClick={() => navigate("/auth")}
-          />
-        </div>
-      )}
+      <LoginRequiredModal
+        open={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </section>
   );
 }

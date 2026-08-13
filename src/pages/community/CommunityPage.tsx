@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AsyncState from "@/components/AsyncState";
 import CategoryButton from "@/components/button/CategoryButton";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
 import Pagination from "@/components/pagination/Pagination";
 import {
   communityCategoryEntries,
@@ -20,6 +19,7 @@ import { formatDate } from "@/utils/time";
 import CommunityPostCard from "./components/CommunityPostCard";
 import CommunitySection from "./components/CommunitySection";
 import CommunityToolbar from "./components/CommunityToolbar";
+import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 
 const categories: Array<{
   value: CommunityCategory | "ALL";
@@ -224,28 +224,10 @@ export default function CommunityPage() {
         )}
       </div>
 
-      {showLoginModal && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]"
-          onMouseDown={(event) => {
-            const dialog = event.currentTarget.querySelector('[role="dialog"]');
-
-            if (event.target instanceof Node && !dialog?.contains(event.target)) {
-              setShowLoginModal(false);
-            }
-          }}
-        >
-          <OnboardCancelBox
-            title="로그인하고 더 많은 기능을 이용해 보세요!"
-            description={`회원가입 후 프로필을 등록하시면,\nAI 챗봇 질문, 정보 저장, 커뮤니티 활동을 제한 없이\n자유롭게 이용하실 수 있습니다.`}
-            leftButtonText="둘러보기"
-            rightButtonText="로그인/회원가입"
-            className="z-[70]!"
-            onLeftButtonClick={() => setShowLoginModal(false)}
-            onRightButtonClick={() => navigate("/auth")}
-          />
-        </div>
-      )}
+      <LoginRequiredModal
+        open={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
