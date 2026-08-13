@@ -1,57 +1,238 @@
-# Bodeum FrontEnd
+# 🩹 보듬 
 
-## 📌 프로젝트 소개
+> **장애아동 부모들이 겪는 정보의 불균형과 심리적 고립감을 해소하기 위한 맞춤형 복지 정보 플랫폼**
 
-보듬은 장애아동 부모들이 겪는 정보의 불균형과 심리적 고립감을 해소하기 위해 탄생한 맞춤형 복지 정보 플랫폼입니다.
+### 📌 [보듬 방문하기  (https://bodeum.site)](https://bodeum.site)
+<img width="700" alt="서비스 미리보기 이미지" src="https://github.com/user-attachments/assets/dcf64f9b-3d2c-4536-8665-662b3fc0f136" />
+<br />
 
-## 👥 팀원 및 프론트엔드 역할 분담
+## 👥 Team 
 
-| 이름                                    | 담당 영역                       |
-| --------------------------------------- | ------------------------------- |
-| [김은하](https://github.com/rladmsgki)  | HOME(+sidebar), INFO            |
-| [심수아](https://github.com/Soo411)     | NEWS, Community, MyPage/Setting |
-| [임정빈](https://github.com/Jungbin906) | AUTH/Onboarding, AI CHAT        |
+| Member | Role | Responsibilities |
+| :---: | :---: | :--- |
+| [**김은하**](https://github.com/rladmsgki) |**Frontend Leader** | `HOME` · `INFO` |
+| [**심수아**](https://github.com/Soo411) | Frontend Developer | `NEWS` · `Community` · `MyPage` |
+| [**임정빈**](https://github.com/Jungbin906) | Frontend Developer | `AUTH` · `AI Chat` |
+<br />
 
-## 🛠️ 기술 스택
+## ✨Key Features
 
-| 분류       | 기술         |
-| ---------- | ------------ |
-| Language   | TypeScript   |
-| Library    | React 19     |
-| Build Tool | Vite         |
-| Styling    | Tailwind CSS |
-| Lint       | ESLint       |
+### 🏠 HOME
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-13 오전 11 18 55" src="https://github.com/user-attachments/assets/5c34e437-1512-4f6e-9c37-4f932a8b69e6" />
+    </td>
+    <td align="center">
+      <img width="300" alt="HOME 추천 정보" src="https://github.com/user-attachments/assets/6974232a-3d49-4928-9e51-97e4268a2580" />
+    </td>
+  </tr>
+</table>
 
-## 📁 폴더 구조
+- 맞춤형 정보 및 주요 콘텐츠 제공
+- 추천 커뮤니티 게시글 및 뉴스 조회
+
+
+### 🤖 AI Chat
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 13 57" src="https://github.com/user-attachments/assets/8940f911-2920-4405-bf79-2091e304b2d0" />
+    </td>
+  </tr>
+</table>
+
+
+- 사용자 프로필을 기반으로 한 시작 인사와 추천 질문 제공
+- 직접 입력 또는 추천 질문을 활용한 **복지·기관·바우처 정보 질의**
+- 답변에 포함된 **관련 정보 출처·링크 및 추가 질문 제공**
+- Markdown을 활용한 **구조화된 AI 답변 표시**
+- 오늘의 대화와 날짜별 과거 기록을 구분한 이전 대화 조회
+
+### 📋 INFO
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 21 35" src="https://github.com/user-attachments/assets/ce768419-0ae4-4671-a087-5d062dfa189b" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 23 10" src="https://github.com/user-attachments/assets/4dac3b8a-b3ac-44ae-aa95-6dda8d76c84f" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 24 06" src="https://github.com/user-attachments/assets/9a31fc4b-69a8-4438-a53b-ca2cab9690e9" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 25 02" src="https://github.com/user-attachments/assets/50c67e2b-6753-487a-b1db-abb959f03769" />
+    </td>
+  </tr>
+</table>
+
+- 기관, 병원, 복지, 취업, 교육 등 **카테고리별 정보 탐색**
+- 지역 및 카테고리를 활용한 **조건별 정보 필터링**
+- **상세 정보 조회**
+- **Kakao Maps API**를 활용한 위치 및 거리 정보 제공
+- 관심 있는 정보를 저장할 수 있는 **스크랩 기능**
+- 정보 항목별 **사용자 후기 조회 및 더보기**
+
+
+### 📰 NEWS
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-13 오전 11 20 24" src="https://github.com/user-attachments/assets/70d587b4-5e9b-446f-b98e-1842fb062d60" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-13 오전 11 20 51" src="https://github.com/user-attachments/assets/e87e441b-2b08-483f-b66e-48d8067c71ad" />
+    </td>
+  </tr>
+</table>
+
+
+- 활동소식과 지역소식으로 구분된 **유형별 소식 탐색**
+- 모집·참여, 교육·세미나, 복지서비스, 지역 정책 등 **카테고리별 필터링**
+- 사용자 프로필 또는 직접 선택한 지역을 기반으로 한 **지역 맞춤 소식 조회**
+- 모집 상태, 진행·신청 기간, 대상, 기관, 문의처 등 **상세 활동 정보 조회**
+- 관심 있는 소식을 저장하고 해제하는 **스크랩 관리**
+- 현재 소식과 동일한 지역의 **관련 소식 추천 및 더보기**
+
+### 💬 COMMUNITY
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 28 57" src="https://github.com/user-attachments/assets/57690aef-2715-4331-a2a9-bd1167c6b38c" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 29 28" src="https://github.com/user-attachments/assets/c07dc280-265a-400c-b841-cb31d3b74db7" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 29 53" src="https://github.com/user-attachments/assets/56b43723-c9ed-414a-beac-5206ba9049ab" />
+    </td>
+  </tr>
+</table>
+
+- 자유소통, 치료·성장 기록, 우리 동네 소식, 기관 후기, 정보·질문 광장 등 **게시판별 콘텐츠 탐색**
+- 게시판 유형과 익명 여부를 선택하고 이미지를 첨부하여 **게시글 작성**
+- 게시글 **공감·스크랩·공유**
+- 본인이 작성한 게시글의 **수정 및 삭제**
+- 댓글과 대댓글의 **작성·수정·삭제 및 공감**
+- 정보·질문 광장 작성자를 위한 **댓글 채택 및 채택 취소**
+- 동일 게시판의 **관련 게시글 조회 및 더보기**
+
+### 👤 MyPage
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 36 05" src="https://github.com/user-attachments/assets/1756eef9-f454-4ba0-924c-5037be58d318" />
+    </td>
+  </tr>
+</table>
+
+- 닉네임, 활동 레벨, 뱃지, 자녀 정보, 거주 지역 등 **프로필 요약 조회**
+- 저장한 정보·소식·커뮤니티 게시글을 한곳에서 확인하는 **스크랩 내역 관리**
+- 본인이 작성한 **게시글 및 댓글 내역 조회**
+- 스크랩 항목과 본인이 작성한 게시글·댓글의 **개별 삭제**
+- 활동별 적립 포인트와 참여 횟수를 확인하는 **포인트 내역 조회**
+- 보듬 뱃지의 의미와 획득 기준을 확인하는 **뱃지 안내**
+- 프로필 이미지와 보호자 닉네임을 변경하는 **기본 프로필 관리**
+
+
+### 🔐 AUTH
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 17 36" src="https://github.com/user-attachments/assets/341168b0-985b-4e26-a942-db642d26f730" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 17 55" src="https://github.com/user-attachments/assets/827c5bb2-fb27-4c43-82b1-bae690789e71" />
+      </td>
+    </tr>
+</table>
+
+- 자녀 생년월, 장애·관심 영역, 특징 키워드를 등록하는 **자녀 프로필 설정**
+- 관심사와 주 활동 지역을 활용한 **맞춤 정보 설정**
+- 닉네임, 보호자 유형, 커뮤니티 역할을 등록하는 **보호자 프로필 설정**
+- 저장된 진행 상태를 기반으로 한 회원가입 및 온보딩 이어하기
+<br />
+
+## 🛠 Tech Stack
+
+| Category | Technology |
+| :--- | :--- |
+| **Framework** | React 19 |
+| **Language** | TypeScript |
+| **Build Tool** | Vite |
+| **Styling** | Tailwind CSS |
+| **Routing** | React Router |
+| **Server State** | TanStack Query |
+| **HTTP Client** | Axios |
+| **Map** | Kakao Maps API |
+| **Markdown** | React Markdown |
+| **Deployment** | Vercel |
+<br />
+
+## 📂 Folder Structure
 
 ```text
 src/
-├── apis/
-├── assets/
-├── components/
-├── constants/
-├── context/
-├── enums/
-├── hooks/
-├── pages/
-├── utils/
-├── App.css
-├── App.tsx
-├── index.css
-└── main.tsx
+├── apis/                 # 도메인별 API 요청 및 인증 처리
+│
+├── assets/               # 이미지 및 아이콘
+│
+├── components/           # 공통 및 재사용 UI 컴포넌트
+│
+├── constants/            # 카테고리, 지역 등 공통 상수
+│
+├── contexts/             # React Context
+│
+├── hooks/                # Custom Hooks 및 Query Hooks
+│   └── queries/
+│
+├── layouts/              # 공통 레이아웃
+│
+├── pages/                # 기능 및 페이지 단위 구성
+│   ├── AIchat/
+│   ├── auth/
+│   ├── community/
+│   ├── home/
+│   ├── info/
+│   ├── mypage/
+│   └── news/
+│
+├── queries/              # TanStack Query Key 관리
+│
+├── router/               # React Router 설정
+│
+├── types/                # TypeScript 타입 정의
+│
+└── utils/                # 공통 유틸리티
+
+tests/                    # 주요 기능 테스트
 ```
 
-## 🤝 컨벤션 & 협업 규칙
+<br />
+
+## 🚀 Getting Started
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Start Development Server
+
+```bash
+npm run dev
+```
+<br />
+
+## 🤝 Convention & Collaboration
 
 ### Branch Convention
-
-브랜치명은 아래 형식을 따릅니다.
 
 ```text
 type/#이슈번호-description
 ```
-
-예시: feat/#12-login
 
 | Type     | Description                       |
 | -------- | --------------------------------- |
@@ -67,13 +248,9 @@ type/#이슈번호-description
 
 ### Commit Convention
 
-커밋 메시지는 아래 형식을 따릅니다.
-
 ```text
 type: 내용
 ```
-
-예시: feat: Button 컴포넌트 구현
 
 | Type     | Description      |
 | -------- | ---------------- |
@@ -90,13 +267,9 @@ type: 내용
 
 ### PR Convention
 
-PR 제목은 아래 형식을 따릅니다.
-
 ```text
 [Type] 내용
 ```
-
-예시: [Feature] 로그인 UI 구현
 
 PR은 `.github/PULL_REQUEST_TEMPLATE.md` 템플릿을 기준으로 작성합니다.
 
@@ -108,61 +281,8 @@ PR은 `.github/PULL_REQUEST_TEMPLATE.md` 템플릿을 기준으로 작성합니�
 
 ### 협업 규칙
 
-#### Branch 관련
-
 - 하나의 브랜치에서는 하나의 기능만 개발하는 것을 권장합니다.
 
-#### PR 관련
+- 1명 이상의 리뷰 승인 후 `dev`에 Merge합니다.
+- 반드시 `dev` 브랜치에 merge합니다. (`main` 에 바로 merge하지 않습니다.)
 
-- 1명 이상의 리뷰 승인 후 `dev`에 Merge한다.
-- 반드시 `dev` 브랜치에 merge한다. (`main` 에 바로 merge하지 않는다.)
-
-## 🚀 실행 방법
-
-### 패키지 설치
-
-```bash
-npm install
-```
-
-### 개발 서버 실행
-
-```bash
-npm run dev
-```
-
-## 📋 화면 목록 및 플로우
-
-### 화면 목록
-
-| 화면       | 경로          | 설명                                    |
-| ---------- | ------------- | --------------------------------------- |
-| Home       | `/`           | 서비스 메인 화면                        |
-| Sidebar    | -             | 주요 메뉴 이동을 위한 사이드바          |
-| Info       | `/info`       | 복지 정보 및 서비스 안내 화면           |
-| News       | `/news`       | 관련 뉴스 목록 및 상세 정보 화면        |
-| Community  | `/community`  | 사용자 간 정보 공유 및 소통 화면        |
-| MyPage     | `/mypage`     | 사용자 정보 및 활동 내역 확인 화면      |
-| Setting    | `/setting`    | 사용자 설정 관리 화면                   |
-| Auth       | `/auth`       | 로그인 및 회원가입 화면                 |
-| Onboarding | `/onboarding` | 초기 사용자 정보 입력 및 맞춤 설정 화면 |
-| AI Chat    | `/ai-chat`    | AI 챗봇을 통한 맞춤형 정보 제공 화면    |
-
-### 기본 플로우
-
-```text
-사용자 접속
-  ↓
-로그인 / 회원가입
-  ↓
-온보딩 진행
-  ↓
-Home 화면 진입
-  ↓
-Sidebar를 통해 주요 화면 이동
-  ├── Info
-  ├── News
-  ├── Community
-  ├── AI Chat
-  └── MyPage / Setting
-```
