@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { type NewsCategoryFilter } from "./components/NewsToolbar";
-import type { NewsTabValue } from "./components/NewsTabs";
+import { type NewsCategoryFilter } from "../components/NewsToolbar";
+import type { NewsTabValue } from "../components/NewsTabs";
 import type { NewsSort, NewsStatus, NewsType } from "@/types/news";
 import { hasStoredAuthSession } from "@/apis/authApi";
 import {
@@ -12,7 +12,7 @@ import {
   getQueryStatus,
   getQueryPage,
   parseInitialRegion,
-} from "./newsQueryParams";
+} from "../newsQueryParams";
 import { useRegionFilter } from "./useRegionFilter";
 
 export function useNewsFilters() {

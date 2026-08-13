@@ -6,7 +6,7 @@ import NewsListSection from "./components/NewsListSection";
 import RegionOnboardingBox from "./components/RegionOnboardingBox";
 import { useNews, useNewsSearch } from "@/hooks/useNews";
 import type { NewsListParams } from "@/types/news";
-import { useNewsFilters } from "./useNewsFilters";
+import { useNewsFilters } from "./hooks/useNewsFilters";
 import AsyncState from "@/components/AsyncState";
 
 const PAGE_SIZE = 14;

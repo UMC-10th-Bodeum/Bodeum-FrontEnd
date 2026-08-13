@@ -1,7 +1,7 @@
 import { useMyProfile } from "@/hooks/useMyPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import { ALL_REGIONS_LABEL, ALL_REGIONS_VALUE } from "./components/RegionOnboardingBox";
+import { ALL_REGIONS_LABEL, ALL_REGIONS_VALUE } from "../components/RegionOnboardingBox";
 import { formatRegionDisplayLabel } from "@/constants/regions";
 import { regionsQueryOptions } from "@/hooks/useOnboarding";
 import { findRegionId } from "@/utils/onboarding";
@@ -93,10 +93,7 @@ export function useRegionFilter({
       }
 
       try {
-        const nextRegionId = await resolveRegionId(
-          initialRegionLevel1,
-          initialRegionLevel2 ?? "",
-        );
+        const nextRegionId = await resolveRegionId(initialRegionLevel1, initialRegionLevel2 ?? "");
         if (!cancelled) setRegionId(nextRegionId);
       } catch {
         if (!cancelled) setRegionId(undefined);

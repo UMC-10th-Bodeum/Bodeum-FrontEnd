@@ -12,9 +12,9 @@ import { getApiErrorMessage, isUnauthorizedError } from "@/apis/apiError";
 import { getNewsStatusPresentation } from "@/utils/newsStatus";
 
 import { formatRegionDisplayLabel } from "@/constants/regions";
-import NewsDetailHeader from "./components/NewsDetailHeader";
-import ActivityInfoTable from "./components/ActivityInfoTable";
-import RelatedNewsSection from "./components/RelatedNewsSection";
+import NewsDetailHeader from "./components/detail/NewsDetailHeader";
+import ActivityInfoTable from "./components/detail/ActivityInfoTable";
+import RelatedNewsSection from "./components/detail/RelatedNewsSection";
 
 const breadcrumbLabelMap: Record<NewsType, string> = {
   ACTIVITY: "활동소식",
