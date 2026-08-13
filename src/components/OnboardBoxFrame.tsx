@@ -1,6 +1,6 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 
-import MainButton from './MainButton';
+import MainButton from './button/MainButton';
 
 export type OnboardBoxFrameButtonColor =
   | 'main-500'

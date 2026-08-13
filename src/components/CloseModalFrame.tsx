@@ -1,6 +1,6 @@
 import type { MouseEventHandler, ReactNode } from "react";
 import CloseIcon from "@/assets/icons/Close.svg?react";
-import MainButton from "@/components/MainButton";
+import MainButton from "@/components/button/MainButton";
 
 interface CloseModalFrameProps {
   children: ReactNode;
@@ -40,7 +40,7 @@ export default function CloseModalFrame({
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-[20px] right-[20px] z-10"
+            className="absolute top-[20px] right-[20px] z-10 cursor-pointer"
           >
             <CloseIcon />
           </button>

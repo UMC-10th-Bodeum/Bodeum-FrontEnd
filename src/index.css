@@ -137,3 +137,18 @@ body {
   -ms-overflow-style: none; 
   scrollbar-width: none; 
 }
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.drag-scroll {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.drag-scroll img {
+  -webkit-user-drag: none;
+}

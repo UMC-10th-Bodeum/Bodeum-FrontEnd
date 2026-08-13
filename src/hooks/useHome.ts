@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getHomeBanner, getHomeNewsPreview, getHomePostPreview, getInfoItemCounts, getRecommendedCommunityPosts, getRecommendedNews } from "@/apis/home";
+import { getHomeBanner, getHomeNewsPreview, getHomePostPreview, getInfoItemCounts, getRecommendedCommunityPosts, getRecommendedNews } from "@/apis/homeApi";
 
 export const useHomeBanner = () => {
   return useQuery({

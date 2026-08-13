@@ -101,13 +101,6 @@ export interface RelatedNews {
   viewCount: number;
 }
 
-export interface RelatedNewsResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: RelatedNews[];
-}
-
 export interface NewsScrapResult {
   newsId: number;
   scrapped: boolean;

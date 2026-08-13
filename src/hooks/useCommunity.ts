@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { hasStoredAuthSession } from "@/apis/authApi";
 import {
   createCommunityComment,
   createCommunityCommentLike,
@@ -14,10 +15,11 @@ import {
   deleteCommunityPostScrap,
   getCommunityComments,
   getCommunityPost,
+  getCommunityPostSearchSuggestions,
   getCommunityPosts,
   deleteCommunityPost,
   updateCommunityPost,
-} from "@/apis/community";
+} from "@/apis/communityApi";
 import type {
   CommunityComment,
   CommunityCommentCreatePayload,
@@ -28,6 +30,11 @@ import type {
   CommunityPostListParams,
   CommunityPostPage,
 } from "@/types/community";
+import {
+  myPointsQueryOptions,
+  USER_COMMENTS_QUERY_KEY,
+  USER_DASHBOARD_QUERY_KEY,
+} from "@/hooks/useMyPage";
 
 function updateCommunityCommentLike(
   comments: CommunityComment[],
@@ -43,6 +50,16 @@ function updateCommunityCommentLike(
       ? updateCommunityCommentLike(comment.replies, commentId, result)
       : comment.replies,
   }));
+}
+
+function invalidateMyPageCommentData(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  void Promise.all([
+    queryClient.invalidateQueries({ queryKey: USER_COMMENTS_QUERY_KEY }),
+    queryClient.invalidateQueries({ queryKey: USER_DASHBOARD_QUERY_KEY }),
+    queryClient.fetchQuery(myPointsQueryOptions),
+  ]);
 }
 
 function appendCommunityReply(
@@ -92,23 +109,30 @@ function incrementCommunityPostCommentCount(
   );
 }
 
-function removeCommentAndCount(
+function applyDeletedCommentState(
   comments: CommunityComment[],
   targetId: number,
 ): { comments: CommunityComment[]; removedCount: number } {
   let removed = 0;
 
-  function countCommentTree(comment: CommunityComment): number {
-    return (
-      1 +
-      (comment.replies?.reduce((count, reply) => count + countCommentTree(reply), 0) ?? 0)
-    );
-  }
-
   function walk(list: CommunityComment[]): CommunityComment[] {
-    return list.flatMap((comment) => {
+    return list.flatMap<CommunityComment>((comment) => {
       if (comment.commentId === targetId) {
-        removed += countCommentTree(comment);
+        removed = 1;
+
+        if (comment.replies?.length) {
+          return [
+            {
+              ...comment,
+              status: "DELETED",
+              content: "",
+              isMine: false,
+              isLiked: false,
+              likeCount: 0,
+            },
+          ];
+        }
+
         return [];
       }
 
@@ -128,13 +152,19 @@ export const communityPostKeys = {
   all: ["community-posts"] as const,
   detail: (postId: number) => [...communityPostKeys.all, "detail", postId] as const,
   comments: (postId: number) => [...communityPostKeys.detail(postId), "comments"] as const,
-  list: ({ page = 0, size = 14, sort = "view", keyword, categoryCode }: CommunityPostListParams) =>
+  searchSuggestions: (keyword: string, size: number) =>
+    [...communityPostKeys.all, "search-suggestions", keyword, size] as const,
+  list: (
+    { page = 0, size = 14, sort, keyword, categoryCode }: CommunityPostListParams,
+    viewerScope: "member" | "guest",
+  ) =>
     [
       ...communityPostKeys.all,
       {
         page,
         size,
-        sort,
+        sort: sort ?? "SERVER_DEFAULT",
+        viewerScope,
         keyword: keyword?.trim() ?? "",
         categoryCode: categoryCode ?? "ALL",
       },
@@ -142,10 +172,22 @@ export const communityPostKeys = {
 };
 
 export function useCommunityPosts(params: CommunityPostListParams) {
+  const viewerScope = hasStoredAuthSession() ? "member" : "guest";
+
   return useQuery({
-    queryKey: communityPostKeys.list(params),
+    queryKey: communityPostKeys.list(params, viewerScope),
     queryFn: () => getCommunityPosts(params),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useCommunityPostSearchSuggestions(keyword: string, size = 10) {
+  const normalizedKeyword = keyword.trim();
+
+  return useQuery({
+    queryKey: communityPostKeys.searchSuggestions(normalizedKeyword, size),
+    queryFn: () => getCommunityPostSearchSuggestions(normalizedKeyword, size),
+    enabled: normalizedKeyword.length >= 2 && normalizedKeyword.length <= 50,
   });
 }
 
@@ -202,6 +244,7 @@ export function useCreateCommunityComment(postId: number) {
       );
 
       incrementCommunityPostCommentCount(queryClient, postId);
+      invalidateMyPageCommentData(queryClient);
     },
   });
 }
@@ -234,6 +277,7 @@ export function useCreateCommunityReply(postId: number) {
       );
 
       incrementCommunityPostCommentCount(queryClient, postId);
+      invalidateMyPageCommentData(queryClient);
     },
   });
 }
@@ -324,16 +368,19 @@ export function useUpdateCommunityComment(postId: number) {
 export function useDeleteCommunityComment(postId: number) {
   const queryClient = useQueryClient();
 
-  return useMutation<unknown, unknown, number>({
+  return useMutation<void, unknown, number>({
     mutationFn: (commentId: number) => deleteCommunityComment(commentId),
     onSuccess: (_res, commentId) => {
       const commentsKey = communityPostKeys.comments(postId);
       const currentComments = queryClient.getQueryData<CommunityCommentsResult>(commentsKey);
       const result = currentComments
-        ? removeCommentAndCount(currentComments.comments, commentId)
+        ? applyDeletedCommentState(currentComments.comments, commentId)
         : undefined;
 
+      invalidateMyPageCommentData(queryClient);
+
       if (!currentComments || !result?.removedCount) {
+        void queryClient.invalidateQueries({ queryKey: commentsKey });
         void queryClient.invalidateQueries({ queryKey: communityPostKeys.detail(postId) });
         void queryClient.invalidateQueries({
           predicate: ({ queryKey }) =>
@@ -378,6 +425,8 @@ export function useDeleteCommunityComment(postId: number) {
               }
             : currentPage,
       );
+
+      void queryClient.invalidateQueries({ queryKey: commentsKey, refetchType: "none" });
     },
   });
 }
@@ -479,7 +528,10 @@ export function useUpdateCommunityPost(postId: number) {
       queryClient.setQueryData<CommunityPostDetail>(communityPostKeys.detail(postId), updated);
 
       void queryClient.invalidateQueries({
-        predicate: ({ queryKey }) => queryKey[0] === communityPostKeys.all[0],
+        predicate: ({ queryKey }) =>
+          queryKey[0] === communityPostKeys.all[0] &&
+          queryKey.length === 2 &&
+          typeof queryKey[1] === "object",
       });
     },
   });

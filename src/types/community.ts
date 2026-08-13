@@ -3,12 +3,21 @@ import type { CommunityCategory, CommunityCategoryCode } from "@/constants/commu
 
 export type CommunityAuthorVisibility = "PROFILE" | "ANONYMOUS";
 
-export interface CommunityPostPayload {
+export interface CommunityPostFormValues {
   category: CommunityCategory;
   authorVisibility: CommunityAuthorVisibility;
   title: string;
   content: string;
   images: File[];
+  existingImageUrls: string[];
+}
+
+export interface CommunityPostFormInitialValues {
+  category: CommunityCategory;
+  authorVisibility: CommunityAuthorVisibility;
+  title: string;
+  content: string;
+  existingImageUrls: string[];
 }
 
 export interface CommunityPostCreateRequest {
@@ -20,27 +29,14 @@ export interface CommunityPostCreateRequest {
   imageUrls?: string[];
 }
 
-export interface CommunityPost {
-  id: number;
-  category: CommunityCategory;
-  diagnosis: DiagnosisType;
-  author: string;
-  createdAt: string;
-  title: string;
-  content: string;
-  likes: number;
-  comments: number;
-  views: number;
-  imageCount: number;
-}
-
-export type CommunityCommentStatus = "ACTIVE";
+export type CommunityCommentStatus = "ACTIVE" | "DELETED";
 
 export interface CommunityComment {
   commentId: number;
   parentCommentId: number | null;
   authorId: number;
   authorNickname: string;
+  profileImageUrl: string | null;
   isMine: boolean;
   content: string;
   isAccepted: boolean;
@@ -76,7 +72,7 @@ export interface CommunityCommentLikeResult {
   likeCount: number;
 }
 
-export type CommunityPostSort = "view" | "scrap" | "comment";
+export type CommunityPostSort = "latest" | "view" | "like" | "comment";
 
 export interface CommunityPostAuthor {
   authorId: number;
@@ -89,7 +85,7 @@ export interface CommunityPostAuthor {
 
 export interface CommunityPostListItem {
   postId: number;
-  boardType: string;
+  boardType: CommunityCategoryCode;
   anonymityType: string;
   title: string;
   content: string;
@@ -110,6 +106,20 @@ export interface CommunityPostListParams {
   sort?: CommunityPostSort;
   keyword?: string;
   categoryCode?: CommunityCategoryCode;
+}
+
+export interface CommunityPostSearchSuggestion {
+  title: string;
+  content: string;
+  type: "POST_TITLE" | "POST_CONTENT";
+}
+
+export interface CommunityPostSearchSuggestionsResult {
+  suggestions: CommunityPostSearchSuggestion[];
+}
+
+export interface CommunityPostImageUploadResult {
+  imageUrl: string;
 }
 
 interface CommunityPageSort {
@@ -145,8 +155,10 @@ export type CommunityAnonymityType = "PROFILE_TAG_VISIBLE" | "FULLY_ANONYMOUS";
 
 export interface CommunityPostDetail {
   postId: number;
-  authorId: number;
+  authorId: number | null;
   authorNickname: string | null;
+  authorLevel: number | null;
+  childAge: number | null;
   isMine: boolean;
   boardType: CommunityCategoryCode;
   anonymityType: CommunityAnonymityType;

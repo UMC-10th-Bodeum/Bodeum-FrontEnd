@@ -12,17 +12,13 @@ type RegionOnboardingBoxProps = {
 const selectClassName = "z-[80] min-w-0 flex-1";
 export const ALL_REGIONS_VALUE = "ALL";
 export const ALL_REGIONS_LABEL = "지역 전체";
-
-const newsRegionOptions = [
-  { label: ALL_REGIONS_LABEL, value: ALL_REGIONS_VALUE },
-  ...regionOptions,
-];
+const REGION_OPTIONS_ALL_VALUE = regionOptions[0].value;
 
 export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboardingBoxProps) {
   const titleId = useId();
   const [sido, setSido] = useState("");
   const [district, setDistrict] = useState("");
-  const isAllRegions = sido === ALL_REGIONS_VALUE;
+  const isAllRegions = sido === REGION_OPTIONS_ALL_VALUE;
   const districtOptions = isAllRegions ? [] : (districtOptionsByRegion[sido] ?? []);
   const districtRequired = districtOptions.length > 0;
   const shouldBlockDistrictSelect = isAllRegions || !sido || !districtRequired;
@@ -45,7 +41,9 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
           rightButtonDisabled={!isComplete}
           onClose={onClose}
           onLeftButtonClick={onClose}
-          onRightButtonClick={() => onComplete({ sido, district })}
+          onRightButtonClick={() =>
+            onComplete({ sido: isAllRegions ? ALL_REGIONS_VALUE : sido, district })
+          }
         >
           <div className="flex min-h-0 w-full flex-1 flex-col gap-[12px]">
             <h2 id={titleId} className="mt-[1.5px] text-h3-onboard text-background-500">
@@ -55,7 +53,7 @@ export default function RegionOnboardingBox({ onClose, onComplete }: RegionOnboa
               <Select
                 variant="L"
                 value={sido}
-                options={newsRegionOptions}
+                options={regionOptions}
                 onChange={(value) => {
                   setSido(value);
                   setDistrict("");

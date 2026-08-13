@@ -54,6 +54,34 @@ test("API 메시지를 기존 화면 메시지 형식으로 변환한다", () =>
   );
 });
 
+test("출처 URL이 없거나 공백이면 클릭할 수 없는 출처로 변환한다", () => {
+  const mapped = mapApiMessage(
+    createMessage({
+      sources: [
+        {
+          sourceType: "SITE",
+          sourceId: 1,
+          sourceTitle: "URL 없는 출처",
+          sourceUrl: null,
+          updatedAt: null,
+        },
+        {
+          sourceType: "SITE",
+          sourceId: 2,
+          sourceTitle: "공백 URL 출처",
+          sourceUrl: "   ",
+          updatedAt: null,
+        },
+      ],
+    }),
+  );
+
+  assert.deepEqual(mapped.resources, [
+    { title: "URL 없는 출처", url: undefined },
+    { title: "공백 URL 출처", url: undefined },
+  ]);
+});
+
 test("서버 인사말이 없을 때만 로컬 starter를 앞에 추가한다", () => {
   const starter = { greeting: "안녕하세요", suggestedQuestions: ["질문"] };
   const answered = createMessage();

@@ -3,6 +3,7 @@ import PostSection from "@/components/PostSection";
 import PostListItem from "@/components/PostListItem";
 import { useHomeNewsPreview, useRecommendedNews } from "@/hooks/useHome";
 import { useNavigate } from "react-router-dom";
+import AsyncState from "@/components/AsyncState";
 
 export default function RecommendedNewsSection() {
   const navigate = useNavigate();
@@ -24,13 +25,21 @@ export default function RecommendedNewsSection() {
       </div>
 
       {isPending ? (
-        <div className="flex h-[180px] items-center justify-center text-background-500">
-          불러오는 중입니다...
-        </div>
+        <AsyncState
+          type="loading"
+          variant="section"
+          loadingText="불러오는 중입니다..."
+          className="flex h-[180px] items-center justify-center text-background-500"
+          textClassName=""
+        />
       ) : isError ? (
-        <div className="flex h-[180px] items-center justify-center text-background-500">
-          추천 소식을 불러오지 못했습니다.
-        </div>
+        <AsyncState
+          type="error"
+          variant="section"
+          errorText="추천 소식을 불러오지 못했습니다."
+          className="flex h-[180px] items-center justify-center text-background-500"
+          textClassName=""
+        />
       ) : (
         <div className="flex gap-[12px] overflow-x-auto no-scrollbar">
           {news.map((item) => (

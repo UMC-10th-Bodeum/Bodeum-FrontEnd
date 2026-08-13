@@ -5,9 +5,11 @@ import NewsIcon from "@/assets/icons/searchNews.svg?react";
 import CommunityIcon from "@/assets/icons/searchCommunity.svg?react";
 import EmptySearchResult from "./search/EmptySearchResult";
 
-interface Suggestion {
+export interface InputSuggestion {
   text: string;
   type: string;
+  description?: string;
+  value?: string;
 }
 
 interface InputProps {
@@ -23,8 +25,26 @@ interface InputProps {
   onBlur?: () => void;
   onEnter?: (keyword: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  suggestions?: Suggestion[];
+  suggestions?: InputSuggestion[];
+  suggestionsLoading?: boolean;
   onSuggestionClick?: (text: string) => void;
+  onClear?: () => void;
+}
+
+function renderHighlightedText(text: string, keyword: string) {
+  const matchIndex = text.indexOf(keyword);
+
+  if (matchIndex === -1) return text;
+
+  return (
+    <>
+      {text.slice(0, matchIndex)}
+      <span className="font-bold text-background-600">
+        {text.slice(matchIndex, matchIndex + keyword.length)}
+      </span>
+      {text.slice(matchIndex + keyword.length)}
+    </>
+  );
 }
 
 export default function Input({
@@ -40,7 +60,9 @@ export default function Input({
   onKeyDown,
   onEnter,
   suggestions = [],
+  suggestionsLoading = false,
   onSuggestionClick,
+  onClear,
   searchType,
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
@@ -59,20 +81,24 @@ export default function Input({
       ? "border-0 bg-background-200 focus-within:border focus-within:border-main-400"
       : "border border-background-300 bg-background-200";
 
-  const filteredSuggestions = suggestions.filter((item) =>
-    searchType === "news"
-      ? item.type === "NEWS_TITLE"
-      : searchType === "community"
-        ? item.type === "COMMUNITY_TITLE"
-        : true
-  );
+  const filteredSuggestions = suggestions.filter((item) => {
+    if (searchType === "news") return item.type === "NEWS_TITLE";
+    if (searchType === "community") {
+      return item.type === "POST_TITLE" || item.type === "POST_CONTENT";
+    }
+    return true;
+  });
+  const SuggestionIcon = searchType === "community" ? CommunityIcon : NewsIcon;
+  const suggestionsKey = filteredSuggestions
+    .map((item) => `${item.type}:${item.text}:${item.description ?? ""}:${item.value ?? ""}`)
+    .join("|");
 
   // 검색어(value)나 제안 목록이 변경되면 인덱스 초기화
   useEffect(() => {
     setActiveIndex(null);
     setIsKeyboardNavigation(false);
     itemRefs.current = [];
-  }, [value]);
+  }, [suggestionsKey, value]);
 
   // activeIndex 변경 시 해당 위치로 자동 스크롤
   useEffect(() => {
@@ -86,9 +112,12 @@ export default function Input({
     // 외부에서 전달된 onKeyDown 먼저 실행
     onKeyDown?.(e);
 
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
+
     // 검색 모드가 아니거나 검색어가 2자 미만, 제안 목록이 없으면 기존 Enter 동작만 처리
-    const isDropdownOpen =
-      search && isFocused && value.trim().length >= 2;
+    const isDropdownOpen = search && isFocused && value.trim().length >= 2;
 
     if (!isDropdownOpen) {
       if (search && e.key === "Enter") {
@@ -99,10 +128,6 @@ export default function Input({
       return;
     }
 
-    if (e.nativeEvent.isComposing) {
-      return;
-    }
-
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setIsKeyboardNavigation(true);
@@ -110,7 +135,7 @@ export default function Input({
       if (filteredSuggestions.length === 0) return;
 
       setActiveIndex((prev) =>
-        prev === null || prev === filteredSuggestions.length - 1 ? 0 : prev + 1
+        prev === null || prev === filteredSuggestions.length - 1 ? 0 : prev + 1,
       );
       return;
     }
@@ -122,7 +147,7 @@ export default function Input({
       if (filteredSuggestions.length === 0) return;
 
       setActiveIndex((prev) =>
-        prev === null || prev === 0 ? filteredSuggestions.length - 1 : prev - 1
+        prev === null || prev === 0 ? filteredSuggestions.length - 1 : prev - 1,
       );
       return;
     }
@@ -131,7 +156,8 @@ export default function Input({
       e.preventDefault();
 
       if (activeIndex !== null && filteredSuggestions[activeIndex]) {
-        const selectedText = filteredSuggestions[activeIndex].text;
+        const selectedText =
+          filteredSuggestions[activeIndex].value ?? filteredSuggestions[activeIndex].text;
         inputRef.current?.blur();
         setIsFilled(selectedText.trim() !== "");
         onSuggestionClick?.(selectedText);
@@ -147,6 +173,7 @@ export default function Input({
       e.preventDefault();
       setIsFocused(false);
       setActiveIndex(null);
+      inputRef.current?.blur();
     }
   };
 
@@ -202,6 +229,7 @@ export default function Input({
 
               onChange(event);
               setIsFilled(false);
+              onClear?.();
             }}
             className="ml-2 shrink-0"
           >
@@ -215,7 +243,7 @@ export default function Input({
           className="
             absolute left-0 right-0 top-[40px]
             z-50 mt-2
-            max-h-[300px] overflow-y-auto
+            max-h-[300px] overflow-y-auto overscroll-contain
             rounded-[10px]
             border border-background-200
             bg-background-100
@@ -223,19 +251,21 @@ export default function Input({
             px-1 py-2
           "
         >
-          {filteredSuggestions.length === 0 ? (
+          {suggestionsLoading ? (
+            <div className="py-8 text-center text-h3-category-sub text-background-500">
+              검색어 추천 리스트를 불러오는 중입니다.
+            </div>
+          ) : filteredSuggestions.length === 0 ? (
             <EmptySearchResult />
           ) : (
             filteredSuggestions.map((item, index) => {
-              const Icon =
-                item.type === "NEWS_TITLE" ? NewsIcon : CommunityIcon;
-
               const matchIndex = item.text.indexOf(value);
               const isActive = activeIndex === index;
+              const selectedText = item.value ?? item.text;
 
               return (
                 <button
-                  key={`${item.type}-${item.text}-${index}`}
+                  key={`${item.type}-${item.text}-${item.description ?? ""}-${index}`}
                   type="button"
                   ref={(el) => {
                     itemRefs.current[index] = el;
@@ -246,7 +276,10 @@ export default function Input({
                     if (search) {
                       inputRef.current?.blur();
                     }
-                    onSuggestionClick?.(item.text);
+                    if (item.value !== undefined) {
+                      setIsFilled(selectedText.trim() !== "");
+                    }
+                    onSuggestionClick?.(selectedText);
                   }}
                   className={`
                     flex w-full items-center
@@ -264,16 +297,27 @@ export default function Input({
                     active:bg-background-200
                   `}
                 >
-                  <Icon className="mr-2 text-background-400 shrink-0" />
-                  {matchIndex === -1 ? (
+                  <SuggestionIcon className="mr-2 shrink-0 text-background-400" />
+                  {item.description !== undefined ? (
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className="block truncate text-h3-category text-background-500"
+                        title={item.text}
+                      >
+                        {renderHighlightedText(item.text, value)}
+                      </span>
+                      <span
+                        className="block truncate text-h3-category-sub text-background-400"
+                        title={item.description}
+                      >
+                        {renderHighlightedText(item.description, value)}
+                      </span>
+                    </span>
+                  ) : matchIndex === -1 ? (
                     <span>{item.text}</span>
                   ) : (
                     <span className="text-background-500">
-                      {item.text.slice(0, matchIndex)}
-                      <span className="text-background-600 font-bold">
-                        {item.text.slice(matchIndex, matchIndex + value.length)}
-                      </span>
-                      {item.text.slice(matchIndex + value.length)}
+                      {renderHighlightedText(item.text, value)}
                     </span>
                   )}
                 </button>

@@ -1,22 +1,31 @@
 import { useRecommendedNews } from "@/hooks/useHome";
 import NewsCard from "@/pages/home/components/NewsCard";
+import AsyncState from "@/components/AsyncState";
 
 export default function RecommendedNewsTopSection() {
   const { data: news = [], isPending, isError } = useRecommendedNews();
 
   if (isPending) {
     return (
-      <div className="flex h-[220px] items-center justify-center text-h6 text-background-500">
-        추천 소식을 불러오는 중입니다...
-      </div>
+      <AsyncState
+        type="loading"
+        variant="section"
+        loadingText="추천 소식을 불러오는 중입니다..."
+        className="flex h-[220px] items-center justify-center text-h6 text-background-500"
+        textClassName=""
+      />
     )
   }
 
   if (isError) {
     return (
-      <div className="flex h-[220px] items-center justify-center text-h6 text-background-500">
-        추천 소식을 불러오지 못했습니다.
-      </div>
+      <AsyncState
+        type="error"
+        variant="section"
+        errorText="추천 소식을 불러오지 못했습니다."
+        className="flex h-[220px] items-center justify-center text-h6 text-background-500"
+        textClassName=""
+      />
     );
   }
 

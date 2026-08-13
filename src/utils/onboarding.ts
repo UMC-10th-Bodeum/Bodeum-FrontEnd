@@ -14,6 +14,10 @@ import type {
   Region,
 } from "@/types/onboarding";
 import type { UserProfile } from "@/types/user";
+import {
+  interestCategoryByLabel,
+  interestLabelByCategory,
+} from "@/constants/interests";
 
 const disabilityTypeByLabel: Record<string, DisabilityType> = {
   자폐스펙트럼: "AUTISM",
@@ -23,13 +27,6 @@ const disabilityTypeByLabel: Record<string, DisabilityType> = {
   발달지연: "DEVELOPMENTAL_DELAY",
   언어장애: "LANGUAGE_DISORDER",
   기타: "ETC",
-};
-
-const interestCategoryByLabel: Record<string, InterestCategory> = {
-  "맞춤 복지·지원금": "WELFARE_SUBSIDY",
-  "안심 병원·건강": "HOSPITAL_HEALTH",
-  "육아 상담·소통": "PARENTING_COMMUNICATION",
-  "성장·교육": "GROWTH_EDUCATION",
 };
 
 const guardianTypeByLabel: Record<string, GuardianType> = {
@@ -55,13 +52,6 @@ const disabilityLabelByType: Record<DisabilityType, string> = {
   DEVELOPMENTAL_DELAY: "발달지연",
   LANGUAGE_DISORDER: "언어장애",
   ETC: "기타",
-};
-
-const interestLabelByCategory: Record<InterestCategory, string> = {
-  WELFARE_SUBSIDY: "맞춤 복지·지원금",
-  HOSPITAL_HEALTH: "안심 병원·건강",
-  PARENTING_COMMUNICATION: "육아 상담·소통",
-  GROWTH_EDUCATION: "성장·교육",
 };
 
 const guardianLabelByType: Record<GuardianType, string> = {

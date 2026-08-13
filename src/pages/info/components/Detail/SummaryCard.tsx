@@ -1,6 +1,6 @@
 import ShareIcon from "@/assets/icons/Share.svg?react";
 import CategoryLabel from "@/components/CategoryLabel";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 import GoIcon from "@/assets/icons/arrow-up-right.svg?react"
 import ScrapIcon from "@/assets/icons/Scrap.svg?react"
 import ViewStat from "@/components/post-stat/ViewStat";
@@ -8,11 +8,11 @@ import ScrapStat from "@/components/post-stat/ScrapStat";
 import CommentStat from "@/components/post-stat/CommentStat";
 import DateStat from "@/components/post-stat/DateStat";
 import PostTag from "@/components/PostTag";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
-import { getInfoShareUrl, toggleInfoScrap } from "@/apis/info";
+import { getInfoShareUrl, toggleInfoScrap } from "@/apis/infoApi";
 import { showToast } from "@/components/Toast";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface SummaryCardProps {
   infoItemId: number;
@@ -66,13 +66,8 @@ export default function SummaryCard({
   phone,
   isScrapped,
 }: SummaryCardProps) {
+  const [scrapped, setScrapped] = useState(isScrapped);
   const [scrapCountState, setScrapCountState] = useState(scrapCount);
-  const [isScrappedState, setIsScrappedState] = useState(isScrapped);
-
-  useEffect(() => {
-    setScrapCountState(scrapCount);
-    setIsScrappedState(isScrapped);
-  }, [scrapCount, isScrapped]);
 
   const handleShare = async () => {
     try {
@@ -98,8 +93,11 @@ export default function SummaryCard({
     try {
       const result = await toggleInfoScrap(infoItemId);
 
-      setIsScrappedState(result.isScrapped);
-      setScrapCountState(result.scrapCount);
+      setScrapped(result.isScrapped);
+
+      setScrapCountState((prev) =>
+        result.isScrapped ? prev + 1 : prev - 1
+      );
 
       showToast(
         "green",
@@ -130,8 +128,7 @@ export default function SummaryCard({
           <ViewStat count={viewCount} showLabel={true} />
           <ScrapStat
             count={scrapCountState}
-            isActive={isScrappedState}
-            onClick={() => { }}
+            isActive={scrapped}
           />
           <CommentStat count={reviewCount} showLabel={true} />
           <DateStat date="2026.05.04" showLabel={true} />
@@ -144,13 +141,11 @@ export default function SummaryCard({
             label="홈페이지"
             icon={GoIcon}
             iconPosition="right"
+            disabled={!homepageUrl}
             onClick={() => {
-              if (!homepageUrl) {
-                showToast("yellow", "등록된 홈페이지가 없습니다.");
-                return;
+              if (homepageUrl) {
+                window.open(homepageUrl, "_blank", "noopener,noreferrer");
               }
-
-              window.open(homepageUrl, "_blank", "noopener,noreferrer");
             }}
           />
 

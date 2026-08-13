@@ -1,59 +1,56 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
-import { getApiErrorMessage } from "@/apis/apiError";
-import ProfileIcon from "@/assets/icons/Profile.svg?react";
-import ButtonFill from "@/components/ButtonFill";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonFill from "@/components/button/ButtonFill";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import HeartStat from "@/components/post-stat/HeartStat";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { showToast } from "@/components/Toast";
-import { useUpdateCommunityComment } from "@/hooks/useCommunity";
 import type { CommunityComment } from "@/types/community";
 import { getRelativeTime } from "@/utils/time";
 
+import { CommunityTextarea } from "../CommunityContentFields";
+import { useCommunityCommentsContext } from "./CommunityCommentsContext";
 import CommunityReplyForm from "./CommunityReplyForm";
 
 export interface CommunityCommentNodeProps {
-  postId: number;
   comment: CommunityComment;
   depth?: number;
-  canAdopt?: boolean;
-  replyTargetId: number | null;
-  onSelectReplyTarget: (comment: CommunityComment) => void;
-  onCancelReply: () => void;
-  onSubmitReply: (parentCommentId: number, content: string) => void;
-  isReplyPending: boolean;
-  onLike: (commentId: number, isCurrentlyLiked: boolean) => void;
-  likingCommentId?: number;
-  onAdopt?: (commentId: number, isAccepted: boolean) => void;
-  isAdoptPending?: boolean;
-  onDelete?: (commentId: number) => void;
 }
 
-export default function CommunityCommentNode({
-  postId,
-  comment,
-  depth = 0,
-  canAdopt = false,
-  replyTargetId,
-  onSelectReplyTarget,
-  onCancelReply,
-  onSubmitReply,
-  isReplyPending,
-  onLike,
-  likingCommentId,
-  onAdopt,
-  isAdoptPending = false,
-  onDelete,
-}: CommunityCommentNodeProps) {
+function CommunityCommentNode({ comment, depth = 0 }: CommunityCommentNodeProps) {
+  const {
+    canAdopt,
+    replyTargetId,
+    onSelectReplyTarget,
+    onCancelReply,
+    onSubmitReply,
+    isReplyPending,
+    onLike,
+    likingCommentId,
+    onAdopt,
+    isAdoptPending,
+    onDelete,
+    onUpdate,
+    updatingCommentId,
+  } = useCommunityCommentsContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
   const menuContainerRef = useRef<HTMLDivElement>(null);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
-  const { mutate: updateComment, isPending: isUpdating } = useUpdateCommunityComment(postId);
+  const isUpdating = updatingCommentId === comment.commentId;
   const isRoot = depth === 0;
-  const isReplyFormOpen = !isEditing && replyTargetId === comment.commentId;
-  const authorName = comment.authorNickname || "익명";
+  const isDeleted = comment.status === "DELETED";
+  const isReplyFormOpen = !isDeleted && !isEditing && replyTargetId === comment.commentId;
+  const authorName =
+    comment.authorNickname?.trim() || (isDeleted ? "삭제된 사용자" : "익명");
+  const profileImage = (
+    <ProfileAvatar
+      imageUrl={comment.profileImageUrl}
+      alt={`${authorName} 프로필`}
+      className={isRoot ? "h-[40px] w-[40px]" : "h-[24px] w-[24px]"}
+    />
+  );
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -92,18 +89,10 @@ export default function CommunityCommentNode({
     const content = editedContent.trim();
     if (!content || isUpdating) return;
 
-    updateComment(
-      { commentId: comment.commentId, content },
-      {
-        onSuccess: () => {
-          setEditedContent(content);
-          setIsEditing(false);
-          showToast("green", "댓글이 수정되었습니다.");
-        },
-        onError: (error) =>
-          showToast("red", getApiErrorMessage(error, "댓글을 수정하지 못했습니다.")),
-      },
-    );
+    onUpdate(comment.commentId, content, () => {
+      setEditedContent(content);
+      setIsEditing(false);
+    });
   };
 
   const nodeContent = (
@@ -114,19 +103,19 @@ export default function CommunityCommentNode({
           : `relative ml-[20px] py-[20px] pl-[48px] before:absolute before:left-0 before:top-[28px] before:h-[24px] before:w-[24px] before:border-b before:border-l before:border-background-300 ${isReplyFormOpen ? "" : "after:absolute after:bottom-0 after:left-[-20px] after:right-0 after:border-b after:border-background-250"}`
       }
     >
-      {isRoot && <ProfileIcon className="h-[40px] w-[40px] shrink-0" />}
+      {isRoot && profileImage}
 
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start justify-between">
+        <div className="flex min-w-0 items-center justify-between">
           <div className="flex min-w-0 items-center gap-[8px]">
-            {!isRoot && <ProfileIcon className="h-[24px] w-[24px] shrink-0" />}
+            {!isRoot && profileImage}
             <p className="truncate text-h6 text-background-600">{authorName}</p>
             <time className="shrink-0 text-body-sub text-background-500">
               {getRelativeTime(comment.createdAt)}
             </time>
           </div>
 
-          {comment.isMine && (
+          {!isDeleted && comment.isMine && (
             <div ref={menuContainerRef} className="relative">
               <button
                 ref={menuTriggerRef}
@@ -135,9 +124,9 @@ export default function CommunityCommentNode({
                 aria-haspopup="menu"
                 aria-expanded={isMenuOpen}
                 onClick={() => setIsMenuOpen((current) => !current)}
-                className="flex h-[26px] w-[26px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
+                className="flex h-[18px] w-[18px] cursor-pointer items-center justify-center rounded-[6px] text-background-500 hover:bg-background-200"
               >
-                <span aria-hidden="true" className="text-[20px] leading-none">
+                <span aria-hidden="true" className="text-[18px] leading-none">
                   ⋮
                 </span>
               </button>
@@ -161,7 +150,7 @@ export default function CommunityCommentNode({
                     type="button"
                     onClick={() => {
                       setIsMenuOpen(false);
-                      onDelete?.(comment.commentId);
+                      onDelete(comment.commentId);
                     }}
                     className="block w-full px-4 py-2 text-left text-body-sub text-sub-red hover:bg-background-200 focus:bg-background-200"
                   >
@@ -173,13 +162,18 @@ export default function CommunityCommentNode({
           )}
         </div>
 
-        {isEditing ? (
+        {isDeleted ? (
+          <p className="mt-[8px] text-h3-onboard text-background-500">삭제된 댓글입니다.</p>
+        ) : isEditing ? (
           <div className="mt-3 pr-[14px]">
-            <textarea
+            <CommunityTextarea
               value={editedContent}
-              maxLength={1000}
-              onChange={(event) => setEditedContent(event.target.value)}
-              className="min-h-[96px] w-full resize-none rounded-[8px] border border-background-300 bg-background-100 px-[16px] py-[12px] text-body text-background-600 outline-none focus:border-primary-500"
+              onChange={setEditedContent}
+              placeholder="댓글을 입력해 주세요"
+              placeholderClassName="placeholder:text-h3-onboard"
+              ariaLabel={`${isRoot ? "댓글" : "답글"} 내용`}
+              compact
+              onEnter={applyEdit}
             />
             <div className="mt-[12px] flex justify-end gap-2">
               <ButtonOutline
@@ -200,9 +194,7 @@ export default function CommunityCommentNode({
           </div>
         ) : (
           <>
-            <p className={`${isRoot ? "" : "mt-[8px]"} text-h3-onboard text-background-600`}>
-              {comment.content}
-            </p>
+            <p className="mt-[8px] text-h3-onboard text-background-600">{comment.content}</p>
             <div className="mt-[16px] flex items-center gap-[24px] text-body-sub text-background-500">
               {!canAdopt && (
                 <HeartStat
@@ -221,7 +213,13 @@ export default function CommunityCommentNode({
                   disabled={isAdoptPending}
                   onClick={(event) => {
                     event?.stopPropagation();
-                    onAdopt?.(comment.commentId, comment.isAccepted);
+
+                    if (comment.isMine && !comment.isAccepted) {
+                      showToast("red", "본인이 작성한 댓글 혹은 답글은 채택할 수 없습니다.");
+                      return;
+                    }
+
+                    onAdopt(comment.commentId, comment.isAccepted);
                   }}
                   label="채택"
                   ariaLabel={comment.isAccepted ? "댓글 채택 취소" : "댓글 채택"}
@@ -254,23 +252,7 @@ export default function CommunityCommentNode({
   );
 
   const replies = comment.replies?.map((reply) => (
-    <CommunityCommentNode
-      key={reply.commentId}
-      postId={postId}
-      comment={reply}
-      depth={depth + 1}
-      canAdopt={canAdopt}
-      replyTargetId={replyTargetId}
-      onSelectReplyTarget={onSelectReplyTarget}
-      onCancelReply={onCancelReply}
-      onSubmitReply={onSubmitReply}
-      isReplyPending={isReplyPending}
-      onLike={onLike}
-      likingCommentId={likingCommentId}
-      onAdopt={onAdopt}
-      isAdoptPending={isAdoptPending}
-      onDelete={onDelete}
-    />
+    <CommunityCommentNode key={reply.commentId} comment={reply} depth={depth + 1} />
   ));
 
   return isRoot ? (
@@ -287,3 +269,5 @@ export default function CommunityCommentNode({
     </div>
   );
 }
+
+export default memo(CommunityCommentNode);

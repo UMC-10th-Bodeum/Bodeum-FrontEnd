@@ -9,7 +9,7 @@ export default function SearchTopBar() {
   const { data: results = [] } = useInfoSearch(keyword);
   
   return (
-    <header className="h-[60px] border-b border-background-250 bg-background-100 px-[20px] py-[10px]">
+    <header className="h-[60px] border-b border-background-250 bg-background-100 px-[20px] py-[10px] items-center justify-center flex">
       <HeaderSearchBar
         value={keyword}
         onChange={setKeyword}

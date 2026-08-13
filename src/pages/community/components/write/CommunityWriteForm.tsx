@@ -1,21 +1,24 @@
 import { useState, type FormEvent } from "react";
 
-import ButtonFill from "@/components/ButtonFill";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonFill from "@/components/button/ButtonFill";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import { communityCategoryEntries, type CommunityCategory } from "@/constants/communityCategory";
 import type {
   CommunityAuthorVisibility,
-  CommunityPostPayload,
+  CommunityPostFormInitialValues,
+  CommunityPostFormValues,
 } from "@/types/community";
 
-import CommunityContentFields from "./CommunityContentFields";
+import CommunityContentFields from "../CommunityContentFields";
 import CommunityImageField from "./CommunityImageField";
 import SelectableChipGroup from "./SelectableChipGroup";
 
 type CommunityWriteFormProps = {
   onCancel: () => void;
-  onSubmit: (payload: CommunityPostPayload) => void;
+  onSubmit: (payload: CommunityPostFormValues) => void;
   isSubmitting?: boolean;
+  initialValues?: CommunityPostFormInitialValues;
+  submitLabel?: string;
 };
 
 const categoryOptions = communityCategoryEntries.map(([value, label]) => ({
@@ -35,17 +38,23 @@ export default function CommunityWriteForm({
   onCancel,
   onSubmit,
   isSubmitting = false,
+  initialValues,
+  submitLabel,
 }: CommunityWriteFormProps) {
-  const [category, setCategory] = useState<CommunityCategory | null>(null);
-  const [authorVisibility, setAuthorVisibility] = useState<CommunityAuthorVisibility | null>(null);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [category, setCategory] = useState<CommunityCategory | null>(
+    initialValues?.category ?? null,
+  );
+  const [authorVisibility, setAuthorVisibility] = useState<CommunityAuthorVisibility | null>(
+    initialValues?.authorVisibility ?? null,
+  );
+  const [title, setTitle] = useState(initialValues?.title ?? "");
+  const [content, setContent] = useState(initialValues?.content ?? "");
   const [images, setImages] = useState<File[]>([]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>(
+    initialValues?.existingImageUrls ?? [],
+  );
 
-  const isSubmittable =
-    category !== null &&
-    title.trim().length > 0 &&
-    content.trim().length > 0;
+  const isSubmittable = category !== null && title.trim().length > 0 && content.trim().length > 0;
 
   const submitPost = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,13 +66,16 @@ export default function CommunityWriteForm({
       title: title.trim(),
       content: content.trim(),
       images,
+      existingImageUrls,
     });
   };
 
   return (
     <form onSubmit={submitPost} className="mx-auto w-[1240px]">
       <div className="rounded-[10px] border border-background-250 bg-background-100 pt-[20px] px-[20px] pb-[40px]">
-        <p className="text-h1-onboard text-background-600">게시글 작성하기</p>
+        <p className="text-h1-onboard text-background-600">
+          {initialValues ? "게시글 수정하기" : "게시글 작성하기"}
+        </p>
 
         <SelectableChipGroup
           legend="게시판 유형"
@@ -86,7 +98,14 @@ export default function CommunityWriteForm({
           onTitleChange={setTitle}
           onContentChange={setContent}
         />
-        <CommunityImageField images={images} onChange={setImages} />
+        <CommunityImageField
+          images={images}
+          onChange={setImages}
+          existingImageUrls={existingImageUrls}
+          onRemoveExistingImage={(url) =>
+            setExistingImageUrls((prev) => prev.filter((u) => u !== url))
+          }
+        />
       </div>
 
       <div className="mt-[13px] flex justify-center gap-[8px]">
@@ -98,7 +117,7 @@ export default function CommunityWriteForm({
         />
         <ButtonFill
           type="submit"
-          label={isSubmitting ? "게시 중..." : "게시하기"}
+          label={isSubmitting ? "처리 중..." : (submitLabel ?? "게시하기")}
           disabled={!isSubmittable || isSubmitting}
           className="!h-[44px] !w-[200px]"
         />

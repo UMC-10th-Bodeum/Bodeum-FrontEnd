@@ -10,8 +10,8 @@ import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
-import { useInfoListQuery } from "@/hooks/queries/info/useInfoListQuery";
-import { useMyProfileQuery } from "@/hooks/queries/useMyProfileQuery";
+import { useInfoList } from "@/hooks/useInfoList";
+import { useMyProfileQuery } from "@/hooks/useMyProfile";
 import AsyncState from "@/components/AsyncState";
 
 const PAGE_SIZE = 14;
@@ -23,20 +23,60 @@ const sortOptions = [
 
 export default function InfoPage() {
   const { data: profile } = useMyProfileQuery();
-  const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
+
+  const [page, setPage] = useState(() => {
+    const pageParam = searchParams.get("page");
+    return pageParam ? Number(pageParam) : 1;
+  });
   const subCategoryParam = searchParams.get("subCategory");
   const [subCategory, setSubCategory] = useState<number | null>(
     subCategoryParam ? Number(subCategoryParam) : null,
   );
-  const [sort, setSort] = useState("");
+  const [sort, setSort] = useState(
+    () => searchParams.get("sort") ?? "",
+  );
   const navigate = useNavigate();
   
   const [regionLevel1, setRegionLevel1] = useState("");
   const [regionLevel2, setRegionLevel2] = useState("");
   const [location, setLocation] = useState("");
 
+  const prevProfileRegion = useRef<string | null>(null);
+
   useEffect(() => {
+    const profileRegionKey = profile
+      ? `${profile.regionLevel1 ?? ""}|${profile.regionLevel2 ?? ""}`
+      : null;
+
+    const profileRegionChanged =
+      prevProfileRegion.current !== null &&
+      profileRegionKey !== prevProfileRegion.current;
+
+    // 마이페이지에서 프로필 지역이 변경된 경우
+    if (profileRegionChanged) {
+      sessionStorage.removeItem("info-region-level1");
+      sessionStorage.removeItem("info-region-level2");
+
+      const level1 = profile?.regionLevel1 ?? "";
+      const level2 = profile?.regionLevel2 ?? "";
+
+      setRegionLevel1(level1);
+      setRegionLevel2(level2);
+      setLocation(
+        level1 ? `${level1} ${level2}`.trim() : "지역 전체",
+      );
+
+      setPage(1);
+
+      prevProfileRegion.current = profileRegionKey;
+
+      return;
+    }
+
+    // 기존 프로필 지역 저장
+    prevProfileRegion.current = profileRegionKey;
+
     const savedRegionLevel1 = sessionStorage.getItem(
       "info-region-level1",
     );
@@ -44,7 +84,7 @@ export default function InfoPage() {
       "info-region-level2",
     );
 
-    // 사용자가 선택한 지역이 있으면 무조건 우선
+    // 사용자가 모달에서 선택한 지역이 있으면 우선
     if (savedRegionLevel1 !== null) {
       setRegionLevel1(savedRegionLevel1);
       setRegionLevel2(savedRegionLevel2 ?? "");
@@ -58,14 +98,16 @@ export default function InfoPage() {
       return;
     }
 
-    // 로그인 상태인데 저장된 지역이 없으면 프로필 지역
+    // 저장된 모달 지역이 없으면 프로필 지역 사용
     if (profile) {
       const level1 = profile.regionLevel1 ?? "";
       const level2 = profile.regionLevel2 ?? "";
 
       setRegionLevel1(level1);
       setRegionLevel2(level2);
-      setLocation(level1 ? `${level1} ${level2}`.trim() : "지역 전체");
+      setLocation(
+        level1 ? `${level1} ${level2}`.trim() : "지역 전체",
+      );
 
       return;
     }
@@ -75,6 +117,16 @@ export default function InfoPage() {
     setRegionLevel2("");
     setLocation("지역 전체");
   }, [profile]);
+
+  const hasProfileRegion = Boolean(
+  profile?.regionLevel1 && profile?.regionLevel2,
+);
+
+  const isProfileRegion =
+    Boolean(profile?.regionLevel1) &&
+    Boolean(profile?.regionLevel2) &&
+    regionLevel1 === profile?.regionLevel1 &&
+    regionLevel2 === profile?.regionLevel2;
   
   const [locationOpen, setLocationOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -98,11 +150,11 @@ export default function InfoPage() {
       ? "scrapCount,desc"
       : "reviewCount,desc";
 
-  const { data, isPending, isError } = useInfoListQuery({
+  const { data, isPending, isError } = useInfoList({
     category: parentCategory,
     subCategory: subCategory ?? undefined,
     regionLevel1: regionLevel1 || null,
-  regionLevel2: regionLevel2 || null,
+    regionLevel2: regionLevel2 || null,
     page: page - 1,
     size: PAGE_SIZE,
     sort: sortValue,
@@ -116,42 +168,72 @@ export default function InfoPage() {
 
   useEffect(() => {
     if (prevCategory.current !== parentCategory) {
-      const subCategories = infoSubCategoryMap[parentCategory];
-      setSubCategory(subCategories[0].id);
+      setSubCategory(null);
+      setPage(1);
       prevCategory.current = parentCategory;
     }
   }, [parentCategory]);
-  
-  useEffect(() => {
-    setPage(1);
-  }, [subCategory, parentCategory, sort]);
+
+  const updateUrl = (
+    params: URLSearchParams,
+    replace = true,
+  ) => {
+    navigate(`/info?${params.toString()}`, { replace });
+  };
+
+  const updatePage = (newPage: number) => {
+    setPage(newPage);
+
+    const params = new URLSearchParams(searchParams);
+    params.set("page", String(newPage));
+
+    updateUrl(params);
+  };
 
   const moveToSubCategory = (id: number | null) => {
     setSubCategory(id);
+    setPage(1);
 
     const params = new URLSearchParams({
       category: parentCategory,
+      page: "1",
     });
 
     if (id !== null) {
       params.set("subCategory", String(id));
     }
 
-    navigate(`/info?${params.toString()}`, {
-      replace: true,
-    });
+    updateUrl(params);
   };
 
   const moveToCategory = (category: ParentCategory) => {
+    setPage(1);
+
     const params = new URLSearchParams({
       category,
     });
 
     const defaultSubCategory = infoSubCategoryMap[category][0].id;
     params.set("subCategory", String(defaultSubCategory));
+    params.set("page", "1");
 
     navigate(`/info?${params.toString()}`);
   };
+
+  const shouldShowEmptyMessage =
+    (isRecommendation && !profile) ||
+    (isRecommendation && profile && !hasProfileRegion) ||
+    (isRecommendation && profile && !isProfileRegion) ||
+    items.length === 0;
+
+  const emptyMessage =
+    isRecommendation && !profile
+      ? "로그인 / 회원가입 하고 추천 기능을 이용해 보세요!"
+      : isRecommendation && profile && !hasProfileRegion
+        ? "맞춤 프로필로 지역을 설정하고 추천 기능을 이용해 보세요!"
+        : isRecommendation && profile && !isProfileRegion
+          ? "마이페이지 > 설정에서 활동 지역을 변경하면, 다른 지역의 추천 목록을 확인하실 수 있어요!"
+          : "조건에 맞는 정보가 없습니다.";
 
   if (isPending) {
     return <AsyncState type="loading" />;
@@ -191,20 +273,25 @@ export default function InfoPage() {
         <Select
           options={sortOptions}
           value={sort}
-          onChange={setSort}
+          onChange={(value) => {
+            setSort(value);
+            updatePage(1);
+
+            const params = new URLSearchParams(searchParams);
+            params.set("page", "1");
+            params.set("sort", value);
+
+            updateUrl(params);
+          }}
           placeholder="조회순"
           variant="S"
           className="w-[120px]"
         />
       </div>
       
-      {isRecommendation && !profile ? (
+      {shouldShowEmptyMessage ? (
         <div className="flex h-[200px] items-center justify-center text-background-500">
-          로그인 / 회원가입 하고 추천 기능을 이용해 보세요!
-        </div>
-      ) : items.length === 0 ? (
-        <div className="flex h-[200px] items-center justify-center text-background-500">
-          조건에 맞는 정보가 없습니다.
+          {emptyMessage}
         </div>
       ) : (
         <>
@@ -214,7 +301,6 @@ export default function InfoPage() {
                 key={item.infoItemId}
                 {...item}
                 onClick={() => navigate(`/info/${item.mainCategory}/${item.infoItemId}`)}
-                onScrapClick={() => console.log(item.infoItemId)}
               />
             ))}
           </div>
@@ -222,7 +308,7 @@ export default function InfoPage() {
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-            onChange={setPage}
+            onChange={updatePage}
           />
         </>
       )}

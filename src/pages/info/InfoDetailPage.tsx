@@ -3,14 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
-import AIChatButton from "@/components/AIChatButton";
+import AIChatButton from "@/components/button/AIChatButton";
 import BusinessHoursSection from "./components/Detail/BusinessHoursSection";
 import LocationSection from "./components/Detail/LocationSection";
 import ReviewSection from "./components/Detail/review/ReviewSection";
 import SummaryCard from "./components/Detail/SummaryCard";
 import IntroSection from "./components/Detail/IntroSection";
-import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
-import { useInfoReviewListQuery } from "@/hooks/queries/info/useInfoReviewsQuery";
+import { useInfoDetail } from "@/hooks/useInfoDetail";
+import { useInfoReviewList } from "@/hooks/useInfoReviewList";
 import AsyncState from "@/components/AsyncState";
 import CategoryModal from "./components/modal/CategoryModal";
 
@@ -19,9 +19,9 @@ export default function InfoDetailPage() {
   const { setBreadcrumb } = useBreadcrumb();
   const [categoryOpen, setCategoryOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
+  const { data: detail, isPending, isError } = useInfoDetail(Number(id));
 
-  const { data: reviewData } = useInfoReviewListQuery(
+  const { data: reviewData } = useInfoReviewList(
     Number(id),
     0,
     100,
@@ -50,14 +50,6 @@ export default function InfoDetailPage() {
 
     return () => setBreadcrumb([]);
   }, [category, detail?.name, infoCategory, navigate, setBreadcrumb]);
-
-  const [isScrapped, setIsScrapped] = useState<boolean>(detail?.isScrapped ?? false);
-  const [scrapCount, setScrapCount] = useState<number>(detail?.scrapCount ?? 0);
-
-  useEffect(() => {
-    setIsScrapped(detail?.isScrapped ?? false);
-    setScrapCount(detail?.scrapCount ?? 0);
-  }, [detail]);
   
   if (isPending) {
     return <AsyncState type="loading" />;
@@ -77,9 +69,9 @@ export default function InfoDetailPage() {
           subCategory={detail.subCategoryKo}
           homepageUrl={detail.homepageUrl ?? undefined}
           viewCount={detail.viewCount}
-          scrapCount={scrapCount}
+          scrapCount={detail.scrapCount}
           reviewCount={detail.reviewCount}
-          isScrapped={isScrapped}
+          isScrapped={detail.isScrapped}
           address={detail.address}
           sido={detail.sido}
           sigungu={detail.sigungu}

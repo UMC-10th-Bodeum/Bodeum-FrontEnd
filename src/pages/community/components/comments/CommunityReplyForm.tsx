@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MainButton from "@/components/MainButton";
+import MainButton from "@/components/button/MainButton";
 
 interface CommunityReplyFormProps {
   targetAuthor: string;
@@ -38,7 +38,6 @@ export default function CommunityReplyForm({
       </span>
       <textarea
         value={reply}
-        maxLength={1000}
         disabled={isSubmitting}
         onChange={(event) => setReply(event.target.value)}
         onKeyDown={(event) => {

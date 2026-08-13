@@ -1,5 +1,5 @@
 import AIMsgIcon from "@/assets/icons/AIMsg.svg?react";
-import FeedbackButton from "@/components/FeedbackButton";
+import FeedbackButton from "@/components/button/FeedbackButton";
 
 import AiMessageBubble, {
   type AiCurationResource,

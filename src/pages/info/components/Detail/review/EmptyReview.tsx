@@ -1,5 +1,5 @@
 import StarIcon from "@/assets/icons/StarEmpty.svg?react";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 
 interface Props {
   onWriteReview: () => void;

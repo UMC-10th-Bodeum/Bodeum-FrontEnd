@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { flushSync } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,9 +19,9 @@ import {
 } from "@/apis/apiError";
 import {
   hasStoredAuthSession,
+  logoutCurrentUser,
   startSocialLogin,
 } from "@/apis/authApi";
-import OnboardCancelBox from "@/components/OnboardCancelBox";
 import { showToast } from "@/components/Toast";
 import { useSubmitAgreementsMutation } from "@/hooks/useAuthMutations";
 import {
@@ -43,6 +48,7 @@ import type {
   OnboardingStep,
 } from "./components/OnboardingStepCard";
 import {
+  clearAuthProgress,
   getStoredAuthNextStep,
   storeAuthNextStep,
 } from "./authProgressStorage";
@@ -54,9 +60,7 @@ import {
 } from "./authFlow";
 import {
   clearAgreementBrowserSession,
-  consumeAgreementInterruptedLogoutNotice,
-  startAgreementBrowserSession,
-  wasAgreementBrowserSessionInterrupted,
+  clearAgreementInterruptedLogoutNotice,
 } from "./agreementBrowserSession";
 import {
   clearOnboardingBrowserSession,
@@ -64,52 +68,13 @@ import {
   startOnboardingBrowserSession,
   wasOnboardingBrowserSessionInterrupted,
 } from "./onboardingBrowserSession";
-
-type OnboardingModal = "cancel" | "skip" | null;
+import { clearAuthBrowserSession } from "./authBrowserSession";
+import { useOnboardingNavigationGuard } from "./hooks/useOnboardingNavigationGuard";
+import OnboardingExitModals, {
+  type OnboardingModal,
+} from "./components/OnboardingExitModals";
 
 const ONBOARDING_RESUME_RETRY_DELAYS = [500, 1_500] as const;
-const BROWSER_BACK_SETTLE_MS = 400;
-const AUTH_HISTORY_GUARD_KEY = "bodeumAuthGuard";
-const AUTH_HISTORY_GUARD_DEPTH = 24;
-
-type AuthHistoryGuard = {
-  id: string;
-  index: number;
-};
-
-function getAuthHistoryGuard(): AuthHistoryGuard | null {
-  const state = window.history.state as
-    | Record<string, unknown>
-    | null
-    | undefined;
-  const guard = state?.[AUTH_HISTORY_GUARD_KEY];
-
-  if (
-    !guard ||
-    typeof guard !== "object" ||
-    !("id" in guard) ||
-    !("index" in guard) ||
-    typeof guard.id !== "string" ||
-    typeof guard.index !== "number"
-  ) {
-    return null;
-  }
-
-  return { id: guard.id, index: guard.index };
-}
-
-function createAuthHistoryState(guard: AuthHistoryGuard) {
-  const currentState =
-    window.history.state && typeof window.history.state === "object"
-      ? window.history.state
-      : {};
-
-  return {
-    ...currentState,
-    [AUTH_HISTORY_GUARD_KEY]: guard,
-  };
-}
-
 async function requestWithRetry<T>(request: () => Promise<T>) {
   let lastError: unknown;
 
@@ -182,27 +147,84 @@ export default function AuthPage() {
   const [onboardingLoadRetry, setOnboardingLoadRetry] = useState(0);
   const [isBackGuardActive, setIsBackGuardActive] = useState(false);
   const requestInFlight = useRef(false);
-  const browserBackInFlight = useRef(false);
-  const authHistoryGuardId = useRef<string | null>(null);
-  const isCollapsingAuthHistory = useRef(false);
-  const lastBrowserBackAt = useRef(0);
-  const protectedFlowWasVisible = useRef(false);
-  const interruptedAgreement = useRef<Promise<boolean> | null>(null);
+  const agreementExitInProgress = useRef(false);
+  const completeOnboardingRef = useRef<() => Promise<void>>(async () => {});
   const interruptedOnboarding = useRef<Promise<boolean> | null>(null);
-
-  if (interruptedAgreement.current === null) {
-    interruptedAgreement.current = wasAgreementBrowserSessionInterrupted();
-  }
 
   if (interruptedOnboarding.current === null) {
     interruptedOnboarding.current = wasOnboardingBrowserSessionInterrupted();
   }
-  const showAgreementBackBlockedToast = useCallback(() => {
-    showToast(
-      "red",
-      "필수 약관 동의를 완료해야 회원가입을 계속할 수 있습니다.",
-    );
-  }, []);
+
+  const exitIncompleteAgreement = useCallback(() => {
+    if (agreementExitInProgress.current) {
+      return;
+    }
+
+    agreementExitInProgress.current = true;
+
+    if (getStoredAuthNextStep() !== "TERMS") {
+      window.location.replace("/");
+      return;
+    }
+
+    requestInFlight.current = true;
+
+    const cleanupTasks = [
+      clearAuthProgress,
+      clearAgreementBrowserSession,
+      clearAgreementInterruptedLogoutNotice,
+      clearOnboardingBrowserSession,
+      () => queryClient.clear(),
+    ];
+
+    cleanupTasks.forEach((cleanup) => {
+      try {
+        cleanup();
+      } catch (cleanupError) {
+        console.warn(
+          "약관 동의 중단 상태를 정리하지 못했습니다.",
+          cleanupError,
+        );
+      }
+    });
+
+    void logoutCurrentUser({ clearImmediately: true }).catch(() => {
+      // 로컬 로그아웃은 완료됐으므로 서버 세션 해제 실패와 무관하게 홈으로 이동한다.
+    });
+
+    window.location.replace("/");
+  }, [queryClient]);
+
+  const hasActiveAuthFlow =
+    hasStoredAuthSession() &&
+    !onboardingLoadError &&
+    (isBackGuardActive || !isInitializing);
+  const shouldHandleAgreementBack =
+    hasActiveAuthFlow && flow === "agreement";
+  const shouldProtectOnboardingHistory =
+    hasActiveAuthFlow && flow === "onboarding" && !isProfileOnboarding;
+  const shouldSeedAuthHistory =
+    shouldHandleAgreementBack || shouldProtectOnboardingHistory;
+  const completeOnboardingFromGuard = useCallback(
+    () => completeOnboardingRef.current(),
+    [],
+  );
+  const {
+    collapseAuthHistory,
+    isCollapsingAuthHistory,
+    resetBrowserBackGuard,
+  } = useOnboardingNavigationGuard({
+    flow,
+    shouldHandleAgreementBack,
+    shouldProtectOnboardingHistory,
+    shouldSeedAuthHistory,
+    requestInFlight,
+    setIsSubmitting,
+    exitIncompleteAgreement,
+    skipOnboarding: skipOnboardingRequest,
+    completeOnboarding: completeOnboardingFromGuard,
+    onSkipCompleted: () => setModal(null),
+  });
 
   useEffect(() => {
     if (isCollapsingAuthHistory.current) {
@@ -292,13 +314,6 @@ export default function AuthPage() {
           clearOnboardingBrowserSession();
 
           if (requestedFlow !== "agreement") {
-            if (
-              navigationTypeRef.current === "POP" &&
-              protectedFlowWasVisible.current
-            ) {
-              showAgreementBackBlockedToast();
-            }
-
             setSearchParams({ flow: "agreement" }, { replace: true });
             return;
           }
@@ -432,12 +447,12 @@ export default function AuthPage() {
     };
   }, [
     isProfileOnboardingRequested,
+    isCollapsingAuthHistory,
     navigate,
     onboardingLoadRetry,
     queryClient,
     requestedFlow,
     setSearchParams,
-    showAgreementBackBlockedToast,
   ]);
 
   useEffect(() => {
@@ -447,7 +462,6 @@ export default function AuthPage() {
       (flow === "agreement" ||
         (flow === "onboarding" && !isProfileOnboarding))
     ) {
-      protectedFlowWasVisible.current = true;
       setIsBackGuardActive(true);
     }
   }, [flow, isInitializing, isProfileOnboarding, onboardingLoadError]);
@@ -458,8 +472,15 @@ export default function AuthPage() {
         return;
       }
 
-      interruptedAgreement.current =
-        wasAgreementBrowserSessionInterrupted();
+      if (getStoredAuthNextStep() === "TERMS") {
+        exitIncompleteAgreement();
+        return;
+      }
+
+      requestInFlight.current = false;
+      resetBrowserBackGuard();
+      agreementExitInProgress.current = false;
+      setIsSubmitting(false);
       interruptedOnboarding.current =
         wasOnboardingBrowserSessionInterrupted();
       setIsInitializing(true);
@@ -471,34 +492,7 @@ export default function AuthPage() {
     return () => {
       window.removeEventListener("pageshow", restoreFromBackForwardCache);
     };
-  }, []);
-
-  useEffect(() => {
-    if (flow !== "agreement" || isInitializing || onboardingLoadError) {
-      return;
-    }
-
-    let cancelled = false;
-
-    void interruptedAgreement.current?.then((wasInterrupted) => {
-      if (cancelled) {
-        return;
-      }
-
-      startAgreementBrowserSession();
-
-      if (
-        wasInterrupted ||
-        consumeAgreementInterruptedLogoutNotice()
-      ) {
-        showToast("red", "약관 동의 전 브라우저를 종료하셨어요");
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [flow, isInitializing, onboardingLoadError]);
+  }, [exitIncompleteAgreement, resetBrowserBackGuard]);
 
   useEffect(() => {
     if (
@@ -531,43 +525,6 @@ export default function AuthPage() {
     setSearchParams({ flow: nextFlow }, { replace: true });
   };
 
-  const collapseAuthHistory = useCallback(async () => {
-    const guard = getAuthHistoryGuard();
-
-    if (
-      !guard ||
-      !authHistoryGuardId.current ||
-      guard.id !== authHistoryGuardId.current
-    ) {
-      return;
-    }
-
-    isCollapsingAuthHistory.current = true;
-
-    if (guard.index <= 0) {
-      return;
-    }
-
-    await new Promise<void>((resolve) => {
-      let settled = false;
-
-      const finish = () => {
-        if (settled) {
-          return;
-        }
-
-        settled = true;
-        window.removeEventListener("popstate", finish);
-        window.clearTimeout(timeoutId);
-        resolve();
-      };
-
-      const timeoutId = window.setTimeout(finish, BROWSER_BACK_SETTLE_MS);
-      window.addEventListener("popstate", finish);
-      window.history.go(-guard.index);
-    });
-  }, []);
-
   const completeOnboarding = useCallback(
     async (nickname?: string) => {
       await collapseAuthHistory();
@@ -582,25 +539,14 @@ export default function AuthPage() {
           : "가입이 완료되었습니다. 보듬에 오신 것을 환영합니다!",
       );
       storeAuthNextStep("HOME");
+      clearAuthBrowserSession();
       clearAgreementBrowserSession();
       clearOnboardingBrowserSession();
       navigate("/", { replace: true });
     },
     [collapseAuthHistory, isProfileOnboarding, navigate],
   );
-
-  const waitForBrowserBackToSettle = useCallback(async () => {
-    while (true) {
-      const remaining =
-        lastBrowserBackAt.current + BROWSER_BACK_SETTLE_MS - Date.now();
-
-      if (remaining <= 0) {
-        return;
-      }
-
-      await wait(remaining);
-    }
-  }, []);
+  completeOnboardingRef.current = () => completeOnboarding();
 
   const runRequest = async (
     request: () => Promise<void>,
@@ -616,10 +562,15 @@ export default function AuthPage() {
     try {
       await request();
     } catch (error) {
-      showToast("red", getApiErrorMessage(error, fallbackMessage));
+      if (!agreementExitInProgress.current) {
+        showToast("red", getApiErrorMessage(error, fallbackMessage));
+      }
     } finally {
       requestInFlight.current = false;
-      setIsSubmitting(false);
+
+      if (!agreementExitInProgress.current) {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -650,6 +601,11 @@ export default function AuthPage() {
   const handleAgreementSubmit = (agreements: AgreementFormValues) => {
     void runRequest(async () => {
       const result = await submitAgreementsRequest(agreements);
+
+      if (agreementExitInProgress.current) {
+        return;
+      }
+
       storeAuthNextStep(result.nextStep);
       clearAgreementBrowserSession();
 
@@ -747,140 +703,11 @@ export default function AuthPage() {
     }, "온보딩을 건너뛰지 못했습니다. 잠시 후 다시 시도해주세요.");
   };
 
-  const shouldProtectAuthHistory =
-    hasStoredAuthSession() &&
-    !onboardingLoadError &&
-    (isBackGuardActive || !isInitializing) &&
-    (flow === "agreement" ||
-      (flow === "onboarding" && !isProfileOnboarding));
   const keepOnboardingVisible =
     flow === "onboarding" &&
     isBackGuardActive &&
     !isProfileOnboarding &&
     !onboardingLoadError;
-
-  useEffect(() => {
-    if (!shouldProtectAuthHistory) {
-      return;
-    }
-
-    const handleBrowserBack = () => {
-      if (isCollapsingAuthHistory.current) {
-        return;
-      }
-
-      lastBrowserBackAt.current = Date.now();
-      const guardId = authHistoryGuardId.current;
-      const currentGuard = getAuthHistoryGuard();
-
-      if (guardId) {
-        const nextIndex =
-          currentGuard?.id === guardId ? currentGuard.index + 1 : 1;
-        const protectedUrl =
-          flow === "agreement"
-            ? "/auth?flow=agreement"
-            : "/auth?flow=onboarding";
-
-        window.history.pushState(
-          createAuthHistoryState({ id: guardId, index: nextIndex }),
-          "",
-          protectedUrl,
-        );
-      }
-
-      if (flow === "agreement") {
-        showAgreementBackBlockedToast();
-        return;
-      }
-
-      if (flow !== "onboarding" || browserBackInFlight.current) {
-        return;
-      }
-
-      if (requestInFlight.current) {
-        showToast("red", "진행 중인 처리가 끝난 후 다시 시도해주세요.");
-        return;
-      }
-
-      browserBackInFlight.current = true;
-      requestInFlight.current = true;
-      setIsSubmitting(true);
-
-      void skipOnboardingRequest()
-        .then(async (result) => {
-          if (result.nextStep !== "HOME") {
-            throw new Error("온보딩 건너뛰기 상태를 확인하지 못했습니다.");
-          }
-
-          await waitForBrowserBackToSettle();
-          setModal(null);
-          await completeOnboarding();
-        })
-        .catch(async (error: unknown) => {
-          await waitForBrowserBackToSettle();
-          showToast(
-            "red",
-            getApiErrorMessage(
-              error,
-              "온보딩을 건너뛰지 못했습니다. 잠시 후 다시 시도해주세요.",
-            ),
-          );
-        })
-        .finally(() => {
-          browserBackInFlight.current = false;
-          requestInFlight.current = false;
-          setIsSubmitting(false);
-        });
-    };
-
-    window.addEventListener("popstate", handleBrowserBack);
-
-    return () => {
-      window.removeEventListener("popstate", handleBrowserBack);
-    };
-  }, [
-    completeOnboarding,
-    flow,
-    isProfileOnboarding,
-    skipOnboardingRequest,
-    shouldProtectAuthHistory,
-    showAgreementBackBlockedToast,
-    waitForBrowserBackToSettle,
-  ]);
-
-  useEffect(() => {
-    if (!shouldProtectAuthHistory || authHistoryGuardId.current) {
-      return;
-    }
-
-    const existingGuard = getAuthHistoryGuard();
-
-    if (existingGuard) {
-      authHistoryGuardId.current = existingGuard.id;
-      return;
-    }
-
-    const guardId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const protectedUrl =
-      flow === "agreement"
-        ? "/auth?flow=agreement"
-        : "/auth?flow=onboarding";
-
-    authHistoryGuardId.current = guardId;
-    window.history.replaceState(
-      createAuthHistoryState({ id: guardId, index: 0 }),
-      "",
-      protectedUrl,
-    );
-
-    for (let index = 1; index <= AUTH_HISTORY_GUARD_DEPTH; index += 1) {
-      window.history.pushState(
-        createAuthHistoryState({ id: guardId, index }),
-        "",
-        protectedUrl,
-      );
-    }
-  }, [flow, shouldProtectAuthHistory]);
 
   return (
     <main
@@ -941,53 +768,14 @@ export default function AuthPage() {
         </ResponsiveOnboardingStage>
       )}
 
-      {modal === "cancel" && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
-          <OnboardCancelBox
-            title={
-              isProfileOnboarding
-                ? "맞춤 프로필 작성을 중단하시겠어요?"
-                : "온보딩을 중단하시겠어요?"
-            }
-            description={
-              isProfileOnboarding
-                ? `기존에 저장된 맞춤 프로필 정보는 그대로 유지됩니다.\n현재 단계에서 작성 중인 내용은 저장되지 않습니다.`
-                : `중단하면 지금까지 작성한 모든 온보딩 정보가 삭제됩니다.\n맞춤형 서비스 이용을 위한 기본 정보는 로그인 후\n[마이페이지 > 설정]에서 언제든 다시 작성하실 수 있습니다.`
-            }
-            leftButtonText="계속하기"
-            rightButtonText={isSubmitting ? "처리 중..." : "중단하기"}
-            className="z-[70]!"
-            leftButtonDisabled={isSubmitting}
-            rightButtonDisabled={isSubmitting}
-            onLeftButtonClick={() => setModal(null)}
-            onRightButtonClick={handleQuitOnboarding}
-          />
-        </div>
-      )}
-
-      {modal === "skip" && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto px-[20px] py-[40px]">
-          <OnboardCancelBox
-            title={
-              isProfileOnboarding
-                ? "맞춤 프로필 작성을 건너뛰시겠어요?"
-                : "온보딩을 건너뛰시겠어요?"
-            }
-            description={
-              isProfileOnboarding
-                ? `기존에 저장된 맞춤 프로필 정보는 그대로 유지됩니다.\n현재 단계에서 작성 중인 내용은 저장되지 않습니다.`
-                : `현재 단계에서 작성 중인 내용은 저장되지 않으며,\n이전 단계에서 저장한 정보는 그대로 유지됩니다.\n나머지 정보는 [마이페이지 > 설정]에서 언제든 작성할 수 있습니다.`
-            }
-            leftButtonText="계속하기"
-            rightButtonText={isSubmitting ? "처리 중..." : "건너뛰기"}
-            className="z-[70]!"
-            leftButtonDisabled={isSubmitting}
-            rightButtonDisabled={isSubmitting}
-            onLeftButtonClick={() => setModal(null)}
-            onRightButtonClick={handleSkipOnboarding}
-          />
-        </div>
-      )}
+      <OnboardingExitModals
+        modal={modal}
+        isProfileOnboarding={isProfileOnboarding}
+        isSubmitting={isSubmitting}
+        onClose={() => setModal(null)}
+        onQuit={handleQuitOnboarding}
+        onSkip={handleSkipOnboarding}
+      />
     </main>
   );
 }

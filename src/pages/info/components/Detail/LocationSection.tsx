@@ -4,7 +4,7 @@ import KakaoMap from "./KakaoMap";
 import { useEffect, useState } from "react";
 import ChevronLeftIcon from "@/assets/icons/ChevronLeft.svg?react";
 import KAKAOMapLogo from "@/assets/icons/KAKAOMapLogo.svg?react"
-import { useKakaoMapUrlQuery } from "@/hooks/queries/info/useKakaoMapUrlQuery";
+import { useKakaoMapUrl } from "@/hooks/useKakaoMapUrl";
 
 interface Props {
   infoItemId: number;
@@ -38,7 +38,7 @@ function getDistance(
 }
 
 export default function LocationSection({ infoItemId, address }: Props) {
-  const { data: kakaoMap } = useKakaoMapUrlQuery(infoItemId);
+  const { data: kakaoMap } = useKakaoMapUrl(infoItemId);
 
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number;

@@ -18,6 +18,10 @@ import {
   clearAgreementBrowserSession,
   clearAgreementInterruptedLogoutNotice,
 } from "./agreementBrowserSession";
+import {
+  clearAuthBrowserSession,
+  startAuthBrowserSession,
+} from "./authBrowserSession";
 import { resolvePostLoginNextStep } from "./authFlow";
 import AuthLoadingState from "./components/AuthLoadingState";
 
@@ -65,7 +69,17 @@ export default function AuthCallbackPage() {
       return;
     }
 
-    window.history.replaceState(window.history.state, "", "/auth/callback");
+    const callbackHistoryState =
+      window.history.state && typeof window.history.state === "object"
+        ? { ...window.history.state }
+        : {};
+
+    delete callbackHistoryState.bodeumAuthGuard;
+    window.history.replaceState(
+      callbackHistoryState,
+      "",
+      "/auth/callback",
+    );
 
     void exchangeSocialLogin(code)
       .then((result) => {
@@ -73,22 +87,23 @@ export default function AuthCallbackPage() {
         startAiChatLoginSession(result.userId, result.accessToken);
         const nextStep = resolvePostLoginNextStep(result);
         storeAuthNextStep(nextStep);
+        clearAgreementBrowserSession();
+        clearAgreementInterruptedLogoutNotice();
 
         if (nextStep === "TERMS") {
+          startAuthBrowserSession();
           navigate("/auth?flow=agreement", { replace: true });
           return;
         }
 
-        clearAgreementInterruptedLogoutNotice();
-
         if (nextStep === "ONBOARDING") {
-          clearAgreementBrowserSession();
+          startAuthBrowserSession();
           navigate("/auth?flow=onboarding", { replace: true });
           return;
         }
 
         if (nextStep === "HOME") {
-          clearAgreementBrowserSession();
+          clearAuthBrowserSession();
           queueLoginToast(result.nickname);
           navigate("/", { replace: true });
           return;

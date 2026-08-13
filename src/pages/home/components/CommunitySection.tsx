@@ -1,15 +1,27 @@
-import CommunityCard from "@/components/CommunityCard";
-import MainButton from "@/components/MainButton";
+import MainButton from "@/components/button/MainButton";
 import PostSection from "@/components/PostSection";
 import PostListItem from "@/components/PostListItem";
 import { useNavigate } from "react-router-dom";
-import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
+import { useHomePostPreview } from "@/hooks/useHome";
+import { useState } from "react";
+import { hasStoredAuthSession } from "@/apis/authStorage";
+import RecommendedCommunitySection from "@/components/RecommendedCommunitySection";
+import LoginRequiredModal from "@/components/modal/LoginRequiredModal";
 
 export default function CommunitySection() {
   const navigate = useNavigate();
-  const { data: posts = [] } = useRecommendedCommunityPosts();
   const { data: popularPosts = [] } = useHomePostPreview("popular");
   const { data: latestPosts = [] } = useHomePostPreview("latest");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const handleWriteClick = () => {
+    if (!hasStoredAuthSession()) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    navigate("/community/write");
+  };
 
   return (
     <section className="w-full min-w-0 overflow-hidden">
@@ -22,7 +34,7 @@ export default function CommunitySection() {
         </div>
 
         <div className="flex gap-[10px]">
-          <MainButton size="S" onClick={() => navigate("/community/write")}>
+          <MainButton size="S" onClick={handleWriteClick}>
             글쓰기
           </MainButton>
           <MainButton size="S" stroke onClick={() => navigate("/community")}>
@@ -31,19 +43,13 @@ export default function CommunitySection() {
         </div>
       </div>
 
-      <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
-        <div className="inline-flex gap-4">
-          {posts.map((post) => (
-            <CommunityCard key={post.postId} {...post} />
-          ))}
-        </div>
-      </div>
+      <RecommendedCommunitySection
+        onPostClick={(postId) => navigate(`/community/${postId}`)}
+      />
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
         <PostSection
           title="인기글"
-          onMoreClick={() => navigate("/community", {
-            state: { sort: "view" },
-          })}
+          onMoreClick={() => navigate("/community?sort=view")}
         >
           {popularPosts.map((post) => (
             <PostListItem
@@ -53,15 +59,13 @@ export default function CommunitySection() {
               likes={post.likeCount}
               talks={post.commentCount}
               views={post.viewCount}
-              onClick={() => navigate(`/communuty/${post.postId}`)}
+              onClick={() => navigate(`/community/${post.postId}`)}
             />
           ))}
         </PostSection>
         <PostSection
           title="최신글"
-          onMoreClick={() => navigate("/community", {
-            state: { sort: "scrap" },
-          })}
+          onMoreClick={() => navigate("/community?sort=latest")}
         >
           {latestPosts.map((post) => (
             <PostListItem
@@ -76,6 +80,10 @@ export default function CommunitySection() {
           ))}
         </PostSection>
       </div>
+      <LoginRequiredModal
+        open={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </section>
   );
 }

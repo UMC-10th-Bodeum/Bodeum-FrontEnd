@@ -3,6 +3,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type QueryClient,
 } from "@tanstack/react-query";
 
 import {
@@ -17,11 +18,19 @@ import {
 } from "@/apis/onboardingApi";
 import { queryKeys } from "@/queries/queryKeys";
 
+const ONBOARDING_STATUS_STALE_TIME_MS = 2_000;
+
+function invalidateOnboardingStatus(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({
+    queryKey: queryKeys.onboarding.status,
+  });
+}
+
 export function onboardingStatusQueryOptions() {
   return queryOptions({
     queryKey: queryKeys.onboarding.status,
     queryFn: getOnboardingStatus,
-    staleTime: 0,
+    staleTime: ONBOARDING_STATUS_STALE_TIME_MS,
     retry: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -61,8 +70,11 @@ export function useRegions(enabled = true) {
 }
 
 export function useRegisterChildProfileMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: registerChildProfile,
+    onSuccess: () => invalidateOnboardingStatus(queryClient),
     retry: false,
   });
 }
@@ -75,27 +87,37 @@ export function useRegisterInterestRegionMutation() {
       const regions = await queryClient.fetchQuery(regionsQueryOptions());
       return registerInterestRegion(input, regions);
     },
+    onSuccess: () => invalidateOnboardingStatus(queryClient),
     retry: false,
   });
 }
 
 export function useRegisterGuardianProfileMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: registerGuardianProfile,
+    onSuccess: () => invalidateOnboardingStatus(queryClient),
     retry: false,
   });
 }
 
 export function useSkipOnboardingMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: skipOnboarding,
+    onSuccess: () => invalidateOnboardingStatus(queryClient),
     retry: false,
   });
 }
 
 export function useQuitOnboardingMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: quitOnboarding,
+    onSuccess: () => invalidateOnboardingStatus(queryClient),
     retry: false,
   });
 }

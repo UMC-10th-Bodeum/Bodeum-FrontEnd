@@ -6,7 +6,8 @@ import NewsListSection from "./components/NewsListSection";
 import RegionOnboardingBox from "./components/RegionOnboardingBox";
 import { useNews, useNewsSearch } from "@/hooks/useNews";
 import type { NewsListParams } from "@/types/news";
-import { useNewsFilters } from "./useNewsFilters";
+import { useNewsFilters } from "./hooks/useNewsFilters";
+import AsyncState from "@/components/AsyncState";
 
 const PAGE_SIZE = 14;
 
@@ -39,6 +40,10 @@ export default function NewsPage() {
   );
   const { data, isPending, isError } = hasSearchKeyword ? newsSearchQuery : newsQuery;
 
+  if (isPending) {
+    return <AsyncState type="loading" />;
+  }
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-background-100">
       <div className="flex flex-col gap-[18px] px-[32px] py-[20px]">
@@ -58,7 +63,7 @@ export default function NewsPage() {
             category={filters.category}
             onCategoryChange={filters.setCategory}
           />
-          <NewsListSection items={data?.items ?? []} isLoading={isPending} isError={isError} />
+          <NewsListSection items={data?.items ?? []} isError={isError} />
           {(data?.totalPages ?? 0) > 0 && (
             <nav aria-label="소식 페이지네이션" className="p-2">
               <Pagination

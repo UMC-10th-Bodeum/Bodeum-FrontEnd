@@ -50,7 +50,7 @@ export type AiMessageSource = {
   sourceType: AiSourceType;
   sourceId: number;
   sourceTitle: string;
-  sourceUrl: string;
+  sourceUrl?: string | null;
   updatedAt: string | null;
 };
 
