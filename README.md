@@ -21,10 +21,10 @@
 <table>
   <tr>
     <td align="center">
-      <img width="400" alt="HOME 메인" src="https://github.com/user-attachments/assets/a1f088b5-0179-4cec-bbee-f5e9c838f0aa" />
+      <img width="300" alt="스크린샷 2026-08-13 오전 11 18 55" src="https://github.com/user-attachments/assets/5c34e437-1512-4f6e-9c37-4f932a8b69e6" />
     </td>
     <td align="center">
-      <img width="400" alt="HOME 추천 정보" src="https://github.com/user-attachments/assets/6974232a-3d49-4928-9e51-97e4268a2580" />
+      <img width="300" alt="HOME 추천 정보" src="https://github.com/user-attachments/assets/6974232a-3d49-4928-9e51-97e4268a2580" />
     </td>
   </tr>
 </table>
@@ -34,7 +34,14 @@
 
 
 ### 🤖 AI Chat
-<img width="400" alt="스크린샷 2026-08-12 오후 9 13 57" src="https://github.com/user-attachments/assets/8940f911-2920-4405-bf79-2091e304b2d0" />
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 13 57" src="https://github.com/user-attachments/assets/8940f911-2920-4405-bf79-2091e304b2d0" />
+    </td>
+  </tr>
+</table>
+
 
 - 사용자 프로필을 기반으로 한 시작 인사와 추천 질문 제공
 - 직접 입력 또는 추천 질문을 활용한 **복지·기관·바우처 정보 질의**
@@ -46,16 +53,16 @@
 <table>
   <tr>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 21 35" src="https://github.com/user-attachments/assets/ce768419-0ae4-4671-a087-5d062dfa189b" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 21 35" src="https://github.com/user-attachments/assets/ce768419-0ae4-4671-a087-5d062dfa189b" />
     </td>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 23 10" src="https://github.com/user-attachments/assets/4dac3b8a-b3ac-44ae-aa95-6dda8d76c84f" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 23 10" src="https://github.com/user-attachments/assets/4dac3b8a-b3ac-44ae-aa95-6dda8d76c84f" />
     </td>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 24 06" src="https://github.com/user-attachments/assets/9a31fc4b-69a8-4438-a53b-ca2cab9690e9" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 24 06" src="https://github.com/user-attachments/assets/9a31fc4b-69a8-4438-a53b-ca2cab9690e9" />
     </td>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 25 02" src="https://github.com/user-attachments/assets/50c67e2b-6753-487a-b1db-abb959f03769" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 25 02" src="https://github.com/user-attachments/assets/50c67e2b-6753-487a-b1db-abb959f03769" />
     </td>
   </tr>
 </table>
@@ -69,7 +76,17 @@
 
 
 ### 📰 NEWS
-<img width="500" alt="스크린샷 2026-08-12 오후 9 20 55" src="https://github.com/user-attachments/assets/c06707eb-83ee-47d1-a844-90d056883886" />
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-13 오전 11 20 24" src="https://github.com/user-attachments/assets/70d587b4-5e9b-446f-b98e-1842fb062d60" />
+    </td>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-13 오전 11 20 51" src="https://github.com/user-attachments/assets/e87e441b-2b08-483f-b66e-48d8067c71ad" />
+    </td>
+  </tr>
+</table>
+
 
 - 활동소식과 지역소식으로 구분된 **유형별 소식 탐색**
 - 모집·참여, 교육·세미나, 복지서비스, 지역 정책 등 **카테고리별 필터링**
@@ -82,13 +99,13 @@
 <table>
   <tr>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 28 57" src="https://github.com/user-attachments/assets/57690aef-2715-4331-a2a9-bd1167c6b38c" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 28 57" src="https://github.com/user-attachments/assets/57690aef-2715-4331-a2a9-bd1167c6b38c" />
     </td>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 29 28" src="https://github.com/user-attachments/assets/c07dc280-265a-400c-b841-cb31d3b74db7" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 29 28" src="https://github.com/user-attachments/assets/c07dc280-265a-400c-b841-cb31d3b74db7" />
     </td>
     <td align="center">
-      <img width="400" alt="스크린샷 2026-08-12 오후 9 29 53" src="https://github.com/user-attachments/assets/56b43723-c9ed-414a-beac-5206ba9049ab" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 29 53" src="https://github.com/user-attachments/assets/56b43723-c9ed-414a-beac-5206ba9049ab" />
     </td>
   </tr>
 </table>
@@ -102,7 +119,13 @@
 - 동일 게시판의 **관련 게시글 조회 및 더보기**
 
 ### 👤 MyPage
-<img width="400" alt="스크린샷 2026-08-12 오후 9 36 05" src="https://github.com/user-attachments/assets/1756eef9-f454-4ba0-924c-5037be58d318" />
+<table>
+  <tr>
+    <td align="center">
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 36 05" src="https://github.com/user-attachments/assets/1756eef9-f454-4ba0-924c-5037be58d318" />
+    </td>
+  </tr>
+</table>
 
 - 닉네임, 활동 레벨, 뱃지, 자녀 정보, 거주 지역 등 **프로필 요약 조회**
 - 저장한 정보·소식·커뮤니티 게시글을 한곳에서 확인하는 **스크랩 내역 관리**
@@ -117,10 +140,10 @@
 <table>
   <tr>
     <td align="center">
-      <img width="500" alt="스크린샷 2026-08-12 오후 9 17 36" src="https://github.com/user-attachments/assets/341168b0-985b-4e26-a942-db642d26f730" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 17 36" src="https://github.com/user-attachments/assets/341168b0-985b-4e26-a942-db642d26f730" />
     </td>
     <td align="center">
-      <img width="500" alt="스크린샷 2026-08-12 오후 9 17 55" src="https://github.com/user-attachments/assets/827c5bb2-fb27-4c43-82b1-bae690789e71" />
+      <img width="300" alt="스크린샷 2026-08-12 오후 9 17 55" src="https://github.com/user-attachments/assets/827c5bb2-fb27-4c43-82b1-bae690789e71" />
       </td>
     </tr>
 </table>
