@@ -29,7 +29,7 @@ export interface CommunityPostCreateRequest {
   imageUrls?: string[];
 }
 
-export type CommunityCommentStatus = "ACTIVE";
+export type CommunityCommentStatus = "ACTIVE" | "DELETED";
 
 export interface CommunityComment {
   commentId: number;

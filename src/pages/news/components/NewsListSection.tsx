@@ -2,21 +2,25 @@ import { useNavigate } from "react-router-dom";
 import type { NewsListItem } from "@/types/news";
 import ProgramItem from "@/components/ProgramItem";
 import { getNewsStatusPresentation } from "@/utils/newsStatus";
+import AsyncState from "@/components/AsyncState";
 
 interface NewsListSectionProps {
   items: NewsListItem[];
-  isLoading?: boolean;
   isError?: boolean;
 }
 
-export default function NewsListSection({ items, isLoading, isError }: NewsListSectionProps) {
+export default function NewsListSection({ items, isError }: NewsListSectionProps) {
   const navigate = useNavigate();
 
-  if (isLoading || isError) {
+  if (isError) {
     return (
-      <div className="flex min-h-[240px] items-center justify-center px-[24px] py-[48px] text-center text-body1 text-background-500">
-        {isError ? "소식을 불러오지 못했습니다." : "소식을 불러오는 중입니다..."}
-      </div>
+      <AsyncState
+        type="error"
+        variant="section"
+        errorText="소식을 불러오지 못했습니다."
+        className="flex min-h-[240px] items-center justify-center px-[24px] py-[48px] text-center text-body1 text-background-500"
+        textClassName=""
+      />
     );
   }
 

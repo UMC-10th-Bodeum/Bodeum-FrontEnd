@@ -109,23 +109,30 @@ function incrementCommunityPostCommentCount(
   );
 }
 
-function removeCommentAndCount(
+function applyDeletedCommentState(
   comments: CommunityComment[],
   targetId: number,
 ): { comments: CommunityComment[]; removedCount: number } {
   let removed = 0;
 
-  function countCommentTree(comment: CommunityComment): number {
-    return (
-      1 +
-      (comment.replies?.reduce((count, reply) => count + countCommentTree(reply), 0) ?? 0)
-    );
-  }
-
   function walk(list: CommunityComment[]): CommunityComment[] {
-    return list.flatMap((comment) => {
+    return list.flatMap<CommunityComment>((comment) => {
       if (comment.commentId === targetId) {
-        removed += countCommentTree(comment);
+        removed = 1;
+
+        if (comment.replies?.length) {
+          return [
+            {
+              ...comment,
+              status: "DELETED",
+              content: "",
+              isMine: false,
+              isLiked: false,
+              likeCount: 0,
+            },
+          ];
+        }
+
         return [];
       }
 
@@ -361,16 +368,19 @@ export function useUpdateCommunityComment(postId: number) {
 export function useDeleteCommunityComment(postId: number) {
   const queryClient = useQueryClient();
 
-  return useMutation<unknown, unknown, number>({
+  return useMutation<void, unknown, number>({
     mutationFn: (commentId: number) => deleteCommunityComment(commentId),
     onSuccess: (_res, commentId) => {
       const commentsKey = communityPostKeys.comments(postId);
       const currentComments = queryClient.getQueryData<CommunityCommentsResult>(commentsKey);
       const result = currentComments
-        ? removeCommentAndCount(currentComments.comments, commentId)
+        ? applyDeletedCommentState(currentComments.comments, commentId)
         : undefined;
 
+      invalidateMyPageCommentData(queryClient);
+
       if (!currentComments || !result?.removedCount) {
+        void queryClient.invalidateQueries({ queryKey: commentsKey });
         void queryClient.invalidateQueries({ queryKey: communityPostKeys.detail(postId) });
         void queryClient.invalidateQueries({
           predicate: ({ queryKey }) =>
@@ -415,6 +425,8 @@ export function useDeleteCommunityComment(postId: number) {
               }
             : currentPage,
       );
+
+      void queryClient.invalidateQueries({ queryKey: commentsKey, refetchType: "none" });
     },
   });
 }

@@ -14,8 +14,9 @@ import {
   updateProfileImage,
 } from "@/apis/mypageApi";
 import { getMyProfile } from "@/apis/userApi";
+import { queryKeys } from "@/queries/queryKeys";
 
-export const USER_PROFILE_QUERY_KEY = ["user", "profile"] as const;
+export const USER_PROFILE_QUERY_KEY = queryKeys.user.profile;
 export const USER_DASHBOARD_QUERY_KEY = ["user", "dashboard"] as const;
 export const USER_SCRAPS_QUERY_KEY = ["user", "scraps"] as const;
 export const USER_POSTS_QUERY_KEY = ["user", "posts"] as const;
