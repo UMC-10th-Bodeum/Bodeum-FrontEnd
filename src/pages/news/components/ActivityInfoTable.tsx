@@ -18,7 +18,9 @@ export default function ActivityInfoTable({ items }: ActivityInfoTableProps) {
             className="flex min-h-[38px] items-center border-b border-background-250"
           >
             <dt className="w-[64px] shrink-0 text-h6-list text-background-500">{label}</dt>
-            <dd className="flex-1 text-h6-list text-background-600">{value}</dd>
+            <dd className="flex-1 whitespace-pre-line py-[10px] text-h6-list text-background-600">
+              {value}
+            </dd>
           </div>
         ))}
       </dl>
