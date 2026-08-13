@@ -75,13 +75,13 @@ export const infoSubCategoryMap: Record<ParentCategory, readonly InfoSubCategory
     { id: 13, value: "LOCAL_WELFARE", label: "지역 복지 서비스" },
   ],
   EDUCATION: [
-    { id: 14, value: "EDUCATION_ETC", label: "취업 추천" },
+    { id: 14, value: "EDUCATION_ETC", label: "교육 추천" },
     { id: 15, value: "SPECIAL_SCHOOL", label: "특수 학교 현황" },
     { id: 16, value: "SPECIAL_EDU_SUPPORT", label: "특수 교육 지원 센터" },
     { id: 17, value: "LIFELONG_EDU", label: "장애인 평생 교육 기관" },
   ],
   EMPLOYMENT: [
-    { id: 18, value: "EMPLOYMENT_ETC", label: "고용 추천" },
+    { id: 18, value: "EMPLOYMENT_ETC", label: "취업 추천" },
     { id: 19, value: "REALTIME_JOB", label: "실시간 구인 정보" },
     { id: 20, value: "KEAD_JOB", label: "KEAD 취업 정보" },
     { id: 21, value: "STANDARD_WORKPLACE", label: "장애인 표준 사업장" },

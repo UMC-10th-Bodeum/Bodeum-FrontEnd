@@ -1,5 +1,6 @@
 import ButtonFill from "@/components/ButtonFill";
 import CommunityCard from "@/components/CommunityCard";
+import { useDragScroll } from "@/hooks/useDragScroll";
 import { useRecommendedCommunityPosts } from "@/hooks/useHome";
 
 interface CommunitySectionProps {
@@ -9,6 +10,13 @@ interface CommunitySectionProps {
 
 export default function CommunitySection({ onWriteClick, onPostClick }: CommunitySectionProps) {
   const { data: posts = [], isPending, isError } = useRecommendedCommunityPosts();
+  const {
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleMouseLeave,
+    handleClickCapture,
+  } = useDragScroll();
 
   return (
     <section className="w-full min-w-0 overflow-hidden">
@@ -34,7 +42,14 @@ export default function CommunitySection({ onWriteClick, onPostClick }: Communit
       ) : posts.length === 0 ? (
         <p className="py-6 text-center text-background-500">추천 게시글이 없습니다.</p>
       ) : (
-        <div className="no-scrollbar w-full min-w-0 overflow-x-auto">
+        <div
+          className="no-scrollbar w-full min-w-0 overflow-x-auto"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onClickCapture={handleClickCapture}
+        >
           <div className="inline-flex gap-4">
             {posts.map((post) => (
               <CommunityCard
