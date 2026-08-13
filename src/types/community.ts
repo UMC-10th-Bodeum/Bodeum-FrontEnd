@@ -3,12 +3,21 @@ import type { CommunityCategory, CommunityCategoryCode } from "@/constants/commu
 
 export type CommunityAuthorVisibility = "PROFILE" | "ANONYMOUS";
 
-export interface CommunityPostPayload {
+export interface CommunityPostFormValues {
   category: CommunityCategory;
   authorVisibility: CommunityAuthorVisibility;
   title: string;
   content: string;
   images: File[];
+  existingImageUrls: string[];
+}
+
+export interface CommunityPostFormInitialValues {
+  category: CommunityCategory;
+  authorVisibility: CommunityAuthorVisibility;
+  title: string;
+  content: string;
+  existingImageUrls: string[];
 }
 
 export interface CommunityPostCreateRequest {
@@ -27,6 +36,7 @@ export interface CommunityComment {
   parentCommentId: number | null;
   authorId: number;
   authorNickname: string;
+  profileImageUrl: string | null;
   isMine: boolean;
   content: string;
   isAccepted: boolean;
@@ -99,7 +109,8 @@ export interface CommunityPostListParams {
 }
 
 export interface CommunityPostSearchSuggestion {
-  text: string;
+  title: string;
+  content: string;
   type: "POST_TITLE" | "POST_CONTENT";
 }
 

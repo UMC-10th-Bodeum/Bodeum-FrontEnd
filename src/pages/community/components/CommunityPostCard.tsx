@@ -10,7 +10,6 @@ interface CommunityPostCardProps {
   likes: number;
   comments: number;
   views: number;
-  imageCount: number;
   createdAt: string;
   initialIsLiked?: boolean;
   onClick?: () => void;

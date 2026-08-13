@@ -137,11 +137,6 @@ export function useNewsFilters() {
 
   const onKeywordChange = (value: string) => {
     setKeyword(value);
-    if (!value.trim()) {
-      setSearchKeyword("");
-      setPage(1);
-      updateNewsSearchParams({ nextKeyword: "", nextPage: 1 });
-    }
   };
 
   const changePage = (nextPage: number) => {

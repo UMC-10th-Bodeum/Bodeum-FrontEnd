@@ -64,7 +64,11 @@ export default function NewsToolbar({
 
   const normalizedKeyword = keyword.trim();
   const debouncedKeyword = useDebouncedValue(normalizedKeyword, 300);
-  const { data: suggestions = [] } = useNewsSearchSuggestions(debouncedKeyword);
+  const { data: suggestions = [], isPending: areSuggestionsPending } =
+    useNewsSearchSuggestions(debouncedKeyword);
+  const areSuggestionsLoading =
+    normalizedKeyword.length >= 2 &&
+    (normalizedKeyword !== debouncedKeyword || areSuggestionsPending);
 
   return (
     <div className="flex flex-wrap items-center gap-[12px]">
@@ -73,7 +77,9 @@ export default function NewsToolbar({
         searchType="news"
         value={keyword}
         onChange={(event) => onKeywordChange(event.target.value)}
+        onClear={() => onSearch("")}
         suggestions={suggestions}
+        suggestionsLoading={areSuggestionsLoading}
         onSuggestionClick={(text) => {
           onKeywordChange(text);
           onSearch(text);
