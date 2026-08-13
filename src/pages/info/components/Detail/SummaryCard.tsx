@@ -12,7 +12,7 @@ import ButtonOutline from "@/components/button/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
 import { getInfoShareUrl, toggleInfoScrap } from "@/apis/info";
 import { showToast } from "@/components/Toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface SummaryCardProps {
   infoItemId: number;
@@ -66,7 +66,8 @@ export default function SummaryCard({
   phone,
   isScrapped,
 }: SummaryCardProps) {
-  const queryClient = useQueryClient();
+  const [scrapped, setScrapped] = useState(isScrapped);
+  const [scrapCountState, setScrapCountState] = useState(scrapCount);
 
   const handleShare = async () => {
     try {
@@ -92,9 +93,11 @@ export default function SummaryCard({
     try {
       const result = await toggleInfoScrap(infoItemId);
 
-      await queryClient.invalidateQueries({
-        queryKey: ["info-detail", infoItemId],
-      });
+      setScrapped(result.isScrapped);
+
+      setScrapCountState((prev) =>
+        result.isScrapped ? prev + 1 : prev - 1
+      );
 
       showToast(
         "green",
@@ -124,8 +127,8 @@ export default function SummaryCard({
         <div className="flex gap-x-5 mb-[8px]">
           <ViewStat count={viewCount} showLabel={true} />
           <ScrapStat
-            count={scrapCount}
-            isActive={isScrapped}
+            count={scrapCountState}
+            isActive={scrapped}
           />
           <CommentStat count={reviewCount} showLabel={true} />
           <DateStat date="2026.05.04" showLabel={true} />
