@@ -40,8 +40,10 @@ function CommunityCommentNode({ comment, depth = 0 }: CommunityCommentNodeProps)
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const isUpdating = updatingCommentId === comment.commentId;
   const isRoot = depth === 0;
-  const isReplyFormOpen = !isEditing && replyTargetId === comment.commentId;
-  const authorName = comment.authorNickname || "익명";
+  const isDeleted = comment.status === "DELETED";
+  const isReplyFormOpen = !isDeleted && !isEditing && replyTargetId === comment.commentId;
+  const authorName =
+    comment.authorNickname?.trim() || (isDeleted ? "삭제된 사용자" : "익명");
   const profileImage = (
     <ProfileAvatar
       imageUrl={comment.profileImageUrl}
@@ -113,7 +115,7 @@ function CommunityCommentNode({ comment, depth = 0 }: CommunityCommentNodeProps)
             </time>
           </div>
 
-          {comment.isMine && (
+          {!isDeleted && comment.isMine && (
             <div ref={menuContainerRef} className="relative">
               <button
                 ref={menuTriggerRef}
@@ -160,7 +162,9 @@ function CommunityCommentNode({ comment, depth = 0 }: CommunityCommentNodeProps)
           )}
         </div>
 
-        {isEditing ? (
+        {isDeleted ? (
+          <p className="mt-[8px] text-h3-onboard text-background-500">삭제된 댓글입니다.</p>
+        ) : isEditing ? (
           <div className="mt-3 pr-[14px]">
             <CommunityTextarea
               value={editedContent}
