@@ -220,6 +220,12 @@ export default function InfoPage() {
     navigate(`/info?${params.toString()}`);
   };
 
+  const shouldShowEmptyMessage =
+    (isRecommendation && !profile) ||
+    (isRecommendation && profile && !hasProfileRegion) ||
+    (isRecommendation && profile && !isProfileRegion) ||
+    items.length === 0;
+
   const emptyMessage =
     isRecommendation && !profile
       ? "로그인 / 회원가입 하고 추천 기능을 이용해 보세요!"
@@ -283,9 +289,7 @@ export default function InfoPage() {
         />
       </div>
       
-      {(isRecommendation && !profile) ||
-        isRecommendation && profile && !hasProfileRegion ||
-        items.length === 0 ? (
+      {shouldShowEmptyMessage ? (
         <div className="flex h-[200px] items-center justify-center text-background-500">
           {emptyMessage}
         </div>
