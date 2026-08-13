@@ -1,5 +1,5 @@
 import { useState } from "react";
-import MainButton from "@/components/MainButton";
+import MainButton from "@/components/button/MainButton";
 
 interface CommunityReplyFormProps {
   targetAuthor: string;

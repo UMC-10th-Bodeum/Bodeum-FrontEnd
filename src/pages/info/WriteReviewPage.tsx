@@ -5,12 +5,12 @@ import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
 import { infoCategoryMap } from "@/constants/infoCategory";
 import type { ParentCategory } from "@/types/info";
 
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import InfoItem from "./components/InfoItem";
 import RatingInput from "./ReviewWrite/RatingInput";
 import ReviewTextArea from "./ReviewWrite/ReviewTextArea";
 import ImageUploader from "@/components/ImageUploader";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
 import { useCreateInfoReviewMutation } from "@/hooks/queries/info/useCreateInfoReviewMutation";

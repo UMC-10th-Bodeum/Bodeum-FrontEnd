@@ -19,9 +19,7 @@ export function loadKakaoMap(): Promise<void> {
     script.async = true;
 
     script.onload = () => {
-      console.log("SDK loaded");
       window.kakao.maps.load(() => {
-        console.log("maps.load 완료");
         resolve();
       });
     };

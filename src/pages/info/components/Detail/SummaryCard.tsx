@@ -1,6 +1,6 @@
 import ShareIcon from "@/assets/icons/Share.svg?react";
 import CategoryLabel from "@/components/CategoryLabel";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 import GoIcon from "@/assets/icons/arrow-up-right.svg?react"
 import ScrapIcon from "@/assets/icons/Scrap.svg?react"
 import ViewStat from "@/components/post-stat/ViewStat";
@@ -8,11 +8,11 @@ import ScrapStat from "@/components/post-stat/ScrapStat";
 import CommentStat from "@/components/post-stat/CommentStat";
 import DateStat from "@/components/post-stat/DateStat";
 import PostTag from "@/components/PostTag";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
 import { getInfoShareUrl, toggleInfoScrap } from "@/apis/info";
 import { showToast } from "@/components/Toast";
-import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SummaryCardProps {
   infoItemId: number;
@@ -66,13 +66,7 @@ export default function SummaryCard({
   phone,
   isScrapped,
 }: SummaryCardProps) {
-  const [scrapCountState, setScrapCountState] = useState(scrapCount);
-  const [isScrappedState, setIsScrappedState] = useState(isScrapped);
-
-  useEffect(() => {
-    setScrapCountState(scrapCount);
-    setIsScrappedState(isScrapped);
-  }, [scrapCount, isScrapped]);
+  const queryClient = useQueryClient();
 
   const handleShare = async () => {
     try {
@@ -98,8 +92,9 @@ export default function SummaryCard({
     try {
       const result = await toggleInfoScrap(infoItemId);
 
-      setIsScrappedState(result.isScrapped);
-      setScrapCountState(result.scrapCount);
+      await queryClient.invalidateQueries({
+        queryKey: ["info-detail", infoItemId],
+      });
 
       showToast(
         "green",
@@ -129,9 +124,8 @@ export default function SummaryCard({
         <div className="flex gap-x-5 mb-[8px]">
           <ViewStat count={viewCount} showLabel={true} />
           <ScrapStat
-            count={scrapCountState}
-            isActive={isScrappedState}
-            onClick={() => { }}
+            count={scrapCount}
+            isActive={isScrapped}
           />
           <CommentStat count={reviewCount} showLabel={true} />
           <DateStat date="2026.05.04" showLabel={true} />

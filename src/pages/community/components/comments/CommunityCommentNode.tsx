@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 
-import ButtonFill from "@/components/ButtonFill";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonFill from "@/components/button/ButtonFill";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import HeartStat from "@/components/post-stat/HeartStat";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import { showToast } from "@/components/Toast";

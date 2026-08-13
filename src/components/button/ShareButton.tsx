@@ -1,6 +1,6 @@
 import ShareIcon from "@/assets/icons/Share.svg?react";
 import { showToast } from "@/components/Toast";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 
 interface ShareButtonProps {
   url: string;

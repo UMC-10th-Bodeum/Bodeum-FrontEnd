@@ -2,7 +2,7 @@ import CommentIcon from "@/assets/icons/Comment.svg?react";
 import PostIcon from "@/assets/icons/Post.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import Chip from "@/components/Chips";
-import DetailBackButton from "@/components/DetailBackButton";
+import DetailBackButton from "@/components/button/DetailBackButton";
 import { Link } from "react-router-dom";
 import type { MyPageItem } from "@/types/mypage";
 

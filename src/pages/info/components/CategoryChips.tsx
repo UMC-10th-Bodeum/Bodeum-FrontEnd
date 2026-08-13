@@ -1,4 +1,4 @@
-import CategoryButton from "@/components/CategoryButton";
+import CategoryButton from "@/components/button/CategoryButton";
 import {
   infoCategoryMap,
   infoSubCategoryMap,

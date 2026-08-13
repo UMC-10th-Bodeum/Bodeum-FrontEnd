@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import { useUserBrief } from "@/hooks/useUser";
 

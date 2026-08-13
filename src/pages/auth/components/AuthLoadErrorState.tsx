@@ -1,5 +1,5 @@
 import Logo from "@/assets/icons/Logo_kr.svg?react";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 
 type AuthLoadErrorStateProps = {
   message: string;

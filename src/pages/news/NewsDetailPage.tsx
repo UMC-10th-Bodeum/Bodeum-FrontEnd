@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { hasStoredAuthSession } from "@/apis/authApi";
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
-import AIChatButton from "@/components/AIChatButton";
+import AIChatButton from "@/components/button/AIChatButton";
 import { useNews, useNewsDetail, useToggleNewsScrap } from "@/hooks/useNews";
 import type { NewsType } from "@/types/news";
 

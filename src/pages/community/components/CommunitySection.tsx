@@ -1,22 +1,14 @@
-import ButtonFill from "@/components/ButtonFill";
-import CommunityCard from "@/components/CommunityCard";
-import { useDragScroll } from "@/hooks/useDragScroll";
-import { useRecommendedCommunityPosts } from "@/hooks/useHome";
+import ButtonFill from "@/components/button/ButtonFill";
+import RecommendedCommunitySection from "@/components/RecommendedCommunitySection";
+import { useNavigate } from "react-router-dom";
 
 interface CommunitySectionProps {
   onWriteClick: () => void;
   onPostClick: (postId: number) => void;
 }
 
-export default function CommunitySection({ onWriteClick, onPostClick }: CommunitySectionProps) {
-  const { data: posts = [], isPending, isError } = useRecommendedCommunityPosts();
-  const {
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleMouseLeave,
-    handleClickCapture,
-  } = useDragScroll();
+export default function CommunitySection({ onWriteClick }: CommunitySectionProps) {
+  const navigate = useNavigate();
 
   return (
     <section className="w-full min-w-0 overflow-hidden">
@@ -35,32 +27,9 @@ export default function CommunitySection({ onWriteClick, onPostClick }: Communit
         />
       </div>
 
-      {isPending ? (
-        <p className="py-6 text-center text-background-500">게시글을 불러오는 중입니다.</p>
-      ) : isError ? (
-        <p className="py-6 text-center text-background-500">게시글을 불러오지 못했습니다.</p>
-      ) : posts.length === 0 ? (
-        <p className="py-6 text-center text-background-500">추천 게시글이 없습니다.</p>
-      ) : (
-        <div
-          className="no-scrollbar w-full min-w-0 overflow-x-auto"
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-          onClickCapture={handleClickCapture}
-        >
-          <div className="inline-flex gap-4">
-            {posts.map((post) => (
-              <CommunityCard
-                key={post.postId}
-                {...post}
-                onClick={() => onPostClick(post.postId)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <RecommendedCommunitySection
+        onPostClick={(postId) => navigate(`/community/${postId}`)}
+      />
     </section>
   );
 }

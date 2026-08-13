@@ -1,6 +1,6 @@
 import type { MouseEventHandler, ReactNode } from "react";
 import CloseIcon from "@/assets/icons/Close.svg?react";
-import MainButton from "@/components/MainButton";
+import MainButton from "@/components/button/MainButton";
 
 interface CloseModalFrameProps {
   children: ReactNode;

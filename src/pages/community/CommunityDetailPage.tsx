@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { isUnauthorizedError } from "@/apis/apiError";
 import AsyncState from "@/components/AsyncState";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import {
   communityCategoryMap,
   communityCategoryCodeMap,

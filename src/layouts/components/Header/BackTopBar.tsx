@@ -1,4 +1,4 @@
-import DetailBackButton from "@/components/DetailBackButton";
+import DetailBackButton from "@/components/button/DetailBackButton";
 import RightIcon from "@/assets/icons/ChevronRight.svg?react";
 
 import { useBreadcrumb } from "@/contexts/BreadcrumbContext";
