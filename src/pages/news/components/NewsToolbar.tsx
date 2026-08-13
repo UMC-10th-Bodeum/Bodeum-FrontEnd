@@ -35,7 +35,6 @@ const categoryOptionsByTab: Record<NewsTabValue, SelectOption[]> = {
     { label: "모집 · 참여", value: "RECRUITMENT_PARTICIPATION" },
     { label: "교육 · 세미나", value: "EDUCATION_SEMINAR" },
     { label: "혜택 · 복지서비스", value: "BENEFIT_WELFARE_SERVICE" },
-    { label: "기관 공지 · 뉴스", value: "INSTITUTION_NOTICE_NEWS" },
   ],
   region: [
     { label: "전체", value: ALL_CATEGORIES_VALUE },

@@ -111,6 +111,7 @@ export function useCommunityCommentActions({
   const removeComment = useCallback(
     (commentId: number) => {
       deleteComment(commentId, {
+        onSuccess: () => showToast("green", "댓글을 삭제했습니다."),
         onError: (error) => showMutationError(error, "댓글을 삭제하지 못했습니다."),
       });
     },

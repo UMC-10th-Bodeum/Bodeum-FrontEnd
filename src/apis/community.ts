@@ -24,7 +24,9 @@ function normalizeCommunityComment(comment: CommunityComment): CommunityComment 
 
   return {
     ...comment,
-    authorNickname: comment.authorNickname?.trim() || "익명",
+    authorNickname:
+      comment.authorNickname?.trim() ||
+      (comment.status === "DELETED" ? "삭제된 사용자" : "익명"),
     replies,
   };
 }
@@ -258,9 +260,7 @@ export const toggleCommunityCommentAdoption = async (commentId: number) => {
 
 // 댓글 삭제
 export const deleteCommunityComment = async (commentId: number) => {
-  const { data } = await api.delete<ApiResponse<string>>(`/api/v1/community/comments/${commentId}`);
-
-  return data.result;
+  await api.delete<ApiResponse<unknown>>(`/api/v1/community/comments/${commentId}`);
 };
 
 // 댓글 수정
