@@ -15,7 +15,7 @@ export function mapSourceToResource(
 
   return {
     title: source.sourceTitle,
-    url: source.sourceUrl,
+    url: source.sourceUrl?.trim() || undefined,
   };
 }
 
