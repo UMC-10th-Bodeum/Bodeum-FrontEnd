@@ -101,7 +101,7 @@ export default function AuthLoginCard({
           href={legalLinks.privacyPolicy}
           target="_blank"
           rel="noopener noreferrer"
-          className="cursor-pointer font-medium underline"
+          className="cursor-pointer underline"
         >
           개인정보처리방침
         </a>

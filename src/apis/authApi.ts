@@ -70,6 +70,11 @@ export async function logoutCurrentUser(
   const refreshToken = localStorage.getItem("refreshToken");
   const accessToken = localStorage.getItem("accessToken");
   const tokenType = localStorage.getItem("tokenType") ?? "Bearer";
+
+  if (options.clearImmediately) {
+    clearAuthTokens();
+  }
+
   const logoutRequest = refreshToken
     ? api.post<ApiResponse<null>>(
         "/api/v1/auth/logout",
@@ -81,10 +86,6 @@ export async function logoutCurrentUser(
         },
       )
     : null;
-
-  if (options.clearImmediately) {
-    clearAuthTokens();
-  }
 
   try {
     if (logoutRequest) {

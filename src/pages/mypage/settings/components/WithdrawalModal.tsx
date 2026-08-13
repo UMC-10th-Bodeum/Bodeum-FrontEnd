@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getApiErrorDetailMessage } from "@/apis/apiError";
@@ -15,11 +15,15 @@ interface WithdrawalModalProps {
   onConfirm: () => void;
 }
 
-export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalProps) {
+export default function WithdrawalModal({
+  onClose,
+  onConfirm,
+}: WithdrawalModalProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutateAsync: withdraw, isPending: isSubmitting } =
     useDeleteMyAccount();
+  const withdrawalInFlight = useRef(false);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -40,9 +44,11 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
   }, [isSubmitting, onClose]);
 
   const handleConfirm = async () => {
-    if (isSubmitting) {
+    if (withdrawalInFlight.current) {
       return;
     }
+
+    withdrawalInFlight.current = true;
 
     try {
       const result = await withdraw();
@@ -50,21 +56,37 @@ export default function WithdrawalModal({ onClose, onConfirm }: WithdrawalModalP
       if (!result.success) {
         throw new Error("회원 탈퇴 처리 결과를 확인할 수 없습니다.");
       }
-
-      clearAuthProgress();
-      clearAgreementBrowserSession();
-      clearOnboardingBrowserSession();
-      queryClient.clear();
-      onConfirm();
-      navigate("/", { replace: true, flushSync: true });
-      clearAuthTokens();
-      showToast("green", "회원 탈퇴가 완료되었습니다.");
     } catch (error) {
+      withdrawalInFlight.current = false;
       showToast(
         "red",
         getApiErrorDetailMessage(error, "회원 탈퇴에 실패했습니다."),
       );
+      return;
     }
+
+    const cleanupTasks = [
+      clearAuthProgress,
+      clearAgreementBrowserSession,
+      clearOnboardingBrowserSession,
+      () => queryClient.clear(),
+      clearAuthTokens,
+    ];
+
+    cleanupTasks.forEach((cleanup) => {
+      try {
+        cleanup();
+      } catch (cleanupError) {
+        console.warn(
+          "회원 탈퇴 후 브라우저 상태를 정리하지 못했습니다.",
+          cleanupError,
+        );
+      }
+    });
+
+    onConfirm();
+    navigate("/", { replace: true, flushSync: true });
+    showToast("green", "회원 탈퇴가 완료되었습니다.");
   };
 
   return (
