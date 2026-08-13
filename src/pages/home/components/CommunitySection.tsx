@@ -7,6 +7,7 @@ import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHom
 import { useState } from "react";
 import { hasStoredAuthSession } from "@/apis/authStorage";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
+import { useDragScroll } from "@/hooks/useDragScroll";
 
 export default function CommunitySection() {
   const navigate = useNavigate();
@@ -14,6 +15,14 @@ export default function CommunitySection() {
   const { data: popularPosts = [] } = useHomePostPreview("popular");
   const { data: latestPosts = [] } = useHomePostPreview("latest");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const {
+    isDragging,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleMouseLeave,
+    handleClickCapture,
+  } = useDragScroll();
 
   const handleWriteClick = () => {
     if (!hasStoredAuthSession()) {
@@ -44,7 +53,15 @@ export default function CommunitySection() {
         </div>
       </div>
 
-      <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
+      <div
+        className={`drag-scroll no-scrollbar overflow-x-auto ${isDragging ? "cursor-grabbing" : "cursor-grab"
+          }`}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onClickCapture={handleClickCapture}
+      >
         <div className="inline-flex gap-4">
           {posts.map((post) => (
             <CommunityCard key={post.postId} {...post} />
