@@ -1,4 +1,4 @@
-import { getInfoSearch } from "@/apis/info";
+import { getInfoSearch } from "@/apis/infoApi";
 import { useQuery } from "@tanstack/react-query";
 
 export function useInfoSearch(keyword: string) {

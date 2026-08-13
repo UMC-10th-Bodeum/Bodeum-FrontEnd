@@ -1,4 +1,4 @@
-import { getInfoReviews } from "@/apis/info";
+import { getInfoReviews } from "@/apis/infoApi";
 import { useQuery } from "@tanstack/react-query";
 
 export const useInfoReviewList = (

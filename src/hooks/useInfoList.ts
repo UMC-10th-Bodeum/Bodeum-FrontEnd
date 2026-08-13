@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getInfoList } from "@/apis/info";
+import { getInfoList } from "@/apis/infoApi";
 import type { ParentCategory } from "@/types/info";
 
 interface Props {

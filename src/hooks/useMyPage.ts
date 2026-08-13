@@ -12,7 +12,7 @@ import {
   getMyScraps,
   updateMyProfile,
   updateProfileImage,
-} from "@/apis/mypage";
+} from "@/apis/mypageApi";
 import { getMyProfile } from "@/apis/userApi";
 
 export const USER_PROFILE_QUERY_KEY = ["user", "profile"] as const;

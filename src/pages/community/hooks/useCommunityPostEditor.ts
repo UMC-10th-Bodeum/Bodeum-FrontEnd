@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { uploadCommunityPostImage } from "@/apis/community";
+import { uploadCommunityPostImage } from "@/apis/communityApi";
 import { showToast } from "@/components/Toast";
 import {
   communityCategoryCodeMap,

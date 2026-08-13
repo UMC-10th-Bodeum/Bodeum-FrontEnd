@@ -15,7 +15,7 @@ import ReviewCancelModal from "./components/modal/ReviewCancelModal";
 import { useInfoDetail } from "@/hooks/useInfoDetail";
 import { useCreateInfoReviewMutation } from "@/hooks/useCreateInfoReviewMutation";
 import { showToast } from "@/components/Toast";
-import { uploadReviewImage } from "@/apis/info";
+import { uploadReviewImage } from "@/apis/infoApi";
 
 export default function WriteReviewPage() {
   const { category, id } = useParams();

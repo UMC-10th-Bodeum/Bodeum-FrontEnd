@@ -19,7 +19,7 @@ import {
   getCommunityPosts,
   deleteCommunityPost,
   updateCommunityPost,
-} from "@/apis/community";
+} from "@/apis/communityApi";
 import type {
   CommunityComment,
   CommunityCommentCreatePayload,

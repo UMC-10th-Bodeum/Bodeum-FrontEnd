@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getInfoDetail } from "@/apis/info";
+import { getInfoDetail } from "@/apis/infoApi";
 
 export const useInfoDetail = (infoItemId: number) => {
   return useQuery({
