@@ -301,7 +301,6 @@ export default function InfoPage() {
                 key={item.infoItemId}
                 {...item}
                 onClick={() => navigate(`/info/${item.mainCategory}/${item.infoItemId}`)}
-                onScrapClick={() => console.log(item.infoItemId)}
               />
             ))}
           </div>
