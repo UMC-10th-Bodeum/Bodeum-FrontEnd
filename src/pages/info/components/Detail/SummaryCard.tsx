@@ -10,7 +10,7 @@ import DateStat from "@/components/post-stat/DateStat";
 import PostTag from "@/components/PostTag";
 import ButtonOutline from "@/components/button/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
-import { getInfoShareUrl, toggleInfoScrap } from "@/apis/info";
+import { getInfoShareUrl, toggleInfoScrap } from "@/apis/infoApi";
 import { showToast } from "@/components/Toast";
 import { useState } from "react";
 

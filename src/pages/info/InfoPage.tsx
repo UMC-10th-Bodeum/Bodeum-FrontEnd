@@ -10,8 +10,8 @@ import LocationButton from "./components/button/LocationButton";
 import { Select } from "@/components/Select";
 import LocationModal from "./components/modal/LocationModal";
 import CategoryModal from "./components/modal/CategoryModal";
-import { useInfoListQuery } from "@/hooks/queries/info/useInfoListQuery";
-import { useMyProfileQuery } from "@/hooks/queries/useMyProfileQuery";
+import { useInfoList } from "@/hooks/useInfoList";
+import { useMyProfileQuery } from "@/hooks/useMyProfile";
 import AsyncState from "@/components/AsyncState";
 
 const PAGE_SIZE = 14;
@@ -150,7 +150,7 @@ export default function InfoPage() {
       ? "scrapCount,desc"
       : "reviewCount,desc";
 
-  const { data, isPending, isError } = useInfoListQuery({
+  const { data, isPending, isError } = useInfoList({
     category: parentCategory,
     subCategory: subCategory ?? undefined,
     regionLevel1: regionLevel1 || null,

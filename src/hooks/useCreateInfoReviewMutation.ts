@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createInfoReview } from "@/apis/info";
+import { createInfoReview } from "@/apis/infoApi";
 
 export const useCreateInfoReviewMutation = () => {
   const queryClient = useQueryClient();

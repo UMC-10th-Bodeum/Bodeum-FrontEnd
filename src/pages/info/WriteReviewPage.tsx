@@ -12,10 +12,10 @@ import ReviewTextArea from "./ReviewWrite/ReviewTextArea";
 import ImageUploader from "@/components/ImageUploader";
 import ButtonFill from "@/components/button/ButtonFill";
 import ReviewCancelModal from "./components/modal/ReviewCancelModal";
-import { useInfoDetailQuery } from "@/hooks/queries/info/useInfoDetailQuery";
-import { useCreateInfoReviewMutation } from "@/hooks/queries/info/useCreateInfoReviewMutation";
+import { useInfoDetail } from "@/hooks/useInfoDetail";
+import { useCreateInfoReviewMutation } from "@/hooks/useCreateInfoReviewMutation";
 import { showToast } from "@/components/Toast";
-import { uploadReviewImage } from "@/apis/info";
+import { uploadReviewImage } from "@/apis/infoApi";
 
 export default function WriteReviewPage() {
   const { category, id } = useParams();
@@ -25,7 +25,7 @@ export default function WriteReviewPage() {
 
   const navigate = useNavigate();
   const { setBreadcrumb } = useBreadcrumb();
-  const { data: detail, isPending, isError } = useInfoDetailQuery(Number(id));
+  const { data: detail, isPending, isError } = useInfoDetail(Number(id));
 
   const infoCategory = category
     ? infoCategoryMap[category as ParentCategory]

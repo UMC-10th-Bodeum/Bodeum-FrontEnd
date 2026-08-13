@@ -1,4 +1,4 @@
-import { toggleReviewHelpful } from "@/apis/info";
+import { toggleReviewHelpful } from "@/apis/infoApi";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import StarIcon from "@/assets/icons/Star.svg?react";
 import FeedbackButton from "@/components/button/FeedbackButton";

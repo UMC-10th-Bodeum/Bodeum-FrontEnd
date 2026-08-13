@@ -5,7 +5,7 @@ import {
   getNewsSearchSuggestions,
   searchNews,
   toggleNewsScrap,
-} from "@/apis/news";
+} from "@/apis/newsApi";
 import type {
   NewsDetail,
   NewsListParams,

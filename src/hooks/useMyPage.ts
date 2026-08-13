@@ -12,7 +12,7 @@ import {
   getMyScraps,
   updateMyProfile,
   updateProfileImage,
-} from "@/apis/mypage";
+} from "@/apis/mypageApi";
 import { getMyProfile } from "@/apis/userApi";
 import { queryKeys } from "@/queries/queryKeys";
 
