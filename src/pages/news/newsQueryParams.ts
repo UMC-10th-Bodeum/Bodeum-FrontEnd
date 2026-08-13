@@ -34,6 +34,12 @@ export const getQueryCategory = (value: string | null): NewsCategoryFilter =>
 export const getQueryStatus = (value: string | null): NewsStatus | undefined =>
   isNewsStatus(value) ? value : undefined;
 
+export const getQueryPage = (value: string | null) => {
+  const page = Number(value);
+
+  return Number.isSafeInteger(page) && page >= 1 ? page : 1;
+};
+
 export const parseInitialRegion = (searchParams: URLSearchParams) => {
   const regionLevel1 = searchParams.get("regionLevel1")?.trim() || undefined;
   const regionLevel2 =
