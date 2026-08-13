@@ -1,8 +1,8 @@
 import { useState } from "react";
 import DetailBackButton from "@/components/DetailBackButton";
-import AccountManagementCard from "./settings/components/AccountManagementCard";
-import WithdrawalModal from "./settings/components/WithdrawalModal";
-import ProfileManagementCard from "./settings/ProfileManagementCard";
+import AccountManagementCard from "./components/settings/AccountManagementCard";
+import WithdrawalModal from "./components/settings/WithdrawalModal";
+import ProfileManagementCard from "./components/settings/ProfileManagementCard";
 import { useProfileSettingsForm } from "./hooks/useProfileSettingsForm";
 
 export default function ProfileSettingsPage() {
