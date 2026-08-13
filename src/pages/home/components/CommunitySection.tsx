@@ -1,28 +1,18 @@
-import CommunityCard from "@/components/CommunityCard";
 import MainButton from "@/components/MainButton";
 import PostSection from "@/components/PostSection";
 import PostListItem from "@/components/PostListItem";
 import { useNavigate } from "react-router-dom";
-import { useHomePostPreview, useRecommendedCommunityPosts } from "@/hooks/useHome";
+import { useHomePostPreview } from "@/hooks/useHome";
 import { useState } from "react";
 import { hasStoredAuthSession } from "@/apis/authStorage";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
-import { useDragScroll } from "@/hooks/useDragScroll";
+import RecommendedCommunitySection from "@/components/RecommendedCommunitySection";
 
 export default function CommunitySection() {
   const navigate = useNavigate();
-  const { data: posts = [] } = useRecommendedCommunityPosts();
   const { data: popularPosts = [] } = useHomePostPreview("popular");
   const { data: latestPosts = [] } = useHomePostPreview("latest");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const {
-    isDragging,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleMouseLeave,
-    handleClickCapture,
-  } = useDragScroll();
 
   const handleWriteClick = () => {
     if (!hasStoredAuthSession()) {
@@ -53,21 +43,9 @@ export default function CommunitySection() {
         </div>
       </div>
 
-      <div
-        className={`drag-scroll no-scrollbar overflow-x-auto ${isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onClickCapture={handleClickCapture}
-      >
-        <div className="inline-flex gap-4">
-          {posts.map((post) => (
-            <CommunityCard key={post.postId} {...post} />
-          ))}
-        </div>
-      </div>
+      <RecommendedCommunitySection
+        onPostClick={(postId) => navigate(`/community/${postId}`)}
+      />
       <div className="flex flex-row mt-[20.5px] gap-[24px]">
         <PostSection
           title="인기글"
