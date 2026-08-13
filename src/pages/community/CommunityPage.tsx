@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AsyncState from "@/components/AsyncState";
-import CategoryButton from "@/components/CategoryButton";
+import CategoryButton from "@/components/button/CategoryButton";
 import OnboardCancelBox from "@/components/OnboardCancelBox";
 import Pagination from "@/components/pagination/Pagination";
 import {

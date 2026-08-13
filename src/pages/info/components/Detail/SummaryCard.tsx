@@ -1,6 +1,6 @@
 import ShareIcon from "@/assets/icons/Share.svg?react";
 import CategoryLabel from "@/components/CategoryLabel";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 import GoIcon from "@/assets/icons/arrow-up-right.svg?react"
 import ScrapIcon from "@/assets/icons/Scrap.svg?react"
 import ViewStat from "@/components/post-stat/ViewStat";
@@ -8,7 +8,7 @@ import ScrapStat from "@/components/post-stat/ScrapStat";
 import CommentStat from "@/components/post-stat/CommentStat";
 import DateStat from "@/components/post-stat/DateStat";
 import PostTag from "@/components/PostTag";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import Building from "@/assets/icons/Building.svg?react"
 import { getInfoShareUrl, toggleInfoScrap } from "@/apis/info";
 import { showToast } from "@/components/Toast";

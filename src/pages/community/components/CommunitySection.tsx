@@ -1,4 +1,4 @@
-import ButtonFill from "@/components/ButtonFill";
+import ButtonFill from "@/components/button/ButtonFill";
 import RecommendedCommunitySection from "@/components/RecommendedCommunitySection";
 import { useNavigate } from "react-router-dom";
 

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 
-import ButtonFill from "@/components/ButtonFill";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonFill from "@/components/button/ButtonFill";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import { communityCategoryEntries, type CommunityCategory } from "@/constants/communityCategory";
 import type {
   CommunityAuthorVisibility,

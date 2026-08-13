@@ -1,6 +1,6 @@
 import { useRef } from "react";
-import ButtonOutline from "@/components/ButtonOutline";
-import ButtonFill from "@/components/ButtonFill";
+import ButtonOutline from "@/components/button/ButtonOutline";
+import ButtonFill from "@/components/button/ButtonFill";
 import ChoiceChips from "@/components/ChoiceChips";
 import Input from "@/components/Input";
 import { diagnosisMap } from "@/constants/diagnosis";

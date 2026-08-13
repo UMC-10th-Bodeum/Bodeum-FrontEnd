@@ -1,7 +1,7 @@
 import type { UserDashboard } from "@/types/mypage";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import SettingIcon from "@/assets/icons/Setting.svg?react";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import { sidoDisplayNameByRegion } from "@/constants/regions";
 import { myPageTabs } from "../myPageTabConfig";
 import type { MyPageTabKey } from "@/types/mypage";

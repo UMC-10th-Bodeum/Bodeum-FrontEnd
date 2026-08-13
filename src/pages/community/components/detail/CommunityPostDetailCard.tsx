@@ -4,7 +4,7 @@ import HeartDisabledIcon from "@/assets/icons/HeartDisabled.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
 import ScrapPressedIcon from "@/assets/icons/ScrapPressed.svg?react";
 import WarningIcon from "@/assets/icons/Warning.svg?react";
-import DetailBackButton from "@/components/DetailBackButton";
+import DetailBackButton from "@/components/button/DetailBackButton";
 import { useNavigate } from "react-router-dom";
 import PostTag from "@/components/PostTag";
 import { showToast } from "@/components/Toast";
@@ -14,10 +14,10 @@ import {
   useToggleCommunityPostScrap,
   useDeleteCommunityPost,
 } from "@/hooks/useCommunity";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import type { CommunityPostDetail } from "@/types/community";
-import ShareButton from "@/components/ShareButton";
+import ShareButton from "@/components/button/ShareButton";
 import { diagnosisMap } from "@/constants/diagnosis";
 import { formatDate } from "@/utils/time";
 import useCommunityMutationError from "../../hooks/useCommunityMutationError";

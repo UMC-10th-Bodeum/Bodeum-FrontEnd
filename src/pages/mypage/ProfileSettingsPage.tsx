@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DetailBackButton from "@/components/DetailBackButton";
+import DetailBackButton from "@/components/button/DetailBackButton";
 import AccountManagementCard from "./components/settings/AccountManagementCard";
 import WithdrawalModal from "./components/settings/WithdrawalModal";
 import ProfileManagementCard from "./components/settings/ProfileManagementCard";

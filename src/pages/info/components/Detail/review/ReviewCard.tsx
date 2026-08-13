@@ -1,7 +1,7 @@
 import { toggleReviewHelpful } from "@/apis/info";
 import ProfileIcon from "@/assets/icons/Profile.svg?react";
 import StarIcon from "@/assets/icons/Star.svg?react";
-import FeedbackButton from "@/components/FeedbackButton";
+import FeedbackButton from "@/components/button/FeedbackButton";
 import { showToast } from "@/components/Toast";
 import { formatDate } from "@/utils/time";
 import { useEffect, useState } from "react";

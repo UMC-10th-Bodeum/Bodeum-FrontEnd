@@ -3,7 +3,7 @@ import Section from "../Section";
 import EmptyReview from "./EmptyReview";
 import ReviewSummary from "./ReviewSummary";
 import ReviewCard from "./ReviewCard";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import { useState } from "react";
 
 interface Review {

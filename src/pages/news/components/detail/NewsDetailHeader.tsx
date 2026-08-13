@@ -1,13 +1,13 @@
 import type { SVGProps } from "react";
-import ButtonFill from "@/components/ButtonFill";
-import ButtonOutline from "@/components/ButtonOutline";
+import ButtonFill from "@/components/button/ButtonFill";
+import ButtonOutline from "@/components/button/ButtonOutline";
 import Chip from "@/components/Chips";
 import DateStat from "@/components/post-stat/DateStat";
 import ScrapStat from "@/components/post-stat/ScrapStat";
 import ViewStat from "@/components/post-stat/ViewStat";
 import ArrowUpRightIcon from "@/assets/icons/arrow-up-right.svg?react";
 import ScrapIcon from "@/assets/icons/Scrap.svg?react";
-import ShareButton from "@/components/ShareButton";
+import ShareButton from "@/components/button/ShareButton";
 import type { NewsDetail } from "@/types/news";
 import type { NewsStatusPresentation } from "@/utils/newsStatus";
 

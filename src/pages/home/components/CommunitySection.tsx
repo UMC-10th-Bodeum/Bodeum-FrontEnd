@@ -1,4 +1,4 @@
-import MainButton from "@/components/MainButton";
+import MainButton from "@/components/button/MainButton";
 import PostSection from "@/components/PostSection";
 import PostListItem from "@/components/PostListItem";
 import { useNavigate } from "react-router-dom";
