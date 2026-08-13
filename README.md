@@ -1,6 +1,7 @@
 # 🩹 보듬 
 
 > **장애아동 부모들이 겪는 정보의 불균형과 심리적 고립감을 해소하기 위한 맞춤형 복지 정보 플랫폼**
+<img width="700" alt="서비스 미리보기 이미지" src="https://github.com/user-attachments/assets/dcf64f9b-3d2c-4536-8665-662b3fc0f136" />
 <br />
 
 ## 👥 Team 
