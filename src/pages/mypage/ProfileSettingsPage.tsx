@@ -11,22 +11,24 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="min-h-full bg-background-200 px-[32px] py-[20px]">
-      <DetailBackButton className="ml-[24px]" />
+      <div className="grid grid-cols-1 items-start">
+        <DetailBackButton className="sticky top-[20px] z-10 col-start-1 row-start-1 ml-[24px] justify-self-start" />
 
-      <div className="mx-auto mt-[18px] flex w-[634px] flex-col gap-[20px]">
-        <ProfileManagementCard
-          form={settings.displayedProfile}
-          joinedAt={settings.joinedAt}
-          guardianType={settings.guardianType}
-          badgeName={settings.badgeName}
-          isEditing={settings.isEditing}
-          onChange={settings.setDraftProfile}
-          onStartEdit={settings.startEditing}
-          onCancel={settings.cancelEditing}
-          onApply={settings.applyEditing}
-          isApplying={settings.isApplying}
-        />
-        <AccountManagementCard onWithdraw={() => setIsWithdrawalModalOpen(true)} />
+        <div className="col-start-1 row-start-1 mx-auto flex w-[634px] flex-col gap-[20px]">
+          <ProfileManagementCard
+            form={settings.displayedProfile}
+            joinedAt={settings.joinedAt}
+            guardianType={settings.guardianType}
+            badgeName={settings.badgeName}
+            isEditing={settings.isEditing}
+            onChange={settings.setDraftProfile}
+            onStartEdit={settings.startEditing}
+            onCancel={settings.cancelEditing}
+            onApply={settings.applyEditing}
+            isApplying={settings.isApplying}
+          />
+          <AccountManagementCard onWithdraw={() => setIsWithdrawalModalOpen(true)} />
+        </div>
       </div>
 
       {isWithdrawalModalOpen && (
